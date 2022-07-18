@@ -137,7 +137,7 @@ def start(num_players):
     
     print(board)
 
-start(4)
+start(5)
 #class Actions:
 #    def __init__(self, choose_characters, draw_cards, get_coins, build, character_skill, district_skill, end_turn)
 
