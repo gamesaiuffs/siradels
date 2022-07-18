@@ -1,5 +1,6 @@
 from random import shuffle
 
+# Mudança
 
 class Players:
     def __init__(self, score, name, player_card, gold, hand, districts, order, king):
@@ -137,7 +138,7 @@ def start(num_players):
     
     print(board)
 
-start(5)
+start(4)
 #class Actions:
 #    def __init__(self, choose_characters, draw_cards, get_coins, build, character_skill, district_skill, end_turn)
 
