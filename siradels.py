@@ -1,6 +1,5 @@
 from random import shuffle
 
-# Mudança
 
 class Players:
     def __init__(self, score, name, player_card, gold, hand, districts, order, king):
