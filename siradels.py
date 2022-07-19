@@ -1,6 +1,5 @@
 from random import shuffle
 
-# Mudança
 
 class Players:
     def __init__(self, score, name, player_card, gold, hand, districts, order, king):
@@ -54,18 +53,27 @@ class DistrictCard:
             "name: ",self.name, \
             "effect: ", self.effect)
 
+#editado
+
 class CharacterCard:
-    def __init__(self, name, effect, rank, skill):
+    def __init__(self, name, effect, rank, skill, morto, roubado):
         self.name = name 
         self.effect = effect 
         self.rank = rank
         self.skill = skill
+        self.morto = morto
+        self.roubado = roubado
+
 
     def __str__(self):
         print("name: ", self.name, \
             "effect: ", self.effect, 
             "rank: ", self.rank,\
-            "skill: ", self.skill)
+            "skill: ", self.skill\
+            "morto: ", self.morto\
+            "roubado: ", self.roubado)
+
+#fim da edição
 
 def create_deck():
     market = DistrictCard(2, 'comercio', 'Market', None)
@@ -83,13 +91,20 @@ def create_deck():
 
     return deck
     
+#Inicio das edições
+
 def create_players_deck(num_of_players):
     assassin = CharacterCard("assassin", None, 1, None) #criar efeito e skill 
     thief = CharacterCard('Thief', None, 2, None)
     mage = CharacterCard("Mage", None, 3, None)
     king = CharacterCard("King", None, 4, None)
+    cardinal = CharacterCard("Cardinal", None, 5, None)
+    alchemist = CharacterCard("Alchemist", None, 6, None)
+    navigator = CharacterCard("Navigator", None, 7, None)
+    warlord = CharacterCard("Warlord", None, 8, None)
 
-    players_deck = [assassin, thief, mage, assassin, thief, mage, assassin, thief]
+
+    players_deck = [assassin, thief, mage, cardinal, alchemist, navigator, warlord]
     shuffle(players_deck)
     players_out_visible = []
     
@@ -113,8 +128,10 @@ def create_players_deck(num_of_players):
 
     players_deck.append(king)
 
-    #Criar resto dos personagens
     return players_deck
+
+#Fim das edições
+
 
 def create_players(num_of_players, deck):
     players_list = []
