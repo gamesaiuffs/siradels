@@ -1,4 +1,4 @@
-class Players:
+class Player:
     def __init__(self, score, name, player_card, gold, hand, districts, order, king):
         self.score = score 
         self.name = name 
