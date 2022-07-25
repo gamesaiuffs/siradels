@@ -10,3 +10,6 @@ class DistrictCard:
             "type: ", self.type, \
             "name: ",self.name, \
             "effect: ", self.effect)
+
+
+## texte 2
