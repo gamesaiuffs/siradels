@@ -14,3 +14,6 @@ class CharacterCard:
             "skill: ", self.skill,\
             "morto: ", self.morto,\
             "roubado: ", self.roubado)
+             
+
+             texte de commit
