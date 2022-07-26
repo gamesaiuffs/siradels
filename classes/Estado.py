@@ -1,9 +1,8 @@
-from Tabuleiro import Tabuleiro
-from Jogadores import Jogadores
-
+import Tabuleiro
+import Jogador
 
 class Estado:
-    def __init__(self, tabuleiro: Tabuleiro, jogadores: Jogadores):
+    def __init__(self, tabuleiro: Tabuleiro, jogadores: Jogador):
         self.board = tabuleiro 
         self.players = jogadores
 
