@@ -3,7 +3,7 @@ from CartaDePersonagem import CartaDePersonagem
 
 #OBS: Variavel order removida 
 
-class Jogadores:
+class Jogador:
     # variavel order removida 
     def __init__(self, pontuacao:int, nome:str, carta_personagem:CartaDePersonagem, ouro:int, cartas_distritos_na_mao:list(CartaDeDistrito), distritos_construidos:list(CartaDeDistrito), eh_o_rei:bool):
         self.pontuacao = pontuacao 
