@@ -1,10 +1,9 @@
+import enum
 
-class TipoDistrito(Enum): 
 
+class TipoDistrito(enum):
     Religioso = 1
-    Militar= 2
+    Militar = 2
     Nobre = 3
     Comercio = 4
-    Especial=5
-
-# print(tipoDistrito.Religioso.value) // para referencia de como usa
+    Especial = 5

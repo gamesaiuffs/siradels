@@ -1,7 +1,9 @@
 import enum
+
+
 class AcoesJogador(enum):
-    selecao = auto() #seleção de personagem
-    escolha_carta = auto() #pegar duas cartas e escolher uma
-    escolha_moedas = auto()
-    construcao = auto()
-    habilidade = auto()
+    SelecionarPersonagem = 1
+    ComprarCartas = 2  # pegar duas cartas e escolher uma
+    PegarOuro = 3
+    Construir = 3
+    UsarHabilidade = 4
