@@ -1,33 +1,19 @@
-import BaralhoDistrito
-import BaralhoPersonagem
-import Fase
+import CartaPersonagem
 
-class Tabuleiro:
-    def __init__(self, num_jogadores):  
-        self.baralho_de_distritos = BaralhoDistrito.criar_baralho()
-        self.turno = 1
-        self.fase = Fase.EscolhaPersonagem
-        self.baralho_de_personagens = BaralhoPersonagem.criar_baralho(num_jogadores)
 
-    def __str__(self):
-        return f"deck: {self.baralho_de_distritos} turn: {self.turno} stage: {self.fase} characters:  {self.baralho_de_personagens}"
+class BaralhoPersonagem:
 
-    def criar_baralho_personagem(self):
-        #todo
-        assassin = CharacterCard("assassin", None, 1, None) #criar efeito e skill 
+    @staticmethod
+    def criar_baralho(num_jogadores: int) -> list(CartaPersonagem):
+        assassin = CharacterCard("assassin", None, 1, None)  # criar efeito e skill
         thief = CharacterCard('Thief', None, 2, None)
         mage = CharacterCard("Mage", None, 3, None)
         king = CharacterCard("King", None, 4, None)
-        cardinal = CharacterCard("Cardinal", None, 5, None)
-        alchemist = CharacterCard("Alchemist", None, 6, None)
-        navigator = CharacterCard("Navigator", None, 7, None)
-        warlord = CharacterCard("Warlord", None, 8, None)
 
-
-        players_deck = [assassin, thief, mage, cardinal, alchemist, navigator, warlord]
+        players_deck = [assassin, thief, mage, assassin, thief, mage, assassin, thief]
         shuffle(players_deck)
         players_out_visible = []
-        
+
         print(players_deck)
 
         if num_of_players == 4:
@@ -48,4 +34,5 @@ class Tabuleiro:
 
         players_deck.append(king)
 
+        # Criar resto dos personagens
         return players_deck
