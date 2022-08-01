@@ -1,10 +1,10 @@
-import Tabuleiro
-import Jogador
+from Tabuleiro import Tabuleiro
+from Jogador import Jogador
 
 class Estado:
-    def __init__(self, tabuleiro: Tabuleiro, jogadores: Jogador):
-        self.board = tabuleiro 
-        self.players = jogadores
+    def __init__(self, tabuleiro: Tabuleiro, jogadores: list(Jogador)):
+        self.tabuleiro = tabuleiro 
+        self.jogadores = jogadores
 
     def __str__(self):
-        return print(f"Tabuleiro:  {self.board} Jogadores:  {self.players}")
+        return print(f"Tabuleiro:  {self.tabuleiro} Jogadores:  {self.jogadores}")

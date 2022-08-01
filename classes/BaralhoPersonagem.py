@@ -1,4 +1,4 @@
-import CartaPersonagem
+from CartaPersonagem import CartaPersonagem
 
 
 class BaralhoPersonagem:

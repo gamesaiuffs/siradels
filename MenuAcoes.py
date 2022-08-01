@@ -21,4 +21,5 @@ print(f"Você escolheu {escolha[y-1]}")
 
 
 # Escolha 4 - Habilidade do Personagem:
+
 print(f"Voce executou a habilidade: {habilidades[Personagem -1]}")
