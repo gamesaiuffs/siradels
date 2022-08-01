@@ -18,8 +18,8 @@ class Simulacao:
         #distribuir cartas iniciais
             #cada jogador recebe 4 cartas do deck
         for jogador in jogadores:
-            jogador.cartas_distrito_na_mao.append(tabuleiro.baralho_de_distritos[0:3])
-            del tabuleiro.baralho_de_distritos[0:3]
+            jogador.cartas_distrito_na_mao.append(tabuleiro.baralho_de_distritos[0:4])
+            del tabuleiro.baralho_de_distritos[0:4]
         
         #sortear jogador inicial que é o rei
         shuffle(jogadores)
@@ -35,7 +35,7 @@ class Simulacao:
         
         return lista_jogadores
     
-    def criar_jogadores_manual(self):
+    def criar_jogadores_manual(self) -> list(Jogador):
         #criar jogadores iniciais:
         lista_jogadores = []
         for jogador in self.num_jogadores:
@@ -45,10 +45,6 @@ class Simulacao:
         return lista_jogadores
 
 
-    def distribuir_cartas_iniciais(self):
-        pass 
-    
-#simulacao = Simulacao(....)#criar estado inicial que cria jogadores
 
 
 
