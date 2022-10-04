@@ -1,7 +1,7 @@
-import enum
+from enum import Enum
 
 
-class TipoDistrito(enum):
+class TipoDistrito(Enum):
     Religioso = 1
     Militar = 2
     Nobre = 3

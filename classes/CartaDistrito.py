@@ -1,6 +1,6 @@
 # Importar classe do efeito_do_distrito
-import TipoDistrito
-import Efeito
+from TipoDistrito import TipoDistrito
+from Efeito import Efeito
 
 
 class CartaDistrito:

@@ -1,3 +1,4 @@
+# nao utilizada
 import CartaDistrito
 import TipoDistrito
 import Efeito

@@ -1,3 +1,7 @@
+
+#nao utilizada
+
+from random import shuffle
 from CartaPersonagem import CartaPersonagem
 
 
@@ -5,13 +9,17 @@ class BaralhoPersonagem:
 
     @staticmethod
     def criar_baralho(num_jogadores: int) -> list(CartaPersonagem):
-        assassin = CharacterCard("assassin", None, 1, None)  # criar efeito e skill
-        thief = CharacterCard('Thief', None, 2, None)
-        mage = CharacterCard("Mage", None, 3, None)
-        king = CharacterCard("King", None, 4, None)
+        assassino = CartaPersonagem("assassino", None, 1, None)  # criar efeito e skill
+        ladrao = CartaPersonagem('Ladrão', None, 2, None)
+        mago = CartaPersonagem("Mago", None, 3, None)
+        rei = CartaPersonagem("Rei", None, 4, None)
+        cardeal = CartaPersonagem("Cardeal", None, 5, None)
+        alquimista = CartaPersonagem("Alquimista", None, 6, None)
+        navegadora = CartaPersonagem("Navegadora", None, 7, None)
+        senhor_da_guerra = CartaPersonagem("Senhor da Guerra", None, 8, None)
 
-        players_deck = [assassin, thief, mage, assassin, thief, mage, assassin, thief]
-        shuffle(players_deck)
+        baralho_personagens = [assassino, ladrao, mago, rei, cardeal, alquimista, navegadora, senhor_da_guerra]
+        shuffle(baralho_personagens)
         players_out_visible = []
 
         print(players_deck)

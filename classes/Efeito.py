@@ -1,3 +1,4 @@
+# nao utilizada no momento
 from abc import abstractmethod
 import Estado
 import Jogador

@@ -1,7 +1,3 @@
-import CartaDistrito
-import CartaPersonagem
-
-
 class Jogador:
     # variavel order removida 
     def __init__(self, nome: str):

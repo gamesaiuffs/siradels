@@ -1,6 +1,6 @@
-import enum
+from enum import Enum
 
 
-class Fase(enum):
+class Fase(Enum):
     Acoes = 1
     EscolhaPersonagem = 2

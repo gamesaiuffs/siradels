@@ -1,3 +1,4 @@
+# arquivo nao utilizado
 # Escolha 1 - Seleção de Personagem:
 personagens = ["Assassina", "Ladrão", "Mago", "Rei", "Cardeal", "Alquimista", "Navegador", "Senhor da Guerra"]
 habilidades = ["Assassinato", "Roubo", "Magia", "Nobreza", "Imposto", "Transmutação", "Pirataria", "Guerra"]
