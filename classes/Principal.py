@@ -11,14 +11,18 @@ while not final_jogo:
     # Cada jogador escolhe seu personagem
     for jogador in simulacao.estado.jogadores:
         print("---------| Personagens |---------")
-        print("Escolha uma carta de personagem: ")
         # "Printa" o baralho de personagens
         for personagem in simulacao.estado.tabuleiro.baralho_personagens:
             print(personagem)
 
-        print("Escolha uma ação: ")
-        carta_escolhida = input()
-        jogador.personagem.append(simulacao.estado.tabuleiro.baralho_personagens.pop([carta_escolhida]))
+        print("Escolha uma carta de personagem [Rank]: ", end="")
+        rank_carta_escolhida = int(input())
+        
+        print("=============================================================================")
+        for index, carta_personagem in enumerate(simulacao.estado.tabuleiro.baralho_personagens):
+            if carta_personagem.rank == rank_carta_escolhida:
+                jogador.personagem.append(simulacao.estado.tabuleiro.baralho_personagens.pop(index))
+                
     # Ordena os jogadores
     simulacao.estado.ordenar_jogadores()
     # Cada jogador faz suas ações
