@@ -1,21 +1,29 @@
+# Imports
 from classes.Simulacao import Simulacao
 
-num_jogadores = 7
+# Inicialização das variáveis esseciais
+num_jogadores = 6
 simulacao = Simulacao(num_jogadores, False)
 final_jogo = False
-while not final_jogo:
-    for jogador in simulacao.estado.jogadores:
-        print("Escolha uma carta de personagem")
-        print(simulacao.estado.tabuleiro.baralho_de_personagens)
-        carta_escolhida = input()
-        jogador.carta_personagem.append(simulacao.estado.tabuleiro.baralho_de_personagens.pop([carta_escolhida]))
 
+# Main Loop
+while not final_jogo:
+    # Cada jogador escolhe seu personagem
+    for jogador in simulacao.estado.jogadores:
+        print("Escolha uma carta de personagem: ")
+        # "Printa" o baralho de personagens
+        print(simulacao.estado.tabuleiro.baralho_personagens)
+        carta_escolhida = input()
+        jogador.personagem.append(simulacao.estado.tabuleiro.baralho_personagens.pop([carta_escolhida]))
+    # Ordena os jogadores
     simulacao.estado.ordenar_jogadores()
+    # Cada jogador faz suas ações
     for jogador in simulacao.estado.jogadores:
         fim_turno = False
         while not fim_turno:
             print("Escolha uma ação")
-            print("Ações disponíveis...")
+            print("Ações disponíveis: ")
+            # [...]
             acao_escolhida = input()
     # verificar final de jogo e atualizar flag
     simulacao.estado.tabuleiro.criar_baralho_personagem(num_jogadores)
