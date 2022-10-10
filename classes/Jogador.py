@@ -1,5 +1,4 @@
 class Jogador:
-    # variavel order removida 
     def __init__(self, nome: str):
         self.pontuacao = 0 
         self.nome = nome 

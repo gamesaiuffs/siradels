@@ -1,13 +1,13 @@
-from Estado import Estado
-from Jogador import Jogador
 from Tabuleiro import Tabuleiro
 from random import shuffle
+from Acao import *
 
 
 class Simulacao:
     def __init__(self, num_jogadores: int, automatico: bool):
         self.num_jogadores = num_jogadores
         self.estado = self.criar_estado_inicial(automatico)
+        self.acoes = self.criar_acoes()
 
     def criar_estado_inicial(self, automatico) -> Estado:
         tabuleiro = Tabuleiro(self.num_jogadores)
@@ -43,3 +43,9 @@ class Simulacao:
             lista_jogadores.append(Jogador(nome_jogador))
 
         return lista_jogadores
+
+    @staticmethod
+    def criar_acoes() -> list[Acao]:
+        acoes = [ColetarOuro(),
+                 EfeitoAssassino()]
+        return acoes
