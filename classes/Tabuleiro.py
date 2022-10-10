@@ -22,15 +22,52 @@ class Tabuleiro:
                f"\nDistritos: {self.baralho_distritos}"
 
     def criar_baralho_personagem(self, num_jogadores):
-        # Define as infomrações de cada personagem
-        assassino = CartaPersonagem("Assassino", 1)
-        ladrao = CartaPersonagem("Ladrao", 2)
-        mago = CartaPersonagem("Mago", 3)
-        rei = CartaPersonagem("Rei", 4)
-        cardeal = CartaPersonagem("Cardeal", 5)
-        alquimista = CartaPersonagem("Alquimista", 6)
-        navegadora = CartaPersonagem("Navegadora", 7)
-        senhor_guerra = CartaPersonagem("Senhor da Guerra", 8)
+        # Define as informações de cada personagem
+        assassino = CartaPersonagem(
+            "Assassino",
+            1, 
+            "Anuncie um personagem que você deseja assassinar. O personagem assassinado perde o turno"
+        )
+        ladrao = CartaPersonagem(
+            "Ladrao",
+            2,
+            "Anuncie um personagem que você deseja roubar. Quando o personagem roubado for revelado, você pega todo o ouro dele"
+        )
+        mago = CartaPersonagem(
+            "Mago",
+            3,
+            "Olhe a mão de outro jogador e escolha 1 carta. Pague para construí-la imediatamente ou adicione-a à sua mão \
+            \nVocê pode construir distritos idênticos."
+        )
+        rei = CartaPersonagem(
+            "Rei",
+            4,
+            "Pegue a coroa \
+            \nGanhe 1 ouro para cada um dos seus distritos NOBRES."
+        )
+        cardeal = CartaPersonagem(
+            "Cardeal",
+            5,
+            "Se você não tiver ouro suficiente para construir um distrito, troque suas cartas pelo ouro de outro jogador (1 carta: 1 ouro). \
+            \nGanhe 1 carta para cada um dos seus distritos RELIGIOSOS."
+        )
+        alquimista = CartaPersonagem(
+            "Alquimista",
+            6,
+            "Ao final do seu turno, você pega de volta todo o ouro pago para construir distritos neste turno. Você não pode pagar mais ouro do que tem."
+        )
+        navegadora = CartaPersonagem(
+            "Navegadora",
+            7,
+            "Ganhe 4 ouros extras ou 4 cartas extras \
+            \nVocê não pode construir distritos."
+        )
+        senhor_guerra = CartaPersonagem(
+            "Senhor da Guerra",
+            8,
+            "Destrua 1 distrito, pagando 1 ouro a menos que o custo dele. \
+            \nGanhe 1 ouro para cada um dos seus distritos MILITARES"
+        )
 
         # Coloca os personagens numa lista e os embaralha (com exceção do rei que será colocado depois)
         mao_jogador = [assassino, ladrao, mago, cardeal, alquimista, navegadora, senhor_guerra]
