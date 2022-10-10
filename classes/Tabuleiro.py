@@ -37,19 +37,19 @@ class Tabuleiro:
             "Mago",
             3,
             "Olhe a mão de outro jogador e escolha 1 carta. Pague para construí-la imediatamente ou adicione-a à sua mão \
-            \nVocê pode construir distritos idênticos."
+            \n\tVocê pode construir distritos idênticos."
         )
         rei = CartaPersonagem(
             "Rei",
             4,
             "Pegue a coroa \
-            \nGanhe 1 ouro para cada um dos seus distritos NOBRES."
+            \n\tGanhe 1 ouro para cada um dos seus distritos NOBRES."
         )
         cardeal = CartaPersonagem(
             "Cardeal",
             5,
             "Se você não tiver ouro suficiente para construir um distrito, troque suas cartas pelo ouro de outro jogador (1 carta: 1 ouro). \
-            \nGanhe 1 carta para cada um dos seus distritos RELIGIOSOS."
+            \n\tGanhe 1 carta para cada um dos seus distritos RELIGIOSOS."
         )
         alquimista = CartaPersonagem(
             "Alquimista",
@@ -60,13 +60,13 @@ class Tabuleiro:
             "Navegadora",
             7,
             "Ganhe 4 ouros extras ou 4 cartas extras \
-            \nVocê não pode construir distritos."
+            \n\tVocê não pode construir distritos."
         )
         senhor_guerra = CartaPersonagem(
             "Senhor da Guerra",
             8,
             "Destrua 1 distrito, pagando 1 ouro a menos que o custo dele. \
-            \nGanhe 1 ouro para cada um dos seus distritos MILITARES"
+            \n\tGanhe 1 ouro para cada um dos seus distritos MILITARES"
         )
 
         # Coloca os personagens numa lista e os embaralha (com exceção do rei que será colocado depois)

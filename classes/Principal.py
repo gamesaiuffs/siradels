@@ -12,8 +12,12 @@ while not final_jogo:
     for jogador in simulacao.estado.jogadores:
         print("Escolha uma carta de personagem: ")
         # "Printa" o baralho de personagens
+
+
+        # print(simulacao.estado.tabuleiro.baralho_personagens)
         for personagem in simulacao.estado.tabuleiro.baralho_personagens:
             print(personagem)
+
 
         carta_escolhida = input()
         jogador.personagem.append(simulacao.estado.tabuleiro.baralho_personagens.pop([carta_escolhida]))
