@@ -61,5 +61,6 @@ class Simulacao:
     def criar_acoes() -> list[Acao]:
         acoes = [ColetarOuro(),
                  EfeitoAssassino(),
-                 ColetarCartas()]
+                 ColetarCartas(),
+                 ConstruirDistrito()]
         return acoes

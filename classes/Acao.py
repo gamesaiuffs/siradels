@@ -56,6 +56,9 @@ class ConstruirDistrito(Acao):
             print(f"{i+1}: {estado.jogadores[estado.jogadores.index(jogador_alvo)].cartas_distrito_mao[i]}")
 
         escolha = int(input("Digite o número do distrito que deseja construir: "))
+        estado.jogadores[estado.jogadores.index(jogador_alvo)].distritos_construidos.append(estado.jogadores[estado.jogadores.index(jogador_alvo)].cartas_distrito_mao[escolha-1])
+        estado.jogadores[estado.jogadores.index(jogador_alvo)].ouro -= estado.jogadores[estado.jogadores.index(jogador_alvo)].cartas_distrito_mao[escolha-1].valor_do_distrito
+        estado.jogadores[estado.jogadores.index(jogador_alvo)].cartas_distrito_mao.pop(escolha-1)
 
 
 class EfeitoAssassino(Acao):
