@@ -25,6 +25,28 @@ class ColetarOuro(Acao):
     def ativar_efeito(estado: Estado, jogador_alvo: Jogador):
         estado.jogadores[estado.jogadores.index(jogador_alvo)].ouro += 2
 
+class ColetarCartas(Acao):
+    def __init__(self):
+        super().__init__('Colete 2 cartas do baralho e escolha uma.')
+
+    @staticmethod
+    def ativar_efeito(estado: Estado, jogador_alvo: Jogador):
+        escolherCartas = estado.tabuleiro.baralho_distritos[0:2]
+        estado.tabuleiro.baralho_distritos.pop()
+        estado.tabuleiro.baralho_distritos.pop()
+
+        print(escolherCartas[0])
+        print(escolherCartas[1])
+
+        escolha = int(input("Digite 1 para a primeira opção, 2 para a segunda: "))
+        if escolha == 1:
+            estado.jogadores[estado.jogadores.index(jogador_alvo)].cartas_distrito_mao.append(escolherCartas[0])
+            estado.tabuleiro.baralho_distritos.append(escolherCartas[0])
+        else:
+            estado.jogadores[estado.jogadores.index(jogador_alvo)].cartas_distrito_mao.append(escolherCartas[1])
+            estado.tabuleiro.baralho_distritos.append(escolherCartas[0])
+
+
 class EfeitoAssassino(Acao):
     def __init__(self):
         super().__init__('Anuncie um personagem que você deseja assassinar. O personagem assassinado perde o turno.')
@@ -58,9 +80,3 @@ class EfeitoMago(Acao):
         carta_escohida = input('Carta escolhida: ')
         estado.jogadores[estado.jogadores.index(jogador_alvo)].cartas_distrito_mao.append(estado.jogadores[jogador_escolhido-1].cartas_distrito_mao[carta_escohida])
 
-class EfeitoRei(Acao):
-    def __init__(self):
-        super().__init__('Pegue a coroa. (Ganhe 1 ouro para cada um dos seus distritos NOBRES)')
-
-    @staticmethod
-    def ativar_efeito()
