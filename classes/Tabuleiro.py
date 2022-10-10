@@ -1,3 +1,4 @@
+# Imports
 from TipoDistrito import TipoDistrito
 from CartaDistrito import CartaDistrito
 from CartaPersonagem import CartaPersonagem
@@ -5,17 +6,24 @@ from random import shuffle
 
 
 class Tabuleiro:
+    # Construtor
     def __init__(self, num_jogadores):
         self.cartas_visiveis = []
         self.cartas_nao_visiveis = []
-        self.baralho_de_personagens = self.criar_baralho_personagem(num_jogadores)
-        self.baralho_de_distritos = self.criar_baralho_distritos()
+        self.baralho_personagens = self.criar_baralho_personagem(num_jogadores)
+        self.baralho_distritos = self.criar_baralho_distritos()
 
+    # To String
     def __str__(self):
-        return f"deck: {self.baralho_de_distritos} characters:  {self.baralho_de_personagens}"
+        return f"\nDeck: {self.baralho_distritos}" \
+               f"\nCartas visiveis: {self.cartas_visiveis}" \
+               f"\nCartas não visiveis: {self.cartas_nao_visiveis}" \
+               f"\nPersonagens: {self.baralho_personagens}" \
+               f"\nDistritos: {self.baralho_distritos}"
 
     def criar_baralho_personagem(self, num_jogadores):
-        assassino = CartaPersonagem("Assassino", 1) #criar efeito e skill
+        # Define as infomrações de cada personagem
+        assassino = CartaPersonagem("Assassino", 1)
         ladrao = CartaPersonagem("Ladrao", 2)
         mago = CartaPersonagem("Mago", 3)
         rei = CartaPersonagem("Rei", 4)
@@ -24,32 +32,33 @@ class Tabuleiro:
         navegadora = CartaPersonagem("Navegadora", 7)
         senhor_guerra = CartaPersonagem("Senhor da Guerra", 8)
 
+        # Coloca os personagens numa lista e os embaralha (com exceção do rei que será colocado depois)
         mao_jogador = [assassino, ladrao, mago, cardeal, alquimista, navegadora, senhor_guerra]
 
         shuffle(mao_jogador)
 
         if num_jogadores == 4:
+            # Duas cartas viradas para cima e uma para baixo
             self.cartas_visiveis.append(mao_jogador.pop(0))
             self.cartas_visiveis.append(mao_jogador.pop(0))
             self.cartas_nao_visiveis.append(mao_jogador.pop(0))
 
         elif num_jogadores == 5:
+            # Uma carta virada para cima e uma para baixo
             self.cartas_visiveis.append(mao_jogador.pop(0))
             self.cartas_nao_visiveis.append(mao_jogador.pop(0))
 
         elif num_jogadores == 6:
+            # Uma carta virada para baixo
             self.cartas_nao_visiveis.append(mao_jogador.pop(0))
 
-        # elif num_jogadores == 7:
-            # self.cartas_nao_visiveis.append(mao_jogador.pop(0))
-            # se forem 7 jogadores, o 7 pode escolher entre a não visível e a última carta do deck principal
-
+        # Coloca o rei na lista de personagens
         mao_jogador.append(rei)
         return mao_jogador
 
     @staticmethod
     def criar_baralho_distritos():
-        # comercial
+        # Comercial
         mercado = CartaDistrito(2, TipoDistrito.Comercio, 'mercado', 4)
         taverna = CartaDistrito(1, TipoDistrito.Comercio, 'taverna', 5)
         prefeitura = CartaDistrito(5, TipoDistrito.Comercio, 'prefeitura', 2)
@@ -57,24 +66,24 @@ class Tabuleiro:
         docas = CartaDistrito(3, TipoDistrito.Comercio, 'docas', 3)
         posto_de_comercio = CartaDistrito(2, TipoDistrito.Comercio, 'posto de comercio', 3)
 
-        # militar
+        # Militar
         torre_de_vigia = CartaDistrito(1, TipoDistrito.Militar, 'torre de vigia', 3)
         prisao = CartaDistrito(2, TipoDistrito.Militar, 'prisao', 3)
         caserna = CartaDistrito(3, TipoDistrito.Militar, 'caserna', 3)
         fortaleza = CartaDistrito(5, TipoDistrito.Militar, 'fortaleza', 2)
 
-        # religioso
+        # Religioso
         templo = CartaDistrito(1, TipoDistrito.Religioso, 'templo', 3)
         mosteiro = CartaDistrito(3, TipoDistrito.Religioso, 'mosteiro', 3)
         catedral = CartaDistrito(5, TipoDistrito.Religioso, 'catedral', 2)
         igreja = CartaDistrito(2, TipoDistrito.Religioso, 'igreja', 3)
 
-        # nobre
+        # Nobre
         solar = CartaDistrito(3, TipoDistrito.Nobre, 'solar', 5)
         castelo = CartaDistrito(4, TipoDistrito.Nobre, 'castelo', 4)
         palacio = CartaDistrito(5, TipoDistrito.Nobre, 'palacio', 3)
 
-        # especial
+        # Especial
         portao_do_dragao = CartaDistrito(6, TipoDistrito.Especial, 'portao do dragao', 1)#ao final da partida marque 2 pontos extras
         bairro_assombrado = CartaDistrito(2, TipoDistrito.Especial, 'bairro_assombrado', 1)#ao final da partida,vale com 1 tipo de distrito à sua escolha
         estabulos = CartaDistrito(2, TipoDistrito.Especial, 'estabulos', 1)#a construcao dos estabulos nao conta para o seu limite de construcao para este turno

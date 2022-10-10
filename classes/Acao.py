@@ -1,12 +1,15 @@
+# Imports
 from abc import abstractmethod
 from Estado import Estado
 from Jogador import Jogador
 
 
 class Acao:
+    # Construtor
     def __init__(self, descricao: str):
         self.descricao = descricao
 
+    # To String
     def __str__(self):
         return f'descrição do efeito: {self.descricao}'
 
