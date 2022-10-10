@@ -3,7 +3,7 @@ from Simulacao import Simulacao
 
 # Inicialização das variáveis esseciais
 num_jogadores = 6
-simulacao = Simulacao(num_jogadores, False)
+simulacao = Simulacao(num_jogadores, True)
 final_jogo = False
 
 # Main Loop

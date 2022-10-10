@@ -60,5 +60,6 @@ class Simulacao:
     @staticmethod
     def criar_acoes() -> list[Acao]:
         acoes = [ColetarOuro(),
-                 EfeitoAssassino()]
+                 EfeitoAssassino(),
+                 ColetarCartas()]
         return acoes
