@@ -7,4 +7,4 @@ class CartaPersonagem:
     # To String
     def __str__(self):
         return f'\nNome: {self.nome}' \
-               f'\nRank: {self.rank}' \
+               f'\nRank: {self.rank}'

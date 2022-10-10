@@ -1,5 +1,5 @@
 # Imports
-from classes.Simulacao import Simulacao
+from Simulacao import Simulacao
 
 # Inicialização das variáveis esseciais
 num_jogadores = 6
