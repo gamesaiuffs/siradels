@@ -48,6 +48,17 @@ class ColetarCartas(Acao):
             estado.jogadores[estado.jogadores.index(jogador_alvo)].cartas_distrito_mao.append(escolherCartas[1])
             estado.tabuleiro.baralho_distritos.append(escolherCartas[0])
 
+class ConstruirDistrito(Acao):
+    def __init__(self):
+        super().__init__('Escolha um distrito para construir.')
+
+    @staticmethod
+    def ativar_efeito(estado: Estado, jogador_alvo: Jogador):
+        for i in range(len(estado.jogadores[estado.jogadores.index(jogador_alvo)].cartas_distrito_mao)):
+            print(f"{i+1}: {estado.jogadores[estado.jogadores.index(jogador_alvo)].cartas_distrito_mao[i]}")
+
+        escolha = int(input("Digite o número do distrito que deseja construir: "))
+
 
 class EfeitoAssassino(Acao):
     def __init__(self):
