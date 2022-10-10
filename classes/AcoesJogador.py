@@ -1,9 +1,11 @@
-import enum
+# Imports
+from enum import Enum
 
 
-class AcoesJogador(enum):
+# Classe de enumeração
+class AcoesJogador(Enum):
     SelecionarPersonagem = 1
-    ComprarCartas = 2  # pegar duas cartas e escolher uma
+    ComprarCartas = 2
     PegarOuro = 3
-    Construir = 3
-    UsarHabilidade = 4
+    Construir = 4
+    UsarHabilidade = 5

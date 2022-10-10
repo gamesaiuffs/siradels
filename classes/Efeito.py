@@ -1,17 +1,21 @@
-# nao utilizada no momento
+# Imports
 from abc import abstractmethod
 import Estado
 import Jogador
 
 
 class Efeito:
-    def __init__(self, passivo: bool, descricao: str):
-        self.passivo = passivo
+    # Construtor
+    def __init__(self, passiva: bool, descricao: str):
         self.descricao = descricao
+        self.passiva = passiva
 
+    # To String
     def __str__(self):
-        return f'descrição do efeito: {self.descricao}'
+        return f'\nDescrição: {self.descricao}' \
+               f'\nPassiva: {self.passiva}'
 
     @abstractmethod
     def ativar_efeito(self, estado: Estado, jogador: Jogador) -> Estado:
+        # WIP
         pass
