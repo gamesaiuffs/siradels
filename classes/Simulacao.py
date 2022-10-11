@@ -25,7 +25,7 @@ class Simulacao:
         # Loop para distribuição das cartas iniciais
         for jogador in jogadores:
             # Distribui 4 cartas para cada jogador
-            jogador.cartas_distrito_mao.append(tabuleiro.baralho_distritos[0:4])
+            jogador.cartas_distrito_mao.extend(tabuleiro.baralho_distritos[0:4])
             # Remove estas cartas do baralho de distritos
             del tabuleiro.baralho_distritos[0:4]
         
