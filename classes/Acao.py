@@ -110,11 +110,10 @@ class EfeitoRei(Acao):
                 estado.jogadores[estado.jogadores.index(jogador_alvo)].ouro += 1
         estado.jogadores[estado.jogadores.index(jogador_alvo)].rei = True
 
-class EfeitoCardeal():
+class EfeitoNavegadora(Acao):
     def __init__(self):
-        super().__init__('Pegue a coroa. (Receba 1 ouro para cada distrito NOBRE contruído)')
+        super().__init__('Colete 4 ouros extras ou 4 cartas extras.')
 
     @staticmethod
     def ativar_efeito(estado: Estado, jogador_alvo: Jogador):
-
-    
+        #finalizar habilidade
