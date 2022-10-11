@@ -13,8 +13,8 @@ while not final_jogo:
         print("Escolha uma carta de personagem: ")
         # "Printa" o baralho de personagens
         print(simulacao.estado.tabuleiro.baralho_personagens)
-        carta_escolhida = input()
-        jogador.personagem.append(simulacao.estado.tabuleiro.baralho_personagens.pop([carta_escolhida]))
+        carta_escolhida = int(input())
+        jogador.personagem.append(simulacao.estado.tabuleiro.baralho_personagens.pop(carta_escolhida))
     # Ordena os jogadores
     simulacao.estado.ordenar_jogadores()
     # Cada jogador faz suas ações
