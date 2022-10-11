@@ -2,6 +2,8 @@
 from abc import abstractmethod
 from Estado import Estado
 from Jogador import Jogador
+from Tabuleiro import Tabuleiro
+from classes.TipoDistrito import TipoDistrito
 
 class Acao:
     # Construtor
@@ -56,6 +58,9 @@ class ConstruirDistrito(Acao):
             print(f"{i+1}: {estado.jogadores[estado.jogadores.index(jogador_alvo)].cartas_distrito_mao[i]}")
 
         escolha = int(input("Digite o número do distrito que deseja construir: "))
+        estado.jogadores[estado.jogadores.index(jogador_alvo)].distritos_construidos.append(estado.jogadores[estado.jogadores.index(jogador_alvo)].cartas_distrito_mao[escolha-1])
+        estado.jogadores[estado.jogadores.index(jogador_alvo)].ouro -= estado.jogadores[estado.jogadores.index(jogador_alvo)].cartas_distrito_mao[escolha-1].valor_do_distrito
+        estado.jogadores[estado.jogadores.index(jogador_alvo)].cartas_distrito_mao.pop(escolha-1)
 
 
 class EfeitoAssassino(Acao):
@@ -80,14 +85,35 @@ class EfeitoMago(Acao):
 
     @staticmethod
     def ativar_efeito(estado: Estado, jogador_alvo: Jogador):
+        
         for numero_jogadores in range(len(estado.jogadores)):
             print(estado.jogadores[numero_jogadores])
 
-        jogador_escolhido = input()
+        jogador_escolhido = int(input())
 
         for cartas_disponiveis_mao in range(len(estado.jogadores[jogador_escolhido-1].cartas_distrito_mao)):
             print(estado.jogadores[jogador_escolhido-1].cartas_distrito_mao[cartas_disponiveis_mao])
 
-        carta_escohida = input('Carta escolhida: ')
+        carta_escohida = int(input('Carta escolhida: '))
         estado.jogadores[estado.jogadores.index(jogador_alvo)].cartas_distrito_mao.append(estado.jogadores[jogador_escolhido-1].cartas_distrito_mao[carta_escohida])
 
+
+class EfeitoRei(Acao):
+    def __init__(self):
+        super().__init__('Pegue a coroa. (Receba 1 ouro para cada distrito NOBRE contruído)')
+
+    @staticmethod
+    def ativar_efeito(estado: Estado, jogador_alvo: Jogador):
+        
+        for ver_distritos_construidos in range(len(jogador_alvo.distritos_construidos)):
+            if jogador_alvo.distritos_construidos[ver_distritos_construidos] == TipoDistrito.Nobre:
+                estado.jogadores[estado.jogadores.index(jogador_alvo)].ouro += 1
+        estado.jogadores[estado.jogadores.index(jogador_alvo)].rei = True
+
+class EfeitoNavegadora(Acao):
+    def __init__(self):
+        super().__init__('Colete 4 ouros extras ou 4 cartas extras.')
+
+    @staticmethod
+    def ativar_efeito(estado: Estado, jogador_alvo: Jogador):
+        #finalizar habilidade
