@@ -19,7 +19,7 @@ class Estado:
     def ordenar_jogadores_rei(self):
         ordenados, index_rei = [], 0
         for i, jogador in enumerate(self.jogadores):
-            if jogador.personagem[0].rank == 4:
+            if jogador.rei:
                 index_rei = i
                 ordenados.insert(0, jogador)
         
