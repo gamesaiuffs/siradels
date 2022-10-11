@@ -3,18 +3,26 @@ from Simulacao import Simulacao
 
 # Inicialização das variáveis esseciais
 num_jogadores = 6
-simulacao = Simulacao(num_jogadores, False)
+simulacao = Simulacao(num_jogadores, True)
 final_jogo = False
 
 # Main Loop
 while not final_jogo:
     # Cada jogador escolhe seu personagem
     for jogador in simulacao.estado.jogadores:
-        print("Escolha uma carta de personagem: ")
+        print("---------| Personagens |---------")
         # "Printa" o baralho de personagens
-        print(simulacao.estado.tabuleiro.baralho_personagens)
-        carta_escolhida = int(input())
-        jogador.personagem.append(simulacao.estado.tabuleiro.baralho_personagens.pop(carta_escolhida))
+        for personagem in simulacao.estado.tabuleiro.baralho_personagens:
+            print(personagem)
+
+        print("Escolha uma carta de personagem [Rank]: ", end="")
+        rank_carta_escolhida = int(input())
+        
+        print("=============================================================================")
+        for index, carta_personagem in enumerate(simulacao.estado.tabuleiro.baralho_personagens):
+            if carta_personagem.rank == rank_carta_escolhida:
+                jogador.personagem.append(simulacao.estado.tabuleiro.baralho_personagens.pop(index))
+                
     # Ordena os jogadores
     simulacao.estado.ordenar_jogadores()
     # Cada jogador faz suas ações
@@ -25,7 +33,8 @@ while not final_jogo:
             print("Ações disponíveis: ")
             # [...]
             acao_escolhida = input()
+
     # verificar final de jogo e atualizar flag
-    simulacao.estado.tabuleiro.criar_baralho_personagem(num_jogadores)
+    simulacao.estado.tabuleiro.baralho_personagens = simulacao.estado.tabuleiro.criar_baralho_personagem(num_jogadores)
 
 # contabilizar a pontuacao e verificar ponto
