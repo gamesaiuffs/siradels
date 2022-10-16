@@ -34,3 +34,7 @@ class Estado:
     def ordenar_jogadores(self):
         ordem = [jogador.personagem[0].rank for jogador in self.jogadores]
         self.jogadores = sort_together([ordem, self.jogadores])[1]
+
+    # Retorna o jogador atual/corrente do turno
+    def jogador_atual(self) -> Jogador:
+        return self.jogadores[self.turno - 1]
