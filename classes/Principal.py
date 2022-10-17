@@ -15,7 +15,7 @@ while not final_jogo:
         print("---------| Personagens |---------")
         # "Printa" o baralho de personagens
 
-        while len(jogador.personagem) == 0:
+        while isinstance(jogador.personagem, str):
             print(jogador.nome)
             for personagem in simulacao.estado.tabuleiro.baralho_personagens:
                 print(personagem)
@@ -24,7 +24,7 @@ while not final_jogo:
             
             for index, carta_personagem in enumerate(simulacao.estado.tabuleiro.baralho_personagens):
                 if carta_personagem.rank == rank_carta_escolhida:
-                    jogador.personagem.append(simulacao.estado.tabuleiro.baralho_personagens.pop(index))
+                    jogador.personagem = simulacao.estado.tabuleiro.baralho_personagens.pop(index)
                     foi_escolhido.append(rank_carta_escolhida)
                     break
                 if rank_carta_escolhida in foi_escolhido:
