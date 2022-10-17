@@ -1,5 +1,6 @@
 # Imports
 from CartaDistrito import CartaDistrito
+from CartaPersonagem import CartaPersonagem
 
 
 class Jogador:
@@ -7,7 +8,7 @@ class Jogador:
     def __init__(self, nome: str):
         self.pontuacao = 0 
         self.nome = nome 
-        self.personagem = "Nenhum"
+        self.personagem = CartaPersonagem("Nenhum", 0)
         self.ouro = 2
         self.cartas_distrito_mao = []
         self.distritos_construidos = []
