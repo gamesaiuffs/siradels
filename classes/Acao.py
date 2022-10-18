@@ -1,10 +1,12 @@
 # Imports
 from abc import abstractmethod
+
+from importlib_metadata import distribution
 from Estado import Estado
 from Jogador import Jogador
 from Tabuleiro import Tabuleiro
-from classes.TipoDistrito import TipoDistrito
-
+from TipoDistrito import TipoDistrito
+from CartaDistrito import CartaDistrito
 
 class Acao:
     # Construtor
@@ -65,7 +67,7 @@ class ConstruirDistrito(Acao):
         if estado.jogador_atual().ouro >= estado.jogador_atual().cartas_distrito_mao[escolha-1].valor_do_distrito:
             estado.jogador_atual().ouro -= estado.jogador_atual().cartas_distrito_mao[escolha-1].valor_do_distrito
             estado.jogador_atual().distritos_construidos.append(estado.jogador_atual().cartas_distrito_mao[escolha-1])
-            estado.jogador_atual().cartas_distrito_mao.pop(escolha-1)
+            estado.jogador_atual().cartas_distrito_mao.remove(escolha-1)
         else:
             print("Ouro insuficiente!")
 
@@ -76,7 +78,12 @@ class EfeitoAssassino(Acao):
 
     @staticmethod
     def ativar_efeito(estado: Estado):
-        estado.jogador_atual().morto = True
+        for numero_jogadores in range(len(estado.jogadores)):
+            print(estado.jogadores[numero_jogadores])
+
+        jogador_escolhido = int(input())
+        
+        estado.jogadores[jogador_escolhido-1].morto = True
 
 
 class EfeitoLadrao(Acao):
@@ -85,7 +92,13 @@ class EfeitoLadrao(Acao):
 
     @staticmethod
     def ativar_efeito(estado: Estado):
-        estado.jogador_atual().roubado = True
+        for numero_jogadores in range(len(estado.jogadores)):
+            print(estado.jogadores[numero_jogadores])
+            
+        jogador_escolhido = int(input())
+        
+        
+        estado.jogadores[jogador_escolhido-1].roubado = True
 
 
 class EfeitoMago(Acao):
@@ -104,7 +117,7 @@ class EfeitoMago(Acao):
             print(estado.jogadores[jogador_escolhido-1].cartas_distrito_mao[cartas_disponiveis_mao])
 
         carta_escohida = int(input('Carta escolhida: '))
-        estado.jogador_atual().cartas_distrito_mao.append(estado.jogadores[jogador_escolhido-1].cartas_distrito_mao[carta_escohida])
+        estado.jogador_atual().cartas_distrito_mao.append(estado.jogadores[jogador_escolhido-1].cartas_distrito_mao[carta_escohida-1])
 
 
 class EfeitoRei(Acao):
@@ -125,19 +138,39 @@ class EfeitoCardealAtivo(Acao):
 
     @staticmethod
     def ativar_efeito(estado: Estado):
-        for i in range(len(estado.jogadores[estado.jogadores.index(estado.jogador_atual())].cartas_distrito_mao)):
-            print(f"{i+1}: {estado.jogadores[estado.jogadores.index(estado.jogador_atual())].cartas_distrito_mao[i]}")
+        
+        divida = 0
+        distritos_trocados = []
 
-        escolha = int(input("Digite o número do distrito que deseja construir: "))
-        if estado.jogadores[estado.jogadores.index(estado.jogador_atual())].ouro >= estado.jogadores[estado.jogadores.index(estado.jogador_atual())].cartas_distrito_mao[escolha-1].valor_do_distrito:
-            estado.jogadores[estado.jogadores.index(estado.jogador_atual())].ouro -= estado.jogadores[estado.jogadores.index(estado.jogador_atual())].cartas_distrito_mao[escolha-1].valor_do_distrito
-            estado.jogadores[estado.jogadores.index(estado.jogador_atual())].distritos_construidos.append(estado.jogadores[estado.jogadores.index(estado.jogador_atual())].cartas_distrito_mao[escolha-1])
-            estado.jogadores[estado.jogadores.index(estado.jogador_atual())].cartas_distrito_mao.pop(escolha-1)
-        else:
-            pass
-            #Neuronios a serem queimados (ativa do cardeal)!!!!
+        for i, mao_propria in enumerate(estado.jogador_atual().cartas_distrito_mao):
+            print(f"{i+1}: {mao_propria}")
 
+        escolha_distrito = int(input("Digite o número do distrito que deseja trocar por ouro: "))
+        for i in estado.jogador_atual().cartas_distrito_mao:
+            if estado.jogador_atual().cartas_distrito_mao[escolha_distrito-1].valor_do_distrito > estado.jogador_atual().ouro:
+                divida = estado.jogador_atual().cartas_distrito_mao[escolha_distrito-1].valor_do_distrito-estado.jogador_atual().ouro
+                print(f"Faltam: {divida} para o distrito {i+1}")
+
+            else:
+                break
+
+        for i, jogador in enumerate(estado.jogadores):
+            print(f"{i+1}: {jogador}")
+
+        jogador_escolhido = int(input("Escolha o jogador alvo: "))
+        if estado.jogadores[jogador_escolhido-1].ouro >= divida and len(estado.jogador_atual().cartas_distrito_mao) >= divida+1:
+            for i in range(divida+1):
+                print("")
+                selecionar_distritos = int(input("Selecione os distritos a serem trocados: "))
+                distritos_trocados.append(selecionar_distritos)
             
+            for i in distritos_trocados:
+                estado.jogadores[jogador_escolhido-1].ouro -= divida
+                estado.jogadores[jogador_escolhido].distritos_construidos.append(estado.jogador_atual().cartas_distrito_mao[i])
+                estado.jogador_atual().cartas_distrito_mao.remove(i)
+                estado.jogador_atual().distritos_construidos.append(i)
+
+
 class EfeitoCardealPassivo(Acao):
     def __init__(self):
         super().__init__('Ganhe 1 carta para cada distrito RELIGIOSO construído')
@@ -145,5 +178,6 @@ class EfeitoCardealPassivo(Acao):
     @staticmethod
     def ativar_efeito(estado: Estado):
         for ver_distritos_construidos in range(len(estado.jogador_atual().distritos_construidos)):
-            if estado.jogador_atual().distritos_construidos[ver_distritos_construidos] == TipoDistrito.Nobre:
-                estado.jogadores[estado.jogadores.index(estado.jogador_atual())].cartas_distrito_mao += 1
+            if estado.jogador_atual().distritos_construidos[ver_distritos_construidos] == TipoDistrito.Religioso:
+                distrito_pescado = estado.tabuleiro.baralho_distritos.pop()
+                estado.jogadores[estado.jogadores.index(estado.jogador_atual())].cartas_distrito_mao.append(distrito_pescado)
