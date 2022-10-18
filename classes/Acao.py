@@ -181,3 +181,59 @@ class EfeitoCardealPassivo(Acao):
             if estado.jogador_atual().distritos_construidos[ver_distritos_construidos] == TipoDistrito.Religioso:
                 distrito_pescado = estado.tabuleiro.baralho_distritos.pop()
                 estado.jogadores[estado.jogadores.index(estado.jogador_atual())].cartas_distrito_mao.append(distrito_pescado)
+
+
+
+class EfeitoDistritoAbrigoParaPobres(Acao):
+    def __init__(self):
+        super().__init__("Se não houver ouro no seu tesouro no fim do seu turno, ganhe 1 ouro.")
+
+    @staticmethod
+    def ativar_efeito(estado: Estado):
+        estado.jogador_atual().ouro += 1 
+
+
+class EfeitoDistritoTesouroImperial(Acao):
+    def __init__(self):
+        super().__init__("Ao final da partida, marque um ponto extra para cada ouro em seu tesouro.")
+
+    @staticmethod
+    def ativar_efeito(estado: Estado):
+        estado.jogador_atual().pontuacao += estado.jogador_atual().ouro 
+
+
+class EfeitoDistritoCofreSecreto(Acao):
+    def __init__(self):
+        super().__init__("O Cofre Secreto não pode ser construído. Ao final da partida, revele o Cofre Secreto da sua mão para marcar 3 pontos.")
+
+    @staticmethod
+    def ativar_efeito(estado: Estado):
+        estado.jogador_atual().pontuacao += 3 
+
+
+class EfeitoDistritoLaboratorio(Acao):
+    def __init__(self):
+        super().__init__("Uma vez por turno, descarte 1 carta da sua mao para ganhar 2 ouros.")
+
+    @staticmethod
+    def ativar_efeito(estado: Estado):
+        # Printar distritos disponíveis para troca
+        for index, distrito in enumerate(estado.jogador_atual().cartas_distrito_mao):
+            print(f"""ID: {index+1}
+            \tNome: {distrito.nome_do_distrito}
+            \tValor: {distrito.valor_do_distrito}
+            \ttipo: {distrito.tipo_de_distrito}
+            """)
+
+        # Escolher qual carta será trocada por 2 ouros
+        while True:
+            print("Escolha uma carta para descartar [ID]:", end=" ")
+            carta = int(input()) - 1
+            if carta >= 1 and carta <= len(estado.jogador_atual().cartas_distrito_mao) + 1: break
+            else: 
+                print("Escolha inválida! Escolha um ID válido!")
+
+        # Remover carta escolhida e adicionar os 2 ouros
+        carta_descartada = estado.jogador_atual().cartas_distrito_mao.pop(carta)
+        estado.tabuleiro.baralho_distritos.append(carta_descartada)
+        estado.jogador_atual().ouro += 2
