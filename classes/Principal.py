@@ -15,7 +15,7 @@ while not final_jogo:
         print("---------| Personagens |---------")
         # "Printa" o baralho de personagens
 
-        while isinstance(jogador.personagem, str):
+        while jogador.personagem.rank == 0:
             print(jogador.nome)
             for personagem in simulacao.estado.tabuleiro.baralho_personagens:
                 print(personagem)

@@ -32,7 +32,7 @@ class Estado:
 
     # Reorganiza a lista de jogadores de acordo com seus personagens
     def ordenar_jogadores(self):
-        ordem = [jogador.personagem[0].rank for jogador in self.jogadores]
+        ordem = [jogador.personagem.rank for jogador in self.jogadores]
         self.jogadores = sort_together([ordem, self.jogadores])[1]
 
     # Retorna o jogador atual/corrente do turno
