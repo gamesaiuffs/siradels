@@ -1,5 +1,4 @@
 # Imports
-from Tabuleiro import Tabuleiro
 from random import shuffle
 from Acao import *
 
@@ -65,3 +64,24 @@ class Simulacao:
                  EfeitoMago(),
                  ConstruirDistrito()]
         return acoes
+
+    def acoes_disponiveis(self) -> list[Acao]:
+        acoes_disponiveis = []
+        '''
+        for acao in self.acoes:
+            match acao.tipo
+                case TipoAcao.ConstruirDistrito:
+                    # Condição para construir distrito
+                    acoes_disponiveis.append(acao)
+                    break
+                case ...
+        '''
+        return acoes_disponiveis
+
+    def imprimir_menu_acoes(self, acoes: list[Acao]) -> str:
+        i = iter(acoes)
+        texto = "Escolha uma ação das seguintes:"
+        texto = "\n\t" + str(next(i))
+        for distrito in i:
+            texto += ", " + str(distrito)
+        return texto
