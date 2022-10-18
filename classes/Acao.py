@@ -293,3 +293,92 @@ class EfeitoAlquimista(Acao):
 
 
 
+class PortalDoDragao(Acao):
+    def __init__(self):
+        super().__init__('Ao final da partida, marque 2 pontos extras')
+    
+    @staticmethod
+    def ativar_efeito(estado: Estado):
+        estado.jogadores[estado.jogadores.index(estado.jogador_atual())].pontuacao += 2
+
+
+class Necropole(Acao):
+    def __init__(self):
+        super().__init__('Você pode construir a Necrópole destruindo 1 distrito na sua cidade, em vez de pagar o custo da Necrópole')
+    
+    @staticmethod
+    def ativar_efeito(estado: Estado):
+        for i, distrito in enumerate(estado.jogador_atual.distritos_construidos):
+            print(f"{i+1}: {distrito.nome_do_distrito}")
+        
+        escolha = int(input("Digite o número do distrito que deseja destruir: "))
+        index = estado.jogador_atual.cartas_distrito_mao.get('necropole')
+        distrito = estado.jogador_atual.distritos_construidos.pop(escolha)
+        estado.tabuleiro.baralho_distritos.append(distrito)
+        necropole = estado.jogador_atual.cartas_distrito_mao.pop(index)
+        estado.tabuleiro.baralho_distritos.append(necropole)
+
+
+class Teatro(Acao):
+    def __init__(self):
+        super().__init__('Ao final de cada fase de escolha, você pode trocar a sua carta de personagem escolhida com a carta de personagem de um oponente')
+
+    @staticmethod
+    def ativar_efeito(estado: Estado):
+        for i, jogador in enumerate(estado.jogadores):
+            if jogador != estado.jogador_atual:
+                print(f"{i+1}: {jogador.nome}")
+        
+        escolha = int(input('Digite o número do jogador que deseja trocar o personagem: '))
+        
+        personagem_temp = estado.jogador_atual.personagem
+        estado.jogador_atual.personagem = estado.jogadores[escolha].personagem
+        estado.jogadores[escolha].personagem = personagem_temp
+    
+
+class MinaDeOuro(Acao):
+    def __init__(self):
+        super().__init__('Se você optar por ganhar ouro ao coletar recursos, ganhe 1 ouro extra.')
+    
+    @staticmethod
+    def ativar_efeito(estado: Estado):
+        estado.jogador_atual.ouro += 1
+
+
+class EscolaDeMagia(Acao):
+    def __init__(self):
+        super().__init__('Ao usar habilidades que obtêm recursos pelos seus distritos, a Escola de Magia vale como o tipo de distrito à sua escolha.')
+    
+    @staticmethod
+    def ativar_efeito(estado: Estado):
+        for i, tipo in enumerate(TipoDistrito):
+            print(f"{i+1}: {tipo._name_}")
+        
+        escolha = int(input('Digite o número do tipo de distrito'))
+        estado.jogador_atual.distritos_construidos.find('escola de magia').tipo = escolha
+
+
+class Muralha(Acao):
+    def __init__(self):
+        super().__init__('O personagem de ranque 8 deve pagar 1 ouro a mais para usar a habilidade dele contra qualquer outro distrito na sua cidade.')
+
+        @staticmethod
+        def ativar_efeito(estado: Estado, jogador: Jogador):
+            return 1 if jogador.distritos_construidos[0].find('muralha') else 0
+
+class Estrutura(Acao):
+    def __init__(self):
+        super().__init__('Você pode construir um distrito destruindo a Estrutura, em vez de pagar os custos do distrito em questão.')
+
+    @staticmethod
+    def ativar_efeito(estado: Estado):
+        for i, distrito in enumerate(estado.jogador_atual.cartas_distrito_mao):
+            print(f"{i+1}: {distrito.nome_do_distrito}")
+        
+        escolha = int(input("Digite o número do distrito que deseja construir: "))
+        index = estado.jogador_atual.distritos_construidos[0].find('estrutura')
+        estrutura = estado.jogador_atual.distritos_construidos[0].pop(index)
+
+        estado.tabuleiro.baralho_distritos.append(estrutura)
+        distrito = estado.jogador_atual.cartas_distrito_mao.pop(escolha)
+        estado.tabuleiro.baralho_distritos.append(distrito)
