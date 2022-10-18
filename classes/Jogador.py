@@ -15,6 +15,8 @@ class Jogador:
         self.rei = False
         self.morto = False
         self.roubado = False
+        self.construiu = False
+        self.ouro_gasto = 0
 
     # To String
     def __str__(self) -> str:

@@ -237,3 +237,59 @@ class EfeitoDistritoLaboratorio(Acao):
         carta_descartada = estado.jogador_atual().cartas_distrito_mao.pop(carta)
         estado.tabuleiro.baralho_distritos.append(carta_descartada)
         estado.jogador_atual().ouro += 2
+
+
+class EfeitoNavegadora(Acao):
+    def __init__(self):
+        super().__init__('Ganhe 4 ouros extras ou 4 cartas extras.Você não pode construir distritos.')
+
+    @staticmethod
+    def ativar_efeito(estado: Estado):
+        escolha = int(input("verifica escolha"))
+        if escolha ==1:
+            estado.jogador_atual().ouro +=4
+            print(estado.jogador_atual().ouro)
+        elif escolha ==2:
+            estado.jogador_atual().cartas_distrito_mao.append(estado.tabuleiro.baralho_distritos[0:4])
+            for i in range(4):
+                estado.tabuleiro.baralho_distritos.pop(i)#testar
+        else:
+            pass
+#----------
+class EfeitoSenhordaGuerra(Acao):
+    def __init__(self):
+        super().__init__("Destrua 1 distrito pagando 1 ouro a menos que o custo dele.(Ganhe 1 ouro para cada um dos seus distritos militares).")
+    @staticmethod
+    def ativar_efeito(estado: Estado):
+        #da ouro por militar
+        for ver_distritos_construidos in range(len(estado.jogador_atual().distritos_construidos)):
+            if estado.jogador_atual().distritos_construidos[ver_distritos_construidos] == TipoDistrito.Militar:
+                estado.jogadores[estado.jogadores.index(estado.jogador_atual())].ouro += 1
+        #efeito destruir
+            #descobrir como printar cartas dos outros jogadores
+            escolha_jogador = int(input("Deseja destruir?"))
+            if escolha_jogador ==1:
+                for numero_jogadores,jogador in enumerate(estado.jogadores):
+                    print(numero_jogadores)
+                    print(jogador)
+                    jogador_escolhido=int(input("Escolha jogador:"))
+                    for numero_cartas,carta in enumerate(jogador.distritos_construidos):
+                        print(numero_cartas,carta)
+                    destruir_carta=int(input("Digite o distrito que deseja destruir:"))
+                    if estado.jogador_atual().ouro >= jogador.distritos_construidos[jogador_escolhido].valor_do_distrito-1:#falta colocar valor do distrito
+                        estado.jogador_atual().ouro -= jogador.distritos_construidos[jogador_escolhido].valor_do_distrito-1
+                        estado.jogadores[jogador_escolhido].distritos_construidos.pop(destruir_carta)
+                        #testar
+            else:
+                pass            
+#-----------
+class EfeitoAlquimista(Acao):
+    def __init__(self):
+        super().__init__("Ao final do seu turno,você pega de volta todo o ouro pago para construir distritos neste turno.Você não pode pagar mais ouro do que tem.")
+    @staticmethod
+    def ativar_efeito(estado: Estado):
+        if estado.jogador_atual().construiu == True:
+            estado.jogador_atual().ouro += estado.jogador_atual().ouro_gasto#Adicionar na classe construir distrito o dinheiro gasto no dinheiro_gasto
+
+
+
