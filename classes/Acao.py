@@ -1,7 +1,6 @@
 # Imports
 from abc import abstractmethod
 
-from importlib_metadata import distribution
 from Estado import Estado
 from Jogador import Jogador
 from Tabuleiro import Tabuleiro
