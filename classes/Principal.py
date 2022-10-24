@@ -33,6 +33,10 @@ while not final_jogo:
             
     # Ordena os jogadores
     simulacao.estado.ordenar_jogadores()
+
+    # Printar estad
+    print(simulacao.estado)
+
     # Cada jogador faz suas ações
     for jogador in simulacao.estado.jogadores:
         fim_turno = False

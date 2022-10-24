@@ -13,3 +13,7 @@ class CartaPersonagem:
             return f'{self.nome}, Rank: {self.rank}'
         return f'{self.nome}, Rank: {self.rank}' \
                f'\n\tHabilidade: {self.descricao_habilidade}'
+    
+    # Pegar apenas o nome do personagem
+    def obter_nome(self):
+        return self.nome
