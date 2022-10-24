@@ -12,7 +12,7 @@ while not final_jogo:
     # Cada jogador escolhe seu personagem
     foi_escolhido = []
     for jogador in simulacao.estado.jogadores:
-        print("---------| Personagens |---------")
+        print("---------| Personagens |--------")
         # "Printa" o baralho de personagens
 
         while jogador.personagem.rank == 0:
