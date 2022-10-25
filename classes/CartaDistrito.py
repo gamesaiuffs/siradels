@@ -12,4 +12,4 @@ class CartaDistrito:
 
     # To String
     def __str__(self) -> str:
-        return f'{self.nome_do_distrito} ({self.tipo_de_distrito.name}, valor: {self.valor_do_distrito}, quantidade: {self.quantidade})'
+        return f'{self.nome_do_distrito}'

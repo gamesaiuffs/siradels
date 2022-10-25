@@ -14,7 +14,11 @@ class Estado:
 
     # To String
     def __str__(self):
-        return f"Tabuleiro:  {self.tabuleiro} Jogadores:  {self.jogadores}"
+        jogadores_print_str = ""
+        for jogador in self.jogadores:
+            jogadores_print_str += jogador.__str__()
+            jogadores_print_str += "\n\n"
+        return f"\nRODADA {self.rodada}\nTURNO {self.turno}\n\nTabuleiro:  {self.tabuleiro}\n\nJogadores:  {jogadores_print_str}"
 
     def ordenar_jogadores_rei(self):
         ordenados, index_rei = [], 0
