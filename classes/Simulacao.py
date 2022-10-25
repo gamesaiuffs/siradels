@@ -1,6 +1,7 @@
 # Imports
 from random import shuffle
 from Acao import *
+from classes.EnumAcoes import Acoes
 
 
 class Simulacao:
@@ -59,23 +60,95 @@ class Simulacao:
     @staticmethod
     def criar_acoes() -> list[Acao]:
         acoes = [ColetarOuro(),
-                 EfeitoAssassino(),
-                 ColetarCartas(),
-                 EfeitoMago(),
-                 ConstruirDistrito()]
+                ColetarCartas(),
+                ConstruirDistrito(),
+                EfeitoAssassino(),
+                EfeitoLadrao(),
+                EfeitoMago(),
+                EfeitoRei(),
+                EfeitoCardealAtivo(),
+                EfeitoCardealPassivo(),
+                EfeitoAlquimista(),
+                EfeitoNavegadora(), 
+                EfeitoSenhordaGuerra(),
+                EfeitoDistritoAbrigoParaPobres(),
+                EfeitoDistritoTesouroImperial(),
+                EfeitoDistritoCofreSecreto(),
+                EfeitoDistritoLaboratorio(),
+                PortalDoDragao(),
+                Necropole(),
+                Teatro(),
+                MinaDeOuro(),
+                EscolaDeMagia(),
+                Muralha(),
+                Estrutura(),
+                PassarTurno()]
         return acoes
 
     def acoes_disponiveis(self) -> list[Acao]:
         acoes_disponiveis = []
-        '''
+
+        #adicionar flag nas ações
+
+        if self.estado.jogador_atual().morto:
+            return acoes_disponiveis.append(PassarTurno())
+
         for acao in self.acoes:
-            match acao.tipo
-                case TipoAcao.ConstruirDistrito:
-                    # Condição para construir distrito
-                    acoes_disponiveis.append(acao)
-                    break
-                case ...
-        '''
+            match acao:
+                case ColetarOuro():
+                    if self.estado.jogador_atual().coletou_recursos == False:
+                        acoes_disponiveis.append(ColetarOuro())
+                case ColetarCartas():
+                    if self.estado.jogador_atual().coletou_recursos == False:
+                        acoes_disponiveis.append(ColetarCartas())
+                case PassarTurno():
+                    if self.estado.jogador_atual().coletou_recursos == True:
+                        acoes_disponiveis.append(PassarTurno())
+                case ConstruirDistrito():
+                    if self.estado.jogador_atual().coletou_recursos == True and self.estado.jogador_atual().acoes_realizadas[Acoes.ConstruirDistrito] == 2:
+                        if self.estado.jogador_atual().personagem.nome != "Navegadora":
+                            acoes_disponiveis.append(ConstruirDistrito())
+                case EfeitoAssassino():
+                    if self.estado.jogador_atual().acoes_realizadas[Acoes.EfeitoAssassino] == 3 and self.estado.jogador_atual().personagem.nome == "Assassino":
+                        acoes_disponiveis.append(EfeitoAssassino())
+                case EfeitoLadrao():
+                    if self.estado.jogador_atual().acoes_realizadas[Acoes.EfeitoLadrao] == 3 and self.estado.jogador_atual().personagem.nome == "Ladrao":
+                        acoes_disponiveis.append(EfeitoLadrao())
+                case EfeitoMago():
+                    if self.estado.jogador_atual().acoes_realizadas[Acoes.EfeitoMago] == 3 and self.estado.jogador_atual().personagem.nome == "Mago":
+                        acoes_disponiveis.append(EfeitoMago())
+                case EfeitoRei():
+                    if self.estado.jogador_atual().acoes_realizadas[Acoes.EfeitoRei] == 3 and self.estado.jogador_atual().personagem.nome == "Rei":
+                        acoes_disponiveis.append(EfeitoRei())
+                case EfeitoCardealAtivo():
+                    if self.estado.jogador_atual().acoes_realizadas[Acoes.EfeitoCardealAtivo] == 3 and self.estado.jogador_atual().personagem.nome == "Cardeal":
+                        acoes_disponiveis.append(EfeitoCardealAtivo())
+                case EfeitoCardealPassivo():
+                    if self.estado.jogador_atual().acoes_realizadas[Acoes.EfeitoCardealPassivo] == 3 and self.estado.jogador_atual().personagem.nome == "Cardeal":
+                        acoes_disponiveis.append(EfeitoCardealPassivo())
+                case EfeitoAlquimista():
+                    if self.estado.jogador_atual().acoes_realizadas[Acoes.EfeitoAlquimista] == 3 and self.estado.jogador_atual().personagem.nome == "Alquimista":
+                        acoes_disponiveis.append(EfeitoAlquimista())
+                        # Disponivel apenas no final do turno
+                case EfeitoNavegadora(),:
+                    if self.estado.jogador_atual().acoes_realizadas[Acoes.EfeitoNavegadora] == 3 and self.estado.jogador_atual().personagem.nome == "Navegadora":
+                        acoes_disponiveis.append(EfeitoNavegadora())
+                case EfeitoSenhordaGuerra():
+                    if self.estado.jogador_atual().acoes_realizadas[Acoes.EfeitoSenhordaGuerra] == 3 and self.estado.jogador_atual().personagem.nome == "SenhordaGuerra":
+                        acoes_disponiveis.append(EfeitoSenhordaGuerra())
+                    '''
+                    EfeitoDistritoAbrigoParaPobres()
+                    EfeitoDistritoTesouroImperial(),
+                    EfeitoDistritoCofreSecreto(),
+                    EfeitoDistritoLaboratorio(),
+                    PortalDoDragao(),
+                    Necropole(),
+                    Teatro(),
+                    MinaDeOuro(),
+                    EscolaDeMagia(),
+                    Muralha(),
+                    Estrutura(),
+                '''
         return acoes_disponiveis
 
     def imprimir_menu_acoes(self, acoes: list[Acao]) -> str:

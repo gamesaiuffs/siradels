@@ -16,7 +16,9 @@ class Jogador:
         self.morto = False
         self.roubado = False
         self.construiu = False
+        self.coletou_recursos = False
         self.ouro_gasto = 0
+        self.acoes_realizadas = [0 for _ in range(24)]
 
     # To String
     def __str__(self) -> str:

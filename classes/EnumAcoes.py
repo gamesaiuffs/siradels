@@ -27,5 +27,5 @@ class Acoes(Enum):
     EscolaDeMagia = 20
     Muralha = 21
     Estrutura = 22
-
+    PassarTurno = 23
 
