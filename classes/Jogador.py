@@ -17,6 +17,7 @@ class Jogador:
         self.roubado = False
         self.construiu = False
         self.ouro_gasto = 0
+        self.terminou = False # True se o jogador construiu 7 distritos 
 
     # To String
     def __str__(self) -> str:
