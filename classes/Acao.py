@@ -65,11 +65,17 @@ class ConstruirDistrito(Acao):
 
         escolha = int(input("Digite o número do distrito que deseja construir: "))
         if estado.jogador_atual().ouro >= estado.jogador_atual().cartas_distrito_mao[escolha-1].valor_do_distrito:
+
+            estado.jogador_atual().pontuacao += estado.jogador_atual().cartas_distrito_mao[escolha-1].valor_do_distrito
+
             estado.jogador_atual().ouro -= estado.jogador_atual().cartas_distrito_mao[escolha-1].valor_do_distrito
             estado.jogador_atual().distritos_construidos.append(estado.jogador_atual().cartas_distrito_mao[escolha-1])
             estado.jogador_atual().cartas_distrito_mao.remove(escolha-1)
+
         else:
             print("Ouro insuficiente!")
+        
+
 
 
 class EfeitoAssassino(Acao):
@@ -103,7 +109,7 @@ class EfeitoLadrao(Acao):
 
 class EfeitoMago(Acao):
     def __init__(self):
-        super().__init__('Escolha um jogador para ver sua mão de distritos, em seguida, escolha uma carta e pague para construí-la imediaamente ou adiciona-a à sua mão. (Você pode construir distritos idênticos)')
+        super().__init__('Escolha um jogador para ver sua mão de distritos, em seguida, escolha uma carta e pague para construí-la imediatamente ou adiciona-a à sua mão. (Você pode construir distritos idênticos)')
 
     @staticmethod
     def ativar_efeito(estado: Estado):
@@ -118,7 +124,7 @@ class EfeitoMago(Acao):
 
         carta_escohida = int(input('Carta escolhida: '))
         estado.jogador_atual().cartas_distrito_mao.append(estado.jogadores[jogador_escolhido-1].cartas_distrito_mao[carta_escohida-1])
-
+        estado.jogadores[jogador_escolhido-1].cartas_distrito_mao.remove(carta_escohida-1)
 
 class EfeitoRei(Acao):
     def __init__(self):
@@ -129,7 +135,8 @@ class EfeitoRei(Acao):
         
         for ver_distritos_construidos in range(len(estado.jogador_atual().distritos_construidos)):
             if estado.jogador_atual().distritos_construidos[ver_distritos_construidos] == TipoDistrito.Nobre:
-                estado.jogadores[estado.jogadores.index(estado.jogador_atual())].ouro += 1
+                estado.jogador_atual().ouro += 1
+                estado.jogador_atual().pontuacao += 1
 
 
 class EfeitoCardealAtivo(Acao):
@@ -155,20 +162,36 @@ class EfeitoCardealAtivo(Acao):
                 break
 
         for i, jogador in enumerate(estado.jogadores):
-            print(f"{i+1}: {jogador}")
+            print(f"{i+1}: {jogador.nome}")
 
-        jogador_escolhido = int(input("Escolha o jogador alvo: "))
-        if estado.jogadores[jogador_escolhido-1].ouro >= divida and len(estado.jogador_atual().cartas_distrito_mao) >= divida+1:
-            for i in range(divida+1):
-                print("")
-                selecionar_distritos = int(input("Selecione os distritos a serem trocados: "))
-                distritos_trocados.append(selecionar_distritos)
+        if len(estado.jogador_atual().cartas_distrito_mao) < divida:
+            return
+        
+        for i, jogador in enumerate(estado.jogadores):
+            print(f"{i+1}: {jogador.nome}")
+        while True:
+            if all([jogador.ouro < divida for jogador in estado.jogadores]):
+                return
+
+            jogador_escolhido = int(input("Escolha o jogador alvo: "))
+            if estado.jogadores[jogador_escolhido-1].ouro >= divida:
+                break
+        for i in range(divida+1):
+            for i, mao_propria in enumerate(estado.jogador_atual().cartas_distrito_mao):
+                print(f"{i+1}: {mao_propria}")
             
-            for i in distritos_trocados:
-                estado.jogadores[jogador_escolhido-1].ouro -= divida
-                estado.jogadores[jogador_escolhido].distritos_construidos.append(estado.jogador_atual().cartas_distrito_mao[i])
-                estado.jogador_atual().cartas_distrito_mao.remove(i)
-                estado.jogador_atual().distritos_construidos.append(i)
+            while True:
+                selecionar_distritos = int(input("\nSelecione os distritos a serem trocados: "))
+                if all([distrito != selecionar_distritos for distrito in distritos_trocados]):
+                    distritos_trocados.append(selecionar_distritos) 
+                    break
+        
+        estado.jogador_atual().distritos_construidos.append(estado.jogador_atual().cartas_distrito_mao[escolha_distrito])
+        estado.jogador_atual().pontuacao += estado.jogador_atual().cartas_distrito_mao[escolha_distrito].valor_do_distrito
+        for i in distritos_trocados:
+            estado.jogadores[jogador_escolhido-1].ouro -= divida
+            estado.jogadores[jogador_escolhido-1].distritos_construidos.append(estado.jogador_atual().cartas_distrito_mao[i])
+            estado.jogador_atual().cartas_distrito_mao.remove(i)
 
 
 class EfeitoCardealPassivo(Acao):
@@ -265,23 +288,28 @@ class EfeitoSenhordaGuerra(Acao):
         for ver_distritos_construidos in range(len(estado.jogador_atual().distritos_construidos)):
             if estado.jogador_atual().distritos_construidos[ver_distritos_construidos] == TipoDistrito.Militar:
                 estado.jogadores[estado.jogadores.index(estado.jogador_atual())].ouro += 1
+                estado.jogador_atual().pontuacao += 1
         #efeito destruir
-            #descobrir como printar cartas dos outros jogadores
-            escolha_jogador = int(input("Deseja destruir?"))
-            if escolha_jogador ==1:
-                for numero_jogadores,jogador in enumerate(estado.jogadores):
-                    print(numero_jogadores)
-                    print(jogador)
-                    jogador_escolhido=int(input("Escolha jogador:"))
-                    for numero_cartas,carta in enumerate(jogador.distritos_construidos):
-                        print(numero_cartas,carta)
-                    destruir_carta=int(input("Digite o distrito que deseja destruir:"))
-                    if estado.jogador_atual().ouro >= jogador.distritos_construidos[jogador_escolhido].valor_do_distrito-1:#falta colocar valor do distrito
-                        estado.jogador_atual().ouro -= jogador.distritos_construidos[jogador_escolhido].valor_do_distrito-1
-                        estado.jogadores[jogador_escolhido].distritos_construidos.pop(destruir_carta)
-                        #testar
-            else:
-                pass            
+        for i, jogador in enumerate(estado.jogadores):
+            for distritos in jogador.distritos_construidos:
+                print(f"{i+1}: {distritos}", end=" | ")
+            print("\n")
+        escolha_jogador = input("Deseja destruir? (s/n)").lower()
+        if escolha_jogador == "s":
+            for numero_jogadores,jogador in enumerate(estado.jogadores):
+                print(numero_jogadores+1)
+                print(jogador)
+                jogador_escolhido=int(input("Escolha jogador:"))
+                for numero_cartas,carta in enumerate(jogador.distritos_construidos):
+                    print(numero_cartas,carta)
+                destruir_carta=int(input("Digite o distrito que deseja destruir:"))
+                if estado.jogador_atual().ouro >= jogador.distritos_construidos[jogador_escolhido-1].valor_do_distrito-1:#falta colocar valor do distrito
+                    estado.jogador_atual().ouro -= jogador.distritos_construidos[jogador_escolhido-1].valor_do_distrito-1
+                    estado.jogadores[jogador_escolhido-1].pontuacao -= jogador.distritos_construidos[jogador_escolhido-1].valor_do_distrito-1
+                    estado.jogadores[jogador_escolhido-1].distritos_construidos.pop(destruir_carta)
+                    #testar
+        else:
+            pass            
 #-----------
 class EfeitoAlquimista(Acao):
     def __init__(self):
@@ -308,17 +336,22 @@ class Necropole(Acao):
     
     @staticmethod
     def ativar_efeito(estado: Estado):
-        for i, distrito in enumerate(estado.jogador_atual.distritos_construidos):
+        for i, distrito in enumerate(estado.jogador_atual().distritos_construidos):
             print(f"{i+1}: {distrito.nome_do_distrito}")
         
         escolha = int(input("Digite o número do distrito que deseja destruir: "))
-        index = estado.jogador_atual.cartas_distrito_mao.get('necropole')
-        distrito = estado.jogador_atual.distritos_construidos.pop(escolha)
-        estado.tabuleiro.baralho_distritos.append(distrito)
-        necropole = estado.jogador_atual.cartas_distrito_mao.pop(index)
-        estado.tabuleiro.baralho_distritos.append(necropole)
+        for index, distrito in enumerate(estado.jogador_atual().distritos_construidos):
+            if distrito.nome_do_distrito == 'necropole':
+                distrito_encontrado = estado.jogador_atual().distritos_construidos.pop(escolha-1)
+                estado.tabuleiro.baralho_distritos.append(distrito_encontrado)
+                necropole = estado.jogador_atual().cartas_distrito_mao.pop(index)
+                estado.jogador_atual().distritos_construidos.append(necropole)
+                estado.jogador_atual().pontuacao += necropole.valor_do_distrito
+                estado.jogador_atual().pontuacao -= distrito_encontrado.valor_do_distrito
 
 
+#continuar pontuação parcial !!!!
+ 
 class Teatro(Acao):
     def __init__(self):
         super().__init__('Ao final de cada fase de escolha, você pode trocar a sua carta de personagem escolhida com a carta de personagem de um oponente')
@@ -382,3 +415,10 @@ class Estrutura(Acao):
         estado.tabuleiro.baralho_distritos.append(estrutura)
         distrito = estado.jogador_atual.cartas_distrito_mao.pop(escolha)
         estado.tabuleiro.baralho_distritos.append(distrito)
+
+class PassarTurno(Acao):
+    def __init__(self, estado: Estado):
+        super().__init__("Passar turno")
+        estado.turno += 1
+        jogador = estado.jogador_atual
+        jogador.roubado, jogador.morto, jogador.construiu, jogador.acoes_realizadas = False, False, False, [0 for _ in range(23)]
