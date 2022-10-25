@@ -16,19 +16,16 @@ class Jogador:
         self.morto = False
         self.roubado = False
         self.construiu = False
+        self.coletou_recursos = False
         self.ouro_gasto = 0
+        self.acoes_realizadas = [0 for _ in range(24)]
+        self.terminou = False # True se o jogador construiu 7 distritos 
 
     # To String
     def __str__(self) -> str:
-        return f"\nNome: {self.nome}" \
-               f"\nPersonagem: {self.personagem}" \
-               f"\nPontuação: {self.pontuacao}" \
-               f"\nOuro: {self.ouro}" \
-               f"\nCartas de distrito na mão: {self.imprimir_distritos(self.cartas_distrito_mao)}" \
-               f"\nDistritos cronstruidos: {self.imprimir_distritos(self.distritos_construidos)}" \
-               f"\nÉ o rei: {self.rei}" \
-               f"\nEstá morto: {self.morto}" \
-               f"\nFoi roubado: {self.roubado}"
+        return f"\n{self.nome}: {self.personagem.obter_nome()} / Morto? {self.morto} / É rei? {self.rei} / Qtd de ouro: {self.ouro} / Pont: {self.pontuacao} / Roubado? {self.roubado}" \
+               f"\nMão: {self.imprimir_nomes_distritos(self.cartas_distrito_mao)}" \
+               f"\nDistritos construídos: {self.imprimir_nomes_distritos(self.distritos_construidos)}" \
 
     # Imprimir lista de distritos
     @staticmethod
@@ -39,4 +36,14 @@ class Jogador:
         texto = "\n\t" + str(next(i))
         for distrito in i:
             texto += ", " + str(distrito)
+        return texto
+
+    @staticmethod
+    def imprimir_nomes_distritos(distritos: list[CartaDistrito]) -> str:
+        if len(distritos) == 0:
+            return "Nenhum distrito"
+        i = iter(distritos)
+        texto = str(next(i).nome_do_distrito)
+        for distrito in i:
+            texto += ", " + str(distrito.nome_do_distrito)
         return texto
