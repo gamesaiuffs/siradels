@@ -3,7 +3,7 @@ from enum import Enum
 
 
 # Classe de enumeração
-class Acoes(Enum):
+class TipoAcao(Enum):
     ColetarOuro = 0
     ColetarCartas = 1
     ConstruirDistrito = 2
