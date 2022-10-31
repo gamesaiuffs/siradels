@@ -105,7 +105,7 @@ class Simulacao:
                     if self.estado.jogador_atual().coletou_recursos == True:
                         acoes_disponiveis.append(PassarTurno())
                 case ConstruirDistrito():
-                    if self.estado.jogador_atual().coletou_recursos == True and self.estado.jogador_atual().acoes_realizadas[Acoes.ConstruirDistrito] == 2:
+                    if self.estado.jogador_atual().coletou_recursos == True and self.estado.jogador_atual().acoes_realizadas[TipoAcao.ConstruirDistrito] == 2:
                         if self.estado.jogador_atual().personagem.nome != "Navegadora":
                             acoes_disponiveis.append(ConstruirDistrito())
                 case EfeitoAssassino():
