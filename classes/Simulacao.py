@@ -1,7 +1,7 @@
 # Imports
 from random import shuffle
 from Acao import *
-from classes.EnumAcoes import Acoes
+from TipoAcao import TipoAcao
 
 
 class Simulacao:
@@ -109,32 +109,32 @@ class Simulacao:
                         if self.estado.jogador_atual().personagem.nome != "Navegadora":
                             acoes_disponiveis.append(ConstruirDistrito())
                 case EfeitoAssassino():
-                    if self.estado.jogador_atual().acoes_realizadas[Acoes.EfeitoAssassino] == 3 and self.estado.jogador_atual().personagem.nome == "Assassino":
+                    if self.estado.jogador_atual().acoes_realizadas[TipoAcao.EfeitoAssassino] == 3 and self.estado.jogador_atual().personagem.nome == "Assassino":
                         acoes_disponiveis.append(EfeitoAssassino())
                 case EfeitoLadrao():
-                    if self.estado.jogador_atual().acoes_realizadas[Acoes.EfeitoLadrao] == 3 and self.estado.jogador_atual().personagem.nome == "Ladrao":
+                    if self.estado.jogador_atual().acoes_realizadas[TipoAcao.EfeitoLadrao] == 3 and self.estado.jogador_atual().personagem.nome == "Ladrao":
                         acoes_disponiveis.append(EfeitoLadrao())
                 case EfeitoMago():
-                    if self.estado.jogador_atual().acoes_realizadas[Acoes.EfeitoMago] == 3 and self.estado.jogador_atual().personagem.nome == "Mago":
+                    if self.estado.jogador_atual().acoes_realizadas[TipoAcao.EfeitoMago] == 3 and self.estado.jogador_atual().personagem.nome == "Mago":
                         acoes_disponiveis.append(EfeitoMago())
                 case EfeitoRei():
-                    if self.estado.jogador_atual().acoes_realizadas[Acoes.EfeitoRei] == 3 and self.estado.jogador_atual().personagem.nome == "Rei":
+                    if self.estado.jogador_atual().acoes_realizadas[TipoAcao.EfeitoRei] == 3 and self.estado.jogador_atual().personagem.nome == "Rei":
                         acoes_disponiveis.append(EfeitoRei())
                 case EfeitoCardealAtivo():
-                    if self.estado.jogador_atual().acoes_realizadas[Acoes.EfeitoCardealAtivo] == 3 and self.estado.jogador_atual().personagem.nome == "Cardeal":
+                    if self.estado.jogador_atual().acoes_realizadas[TipoAcao.EfeitoCardealAtivo] == 3 and self.estado.jogador_atual().personagem.nome == "Cardeal":
                         acoes_disponiveis.append(EfeitoCardealAtivo())
                 case EfeitoCardealPassivo():
-                    if self.estado.jogador_atual().acoes_realizadas[Acoes.EfeitoCardealPassivo] == 3 and self.estado.jogador_atual().personagem.nome == "Cardeal":
+                    if self.estado.jogador_atual().acoes_realizadas[TipoAcao.EfeitoCardealPassivo] == 3 and self.estado.jogador_atual().personagem.nome == "Cardeal":
                         acoes_disponiveis.append(EfeitoCardealPassivo())
                 case EfeitoAlquimista():
-                    if self.estado.jogador_atual().acoes_realizadas[Acoes.EfeitoAlquimista] == 3 and self.estado.jogador_atual().personagem.nome == "Alquimista":
+                    if self.estado.jogador_atual().acoes_realizadas[TipoAcao.EfeitoAlquimista] == 3 and self.estado.jogador_atual().personagem.nome == "Alquimista":
                         acoes_disponiveis.append(EfeitoAlquimista())
                         # Disponivel apenas no final do turno
                 case EfeitoNavegadora(),:
-                    if self.estado.jogador_atual().acoes_realizadas[Acoes.EfeitoNavegadora] == 3 and self.estado.jogador_atual().personagem.nome == "Navegadora":
+                    if self.estado.jogador_atual().acoes_realizadas[TipoAcao.EfeitoNavegadora] == 3 and self.estado.jogador_atual().personagem.nome == "Navegadora":
                         acoes_disponiveis.append(EfeitoNavegadora())
                 case EfeitoSenhordaGuerra():
-                    if self.estado.jogador_atual().acoes_realizadas[Acoes.EfeitoSenhordaGuerra] == 3 and self.estado.jogador_atual().personagem.nome == "SenhordaGuerra":
+                    if self.estado.jogador_atual().acoes_realizadas[TipoAcao.EfeitoSenhordaGuerra] == 3 and self.estado.jogador_atual().personagem.nome == "SenhordaGuerra":
                         acoes_disponiveis.append(EfeitoSenhordaGuerra())
                     '''
                     EfeitoDistritoAbrigoParaPobres()
