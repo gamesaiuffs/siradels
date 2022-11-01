@@ -42,10 +42,9 @@ while not final_jogo:
     for jogador in simulacao.estado.jogadores:
         fim_turno = False
         while not fim_turno:
-            print("Escolha uma ação")
             print("Ações disponíveis: ")
             # [...]
-            acao_escolhida = input()
+            acao_escolhida = input("Escolha uma ação")
             if acao_escolhida == "sair do jogo":
                 final_jogo = True
                 break
