@@ -1,5 +1,6 @@
 # Imports
 from Simulacao import Simulacao
+from TipoDistrito import TipoDistrito
 
 # Inicialização das variáveis esseciais
 num_jogadores = 6
@@ -75,10 +76,10 @@ for jogador in simulacao.estado.jogadores:
     for distrito in jogador.distritos_construidos:
         if distrito.tipo_de_distrito not in tipos_distritos:
             tipos_distritos.append(distrito.tipo_de_distrito)
-        if (distrito.tipo_de_distrito == 5):
+        if (distrito.tipo_de_distrito == TipoDistrito.Especial):
             num_dist_especiais += 1
 
-    if len(tipos_distritos) == 5:
+    if len(tipos_distritos) == TipoDistrito.Especial:
         cont_pontos_tipos_distritos = 3
         soma_pontos += 3
 
