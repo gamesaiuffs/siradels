@@ -223,7 +223,7 @@ class EfeitoCardealPassivo(Acao):
 
 
 
-class EfeitoDistritoAbrigoParaPobres(Acao):
+class AbrigoParaPobres(Acao):
     def __init__(self):
         super().__init__("Se não houver ouro no seu tesouro no fim do seu turno, ganhe 1 ouro.")
 
@@ -232,7 +232,7 @@ class EfeitoDistritoAbrigoParaPobres(Acao):
         estado.jogador_atual().ouro += 1 
 
 
-class EfeitoDistritoTesouroImperial(Acao):
+class TesouroImperial(Acao):
     def __init__(self):
         super().__init__("Ao final da partida, marque um ponto extra para cada ouro em seu tesouro.")
 
@@ -241,7 +241,7 @@ class EfeitoDistritoTesouroImperial(Acao):
         estado.jogador_atual().pontuacao += estado.jogador_atual().ouro 
 
 
-class EfeitoDistritoCofreSecreto(Acao):
+class CofreSecreto(Acao):
     def __init__(self):
         super().__init__("O Cofre Secreto não pode ser construído. Ao final da partida, revele o Cofre Secreto da sua mão para marcar 3 pontos.")
 
@@ -250,7 +250,7 @@ class EfeitoDistritoCofreSecreto(Acao):
         estado.jogador_atual().pontuacao += 3 
 
 
-class EfeitoDistritoLaboratorio(Acao):
+class Laboratorio(Acao):
     def __init__(self):
         super().__init__("Uma vez por turno, descarte 1 carta da sua mao para ganhar 2 ouros.")
 
@@ -373,6 +373,29 @@ class Necropole(Acao):
                 estado.jogador_atual().distritos_construidos.append(necropole)
                 estado.jogador_atual().pontuacao += necropole.valor_do_distrito
                 estado.jogador_atual().pontuacao -= distrito_encontrado.valor_do_distrito
+
+
+class CovilDosLadroes(Acao):
+    def __init__(self):
+        super().__init__('Pague parte ou todo o custo do Covil dos Ladrões com cartas da sua mão, em vez de ouro, a uma taxa de 1 carta: 1 ouro')
+    
+    @staticmethod
+    def ativar_efeito(estado: Estado):
+        n_cartas_mao = len(estado.jogador_atual().cartas_distrito_mao) - 1
+        n = int(input(f"Deseja construir o Covil dos Ladrões com quantas cartas? (0-{6 if n_cartas_mao >= 6 else n_cartas_mao})"))
+        restante = n
+
+        for i in range(n):
+            for i, distrito in enumerate(estado.jogador_atual().cartas_distrito_mao):
+                if i == 0 and distrito.nome_do_distrito == '':
+                    covil = estado.jogador_atual().cartas_distrito_mao.pop(i)
+                    estado.jogador_atual().distritos_construidos.append(covil)
+                print(f"{i+1}: {distrito.nome_do_distrito}")
+            escolha = input(f"Informe o distrito: ({n - i} restantes)")
+            estado.jogador_atual().cartas_distrito_mao.pop(escolha-1)
+            restante -= 1
+        estado.jogador_atual().ouro -= restante
+        
 
 
 #continuar pontuação parcial !!!!
