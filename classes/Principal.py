@@ -1,5 +1,6 @@
 # Imports
 from Simulacao import Simulacao
+from TipoDistrito import TipoDistrito
 
 # Inicialização das variáveis esseciais
 num_jogadores = 6
@@ -48,6 +49,11 @@ while not final_jogo:
             if acao_escolhida == "sair do jogo":
                 final_jogo = True
                 break
+        if (len(jogador.distritos_construidos) >= 7):
+            jogador.terminou = True 
+            if (jogador_finalizador == None):
+                jogador_finalizador = jogador
+
     # verificar final de jogo e atualizar flag
     simulacao.estado.tabuleiro.baralho_personagens = simulacao.estado.tabuleiro.criar_baralho_personagem(num_jogadores)
 
@@ -66,10 +72,14 @@ for jogador in simulacao.estado.jogadores:
     # +3 se tem um distrito de cada tipo
     tipos_distritos = [] 
     cont_pontos_tipos_distritos = 0
+    num_dist_especiais = 0
     for distrito in jogador.distritos_construidos:
         if distrito.tipo_de_distrito not in tipos_distritos:
             tipos_distritos.append(distrito.tipo_de_distrito)
-    if len(tipos_distritos) == 5:
+        if (distrito.tipo_de_distrito == TipoDistrito.Especial):
+            num_dist_especiais += 1
+
+    if len(tipos_distritos) == TipoDistrito.Especial:
         cont_pontos_tipos_distritos = 3
         soma_pontos += 3
 
@@ -91,4 +101,34 @@ for jogador in simulacao.estado.jogadores:
     cont_pontos_distritos_especiais = 0
     soma_pontos += 0 
 
+    #cofre secreto (n pode ser construido) - revelar no final - +3 pontos
+    for distrito in jogador.cartas_distrito_mao:
+        if distrito.nome_do_distrito == 'cofre secreto':
+            soma_pontos += 3
+            cont_pontos_distritos_especiais += 3
+
+    
+    for distrito_construido in jogador.distritos_construidos:
+        
+        # tesouro imperial
+        if (distrito_construido.nome_do_distrito == 'tesouro imperial'):
+            soma_pontos += jogador.ouro
+            cont_pontos_distritos_especiais += jogador.ouro
+
+        # Portão do dragão
+        elif (distrito_construido.nome_do_distrito == 'portao do dragao'):
+            soma_pontos += 2
+            cont_pontos_distritos_especiais += 2
+
+        # bairro assombrado
+        elif (distrito_construido.nome_do_distrito == 'bairro_assombrado'):
+            if (len(tipos_distritos) == 4 and num_dist_especiais > 1):
+                soma_pontos += 3
+                cont_pontos_distritos_especiais += 3
+
+
     print(f"\n\n{jogador.nome}\n\tPontos por valor de distrito: {cont_pontos_distrito}\n\tPontos por tipos de distritos: {cont_pontos_tipos_distritos}\n\tPontos por terminar primeiro: {cont_pontos_finalizador}\n\tPontos por terminar após o primeiro: {cont_pontos_finalizador_segundo}\n\tPontos por distritos especiais: {cont_pontos_distritos_especiais}\n\tPontuação total: {soma_pontos}")
+
+
+    
+    # se tiver 4 tipos diferentes de distrito e o bairro assombrado (tem que ter outro do tipo especial além do bairro assombrado para valer)
