@@ -59,8 +59,9 @@ class ConstruirDistrito(Acao):
 
     @staticmethod
     def ativar_efeito(estado: Estado):
-        for i in range(len(estado.jogador_atual().cartas_distrito_mao)):
-            print(f"{i+1}: {estado.jogador_atual().cartas_distrito_mao[i]}")
+        for i, carta in range(len(estado.jogador_atual().cartas_distrito_mao)):
+            if not carta.nome_do_distrito == 'cofre secreto':
+                print(f"{i+1}: {carta}")
 
         escolha = int(input("Digite o número do distrito que deseja construir: "))
         if estado.jogador_atual().ouro >= estado.jogador_atual().cartas_distrito_mao[escolha-1].valor_do_distrito:
@@ -122,14 +123,15 @@ class EfeitoMago(Acao):
 
         jogador_escolhido = int(input("selecione o jogador: "))
 
-        for cartas_disponiveis_mao in range(len(estado.jogadores[jogador_escolhido-1].cartas_distrito_mao)):
-            print(estado.jogadores[jogador_escolhido-1].cartas_distrito_mao[cartas_disponiveis_mao])
+        for i, carta in range(len(estado.jogadores[jogador_escolhido-1].cartas_distrito_mao)):
+            if not carta.nome_do_distrito == 'cofre secreto':
+                print(f"{i+1}: {carta}")
 
         carta_escohida = int(input('Carta escolhida: '))
         estado.jogador_atual().cartas_distrito_mao.append(estado.jogadores[jogador_escolhido-1].cartas_distrito_mao[carta_escohida-1])
         estado.jogadores[jogador_escolhido-1].cartas_distrito_mao.pop(carta_escohida-1)
 
-        deseja_construir = input("deseja construir imediatamente?(s/n) ")
+        deseja_construir = input("deseja construir imediatamente? (s/n) ").lower()
         if deseja_construir == "s":
             estado.jogador_atual().distritos_construidos.append(estado.jogador_atual().cartas_distrito_mao[-1])
             estado.jogador_atual().ouro -= estado.jogador_atual().cartas_distrito_mao[-1].valor_do_distrito
@@ -163,7 +165,8 @@ class EfeitoCardealAtivo(Acao):
         distritos_trocados = []
 
         for i, mao_propria in enumerate(estado.jogador_atual().cartas_distrito_mao):
-            print(f"{i+1}: {mao_propria}")
+            if not mao_propria.nome_do_distrito == 'cofre secreto':
+                print(f"{i+1}: {mao_propria}")
 
         escolha_distrito = int(input("Digite o número do distrito que deseja trocar por ouro: "))
         for i in estado.jogador_atual().cartas_distrito_mao:
@@ -387,7 +390,7 @@ class CovilDosLadroes(Acao):
 
         for i in range(n):
             for i, distrito in enumerate(estado.jogador_atual().cartas_distrito_mao):
-                if i == 0 and distrito.nome_do_distrito == '':
+                if i == 0 and distrito.nome_do_distrito == 'covil dos ladroes':
                     covil = estado.jogador_atual().cartas_distrito_mao.pop(i)
                     estado.jogador_atual().distritos_construidos.append(covil)
                 print(f"{i+1}: {distrito.nome_do_distrito}")
@@ -448,7 +451,8 @@ class Estrutura(Acao):
     @staticmethod
     def ativar_efeito(estado: Estado):
         for i, distrito in enumerate(estado.jogador_atual().cartas_distrito_mao):
-            print(f"{i+1}: {distrito.nome_do_distrito}")
+            if not distrito.nome_do_distrito == 'cofre secreto':
+                print(f"{i+1}: {distrito.nome_do_distrito}")
         
         escolha = int(input("Digite o número do distrito que deseja construir: "))
         for distrito in estado.jogador_atual().distritos_construidos:
