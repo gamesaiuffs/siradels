@@ -28,6 +28,11 @@ class ColetarOuro(Acao):
 
     @staticmethod
     def ativar_efeito(estado: Estado):
+
+        for i, carta in enumerate(estado.jogador_atual().distritos_construidos):
+            if carta.nome_do_distrito == 'mina de ouro':
+                estado.jogador_atual().ouro += 1
+
         estado.jogador_atual().ouro += 2
 
 
@@ -59,7 +64,7 @@ class ConstruirDistrito(Acao):
 
     @staticmethod
     def ativar_efeito(estado: Estado):
-        for i, carta in range(len(estado.jogador_atual().cartas_distrito_mao)):
+        for i, carta in enumerate(estado.jogador_atual().cartas_distrito_mao):
             if not carta.nome_do_distrito == 'cofre secreto':
                 print(f"{i+1}: {carta}")
 
@@ -123,7 +128,7 @@ class EfeitoMago(Acao):
 
         jogador_escolhido = int(input("selecione o jogador: "))
 
-        for i, carta in range(len(estado.jogadores[jogador_escolhido-1].cartas_distrito_mao)):
+        for i, carta in enumerate(estado.jogadores[jogador_escolhido-1].cartas_distrito_mao):
             if not carta.nome_do_distrito == 'cofre secreto':
                 print(f"{i+1}: {carta}")
 
@@ -300,7 +305,7 @@ class EfeitoNavegadora(Acao):
 #----------
 class EfeitoSenhordaGuerra(Acao):
     def __init__(self):
-        super().__init__("Destrua 1 distrito pagando 1 ouro a menos que o custo dele.(Ganhe 1 ouro para cada um dos seus distritos militares).")
+        super().__init__("Destrua 1 distrito pagando 1 ouro a menos que o custo dele. (Ganhe 1 ouro para cada um dos seus distritos militares)")
     @staticmethod
     def ativar_efeito(estado: Estado):
         #da ouro por militar
@@ -341,7 +346,7 @@ class EfeitoSenhordaGuerra(Acao):
 #-----------
 class EfeitoAlquimista(Acao):
     def __init__(self):
-        super().__init__("Ao final do seu turno,você pega de volta todo o ouro pago para construir distritos neste turno.Você não pode pagar mais ouro do que tem.")
+        super().__init__("Ao final do seu turno,você pega de volta todo o ouro pago para construir distritos neste turno. Você não pode pagar mais ouro do que tem.")
     @staticmethod
     def ativar_efeito(estado: Estado):
         if estado.jogador_atual().construiu or estado.jogador_atual().construiu_estabulo:
@@ -360,7 +365,7 @@ class PortalDoDragao(Acao):
 
 class Necropole(Acao):
     def __init__(self):
-        super().__init__('Você pode construir a Necrópole destruindo 1 distrito na sua cidade, em vez de pagar o custo da Necrópole')
+        super().__init__('Você pode construir a Necrópole destruindo 1 distrito na sua cidade, em vez de pagar o custo da Necrópole.')
     
     @staticmethod
     def ativar_efeito(estado: Estado):
@@ -380,7 +385,7 @@ class Necropole(Acao):
 
 class CovilDosLadroes(Acao):
     def __init__(self):
-        super().__init__('Pague parte ou todo o custo do Covil dos Ladrões com cartas da sua mão, em vez de ouro, a uma taxa de 1 carta: 1 ouro')
+        super().__init__('Pague parte ou todo o custo do Covil dos Ladrões com cartas da sua mão, em vez de ouro, a uma taxa de 1 carta: 1 ouro.')
     
     @staticmethod
     def ativar_efeito(estado: Estado):
@@ -405,7 +410,7 @@ class CovilDosLadroes(Acao):
  
 class Teatro(Acao):
     def __init__(self):
-        super().__init__('Ao final de cada fase de escolha, você pode trocar a sua carta de personagem escolhida com a carta de personagem de um oponente')
+        super().__init__('Ao final de cada fase de escolha, você pode trocar a sua carta de personagem escolhida com a carta de personagem de um oponente.')
 
     @staticmethod
     def ativar_efeito(estado: Estado):
