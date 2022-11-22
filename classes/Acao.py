@@ -152,9 +152,8 @@ class EfeitoRei(Acao):
 
     @staticmethod
     def ativar_efeito(estado: Estado):
-        
-        for ver_distritos_construidos in range(len(estado.jogador_atual().distritos_construidos)):
-            if estado.jogador_atual().distritos_construidos[ver_distritos_construidos] == TipoDistrito.Nobre:
+        for _, distrito in enumerate(estado.jogador_atual().distritos_construidos):
+            if distrito.tipo_de_distrito == TipoDistrito.Nobre or distrito.nome_do_distrito == 'escola de magia':
                 estado.jogador_atual().ouro += 1
                 estado.jogador_atual().pontuacao += 1
 
@@ -224,8 +223,8 @@ class EfeitoCardealPassivo(Acao):
 
     @staticmethod
     def ativar_efeito(estado: Estado):
-        for ver_distritos_construidos in range(len(estado.jogador_atual().distritos_construidos)):
-            if estado.jogador_atual().distritos_construidos[ver_distritos_construidos] == TipoDistrito.Religioso:
+        for _, distrito in enumerate(estado.jogador_atual().distritos_construidos):
+            if distrito.tipo_de_distrito == TipoDistrito.Religioso or distrito.nome_do_distrito == 'escola de magia':
                 distrito_pescado = estado.tabuleiro.baralho_distritos.pop()
                 estado.jogadores[estado.jogadores.index(estado.jogador_atual())].cartas_distrito_mao.append(distrito_pescado)
 
@@ -312,9 +311,9 @@ class EfeitoSenhordaGuerra(Acao):
         #implementar distrito especial "muralha"
         multa_muralha = 0
 
-        for ver_distritos_construidos in range(len(estado.jogador_atual().distritos_construidos)):
-            if estado.jogador_atual().distritos_construidos[ver_distritos_construidos] == TipoDistrito.Militar:
-                estado.jogadores[estado.jogadores.index(estado.jogador_atual())].ouro += 1
+        for _, distrito in enumerate(estado.jogador_atual().distritos_construidos):
+            if distrito.tipo_de_distrito == TipoDistrito.Militar or distrito.nome_do_distrito == 'escola de magia':
+                estado.jogador_atual().ouro += 1
                 estado.jogador_atual().pontuacao += 1
         #efeito destruir
         for i, jogador in enumerate(estado.jogadores):
@@ -373,7 +372,7 @@ class Necropole(Acao):
             print(f"{i+1}: {distrito.nome_do_distrito}")
         
         escolha = int(input("Digite o número do distrito que deseja destruir: "))
-        for index, distrito in enumerate(estado.jogador_atual().distritos_construidos):
+        for index, distrito in enumerate(estado.jogador_atual().cartas_distrito_mao):
             if distrito.nome_do_distrito == 'necropole':
                 distrito_encontrado = estado.jogador_atual().distritos_construidos.pop(escolha-1)
                 estado.tabuleiro.baralho_distritos.append(distrito_encontrado)
@@ -471,9 +470,12 @@ class Estrutura(Acao):
         estado.tabuleiro.baralho_distritos.append(distrito)
         estado.jogador_atual().pontuacao += distrito.valor_do_distrito
 
+
 class PassarTurno(Acao):
-    def __init__(self, estado: Estado):
+    def __init__(self):
         super().__init__("Passar turno")
+        
+    def ativar_efeito(estado: Estado):    
         estado.turno += 1
         jogador = estado.jogador_atual()
         jogador.ouro_gasto, jogador.roubado, jogador.morto, jogador.construiu, jogador.acoes_realizadas = 0, False, False, False, [0 for _ in range(23)]
