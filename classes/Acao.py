@@ -229,14 +229,73 @@ class EfeitoCardealPassivo(Acao):
                 estado.jogadores[estado.jogadores.index(estado.jogador_atual())].cartas_distrito_mao.append(distrito_pescado)
 
 
-
-class AbrigoParaPobres(Acao):
+class EfeitoNavegadora(Acao):
     def __init__(self):
-        super().__init__("Se não houver ouro no seu tesouro no fim do seu turno, ganhe 1 ouro.")
+        super().__init__('Ganhe 4 ouros extras ou 4 cartas extras.Você não pode construir distritos.')
 
     @staticmethod
     def ativar_efeito(estado: Estado):
-        estado.jogador_atual().ouro += 1 
+        escolha = int(input("verifica escolha"))
+        if escolha ==1:
+            estado.jogador_atual().ouro +=4
+            print(estado.jogador_atual().ouro)
+        elif escolha ==2:
+            estado.jogador_atual().cartas_distrito_mao.append(estado.tabuleiro.baralho_distritos[0:4])
+            for i in range(4):
+                estado.tabuleiro.baralho_distritos.pop(i)#testar
+        else:
+            pass
+
+
+class EfeitoSenhordaGuerra(Acao):
+    def __init__(self):
+        super().__init__("Destrua 1 distrito pagando 1 ouro a menos que o custo dele. (Ganhe 1 ouro para cada um dos seus distritos militares)")
+    @staticmethod
+    def ativar_efeito(estado: Estado):
+        #da ouro por militar
+        #implementar distrito especial "muralha"
+        multa_muralha = 0
+
+        for _, distrito in enumerate(estado.jogador_atual().distritos_construidos):
+            if distrito.tipo_de_distrito == TipoDistrito.Militar or distrito.nome_do_distrito == 'escola de magia':
+                estado.jogador_atual().ouro += 1
+                estado.jogador_atual().pontuacao += 1
+        #efeito destruir
+        for i, jogador in enumerate(estado.jogadores):
+            for distritos in jogador.distritos_construidos:
+                print(f"{i+1}: {distritos}", end=" | ")
+
+            print("\n")
+        escolha_jogador = input("Deseja destruir? (s/n)").lower()
+        if escolha_jogador == "s":
+            for numero_jogadores,jogador in enumerate(estado.jogadores):
+                print(numero_jogadores+1)
+                print(jogador)
+            jogador_escolhido=int(input("Escolha jogador:"))
+            for numero_cartas,carta in enumerate(estado.jogadores[jogador_escolhido-1].distritos_construidos):
+                print(numero_cartas,carta)
+
+                if carta == 'muralha':
+                    multa_muralha += 1
+
+            destruir_carta=int(input("Digite o distrito que deseja destruir:"))
+            if estado.jogadores[jogador_escolhido-1].terminou == False:
+                if estado.jogador_atual().ouro >= jogador.distritos_construidos[jogador_escolhido-1].valor_do_distrito-1+multa_muralha:#falta colocar valor do distrito
+                    estado.jogador_atual().ouro -= jogador.distritos_construidos[jogador_escolhido-1].valor_do_distrito-1+multa_muralha
+                    estado.jogadores[jogador_escolhido-1].pontuacao -= jogador.distritos_construidos[jogador_escolhido-1].valor_do_distrito-1
+                    estado.jogadores[jogador_escolhido-1].distritos_construidos.pop(destruir_carta)
+                #testar
+            else:
+                print("o jogador possui 7 distritos construídos!")
+
+
+class EfeitoAlquimista(Acao):
+    def __init__(self):
+        super().__init__("Ao final do seu turno,você pega de volta todo o ouro pago para construir distritos neste turno. Você não pode pagar mais ouro do que tem.")
+    @staticmethod
+    def ativar_efeito(estado: Estado):
+        if estado.jogador_atual().construiu or estado.jogador_atual().construiu_estabulo:
+            estado.jogador_atual().ouro += estado.jogador_atual().ouro_gasto
 
 
 class TesouroImperial(Acao):
@@ -285,83 +344,6 @@ class Laboratorio(Acao):
         estado.jogador_atual().ouro += 2
 
 
-class EfeitoNavegadora(Acao):
-    def __init__(self):
-        super().__init__('Ganhe 4 ouros extras ou 4 cartas extras.Você não pode construir distritos.')
-
-    @staticmethod
-    def ativar_efeito(estado: Estado):
-        escolha = int(input("verifica escolha"))
-        if escolha ==1:
-            estado.jogador_atual().ouro +=4
-            print(estado.jogador_atual().ouro)
-        elif escolha ==2:
-            estado.jogador_atual().cartas_distrito_mao.append(estado.tabuleiro.baralho_distritos[0:4])
-            for i in range(4):
-                estado.tabuleiro.baralho_distritos.pop(i)#testar
-        else:
-            pass
-#----------
-class EfeitoSenhordaGuerra(Acao):
-    def __init__(self):
-        super().__init__("Destrua 1 distrito pagando 1 ouro a menos que o custo dele. (Ganhe 1 ouro para cada um dos seus distritos militares)")
-    @staticmethod
-    def ativar_efeito(estado: Estado):
-        #da ouro por militar
-        #implementar distrito especial "muralha"
-        multa_muralha = 0
-
-        for _, distrito in enumerate(estado.jogador_atual().distritos_construidos):
-            if distrito.tipo_de_distrito == TipoDistrito.Militar or distrito.nome_do_distrito == 'escola de magia':
-                estado.jogador_atual().ouro += 1
-                estado.jogador_atual().pontuacao += 1
-        #efeito destruir
-        for i, jogador in enumerate(estado.jogadores):
-            for distritos in jogador.distritos_construidos:
-                print(f"{i+1}: {distritos}", end=" | ")
-
-            print("\n")
-        escolha_jogador = input("Deseja destruir? (s/n)").lower()
-        if escolha_jogador == "s":
-            for numero_jogadores,jogador in enumerate(estado.jogadores):
-                print(numero_jogadores+1)
-                print(jogador)
-            jogador_escolhido=int(input("Escolha jogador:"))
-            for numero_cartas,carta in enumerate(estado.jogadores[jogador_escolhido-1].distritos_construidos):
-                print(numero_cartas,carta)
-
-                if carta == 'muralha':
-                    multa_muralha += 1
-
-            destruir_carta=int(input("Digite o distrito que deseja destruir:"))
-            if estado.jogadores[jogador_escolhido-1].terminou == False:
-                if estado.jogador_atual().ouro >= jogador.distritos_construidos[jogador_escolhido-1].valor_do_distrito-1+multa_muralha:#falta colocar valor do distrito
-                    estado.jogador_atual().ouro -= jogador.distritos_construidos[jogador_escolhido-1].valor_do_distrito-1+multa_muralha
-                    estado.jogadores[jogador_escolhido-1].pontuacao -= jogador.distritos_construidos[jogador_escolhido-1].valor_do_distrito-1
-                    estado.jogadores[jogador_escolhido-1].distritos_construidos.pop(destruir_carta)
-                #testar
-            else:
-                print("o jogador possui 7 distritos construídos!")
-#-----------
-class EfeitoAlquimista(Acao):
-    def __init__(self):
-        super().__init__("Ao final do seu turno,você pega de volta todo o ouro pago para construir distritos neste turno. Você não pode pagar mais ouro do que tem.")
-    @staticmethod
-    def ativar_efeito(estado: Estado):
-        if estado.jogador_atual().construiu or estado.jogador_atual().construiu_estabulo:
-            estado.jogador_atual().ouro += estado.jogador_atual().ouro_gasto
-
-
-
-class PortalDoDragao(Acao):
-    def __init__(self):
-        super().__init__('Ao final da partida, marque 2 pontos extras')
-    
-    @staticmethod
-    def ativar_efeito(estado: Estado):
-        estado.jogadores[estado.jogadores.index(estado.jogador_atual())].pontuacao += 2
-
-
 class Necropole(Acao):
     def __init__(self):
         super().__init__('Você pode construir a Necrópole destruindo 1 distrito na sua cidade, em vez de pagar o custo da Necrópole.')
@@ -403,8 +385,6 @@ class CovilDosLadroes(Acao):
             restante -= 1
         estado.jogador_atual().ouro -= restante
         
-
-
 #continuar pontuação parcial !!!!
  
 class Teatro(Acao):
@@ -422,30 +402,6 @@ class Teatro(Acao):
         personagem_temp = estado.jogador_atual().personagem
         estado.jogador_atual().personagem = estado.jogadores[escolha].personagem
         estado.jogadores[escolha].personagem = personagem_temp
-    
-
-class MinaDeOuro(Acao):
-    def __init__(self):
-        super().__init__('Se você optar por ganhar ouro ao coletar recursos, ganhe 1 ouro extra.')
-    
-    @staticmethod
-    def ativar_efeito(estado: Estado):
-        estado.jogador_atual().ouro += 1
-
-
-class EscolaDeMagia(Acao):
-    def __init__(self):
-        super().__init__('Ao usar habilidades que obtêm recursos pelos seus distritos, a Escola de Magia vale como o tipo de distrito à sua escolha.')
-    
-    @staticmethod
-    def ativar_efeito(estado: Estado):
-        for i, tipo in enumerate(TipoDistrito):
-            print(f"{i+1}: {tipo._name_}")
-        
-        escolha = int(input('Digite o número do tipo de distrito'))
-        for distrito in estado.jogador_atual().distritos_construidos:
-            if distrito.nome_do_distrito == 'escola de magia':
-                estado.jogador_atual().distritos_construidos.tipo_do_distrito = TipoDistrito(escolha)
 
 
 class Estrutura(Acao):
@@ -476,6 +432,10 @@ class PassarTurno(Acao):
         super().__init__("Passar turno")
         
     def ativar_efeito(estado: Estado):    
+        for _, distrito in enumerate(estado.jogador_atual().distritos_construidos):
+            if distrito.nome_do_distrito == 'abrigo para pobres' and estado.jogador_atual().ouro == 0:
+                estado.jogador_atual().ouro += 1
+                
         estado.turno += 1
         jogador = estado.jogador_atual()
         jogador.ouro_gasto, jogador.roubado, jogador.morto, jogador.construiu, jogador.acoes_realizadas = 0, False, False, False, [0 for _ in range(23)]
