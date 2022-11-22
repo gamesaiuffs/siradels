@@ -50,7 +50,7 @@ while not final_jogo:
                 print(f"\t{indexAcao} - {acao.descricao}")
 
             try:
-                acao_escolhida = int(input("Escolha uma ação"))
+                acao_escolhida = int(input("Escolha uma ação: "))
                 if acao_escolhida == -1:
                     final_jogo = True
                     break
@@ -59,6 +59,9 @@ while not final_jogo:
                     acoes[acao_escolhida].ativar_efeito(simulacao.estado)
             except:
                 print("escolha invalida")
+                
+            # Printar estad
+            print(simulacao.estado)
 
         if (len(jogador.distritos_construidos) >= 7):
             jogador.terminou = True 

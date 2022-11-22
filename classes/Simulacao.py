@@ -71,15 +71,10 @@ class Simulacao:
                 EfeitoAlquimista(),
                 EfeitoNavegadora(), 
                 EfeitoSenhordaGuerra(),
-                AbrigoParaPobres(),
-                TesouroImperial(),
                 CofreSecreto(),
                 Laboratorio(),
-                PortalDoDragao(),
                 Necropole(),
                 Teatro(),
-                MinaDeOuro(),
-                EscolaDeMagia(),
                 Estrutura(),
                 Estabulo(),
                 CovilDosLadroes(),
@@ -106,45 +101,39 @@ class Simulacao:
                     if self.estado.jogador_atual().coletou_recursos == True:
                         acoes_disponiveis.append(self.acoes[acao.value])
                 case TipoAcao.ConstruirDistrito:
-                    if self.estado.jogador_atual().coletou_recursos == True and self.estado.jogador_atual().acoes_realizadas[TipoAcao.ConstruirDistrito] == 2:
+                    if self.estado.jogador_atual().coletou_recursos == True and self.estado.jogador_atual().acoes_realizadas[TipoAcao.ConstruirDistrito.value] == 2:
                         if self.estado.jogador_atual().personagem.nome != "Navegadora":
                             acoes_disponiveis.append(self.acoes[acao.value])
                 case TipoAcao.EfeitoAssassino:
-                    if self.estado.jogador_atual().acoes_realizadas[TipoAcao.EfeitoAssassino] == 3 and self.estado.jogador_atual().personagem.nome == "Assassino":
+                    if self.estado.jogador_atual().acoes_realizadas[TipoAcao.EfeitoAssassino.value] == 3 and self.estado.jogador_atual().personagem.nome == "Assassino":
                         acoes_disponiveis.append(self.acoes[acao.value])
                 case TipoAcao.EfeitoLadrao:
-                    if self.estado.jogador_atual().acoes_realizadas[TipoAcao.EfeitoLadrao] == 4 and self.estado.jogador_atual().personagem.nome == "Ladrao":
+                    if self.estado.jogador_atual().acoes_realizadas[TipoAcao.EfeitoLadrao.value] == 4 and self.estado.jogador_atual().personagem.nome == "Ladrao":
                         acoes_disponiveis.append(self.acoes[acao.value])
                 case TipoAcao.EfeitoMago:
-                    if self.estado.jogador_atual().acoes_realizadas[TipoAcao.EfeitoMago] == 5 and self.estado.jogador_atual().personagem.nome == "Mago":
+                    if self.estado.jogador_atual().acoes_realizadas[TipoAcao.EfeitoMago.value] == 5 and self.estado.jogador_atual().personagem.nome == "Mago":
                         acoes_disponiveis.append(self.acoes[acao.value])
                 case TipoAcao.EfeitoRei:
-                    if self.estado.jogador_atual().acoes_realizadas[TipoAcao.EfeitoRei] == 6 and self.estado.jogador_atual().personagem.nome == "Rei":
+                    if self.estado.jogador_atual().acoes_realizadas[TipoAcao.EfeitoRei.value] == 6 and self.estado.jogador_atual().personagem.nome == "Rei":
                         acoes_disponiveis.append(self.acoes[acao.value])
                 case TipoAcao.EfeitoCardealAtivo:
-                    if self.estado.jogador_atual().acoes_realizadas[TipoAcao.EfeitoCardealAtivo] == 7 and self.estado.jogador_atual().personagem.nome == "Cardeal":
+                    if self.estado.jogador_atual().acoes_realizadas[TipoAcao.EfeitoCardealAtivo.value] == 7 and self.estado.jogador_atual().personagem.nome == "Cardeal":
                         acoes_disponiveis.append(self.acoes[acao.value])
                 case TipoAcao.EfeitoCardealPassivo:
-                    if self.estado.jogador_atual().acoes_realizadas[TipoAcao.EfeitoCardealPassivo] == 8 and self.estado.jogador_atual().personagem.nome == "Cardeal":
+                    if self.estado.jogador_atual().acoes_realizadas[TipoAcao.EfeitoCardealPassivo.value] == 8 and self.estado.jogador_atual().personagem.nome == "Cardeal":
                         acoes_disponiveis.append(self.acoes[acao.value])
                 case TipoAcao.EfeitoAlquimista:
-                    if self.estado.jogador_atual().acoes_realizadas[TipoAcao.EfeitoAlquimista] == 9 and self.estado.jogador_atual().personagem.nome == "Alquimista":
+                    if self.estado.jogador_atual().acoes_realizadas[TipoAcao.EfeitoAlquimista.value] == 9 and self.estado.jogador_atual().personagem.nome == "Alquimista":
                         acoes_disponiveis.append(self.acoes[acao.value])
                         # Disponivel apenas no final do turno
                 case TipoAcao.EfeitoNavegadora:
-                    if self.estado.jogador_atual().acoes_realizadas[TipoAcao.EfeitoNavegadora] == 10 and self.estado.jogador_atual().personagem.nome == "Navegadora":
+                    if self.estado.jogador_atual().acoes_realizadas[TipoAcao.EfeitoNavegadora.value] == 10 and self.estado.jogador_atual().personagem.nome == "Navegadora":
                         acoes_disponiveis.append(self.acoes[acao.value])
                 case TipoAcao.EfeitoSenhordaGuerra:
-                    if self.estado.jogador_atual().acoes_realizadas[TipoAcao.EfeitoSenhordaGuerra] == 11 and self.estado.jogador_atual().personagem.nome == "SenhordaGuerra":
+                    if self.estado.jogador_atual().acoes_realizadas[TipoAcao.EfeitoSenhordaGuerra.value] == 11 and self.estado.jogador_atual().personagem.nome == "SenhordaGuerra":
                         acoes_disponiveis.append(self.acoes[acao.value])
-                case TipoAcao.AbrigoParaPobres:
-                    if self.estado.jogador_atual().acoes_realizadas[TipoAcao.AbrigoParaPobres] == 12 and self.estado.jogador_atual().ouro == 0:
-                        for nomeDistrito in self.estado.jogador_atual().distritos_construidos:
-                            if nomeDistrito.nome_do_distrito == "abrigo para pobres":
-                                acoes_disponiveis.append(self.acoes[acao.value])
-                                # Disponivel apenas no final do turno
                 case TipoAcao.Laboratorio:
-                    if self.estado.jogador_atual().acoes_realizadas[TipoAcao.Laboratorio] == 15 and len(self.estado.jogador_atual().cartas_distrito_mao) > 0:
+                    if self.estado.jogador_atual().acoes_realizadas[TipoAcao.Laboratorio.value] == 15 and len(self.estado.jogador_atual().cartas_distrito_mao) > 0:
                         for nomeDistrito in self.estado.jogador_atual().distritos_construidos:
                             if nomeDistrito.nome_do_distrito == "laboratorio":
                                 acoes_disponiveis.append(self.acoes[acao.value])

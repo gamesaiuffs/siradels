@@ -35,6 +35,7 @@ class ColetarOuro(Acao):
 
         estado.jogador_atual().ouro += 2
         estado.jogador_atual().acoes_realizadas[TipoAcao.ColetarOuro.value] = 1
+        estado.jogador_atual().coletou_recursos = True
 
 
 class ColetarCartas(Acao):
@@ -58,6 +59,7 @@ class ColetarCartas(Acao):
             estado.jogador_atual().cartas_distrito_mao.append(escolherCartas[1])
             estado.tabuleiro.baralho_distritos.append(escolherCartas[0])
         estado.jogador_atual().acoes_realizadas[TipoAcao.ColetarCartas.value] = 1
+        estado.jogador_atual().coletou_recursos = True
 
 
 class ConstruirDistrito(Acao):
