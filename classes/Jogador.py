@@ -18,7 +18,7 @@ class Jogador:
         self.construiu = False
         self.coletou_recursos = False
         self.ouro_gasto = 0
-        self.acoes_realizadas = [0 for _ in range(24)]
+        self.acoes_realizadas = [0 for _ in range(19)]
         self.terminou = False # True se o jogador construiu 7 distritos 
 
     # To String

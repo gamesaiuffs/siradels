@@ -6,6 +6,7 @@ from Jogador import Jogador
 from Tabuleiro import Tabuleiro
 from TipoDistrito import TipoDistrito
 from CartaDistrito import CartaDistrito
+from TipoAcao import TipoAcao
 
 class Acao:
     # Construtor
@@ -28,12 +29,12 @@ class ColetarOuro(Acao):
 
     @staticmethod
     def ativar_efeito(estado: Estado):
-
         for i, carta in enumerate(estado.jogador_atual().distritos_construidos):
             if carta.nome_do_distrito == 'mina de ouro':
                 estado.jogador_atual().ouro += 1
 
         estado.jogador_atual().ouro += 2
+        estado.jogador_atual().acoes_realizadas[TipoAcao.ColetarOuro.value] = 1
 
 
 class ColetarCartas(Acao):
@@ -56,6 +57,7 @@ class ColetarCartas(Acao):
         else:
             estado.jogador_atual().cartas_distrito_mao.append(escolherCartas[1])
             estado.tabuleiro.baralho_distritos.append(escolherCartas[0])
+        estado.jogador_atual().acoes_realizadas[TipoAcao.ColetarCartas.value] = 1
 
 
 class ConstruirDistrito(Acao):
@@ -84,6 +86,7 @@ class ConstruirDistrito(Acao):
 
         else:
             print("Ouro insuficiente!")
+        estado.jogador_atual().acoes_realizadas[TipoAcao.ConstruirDistrito.value] = 1
 
 
 
@@ -99,6 +102,7 @@ class EfeitoAssassino(Acao):
         jogador_escolhido = int(input())
         
         estado.jogadores[jogador_escolhido-1].morto = True
+        estado.jogador_atual().acoes_realizadas[TipoAcao.EfeitoAssassino.value] = 1
 
 
 class EfeitoLadrao(Acao):
@@ -114,6 +118,7 @@ class EfeitoLadrao(Acao):
         
         
         estado.jogadores[jogador_escolhido-1].roubado = True
+        estado.jogador_atual().acoes_realizadas[TipoAcao.EfeitoLadrao.value] = 1
 
 
 class EfeitoMago(Acao):
@@ -144,6 +149,7 @@ class EfeitoMago(Acao):
             estado.jogador_atual().cartas_distrito_mao.remove(estado.jogador_atual().cartas_distrito_mao[-1])
             if len(estado.jogador_atual().distritos_construidos) == 7:
                 estado.jogador_atual().terminou = True
+        estado.jogador_atual().acoes_realizadas[TipoAcao.EfeitoMago.value] = 1
 
 
 class EfeitoRei(Acao):
@@ -156,6 +162,7 @@ class EfeitoRei(Acao):
             if distrito.tipo_de_distrito == TipoDistrito.Nobre or distrito.nome_do_distrito == 'escola de magia':
                 estado.jogador_atual().ouro += 1
                 estado.jogador_atual().pontuacao += 1
+        estado.jogador_atual().acoes_realizadas[TipoAcao.EfeitoRei.value] = 1
 
 
 class EfeitoCardealAtivo(Acao):
@@ -215,6 +222,7 @@ class EfeitoCardealAtivo(Acao):
 
         if len(estado.jogador_atual().distritos_construidos) == 7:
             estado.jogador_atual().terminou = True
+        estado.jogador_atual().acoes_realizadas[TipoAcao.EfeitoCardealAtivo.value] = 1
 
 
 class EfeitoCardealPassivo(Acao):
@@ -227,6 +235,7 @@ class EfeitoCardealPassivo(Acao):
             if distrito.tipo_de_distrito == TipoDistrito.Religioso or distrito.nome_do_distrito == 'escola de magia':
                 distrito_pescado = estado.tabuleiro.baralho_distritos.pop()
                 estado.jogadores[estado.jogadores.index(estado.jogador_atual())].cartas_distrito_mao.append(distrito_pescado)
+        estado.jogador_atual().acoes_realizadas[TipoAcao.EfeitoCardealPassivo.value] = 1
 
 
 class EfeitoNavegadora(Acao):
@@ -245,6 +254,7 @@ class EfeitoNavegadora(Acao):
                 estado.tabuleiro.baralho_distritos.pop(i)#testar
         else:
             pass
+        estado.jogador_atual().acoes_realizadas[TipoAcao.EfeitoNavegadora.value] = 1
 
 
 class EfeitoSenhordaGuerra(Acao):
@@ -287,24 +297,18 @@ class EfeitoSenhordaGuerra(Acao):
                 #testar
             else:
                 print("o jogador possui 7 distritos construídos!")
+        estado.jogador_atual().acoes_realizadas[TipoAcao.EfeitoSenhordaGuerra.value] = 1
 
 
 class EfeitoAlquimista(Acao):
     def __init__(self):
         super().__init__("Ao final do seu turno,você pega de volta todo o ouro pago para construir distritos neste turno. Você não pode pagar mais ouro do que tem.")
+    
     @staticmethod
     def ativar_efeito(estado: Estado):
         if estado.jogador_atual().construiu or estado.jogador_atual().construiu_estabulo:
             estado.jogador_atual().ouro += estado.jogador_atual().ouro_gasto
-
-
-class TesouroImperial(Acao):
-    def __init__(self):
-        super().__init__("Ao final da partida, marque um ponto extra para cada ouro em seu tesouro.")
-
-    @staticmethod
-    def ativar_efeito(estado: Estado):
-        estado.jogador_atual().pontuacao += estado.jogador_atual().ouro 
+        estado.jogador_atual().acoes_realizadas[TipoAcao.EfeitoAlquimista.value] = 1
 
 
 class CofreSecreto(Acao):
@@ -313,7 +317,8 @@ class CofreSecreto(Acao):
 
     @staticmethod
     def ativar_efeito(estado: Estado):
-        estado.jogador_atual().pontuacao += 3 
+        estado.jogador_atual().pontuacao += 3
+        estado.jogador_atual().acoes_realizadas[TipoAcao.CofreSecreto.value] = 1
 
 
 class Laboratorio(Acao):
@@ -342,6 +347,7 @@ class Laboratorio(Acao):
         carta_descartada = estado.jogador_atual().cartas_distrito_mao.pop(carta)
         estado.tabuleiro.baralho_distritos.append(carta_descartada)
         estado.jogador_atual().ouro += 2
+        estado.jogador_atual().acoes_realizadas[TipoAcao.Laboratorio.value] = 1
 
 
 class Necropole(Acao):
@@ -362,6 +368,7 @@ class Necropole(Acao):
                 estado.jogador_atual().distritos_construidos.append(necropole)
                 estado.jogador_atual().pontuacao += necropole.valor_do_distrito
                 estado.jogador_atual().pontuacao -= distrito_encontrado.valor_do_distrito
+        estado.jogador_atual().acoes_realizadas[TipoAcao.Necropole.value] = 1
 
 
 class CovilDosLadroes(Acao):
@@ -384,6 +391,7 @@ class CovilDosLadroes(Acao):
             estado.jogador_atual().cartas_distrito_mao.pop(escolha-1)
             restante -= 1
         estado.jogador_atual().ouro -= restante
+        estado.jogador_atual().acoes_realizadas[TipoAcao.CovilDosLadroes.value] = 1
         
 #continuar pontuação parcial !!!!
  
@@ -402,6 +410,7 @@ class Teatro(Acao):
         personagem_temp = estado.jogador_atual().personagem
         estado.jogador_atual().personagem = estado.jogadores[escolha].personagem
         estado.jogadores[escolha].personagem = personagem_temp
+        estado.jogador_atual().acoes_realizadas[TipoAcao.Teatro.value] = 1
 
 
 class Estrutura(Acao):
@@ -425,6 +434,7 @@ class Estrutura(Acao):
         distrito = estado.jogador_atual().cartas_distrito_mao.pop(escolha)
         estado.tabuleiro.baralho_distritos.append(distrito)
         estado.jogador_atual().pontuacao += distrito.valor_do_distrito
+        estado.jogador_atual().acoes_realizadas[TipoAcao.Estrutura.value] = 1
 
 
 class PassarTurno(Acao):
@@ -438,7 +448,8 @@ class PassarTurno(Acao):
                 
         estado.turno += 1
         jogador = estado.jogador_atual()
-        jogador.ouro_gasto, jogador.roubado, jogador.morto, jogador.construiu, jogador.acoes_realizadas = 0, False, False, False, [0 for _ in range(23)]
+        jogador.ouro_gasto, jogador.roubado, jogador.morto, jogador.construiu, jogador.acoes_realizadas = 0, False, False, False, [0 for _ in range(19)]
+        estado.jogador_atual().acoes_realizadas[TipoAcao.PassarTurno.value] = 1
 
 class Estabulo(Acao):
     def __init__(self):
@@ -465,3 +476,4 @@ class Estabulo(Acao):
                     else:
                         print("Ouro insuficiente!")
                     break
+            estado.jogador_atual().acoes_realizadas[TipoAcao.Estabulo.value] = 1
