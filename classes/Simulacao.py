@@ -113,44 +113,63 @@ class Simulacao:
                     if self.estado.jogador_atual().acoes_realizadas[TipoAcao.EfeitoAssassino] == 3 and self.estado.jogador_atual().personagem.nome == "Assassino":
                         acoes_disponiveis.append(self.acoes[acao.value])
                 case TipoAcao.EfeitoLadrao:
-                    if self.estado.jogador_atual().acoes_realizadas[TipoAcao.EfeitoLadrao] == 3 and self.estado.jogador_atual().personagem.nome == "Ladrao":
+                    if self.estado.jogador_atual().acoes_realizadas[TipoAcao.EfeitoLadrao] == 4 and self.estado.jogador_atual().personagem.nome == "Ladrao":
                         acoes_disponiveis.append(self.acoes[acao.value])
                 case TipoAcao.EfeitoMago:
-                    if self.estado.jogador_atual().acoes_realizadas[TipoAcao.EfeitoMago] == 3 and self.estado.jogador_atual().personagem.nome == "Mago":
+                    if self.estado.jogador_atual().acoes_realizadas[TipoAcao.EfeitoMago] == 5 and self.estado.jogador_atual().personagem.nome == "Mago":
                         acoes_disponiveis.append(self.acoes[acao.value])
                 case TipoAcao.EfeitoRei:
-                    if self.estado.jogador_atual().acoes_realizadas[TipoAcao.EfeitoRei] == 3 and self.estado.jogador_atual().personagem.nome == "Rei":
+                    if self.estado.jogador_atual().acoes_realizadas[TipoAcao.EfeitoRei] == 6 and self.estado.jogador_atual().personagem.nome == "Rei":
                         acoes_disponiveis.append(self.acoes[acao.value])
                 case TipoAcao.EfeitoCardealAtivo:
-                    if self.estado.jogador_atual().acoes_realizadas[TipoAcao.EfeitoCardealAtivo] == 3 and self.estado.jogador_atual().personagem.nome == "Cardeal":
+                    if self.estado.jogador_atual().acoes_realizadas[TipoAcao.EfeitoCardealAtivo] == 7 and self.estado.jogador_atual().personagem.nome == "Cardeal":
                         acoes_disponiveis.append(self.acoes[acao.value])
                 case TipoAcao.EfeitoCardealPassivo:
-                    if self.estado.jogador_atual().acoes_realizadas[TipoAcao.EfeitoCardealPassivo] == 3 and self.estado.jogador_atual().personagem.nome == "Cardeal":
+                    if self.estado.jogador_atual().acoes_realizadas[TipoAcao.EfeitoCardealPassivo] == 8 and self.estado.jogador_atual().personagem.nome == "Cardeal":
                         acoes_disponiveis.append(self.acoes[acao.value])
                 case TipoAcao.EfeitoAlquimista:
-                    if self.estado.jogador_atual().acoes_realizadas[TipoAcao.EfeitoAlquimista] == 3 and self.estado.jogador_atual().personagem.nome == "Alquimista":
+                    if self.estado.jogador_atual().acoes_realizadas[TipoAcao.EfeitoAlquimista] == 9 and self.estado.jogador_atual().personagem.nome == "Alquimista":
                         acoes_disponiveis.append(self.acoes[acao.value])
                         # Disponivel apenas no final do turno
                 case TipoAcao.EfeitoNavegadora:
-                    if self.estado.jogador_atual().acoes_realizadas[TipoAcao.EfeitoNavegadora] == 3 and self.estado.jogador_atual().personagem.nome == "Navegadora":
+                    if self.estado.jogador_atual().acoes_realizadas[TipoAcao.EfeitoNavegadora] == 10 and self.estado.jogador_atual().personagem.nome == "Navegadora":
                         acoes_disponiveis.append(self.acoes[acao.value])
                 case TipoAcao.EfeitoSenhordaGuerra:
-                    if self.estado.jogador_atual().acoes_realizadas[TipoAcao.EfeitoSenhordaGuerra] == 3 and self.estado.jogador_atual().personagem.nome == "SenhordaGuerra":
+                    if self.estado.jogador_atual().acoes_realizadas[TipoAcao.EfeitoSenhordaGuerra] == 11 and self.estado.jogador_atual().personagem.nome == "SenhordaGuerra":
                         acoes_disponiveis.append(self.acoes[acao.value])
+                case TipoAcao.AbrigoParaPobres:
+                    if self.estado.jogador_atual().acoes_realizadas[TipoAcao.AbrigoParaPobres] == 12 and self.estado.jogador_atual().ouro == 0:
+                        for nomeDistrito in self.estado.jogador_atual().distritos_construidos:
+                            if nomeDistrito.nome_do_distrito == "abrigo para pobres":
+                                acoes_disponiveis.append(self.acoes[acao.value])
+                                # Disponivel apenas no final do turno
+                case TipoAcao.Laboratorio:
+                    if self.estado.jogador_atual().acoes_realizadas[TipoAcao.Laboratorio] == 15 and len(self.estado.jogador_atual().cartas_distrito_mao) > 0:
+                        for nomeDistrito in self.estado.jogador_atual().distritos_construidos:
+                            if nomeDistrito.nome_do_distrito == "laboratorio":
+                                acoes_disponiveis.append(self.acoes[acao.value])
+                case TipoAcao.Necropole:
+                    if len(self.estado.jogador_atual().distritos_construidos) > 0:
+                        for nomeDistrito in self.estado.jogador_atual().cartas_distrito_mao:
+                            if nomeDistrito.nome_do_distrito == "necropole":
+                                acoes_disponiveis.append(self.acoes[acao.value])
+                case TipoAcao.Estrutura:
+                    if len(self.estado.jogador_atual().cartas_distrito_mao) > 0:
+                        for nomeDistrito in self.estado.jogador_atual().distritos_construidos:
+                            if nomeDistrito.nome_do_distrito == "estrutura":
+                                acoes_disponiveis.append(self.acoes[acao.value])
+                case TipoAcao.Estabulo:
+                    for nomeDistrito in self.estado.jogador_atual().cartas_distrito_mao:
+                        if nomeDistrito.nome_do_distrito == "estabulos":
+                            acoes_disponiveis.append(self.acoes[acao.value])
+                case TipoAcao.CovilDosLadroes:
+                    for nomeDistrito in self.estado.jogador_atual().cartas_distrito_mao:
+                        if nomeDistrito.nome_do_distrito == "covil dos ladroes":
+                            acoes_disponiveis.append(self.acoes[acao.value])
                     '''
-    AbrigoParaPobres = 12
     TesouroImperial = 13
-    CofreSecreto = 14
-    Laboratorio = 15
-    PortalDoDragao = 16
-    Necropole = 17
     Teatro = 18
-    MinaDeOuro = 19
     EscolaDeMagia = 20
-    Estrutura = 21
-    Estabulo = 22
-    CovilDosLadroes = 23
-    PassarTurno = 24
                 '''
         return acoes_disponiveis
 
