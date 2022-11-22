@@ -90,7 +90,7 @@ class Simulacao:
         acoes_disponiveis = []
 
         #adicionar flag nas ações
-
+        
         if self.estado.jogador_atual().morto:
             return acoes_disponiveis.append(self.acoes[24])
 
