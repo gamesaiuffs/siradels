@@ -44,11 +44,22 @@ while not final_jogo:
         fim_turno = False
         while not fim_turno:
             print("Ações disponíveis: ")
-            # [...]
-            acao_escolhida = input("Escolha uma ação")
-            if acao_escolhida == "sair do jogo":
-                final_jogo = True
-                break
+
+            acoes = simulacao.acoes_disponiveis()
+            for indexAcao, acao in enumerate(acoes):
+                print(f"\t{indexAcao} - {acao.descricao}")
+
+            try:
+                acao_escolhida = int(input("Escolha uma ação"))
+                if acao_escolhida == -1:
+                    final_jogo = True
+                    break
+
+                if (0 <= acao_escolhida < len(acoes)):
+                    acoes[acao_escolhida].ativar_efeito(simulacao.estado)
+            except:
+                print("escolha invalida")
+
         if (len(jogador.distritos_construidos) >= 7):
             jogador.terminou = True 
             if (jogador_finalizador == None):
