@@ -60,10 +60,27 @@ class Simulacao:
         return lista_jogadores
 
     @staticmethod
-    def criar_acoes() -> list:
-        acoes = [None] * len(TipoAcao)
-        for acao in TipoAcao:
-            acoes[acao.value] = acao
+    def criar_acoes() -> list[Acao]:
+        acoes = [ColetarOuro(),
+                 ColetarCartas(),
+                 ConstruirDistrito(),
+                 EfeitoAssassino(),
+                 EfeitoLadrao(),
+                 EfeitoMago(),
+                 EfeitoRei(),
+                 EfeitoCardealAtivo(),
+                 EfeitoCardealPassivo(),
+                 EfeitoAlquimista(),
+                 EfeitoNavegadora(),
+                 EfeitoSenhordaGuerra(),
+                 CofreSecreto(),
+                 Laboratorio(),
+                 Necropole(),
+                 Teatro(),
+                 Estrutura(),
+                 Estabulo(),
+                 CovilDosLadroes(),
+                 PassarTurno()]
         return acoes
 
     def acoes_disponiveis(self) -> list[Acao]:
