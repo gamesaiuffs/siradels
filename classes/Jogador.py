@@ -6,8 +6,8 @@ from CartaPersonagem import CartaPersonagem
 class Jogador:
     # Construtor
     def __init__(self, nome: str):
-        self.pontuacao = 0 
-        self.nome = nome 
+        self.pontuacao = 0
+        self.nome = nome
         self.personagem = CartaPersonagem("Nenhum", 0)
         self.ouro = 2
         self.cartas_distrito_mao = []
@@ -16,16 +16,19 @@ class Jogador:
         self.morto = False
         self.roubado = False
         self.construiu = False
+        self.construiu_estabulo = False
         self.coletou_recursos = False
         self.ouro_gasto = 0
         self.acoes_realizadas = [0 for _ in range(19)]
-        self.terminou = False # True se o jogador construiu 7 distritos 
+        self.terminou = False  # True se o jogador construiu 7 distritos
 
     # To String
     def __str__(self) -> str:
-        return f"\n{self.nome}: {self.personagem.obter_nome()} / Morto? {self.morto} / É rei? {self.rei} / Qtd de ouro: {self.ouro} / Pont: {self.pontuacao} / Roubado? {self.roubado}" \
+        return f"\n{self.nome}: {self.personagem.obter_nome()} / Morto? {self.morto} / É rei? {self.rei}" \
+               f" / Qtd de ouro: {self.ouro} / Pont: {self.pontuacao} / Roubado? {self.roubado}" \
                f"\nMão: {self.imprimir_nomes_distritos(self.cartas_distrito_mao)}" \
                f"\nDistritos construídos: {self.imprimir_nomes_distritos(self.distritos_construidos)}" \
+
 
     # Imprimir lista de distritos
     @staticmethod

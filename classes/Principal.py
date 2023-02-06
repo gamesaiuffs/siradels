@@ -5,7 +5,7 @@ from TipoDistrito import TipoDistrito
 # Inicialização das variáveis esseciais
 num_jogadores = 6
 bots = True
-jogador_finalizador = None # primeiro a construir sete distritos  
+jogador_finalizador = None  # primeiro a construir sete distritos
 simulacao = Simulacao(num_jogadores, bots)
 final_jogo = False
 
@@ -49,23 +49,22 @@ while not final_jogo:
             for indexAcao, acao in enumerate(acoes):
                 print(f"\t{indexAcao} - {acao.descricao}")
 
-            try:
-                acao_escolhida = int(input("Escolha uma ação: "))
-                if acao_escolhida == -1:
-                    final_jogo = True
-                    break
+            acao_escolhida = int(input("Escolha uma ação: "))
+            if acao_escolhida == -1:
+                final_jogo = True
+                break
 
-                if (0 <= acao_escolhida < len(acoes)):
-                    acoes[acao_escolhida].ativar_efeito(simulacao.estado)
-            except:
+            if 0 <= acao_escolhida < len(acoes):
+                acoes[acao_escolhida].ativar_efeito(simulacao.estado)
+            else:
                 print("escolha invalida")
-                
+
             # Printar estad
             print(simulacao.estado)
 
-        if (len(jogador.distritos_construidos) >= 7):
+        if len(jogador.distritos_construidos) >= 7:
             jogador.terminou = True 
-            if (jogador_finalizador == None):
+            if jogador_finalizador is None:
                 jogador_finalizador = jogador
 
     # verificar final de jogo e atualizar flag
@@ -90,7 +89,7 @@ for jogador in simulacao.estado.jogadores:
     for distrito in jogador.distritos_construidos:
         if distrito.tipo_de_distrito not in tipos_distritos:
             tipos_distritos.append(distrito.tipo_de_distrito)
-        if (distrito.tipo_de_distrito == TipoDistrito.Especial):
+        if distrito.tipo_de_distrito == TipoDistrito.Especial:
             num_dist_especiais += 1
 
     if len(tipos_distritos) == TipoDistrito.Especial:
@@ -103,46 +102,44 @@ for jogador in simulacao.estado.jogadores:
         cont_pontos_finalizador = 4
         soma_pontos += 4
 
-
     # +2 pros outros q fecharam 7 distritos 
     cont_pontos_finalizador_segundo = 0
     if jogador_finalizador != jogador and jogador.terminou: 
         cont_pontos_finalizador_segundo = 2
         soma_pontos += 2
 
-
     # pontos extras de distritos especiais 
     cont_pontos_distritos_especiais = 0
     soma_pontos += 0 
 
-    #cofre secreto (n pode ser construido) - revelar no final - +3 pontos
+    # cofre secreto (n pode ser construido) - revelar no final - +3 pontos
     for distrito in jogador.cartas_distrito_mao:
         if distrito.nome_do_distrito == 'cofre secreto':
             soma_pontos += 3
             cont_pontos_distritos_especiais += 3
 
-    
     for distrito_construido in jogador.distritos_construidos:
         
         # tesouro imperial
-        if (distrito_construido.nome_do_distrito == 'tesouro imperial'):
+        if distrito_construido.nome_do_distrito == 'tesouro imperial':
             soma_pontos += jogador.ouro
             cont_pontos_distritos_especiais += jogador.ouro
 
         # Portão do dragão
-        elif (distrito_construido.nome_do_distrito == 'portao do dragao'):
+        elif distrito_construido.nome_do_distrito == 'portao do dragao':
             soma_pontos += 2
             cont_pontos_distritos_especiais += 2
 
         # bairro assombrado
-        elif (distrito_construido.nome_do_distrito == 'bairro_assombrado'):
-            if (len(tipos_distritos) == 4 and num_dist_especiais > 1):
+        elif distrito_construido.nome_do_distrito == 'bairro_assombrado':
+            if len(tipos_distritos) == 4 and num_dist_especiais > 1:
                 soma_pontos += 3
                 cont_pontos_distritos_especiais += 3
 
-
-    print(f"\n\n{jogador.nome}\n\tPontos por valor de distrito: {cont_pontos_distrito}\n\tPontos por tipos de distritos: {cont_pontos_tipos_distritos}\n\tPontos por terminar primeiro: {cont_pontos_finalizador}\n\tPontos por terminar após o primeiro: {cont_pontos_finalizador_segundo}\n\tPontos por distritos especiais: {cont_pontos_distritos_especiais}\n\tPontuação total: {soma_pontos}")
-
-
-    
-    # se tiver 4 tipos diferentes de distrito e o bairro assombrado (tem que ter outro do tipo especial além do bairro assombrado para valer)
+    print(f"\n\n{jogador.nome}\n\t"
+          f"Pontos por valor de distrito: {cont_pontos_distrito}\n\t"
+          f"Pontos por tipos de distritos: {cont_pontos_tipos_distritos}\n\t"
+          f"Pontos por terminar primeiro: {cont_pontos_finalizador}\n\t"
+          f"Pontos por terminar após o primeiro: {cont_pontos_finalizador_segundo}\n\t"
+          f"Pontos por distritos especiais: {cont_pontos_distritos_especiais}\n\t"
+          f"Pontuação total: {soma_pontos}")
