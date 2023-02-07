@@ -4,6 +4,7 @@ from abc import abstractmethod
 from Estado import Estado
 from TipoDistrito import TipoDistrito
 from TipoAcao import TipoAcao
+from CartaPersonagem import CartaPersonagem
 
 
 class Acao:
@@ -97,12 +98,28 @@ class EfeitoAssassino(Acao):
 
     @staticmethod
     def ativar_efeito(estado: Estado):
-        for numero_jogadores in range(len(estado.jogadores)):
-            print(estado.jogadores[numero_jogadores])
+        # for numero_jogadores in range(len(estado.jogadores)):
+        #     print(estado.jogadores[numero_jogadores])
 
-        jogador_escolhido = int(input())
+        # jogador_escolhido = int(input())
 
-        estado.jogadores[jogador_escolhido - 1].morto = True
+        # estado.jogadores[jogador_escolhido - 1].morto = True
+        # estado.jogador_atual().acoes_realizadas[TipoAcao.EfeitoAssassino.value] = 1
+        print("Rank do personagem: ")
+
+        personagem_escolhido = int(input())
+        
+        for index, jogador in enumerate(estado.jogadores):
+            if jogador.personagem.rank == personagem_escolhido:
+                jogador_escolhido = jogador
+                break
+            else:
+                jogador_escolhido = None
+                
+        if jogador_escolhido != None:
+            print(jogador_escolhido)
+            estado.jogadores[index].morto = True
+        
         estado.jogador_atual().acoes_realizadas[TipoAcao.EfeitoAssassino.value] = 1
 
 
@@ -113,12 +130,21 @@ class EfeitoLadrao(Acao):
 
     @staticmethod
     def ativar_efeito(estado: Estado):
-        for numero_jogadores in range(len(estado.jogadores)):
-            print(estado.jogadores[numero_jogadores])
+        print("Rank do personagem: ")
 
-        jogador_escolhido = int(input())
-
-        estado.jogadores[jogador_escolhido - 1].roubado = True
+        personagem_escolhido = int(input())
+        
+        for index, jogador in enumerate(estado.jogadores):
+            if jogador.personagem.rank == personagem_escolhido:
+                jogador_escolhido = jogador
+                break
+            else:
+                jogador_escolhido = None
+                
+        if jogador_escolhido != None:
+            print(jogador_escolhido)
+            estado.jogadores[index].roubado = True
+        
         estado.jogador_atual().acoes_realizadas[TipoAcao.EfeitoLadrao.value] = 1
 
 
@@ -186,7 +212,7 @@ class EfeitoCardealAtivo(Acao):
             if not mao_propria.nome_do_distrito == 'cofre secreto':
                 print(f"{i + 1}: {mao_propria}")
 
-        escolha_distrito = int(input("Digite o número do distrito que deseja trocar por ouro: "))
+        escolha_distrito = int(input("Digite o número do distrito que deseja construir: "))
         for i in estado.jogador_atual().cartas_distrito_mao:
             if estado.jogador_atual().cartas_distrito_mao[escolha_distrito - 1].valor_do_distrito \
                     > estado.jogador_atual().ouro:
@@ -196,13 +222,10 @@ class EfeitoCardealAtivo(Acao):
 
             else:
                 break
-
-        for i, jogador in enumerate(estado.jogadores):
-            print(f"{i + 1}: {jogador.nome}")
-
-        if len(estado.jogador_atual().cartas_distrito_mao) < divida:
+        
+        if len(estado.jogador_atual().cartas_distrito_mao) <= divida:
             return
-
+        
         for i, jogador in enumerate(estado.jogadores):
             print(f"{i + 1}: {jogador.nome}")
         while True:
@@ -235,6 +258,7 @@ class EfeitoCardealAtivo(Acao):
         if len(estado.jogador_atual().distritos_construidos) == 7:
             estado.jogador_atual().terminou = True
         estado.jogador_atual().acoes_realizadas[TipoAcao.EfeitoCardealAtivo.value] = 1
+        estado.jogador_atual().acoes_realizadas[TipoAcao.ConstruirDistrito.value] = 1
 
 
 class EfeitoCardealPassivo(Acao):
@@ -484,8 +508,9 @@ class PassarTurno(Acao):
         estado.turno += 1
         jogador = estado.jogador_atual()
         jogador.ouro_gasto, jogador.roubado, jogador.morto, jogador.construiu = 0, False, False, False
-        jogador.acoes_realizadas = [0 for _ in range(19)]
+        jogador.acoes_realizadas = [0 for _ in range(len(TipoAcao))]
         estado.jogador_atual().acoes_realizadas[TipoAcao.PassarTurno.value] = 1
+        
 
 
 class Estabulo(Acao):

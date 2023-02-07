@@ -1,6 +1,7 @@
 # Imports
 from Simulacao import Simulacao
 from TipoDistrito import TipoDistrito
+from TipoAcao import TipoAcao
 
 # Inicialização das variáveis esseciais
 num_jogadores = 6
@@ -43,6 +44,7 @@ while not final_jogo:
     for jogador in simulacao.estado.jogadores:
         fim_turno = False
         while not fim_turno:
+            print(simulacao.estado.jogador_atual().nome)
             print("Ações disponíveis: ")
 
             acoes = simulacao.acoes_disponiveis()
@@ -66,6 +68,11 @@ while not final_jogo:
             jogador.terminou = True 
             if jogador_finalizador is None:
                 jogador_finalizador = jogador
+        
+        
+        
+        if jogador.acoes_realizadas[TipoAcao.PassarTurno.value] == 1:
+            fim_turno = True
 
     # verificar final de jogo e atualizar flag
     simulacao.estado.tabuleiro.baralho_personagens = simulacao.estado.tabuleiro.criar_baralho_personagem(num_jogadores)

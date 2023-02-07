@@ -1,6 +1,7 @@
 # Imports
 from CartaDistrito import CartaDistrito
 from CartaPersonagem import CartaPersonagem
+from TipoAcao import TipoAcao
 
 
 class Jogador:
@@ -19,7 +20,7 @@ class Jogador:
         self.construiu_estabulo = False
         self.coletou_recursos = False
         self.ouro_gasto = 0
-        self.acoes_realizadas = [0 for _ in range(19)]
+        self.acoes_realizadas = [0 for _ in range(len(TipoAcao))]
         self.terminou = False  # True se o jogador construiu 7 distritos
 
     # To String
@@ -50,3 +51,4 @@ class Jogador:
         for distrito in i:
             texto += ", " + str(distrito.nome_do_distrito)
         return texto
+    
