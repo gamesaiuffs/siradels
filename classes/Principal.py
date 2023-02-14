@@ -2,6 +2,7 @@
 from Simulacao import Simulacao
 from TipoDistrito import TipoDistrito
 from TipoAcao import TipoAcao
+from CartaPersonagem import CartaPersonagem
 
 # Inicialização das variáveis esseciais
 num_jogadores = 6
@@ -42,9 +43,21 @@ while not final_jogo:
 
     # Cada jogador faz suas ações
     for jogador in simulacao.estado.jogadores:
+        
+        # Atribui a flag rei ao jogador com o rei
+        if jogador.personagem.rank == 4:
+            for antigorei in simulacao.estado.jogadores:
+                if antigorei.rei:
+                    antigorei.rei = False
+            jogador.rei = True
+            
+        if jogador.roubado:
+            simulacao.estado.jogadores[1].ouro += jogador.ouro
+            jogador.ouro = 0 
+            
         fim_turno = False
         while not fim_turno:
-            print(simulacao.estado.jogador_atual().nome)
+            print(jogador.nome)
             print("Ações disponíveis: ")
 
             acoes = simulacao.acoes_disponiveis()
@@ -59,23 +72,29 @@ while not final_jogo:
             if 0 <= acao_escolhida < len(acoes):
                 acoes[acao_escolhida].ativar_efeito(simulacao.estado)
             else:
-                print("escolha invalida")
+                print("Escolha inválida")
 
             # Printar estad
             print(simulacao.estado)
+            
+            if jogador.acoes_realizadas[TipoAcao.PassarTurno.value] == 1:
+                fim_turno = True
 
         if len(jogador.distritos_construidos) >= 7:
             jogador.terminou = True 
             if jogador_finalizador is None:
                 jogador_finalizador = jogador
-        
-        
-        
-        if jogador.acoes_realizadas[TipoAcao.PassarTurno.value] == 1:
-            fim_turno = True
+
+
 
     # verificar final de jogo e atualizar flag
     simulacao.estado.tabuleiro.baralho_personagens = simulacao.estado.tabuleiro.criar_baralho_personagem(num_jogadores)
+    simulacao.estado.turno = 1
+    simulacao.estado.rodada += 1
+    for jogador in simulacao.estado.jogadores:
+        jogador.personagem = CartaPersonagem("Nenhum", 0)
+    simulacao.estado.ordenar_jogadores_rei()
+    
 
 # contabilizar a pontuacao e verificar ponto
 

@@ -88,7 +88,8 @@ class Simulacao:
 
         # adicionar flag nas ações
         if self.estado.jogador_atual().morto:
-            return acoes_disponiveis.append(self.acoes[acao.value])
+            acoes_disponiveis.append(self.acoes[TipoAcao.PassarTurno.value])
+            return acoes_disponiveis
 
         for acao in TipoAcao:
             if acao == TipoAcao.ColetarOuro:
@@ -170,8 +171,10 @@ class Simulacao:
                             acoes_disponiveis.append(self.acoes[acao.value])
             if acao == TipoAcao.Estabulo:
                 for nomeDistrito in self.estado.jogador_atual().cartas_distrito_mao:
-                    if nomeDistrito.nome_do_distrito == "estabulos":
+                    if nomeDistrito.nome_do_distrito == "estabulos" and self.estado.jogador_atual().personagem.nome != "Navegadora":
                         acoes_disponiveis.append(self.acoes[acao.value])
+                    # if self.estado.jogador_atual().personagem.nome != "Navegadora":
+                    #     acoes_disponiveis.append(self.acoes[acao.value])
             if acao == TipoAcao.CovilDosLadroes:
                 for nomeDistrito in self.estado.jogador_atual().cartas_distrito_mao:
                     if nomeDistrito.nome_do_distrito == "covil dos ladroes":

@@ -4,7 +4,6 @@ from abc import abstractmethod
 from Estado import Estado
 from TipoDistrito import TipoDistrito
 from TipoAcao import TipoAcao
-from CartaPersonagem import CartaPersonagem
 
 
 class Acao:
@@ -69,7 +68,7 @@ class ConstruirDistrito(Acao):
     def ativar_efeito(estado: Estado):
         for i, carta in enumerate(estado.jogador_atual().cartas_distrito_mao):
             if not carta.nome_do_distrito == 'cofre secreto':
-                print(f"{i + 1}: {carta}")
+                print(f"{i + 1}: {carta.imprimir_tudo()}")
 
         escolha = int(input("Digite o número do distrito que deseja construir: "))
         if estado.jogador_atual().ouro >= estado.jogador_atual().cartas_distrito_mao[escolha - 1].valor_do_distrito:
@@ -79,17 +78,18 @@ class ConstruirDistrito(Acao):
 
             estado.jogador_atual().ouro -= estado.jogador_atual().cartas_distrito_mao[escolha - 1].valor_do_distrito
             estado.jogador_atual().distritos_construidos.append(estado.jogador_atual().cartas_distrito_mao[escolha - 1])
-            estado.jogador_atual().cartas_distrito_mao.pop(escolha - 1)
-            estado.jogador_atual().construiu = True
             estado.jogador_atual().ouro_gasto = estado.jogador_atual().cartas_distrito_mao[
                 escolha - 1].valor_do_distrito
+            estado.jogador_atual().cartas_distrito_mao.pop(escolha - 1)
+            estado.jogador_atual().construiu = True
 
             if len(estado.jogador_atual().distritos_construidos) == 7:
                 estado.jogador_atual().terminou = True
+                
+            estado.jogador_atual().acoes_realizadas[TipoAcao.ConstruirDistrito.value] = 1
 
         else:
             print("Ouro insuficiente!")
-        estado.jogador_atual().acoes_realizadas[TipoAcao.ConstruirDistrito.value] = 1
 
 
 class EfeitoAssassino(Acao):
@@ -185,7 +185,7 @@ class EfeitoMago(Acao):
 
 class EfeitoRei(Acao):
     def __init__(self):
-        super().__init__('Pegue a coroa. (Receba 1 ouro para cada distrito NOBRE contruído)')
+        super().__init__('Receba 1 ouro para cada distrito NOBRE contruído')
 
     @staticmethod
     def ativar_efeito(estado: Estado):
@@ -277,11 +277,11 @@ class EfeitoCardealPassivo(Acao):
 
 class EfeitoNavegadora(Acao):
     def __init__(self):
-        super().__init__('Ganhe 4 ouros extras ou 4 cartas extras.Você não pode construir distritos.')
+        super().__init__('Ganhe 4 ouros extras ou 4 cartas extras. Você não pode construir distritos.')
 
     @staticmethod
     def ativar_efeito(estado: Estado):
-        escolha = int(input("verifica escolha"))
+        escolha = int(input("1 - Ouro 2 - Carta"))
         if escolha == 1:
             estado.jogador_atual().ouro += 4
             print(estado.jogador_atual().ouro)
@@ -505,11 +505,11 @@ class PassarTurno(Acao):
             if distrito.nome_do_distrito == 'abrigo para pobres' and estado.jogador_atual().ouro == 0:
                 estado.jogador_atual().ouro += 1
 
-        estado.turno += 1
         jogador = estado.jogador_atual()
         jogador.ouro_gasto, jogador.roubado, jogador.morto, jogador.construiu = 0, False, False, False
         jogador.acoes_realizadas = [0 for _ in range(len(TipoAcao))]
-        estado.jogador_atual().acoes_realizadas[TipoAcao.PassarTurno.value] = 1
+        jogador.acoes_realizadas[TipoAcao.PassarTurno.value] = 1
+        estado.turno += 1
         
 
 

@@ -13,3 +13,7 @@ class CartaDistrito:
     # To String
     def __str__(self) -> str:
         return f'{self.nome_do_distrito}'
+    
+    def imprimir_tudo(self) -> str:
+        return f'{self.nome_do_distrito} {self.valor_do_distrito} {self.tipo_de_distrito.name}'
+        
