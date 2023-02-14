@@ -70,7 +70,7 @@ while not final_jogo:
                 break
 
             if 0 <= acao_escolhida < len(acoes):
-                acoes[acao_escolhida].ativar_efeito(simulacao.estado)
+                acoes[acao_escolhida].ativar(simulacao.estado)
             else:
                 print("Escolha inválida")
 
