@@ -1,4 +1,3 @@
-# Imports
 from abc import abstractmethod
 
 from Estado import Estado
@@ -6,6 +5,7 @@ from TipoDistrito import TipoDistrito
 from TipoAcao import TipoAcao
 
 
+# Classe Abstrata
 class Acao:
     # Construtor
     def __init__(self, descricao: str):
@@ -17,7 +17,7 @@ class Acao:
 
     @staticmethod
     @abstractmethod
-    def ativar_efeito(estado: Estado):
+    def ativar(estado: Estado):
         pass
 
 
@@ -26,8 +26,8 @@ class ColetarOuro(Acao):
         super().__init__('Colete 2 ouros do banco.')
 
     @staticmethod
-    def ativar_efeito(estado: Estado):
-        for i, carta in enumerate(estado.jogador_atual().distritos_construidos):
+    def ativar(estado: Estado):
+        for carta in estado.jogador_atual().distritos_construidos:
             if carta.nome_do_distrito == 'mina de ouro':
                 estado.jogador_atual().ouro += 1
 
@@ -41,7 +41,7 @@ class ColetarCartas(Acao):
         super().__init__('Colete 2 cartas do baralho e escolha uma.')
 
     @staticmethod
-    def ativar_efeito(estado: Estado):
+    def ativar(estado: Estado):
         escolher_cartas = estado.tabuleiro.baralho_distritos[0:2]
         estado.tabuleiro.baralho_distritos.pop()
         estado.tabuleiro.baralho_distritos.pop()
@@ -65,7 +65,7 @@ class ConstruirDistrito(Acao):
         super().__init__('Escolha um distrito para construir.')
 
     @staticmethod
-    def ativar_efeito(estado: Estado):
+    def ativar(estado: Estado):
         for i, carta in enumerate(estado.jogador_atual().cartas_distrito_mao):
             if not carta.nome_do_distrito == 'cofre secreto':
                 print(f"{i + 1}: {carta.imprimir_tudo()}")
@@ -97,7 +97,7 @@ class EfeitoAssassino(Acao):
         super().__init__('Anuncie um personagem que você deseja assassinar. O personagem assassinado perde o turno.')
 
     @staticmethod
-    def ativar_efeito(estado: Estado):
+    def ativar(estado: Estado):
         # for numero_jogadores in range(len(estado.jogadores)):
         #     print(estado.jogadores[numero_jogadores])
 
@@ -129,7 +129,7 @@ class EfeitoLadrao(Acao):
             'Anuncie um personagem que você deseja roubar. O personagem roubado entrega todo seu ouro ao ladrão.')
 
     @staticmethod
-    def ativar_efeito(estado: Estado):
+    def ativar(estado: Estado):
         print("Rank do personagem: ")
 
         personagem_escolhido = int(input())
@@ -156,7 +156,7 @@ class EfeitoMago(Acao):
             '(Você pode construir distritos idênticos)')
 
     @staticmethod
-    def ativar_efeito(estado: Estado):
+    def ativar(estado: Estado):
 
         for numero_jogadores in range(len(estado.jogadores)):
             print(estado.jogadores[numero_jogadores])
@@ -188,7 +188,7 @@ class EfeitoRei(Acao):
         super().__init__('Receba 1 ouro para cada distrito NOBRE contruído')
 
     @staticmethod
-    def ativar_efeito(estado: Estado):
+    def ativar(estado: Estado):
         for _, distrito in enumerate(estado.jogador_atual().distritos_construidos):
             if distrito.tipo_de_distrito == TipoDistrito.Nobre or distrito.nome_do_distrito == 'escola de magia':
                 estado.jogador_atual().ouro += 1
@@ -203,7 +203,7 @@ class EfeitoCardealAtivo(Acao):
             'troque suas cartas pelo ouro de outro jogador. (1 carta: 1 ouro)')
 
     @staticmethod
-    def ativar_efeito(estado: Estado):
+    def ativar(estado: Estado):
 
         divida = 0
         distritos_trocados = []
@@ -266,7 +266,7 @@ class EfeitoCardealPassivo(Acao):
         super().__init__('Ganhe 1 carta para cada distrito RELIGIOSO construído')
 
     @staticmethod
-    def ativar_efeito(estado: Estado):
+    def ativar(estado: Estado):
         for _, distrito in enumerate(estado.jogador_atual().distritos_construidos):
             if distrito.tipo_de_distrito == TipoDistrito.Religioso or distrito.nome_do_distrito == 'escola de magia':
                 distrito_pescado = estado.tabuleiro.baralho_distritos.pop()
@@ -280,7 +280,7 @@ class EfeitoNavegadora(Acao):
         super().__init__('Ganhe 4 ouros extras ou 4 cartas extras. Você não pode construir distritos.')
 
     @staticmethod
-    def ativar_efeito(estado: Estado):
+    def ativar(estado: Estado):
         escolha = int(input("1 - Ouro 2 - Carta"))
         if escolha == 1:
             estado.jogador_atual().ouro += 4
@@ -301,7 +301,7 @@ class EfeitoSenhordaGuerra(Acao):
             "(Ganhe 1 ouro para cada um dos seus distritos militares)")
 
     @staticmethod
-    def ativar_efeito(estado: Estado):
+    def ativar(estado: Estado):
         # da ouro por militar
         # implementar distrito especial "muralha"
         multa_muralha = 0
@@ -351,7 +351,7 @@ class EfeitoAlquimista(Acao):
             "distritos neste turno. Você não pode pagar mais ouro do que tem.")
 
     @staticmethod
-    def ativar_efeito(estado: Estado):
+    def ativar(estado: Estado):
         if estado.jogador_atual().construiu or estado.jogador_atual().construiu_estabulo:
             estado.jogador_atual().ouro += estado.jogador_atual().ouro_gasto
         estado.jogador_atual().acoes_realizadas[TipoAcao.EfeitoAlquimista.value] = 1
@@ -364,7 +364,7 @@ class CofreSecreto(Acao):
             "o Cofre Secreto da sua mão para marcar 3 pontos.")
 
     @staticmethod
-    def ativar_efeito(estado: Estado):
+    def ativar(estado: Estado):
         estado.jogador_atual().pontuacao += 3
         estado.jogador_atual().acoes_realizadas[TipoAcao.CofreSecreto.value] = 1
 
@@ -374,7 +374,7 @@ class Laboratorio(Acao):
         super().__init__("Uma vez por turno, descarte 1 carta da sua mao para ganhar 2 ouros.")
 
     @staticmethod
-    def ativar_efeito(estado: Estado):
+    def ativar(estado: Estado):
         # Printar distritos disponíveis para troca
         for index, distrito in enumerate(estado.jogador_atual().cartas_distrito_mao):
             print(f"""ID: {index + 1}
@@ -406,7 +406,7 @@ class Necropole(Acao):
             'em vez de pagar o custo da Necrópole.')
 
     @staticmethod
-    def ativar_efeito(estado: Estado):
+    def ativar(estado: Estado):
         for i, distrito in enumerate(estado.jogador_atual().distritos_construidos):
             print(f"{i + 1}: {distrito.nome_do_distrito}")
 
@@ -429,7 +429,7 @@ class CovilDosLadroes(Acao):
             'em vez de ouro, a uma taxa de 1 carta: 1 ouro.')
 
     @staticmethod
-    def ativar_efeito(estado: Estado):
+    def ativar(estado: Estado):
         n_cartas_mao = len(estado.jogador_atual().cartas_distrito_mao) - 1
         n = int(input(
             f"Deseja construir o Covil dos Ladrões com quantas cartas? (0-{6 if n_cartas_mao >= 6 else n_cartas_mao})"))
@@ -457,7 +457,7 @@ class Teatro(Acao):
             'personagem escolhida com a carta de personagem de um oponente.')
 
     @staticmethod
-    def ativar_efeito(estado: Estado):
+    def ativar(estado: Estado):
         for i, jogador in enumerate(estado.jogadores):
             if jogador != estado.jogador_atual():
                 print(f"{i + 1}: {jogador.nome}")
@@ -476,7 +476,7 @@ class Estrutura(Acao):
             'Você pode construir um distrito destruindo a Estrutura, em vez de pagar os custos do distrito em questão.')
 
     @staticmethod
-    def ativar_efeito(estado: Estado):
+    def ativar(estado: Estado):
         for i, distrito in enumerate(estado.jogador_atual().cartas_distrito_mao):
             if not distrito.nome_do_distrito == 'cofre secreto':
                 print(f"{i + 1}: {distrito.nome_do_distrito}")
@@ -500,7 +500,7 @@ class PassarTurno(Acao):
         super().__init__("Passar turno")
 
     @staticmethod
-    def ativar_efeito(estado: Estado):
+    def ativar(estado: Estado):
         for _, distrito in enumerate(estado.jogador_atual().distritos_construidos):
             if distrito.nome_do_distrito == 'abrigo para pobres' and estado.jogador_atual().ouro == 0:
                 estado.jogador_atual().ouro += 1
@@ -518,7 +518,7 @@ class Estabulo(Acao):
         super().__init__("A construção dos Estabulos não conta para o seu limite de construção neste turno.")
 
     @staticmethod
-    def ativar_efeito(estado: Estado):
+    def ativar(estado: Estado):
         for estabulo in estado.jogador_atual().distritos_construidos:
             if estabulo.nome_do_distrito == "estabulo":
 
