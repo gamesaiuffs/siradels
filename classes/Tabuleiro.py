@@ -111,78 +111,110 @@ class Tabuleiro:
 
     @staticmethod
     def criar_baralho_distritos():
-        # Comercial
-        mercado = CartaDistrito(2, TipoDistrito.Comercio, 'mercado', 4)
-        taverna = CartaDistrito(1, TipoDistrito.Comercio, 'taverna', 5)
-        prefeitura = CartaDistrito(5, TipoDistrito.Comercio, 'prefeitura', 2)
-        porto = CartaDistrito(4, TipoDistrito.Comercio, 'porto', 3)
-        docas = CartaDistrito(3, TipoDistrito.Comercio, 'docas', 3)
-        posto_de_comercio = CartaDistrito(2, TipoDistrito.Comercio, 'posto de comercio', 3)
+        # Distritos básicos
+        baralho = [CartaDistrito(1, TipoDistrito.Religioso, 'Templo', 3),
+                   CartaDistrito(2, TipoDistrito.Religioso, 'Igreja', 3),
+                   CartaDistrito(3, TipoDistrito.Religioso, 'Mosteiro', 3),
+                   CartaDistrito(5, TipoDistrito.Religioso, 'Catedral', 2),
+                   CartaDistrito(1, TipoDistrito.Militar, 'Torre de Vigia', 3),
+                   CartaDistrito(2, TipoDistrito.Militar, 'Prisão', 3),
+                   CartaDistrito(3, TipoDistrito.Militar, 'Caserna', 3),
+                   CartaDistrito(5, TipoDistrito.Militar, 'Fortaleza', 2),
+                   CartaDistrito(3, TipoDistrito.Nobre, 'Solar', 5),
+                   CartaDistrito(4, TipoDistrito.Nobre, 'Castelo', 4),
+                   CartaDistrito(5, TipoDistrito.Nobre, 'Palácio', 3),
+                   CartaDistrito(1, TipoDistrito.Comercial, 'Taverna', 5),
+                   CartaDistrito(2, TipoDistrito.Comercial, 'Mercado', 4),
+                   CartaDistrito(2, TipoDistrito.Comercial, 'Posto de Comércio', 3),
+                   CartaDistrito(3, TipoDistrito.Comercial, 'Docas', 3),
+                   CartaDistrito(4, TipoDistrito.Comercial, 'Porto', 3),
+                   CartaDistrito(5, TipoDistrito.Comercial, 'Prefeitura', 2)]
 
-        # Militar
-        torre_de_vigia = CartaDistrito(1, TipoDistrito.Militar, 'torre de vigia', 3)
-        prisao = CartaDistrito(2, TipoDistrito.Militar, 'prisao', 3)
-        caserna = CartaDistrito(3, TipoDistrito.Militar, 'caserna', 3)
-        fortaleza = CartaDistrito(5, TipoDistrito.Militar, 'fortaleza', 2)
+        # Criando duplicatas dos distritos básicos conforme quantidade
+        aux = []
+        for carta in baralho:
+            qtd = 1
+            while qtd < carta.quantidade:
+                aux.append(carta)
+                qtd += 1
+        baralho.extend(aux)
 
-        # Religioso
-        templo = CartaDistrito(1, TipoDistrito.Religioso, 'templo', 3)
-        mosteiro = CartaDistrito(3, TipoDistrito.Religioso, 'mosteiro', 3)
-        catedral = CartaDistrito(5, TipoDistrito.Religioso, 'catedral', 2)
-        igreja = CartaDistrito(2, TipoDistrito.Religioso, 'igreja', 3)
+        # Distritos especiais
+        especiais = [CartaDistrito(0, TipoDistrito.Especial, 'Cofre Secreto', 1,
+                                   "O Cofre não pode ser contruído. "
+                                   "Ao final da partida, revele o Cofre Secreto da sua mão para marcar 3 pontos extras."),
+                     CartaDistrito(2, TipoDistrito.Especial, 'Bairro Assombrado', 1,
+                                   "Ao final da partida, o Bairro Assombrado vale como 1 tipo de distrito à sua escolha."),
+                     CartaDistrito(2, TipoDistrito.Especial, 'Estábulos', 1,
+                                   "A construção dos Estábulos não conta para o seu limite de construção neste turno."),
+                     CartaDistrito(3, TipoDistrito.Especial, 'Estrutura', 1,
+                                   "Você pode cosntruir um distrito destruindo a Estrutura, em vez de pagar os custos do distrito em questão."),
+                     CartaDistrito(3, TipoDistrito.Especial, 'Arsenal', 1,
+                                   "No seu turno, destrua o Arsenal para destruir 1 distrito à sua escolha."),
+                     CartaDistrito(3, TipoDistrito.Especial, 'Torre de Menagem', 1,
+                                   "O personagem de ranque 8 não pode usar a habilidade dele contra a Torre de Menagem."),
+                     CartaDistrito(3, TipoDistrito.Especial, 'Estátua', 1,
+                                   "Se você tiver a coroa no final da partida, marque 5 pontos extras."),
+                     CartaDistrito(4, TipoDistrito.Especial, 'Monumento', 1,
+                                   "Você não pode construir o Monumento se tiver 5 ou mais distritos na sua cidade. "
+                                   "Considere o Monumento como 2 distritos para fins de uma cidade completa."),
+                     CartaDistrito(4, TipoDistrito.Especial, 'Abrigo para Pobres', 1,
+                                   "Se não houver ouro no seu tesouro no fim do seu turno, ganhe 1 ouro."),
+                     CartaDistrito(4, TipoDistrito.Especial, 'Observatório', 1,
+                                   "Se você optou por comprar cartas ao coletar recursos, compre 3 cartas em vez de 2."),
+                     CartaDistrito(4, TipoDistrito.Especial, 'Museu', 1,
+                                   "Uma vez por turno, coloque 1 carta da sua mão, voltada para baixo, sob o museu. "
+                                   "Ao final da partida, marque 1 ponto extra para cada carta sob o Museu."),
+                     CartaDistrito(4, TipoDistrito.Especial, 'Basílica', 1,
+                                   "Ao final da partida, marque 1 ponto extra para cada distrito especial na sua cidade "
+                                   "que tenha um número ímpar como custo."),
+                     CartaDistrito(5, TipoDistrito.Especial, 'Fábrica', 1,
+                                   "Você paga 1 ouro a menos para construir qualquer outro distrito ESPECIAL."),
+                     CartaDistrito(5, TipoDistrito.Especial, 'Pedreira', 1,
+                                   "Você pode construir distritos que são idênticos a distritos em sua cidade."),
+                     CartaDistrito(5, TipoDistrito.Especial, 'Poço dos Desejos', 1,
+                                   "Ao final da partida, marque 1 ponto extra para cada distrito ESPECIAL "
+                                   "na sua cidade (incluindo o Poço dos Desejos)."),
+                     CartaDistrito(5, TipoDistrito.Especial, 'Forja', 1,
+                                   "Uma vez por turno, pague 2 ouros para receber 3 cartas."),
+                     CartaDistrito(5, TipoDistrito.Especial, 'Necrópole', 1,
+                                   "Você pode construir a Necrópole destruindo 1 distrito na sua cidade, em vez de pagar o custo da Necrópole."),
+                     CartaDistrito(5, TipoDistrito.Especial, 'Tesouro Imperial', 1,
+                                   "Ao final da partida, marque 1 ponto extra para cada ouro em seu tesouro."),
+                     CartaDistrito(5, TipoDistrito.Especial, 'Laboratório', 1,
+                                   "Uma vez por turno, descarte 1 carta da sua mão para ganahr 2 ouros."),
+                     CartaDistrito(5, TipoDistrito.Especial, 'Sala de Mapas', 1,
+                                   "Ao final da partida, marque 1 ponto extra para cada carta na sua mão."),
+                     CartaDistrito(5, TipoDistrito.Especial, 'Torre de Marfim', 1,
+                                   "Se a Torre de Marfim for o único distrito ESPECIAL na sua cidade ao final da partida, marque 5 pontos extras."),
+                     CartaDistrito(5, TipoDistrito.Especial, 'Capitólio', 1,
+                                   "Se você tiver pelo menos 3 distritos do mesmo tipo no final da partida, marque 3 pontos extras."),
+                     CartaDistrito(6, TipoDistrito.Especial, 'Portão do Dragão', 1,
+                                   "Ao final da partida, marque 2 pontos extras."),
+                     CartaDistrito(6, TipoDistrito.Especial, 'Teatro', 1,
+                                   "Ao final de cada fase de escolha, você pode trocar a sua carta de personagem escolhida "
+                                   "com a carta de personagem de um oponente."),
+                     CartaDistrito(6, TipoDistrito.Especial, 'Muralha', 1,
+                                   "O personagem de ranque 8 deve pagar 1 ouro a mais para usar a habilidade "
+                                   "dele contra qualquer outro distrito na sua cidade."),
+                     CartaDistrito(6, TipoDistrito.Especial, 'Mina de Ouro', 1,
+                                   "Se você optar por ganhar ouro ao coletar recursos, ganhe 1 ouro extra."),
+                     CartaDistrito(6, TipoDistrito.Especial, 'Covil dos Ladrões', 1,
+                                   "Pague parte ou todo o custo do Covil dos Ladrões com cartas da sua mão, em vez de  ouro, "
+                                   "a uma taxa de 1 carta: 1 ouro."),
+                     CartaDistrito(6, TipoDistrito.Especial, 'Escola de Magia', 1,
+                                   "Ao usar habilidades que obtêm recursos pelos seus distritos, "
+                                   "a Escola de Magia vale como o tipo de distrito à sua escolha."),
+                     CartaDistrito(6, TipoDistrito.Especial, 'Biblioteca', 1,
+                                   "Se você optar por comprar cartas ao coletar recursos, mantenha todas elas em sua mão."),
+                     CartaDistrito(6, TipoDistrito.Especial, 'Parque', 1,
+                                   "Se não houver cartas na sua mão no fim do seu turno, ganhe 2 cartas.")]
 
-        # Nobre
-        solar = CartaDistrito(3, TipoDistrito.Nobre, 'solar', 5)
-        castelo = CartaDistrito(4, TipoDistrito.Nobre, 'castelo', 4)
-        palacio = CartaDistrito(5, TipoDistrito.Nobre, 'palacio', 3)
+        # Selecionar 14 cartas de distritos especiais aleatoriamente
+        shuffle(especiais)
+        baralho.extend(especiais[0:14])
 
-        # Especial
-        # ao final da partida marque 2 pontos extras
-        portao_do_dragao = CartaDistrito(6, TipoDistrito.Especial, 'portao do dragao', 1)
-        # ao final da partida,vale com 1 tipo de distrito à sua escolha
-        bairro_assombrado = CartaDistrito(2, TipoDistrito.Especial, 'bairro_assombrado', 1)
-        # a construcao dos estabulos nao conta para o seu limite de construcao para este turno
-        estabulos = CartaDistrito(2, TipoDistrito.Especial, 'estabulos', 1)
-        # ao final de cada fase de escolha,vc pode trocar sua carta de personagem escolhida
-        # com a carta de personagem de um oponente
-        teatro = CartaDistrito(6, TipoDistrito.Especial, 'teatro', 1)
-        # vc pode construir um distrito destruindo a estrutura,em vez de pagar os custos do distrito em questao
-        estrutura = CartaDistrito(3, TipoDistrito.Especial, 'estrutura', 1)
-        # se nao houver ouro no seu tesouro no fim do seu turno,ganhe 1 ouro
-        abrigo_para_pobres = CartaDistrito(4, TipoDistrito.Especial, 'abrigo para pobres', 1)
-        # se vc optar por ganhar ouro ao coletar recursos,ganhe 1 ouro extra
-        mina_de_ouro = CartaDistrito(6, TipoDistrito.Especial, 'mina de ouro', 1)
-        # pague parte ou o custo total do covil dos ladroes com cartas de sua mao,em vez de ouro,
-        # a uma taxa de uma carta:um ouro
-        covil_dos_ladroes = CartaDistrito(6, TipoDistrito.Especial, 'covil dos ladroes', 1)
-        # uma vez por turno,decarte uma carta de sua mao para ganhar 2 ouros
-        laboratorio = CartaDistrito(5, TipoDistrito.Especial, 'laboratorio', 1)
-        # voce pode consturir a necropole destruindo um distrito na sua cidade,ao invez de pagar o custo da necropole
-        necropole = CartaDistrito(5, TipoDistrito.Especial, 'necropole', 1)
-        # o personagem de rank 8 deve pagar 1 ouro a mais para usar a habilidade
-        # dele contra qualquer outro distrito de sua cidade
-        muralha = CartaDistrito(6, TipoDistrito.Especial, 'muralha', 1)
-        # ao usar habilidades que obtem recursos pelos seus distritos,
-        # a escola de magia vale como o tipo de distrito a sua escolha
-        escola_de_magia = CartaDistrito(6, TipoDistrito.Especial, 'escola de magia', 1)
-        # o cofre secreto nao pode ser construido.ao final da partida,
-        # revele o cofre secreto da sua mao para marcar 3 pontos extras
-        cofre_secreto = CartaDistrito(0, TipoDistrito.Especial, 'cofre secreto', 1)
-        # ao final da partida,marque um ponto extra para cada ouro em seu tesouro
-        tesouro_imperial = CartaDistrito(5, TipoDistrito.Especial, 'tesouro imperial', 1)
-
-        # quando chama o print(cartagenerica) ele usa o _str_ do cartadistrito, fazer um for pra printar td o baralho
-
-        # Criar resto do deck
-        baralho = [mercado, mercado, mercado, mercado, mercado, taverna, taverna, taverna, taverna, taverna,
-                   torre_de_vigia, torre_de_vigia, torre_de_vigia, palacio, palacio, palacio, prisao, prisao, prisao,
-                   caserna, caserna, caserna, fortaleza, fortaleza, solar, solar, solar, solar, solar, templo,
-                   templo, templo, castelo, castelo, castelo, castelo, porto, porto, porto, catedral, catedral,
-                   mosteiro, mosteiro, mosteiro, docas, docas, docas, prefeitura, prefeitura, igreja, igreja,
-                   posto_de_comercio, posto_de_comercio, posto_de_comercio, portao_do_dragao, bairro_assombrado,
-                   estabulos, teatro, estrutura, abrigo_para_pobres, mina_de_ouro, covil_dos_ladroes,
-                   laboratorio, necropole, muralha, escola_de_magia, cofre_secreto, tesouro_imperial]
-
+        # Embaralhar baralho final
         shuffle(baralho)
 
         return baralho
