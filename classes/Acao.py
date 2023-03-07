@@ -40,13 +40,17 @@ class ColetarCartas(Acao):
         print("\nCarta 2:")
         print(cartas_compradas[1].imprimir_tudo())
 
-        escolha = int(input("Escolha a carta (1 ou 2) que deseja ficar: "))
-        if escolha == 1:
-            estado.jogador_atual().cartas_distrito_mao.append(cartas_compradas[0])
-            estado.tabuleiro.baralho_distritos.append(cartas_compradas[1])
-        else:
-            estado.jogador_atual().cartas_distrito_mao.append(cartas_compradas[1])
-            estado.tabuleiro.baralho_distritos.append(cartas_compradas[0])
+        escolha = ''
+        while escolha != '1' or escolha != '2':
+            escolha = input("Escolha a carta (1 ou 2) que deseja ficar: ")
+            if escolha == '1':
+                estado.jogador_atual().cartas_distrito_mao.append(cartas_compradas[0])
+                estado.tabuleiro.baralho_distritos.append(cartas_compradas[1])
+            elif escolha == '2':
+                estado.jogador_atual().cartas_distrito_mao.append(cartas_compradas[1])
+                estado.tabuleiro.baralho_distritos.append(cartas_compradas[0])
+            else:
+                print("Escolha inválida.")
         super().ativar(estado)
 
 

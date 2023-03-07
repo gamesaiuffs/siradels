@@ -2,85 +2,89 @@ from enum import Enum, auto
 
 
 class TipoAcao(Enum):
+
+    def value(self) -> int:
+        return super().value - 1
+
     # Ações básicas
-    ColetarOuro = auto
-    ColetarCartas = auto
-    ConstruirDistrito = auto
+    ColetarOuro = auto(0)
+    ColetarCartas = auto()
+    ConstruirDistrito = auto()
 
     # Ações de personagem
     # Rank 1
-    HabilidadeAssassina = auto
-    HabilidadeBruxa = auto
-    HabilidadeMagistrado = auto
+    HabilidadeAssassina = auto()
+    HabilidadeBruxa = auto()
+    HabilidadeMagistrado = auto()
     # Rank 2
-    HabilidadeLadrao = auto
-    HabilidadeEspiao = auto
-    HabilidadeChantagista = auto
+    HabilidadeLadrao = auto()
+    HabilidadeEspiao = auto()
+    HabilidadeChantagista = auto()
     # Rank 3
-    HabilidadeIlusionista = auto
-    HabilidadeMago = auto
-    HabilidadeVidente = auto
+    HabilidadeIlusionista = auto()
+    HabilidadeMago = auto()
+    HabilidadeVidente = auto()
     # Rank 4
-    HabilidadeRei = auto
-    HabilidadeImperador = auto
-    HabilidadePatricio = auto
+    HabilidadeRei = auto()
+    HabilidadeImperador = auto()
+    HabilidadePatricio = auto()
     # Rank 5
-    HabilidadeBispo = auto
-    HabilidadeAbade = auto
-    HabilidadeCardealAtivo = auto
-    HabilidadeCardealPassivo = auto
+    HabilidadeBispo = auto()
+    HabilidadeAbade = auto()
+    HabilidadeCardealAtivo = auto()
+    HabilidadeCardealPassivo = auto()
     # Rank 6
-    HabilidadeComerciante = auto
-    HabilidadeAlquimista = auto
-    HabilidadeMercador = auto
+    HabilidadeComerciante = auto()
+    HabilidadeAlquimista = auto()
+    HabilidadeMercador = auto()
     # Rank 7
-    HabilidadeArquiteta = auto
-    HabilidadeNavegadora = auto
-    HabilidadeEstudiosa = auto
+    HabilidadeArquiteta = auto()
+    HabilidadeNavegadora = auto()
+    HabilidadeEstudiosa = auto()
     # Rank 8
-    HabilidadeSenhordaGuerra = auto
-    HabilidadeDiplomata = auto
-    HabilidadeMarechal = auto
+    HabilidadeSenhordaGuerra = auto()
+    HabilidadeDiplomata = auto()
+    HabilidadeMarechal = auto()
     # Rank 9
-    HabilidadeRainha = auto
-    HabilidadeArtista = auto
-    HabilidadeColetorDeImpostos = auto
+    HabilidadeRainha = auto()
+    HabilidadeArtista = auto()
+    HabilidadeColetorDeImpostos = auto()
 
     # Distritos Especiais
     # Ações Ativas
-    CofreSecreto = auto
-    Laboratorio = auto
-    Necropole = auto
-    Teatro = auto
-    Estrutura = auto
-    Estabulos = auto
-    CovilDosLadroes = auto
+    CofreSecreto = auto()
+    Laboratorio = auto()
+    Necropole = auto()
+    Teatro = auto()
+    Estrutura = auto()
+    Estabulos = auto()
+    CovilDosLadroes = auto()
 
     # Ações Passivas
-    PortaoDoDragao = auto
-    Muralha = auto
-    MinaDeOuro = auto  # implementado
-    TesouroImperial = auto
-    AbrigoParaPobres = auto
-    BairroAssombrado = auto
-    EscolaDeMagia = auto
+    PortaoDoDragao = auto()
+    Muralha = auto()
+    MinaDeOuro = auto()  # implementado
+    TesouroImperial = auto()
+    AbrigoParaPobres = auto()
+    BairroAssombrado = auto()
+    EscolaDeMagia = auto()
 
-    Parque = auto
-    Monumento = auto
-    Estatua = auto
-    Forja = auto
-    PocoDosDesejos = auto
-    Pedreira = auto
-    TorreDeMenagem = auto
-    Biblioteca = auto
-    Fabrica = auto
-    Arsenal = auto
-    Basilica = auto
-    Museu = auto
-    Observatorio = auto
-    Capitolio = auto
-    TorreDeMarfim = auto
-    SalaDeMapas = auto
+    Parque = auto()
+    Monumento = auto()
+    Estatua = auto()
+    Forja = auto()
+    PocoDosDesejos = auto()
+    Pedreira = auto()
+    TorreDeMenagem = auto()
+    Biblioteca = auto()
+    Fabrica = auto()
+    Arsenal = auto()
+    Basilica = auto()
+    Museu = auto()
+    Observatorio = auto()
+    Capitolio = auto()
+    TorreDeMarfim = auto()
+    SalaDeMapas = auto()
 
     # Final de turno
-    PassarTurno = auto
+    PassarTurno = auto()
