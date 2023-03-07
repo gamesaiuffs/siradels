@@ -1,7 +1,7 @@
 # Imports
-from TipoDistrito import TipoDistrito
-from CartaDistrito import CartaDistrito
-from CartaPersonagem import CartaPersonagem
+from classes.enum.TipoDistrito import TipoDistrito
+from classes.model.CartaDistrito import CartaDistrito
+from classes.model.CartaPersonagem import CartaPersonagem
 from random import shuffle
 
 

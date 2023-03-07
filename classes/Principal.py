@@ -1,8 +1,8 @@
 # Imports
 from Simulacao import Simulacao
-from TipoDistrito import TipoDistrito
-from TipoAcao import TipoAcao
-from CartaPersonagem import CartaPersonagem
+from classes.enum.TipoDistrito import TipoDistrito
+from classes.enum.TipoAcao import TipoAcao
+from classes.model.CartaPersonagem import CartaPersonagem
 
 # Inicialização das variáveis esseciais
 num_jogadores = 6

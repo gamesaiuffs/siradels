@@ -1,9 +1,9 @@
 # Imports
 from random import shuffle
 from Acao import *
-from TipoAcao import TipoAcao
-from Tabuleiro import Tabuleiro
-from Jogador import Jogador
+from classes.enum.TipoAcao import TipoAcao
+from classes.model.Tabuleiro import Tabuleiro
+from classes.model.Jogador import Jogador
 
 
 class Simulacao:

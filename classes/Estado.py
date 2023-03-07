@@ -1,7 +1,7 @@
 # Imports
 from more_itertools import sort_together
-from Tabuleiro import Tabuleiro
-from Jogador import Jogador
+from classes.model.Tabuleiro import Tabuleiro
+from classes.model.Jogador import Jogador
 
 
 class Estado:

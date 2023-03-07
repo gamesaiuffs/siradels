@@ -1,5 +1,5 @@
 # Imports
-from TipoDistrito import TipoDistrito
+from classes.enum.TipoDistrito import TipoDistrito
 
 
 class CartaDistrito:

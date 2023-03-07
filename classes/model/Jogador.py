@@ -1,7 +1,8 @@
 # Imports
-from CartaDistrito import CartaDistrito
-from CartaPersonagem import CartaPersonagem
-from TipoAcao import TipoAcao
+from classes.model.CartaDistrito import CartaDistrito
+from classes.model.CartaPersonagem import CartaPersonagem
+from classes.enum.TipoAcao import TipoAcao
+from typing import List
 
 
 class Jogador:
@@ -11,16 +12,15 @@ class Jogador:
         self.nome = nome
         self.personagem = CartaPersonagem("Nenhum", 0)
         self.ouro = 2
-        self.cartas_distrito_mao = []
-        self.distritos_construidos = []
+        self.cartas_distrito_mao: List[CartaDistrito] = []
+        self.distritos_construidos: List[CartaDistrito] = []
         self.rei = False
         self.morto = False
         self.roubado = False
         self.construiu = False
         self.construiu_estabulo = False
-        self.coletou_recursos = False
         self.ouro_gasto = 0
-        self.acoes_realizadas = [0 for _ in range(len(TipoAcao))]
+        self.acoes_realizadas = [False for _ in range(len(TipoAcao))]
         self.terminou = False  # True se o jogador construiu 7 distritos
 
     # To String
@@ -51,4 +51,13 @@ class Jogador:
         for distrito in i:
             texto += ", " + str(distrito.nome_do_distrito)
         return texto
+
+    def construiu_distrito(self, nome: str) -> bool:
+        for carta in self.distritos_construidos:
+            if carta.nome_do_distrito == nome:
+                return True
+        return False
+
+    def coletou_recursos(self) -> bool:
+        return self.acoes_realizadas[TipoAcao.ColetarOuro.value] | self.acoes_realizadas[TipoAcao.ColetarCartas.value]
     
