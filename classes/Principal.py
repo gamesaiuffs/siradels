@@ -65,6 +65,7 @@ while not final_jogo:
                 print(f"\t{indexAcao} - {acao.descricao}")
 
             acao_escolhida = int(input("Escolha uma ação: "))
+            print()
             if acao_escolhida == -1:
                 final_jogo = True
                 break

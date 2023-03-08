@@ -15,15 +15,15 @@ class Tabuleiro:
 
     # To String
     def __str__(self):
-        texto_deck = "Nenhum distrito disponível!" if len(self.baralho_distritos) == 0 else ""
+        texto_baralho = "Nenhuma carta!" if len(self.baralho_distritos) == 0 else ""
         for carta in self.baralho_distritos:
-            texto_deck += carta.__str__() + " | "
+            texto_baralho += carta.__str__() + " | "
 
-        texto_cartas_visiveis = "Nenhuma carta visivel!" if len(self.cartas_visiveis) == 0 else ""
+        texto_cartas_visiveis = "Nenhuma carta!" if len(self.cartas_visiveis) == 0 else ""
         for carta in self.cartas_visiveis:
             texto_cartas_visiveis += carta.__str__() + " | "
 
-        texto_cartas_n_visiveis = "Nenhuma carta visivel!" if len(self.cartas_nao_visiveis) == 0 else ""
+        texto_cartas_n_visiveis = "Nenhuma carta!" if len(self.cartas_nao_visiveis) == 0 else ""
         for carta in self.cartas_nao_visiveis:
             texto_cartas_n_visiveis += carta.__str__() + " | "
 
@@ -31,14 +31,10 @@ class Tabuleiro:
         for carta in self.baralho_personagens:
             texto_personagens += carta.__str__() + " | "
 
-        texto_distritos = ""
-        for carta in self.baralho_distritos:
-            texto_distritos += carta.__str__() + " | "
-
-        return f"\nDeck: {texto_deck}\n" \
-               f"\nCartas visiveis: {texto_cartas_visiveis}\n" \
-               f"\nCartas não visiveis: {texto_cartas_n_visiveis}\n" \
-               f"\nPersonagens: {texto_personagens}\n"
+        return f"\nBaralho: {texto_baralho}" \
+               f"\nCartas visiveis: {texto_cartas_visiveis}" \
+               f"\nCartas não visiveis: {texto_cartas_n_visiveis}" \
+               f"\nPersonagens que sobraram: {texto_personagens}\n"
 
     def criar_baralho_personagem(self, num_jogadores):
         # Define as informações de cada personagem

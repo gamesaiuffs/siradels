@@ -23,7 +23,6 @@ class ColetarOuro(Acao):
         if estado.jogador_atual().construiu_distrito('Mina de Ouro'):
             estado.jogador_atual().ouro += 1
         estado.jogador_atual().ouro += 2
-        estado.jogador_atual().acoes_realizadas += self.tipo_acao
         super().ativar(estado)
 
 
@@ -35,13 +34,14 @@ class ColetarCartas(Acao):
         cartas_compradas = estado.tabuleiro.baralho_distritos[:2]
         del estado.tabuleiro.baralho_distritos[:2]
 
+        print("Executando ação", self.tipo_acao)
         print("Carta 1:")
-        print(cartas_compradas[0].imprimir_tudo())
-        print("\nCarta 2:")
-        print(cartas_compradas[1].imprimir_tudo())
+        print("\t", cartas_compradas[0].imprimir_tudo())
+        print("Carta 2:")
+        print("\t", cartas_compradas[1].imprimir_tudo())
 
         escolha = ''
-        while escolha != '1' or escolha != '2':
+        while escolha != '1' and escolha != '2':
             escolha = input("Escolha a carta (1 ou 2) que deseja ficar: ")
             if escolha == '1':
                 estado.jogador_atual().cartas_distrito_mao.append(cartas_compradas[0])

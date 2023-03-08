@@ -1,13 +1,14 @@
 from enum import Enum, auto
+from typing import Any
 
 
 class TipoAcao(Enum):
 
-    def value(self) -> int:
-        return super().value - 1
+    def _generate_next_value_(name: str, start: int, count: int, last_values: list[int]) -> int:
+        return count
 
     # Ações básicas
-    ColetarOuro = auto(0)
+    ColetarOuro = auto()
     ColetarCartas = auto()
     ConstruirDistrito = auto()
 
