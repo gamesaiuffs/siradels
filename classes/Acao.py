@@ -30,7 +30,9 @@ class PassarTurno(Acao):
         jogador = estado.jogador_atual()
         jogador.ouro_gasto, jogador.roubado, jogador.morto, jogador.construiu = 0, False, False, False
         jogador.acoes_realizadas = [False for _ in range(len(TipoAcao))]
-        jogador.acoes_realizadas[TipoAcao.PassarTurno.value] = 1
+        super().ativar(estado)
+
+        # Turno deve ser o último a ser atualizado, pois, afeta ponteiro para jogador atual
         estado.turno += 1
 
 
@@ -142,6 +144,7 @@ class HabilidadeAssassina(Acao):
             if not 2 < escolha < 8:
                 print("Escolha inválida.")
                 continue
+            break
         
         for jogador in estado.jogadores:
             if jogador.personagem.rank == escolha:
@@ -158,7 +161,7 @@ class HabilidadeLadrao(Acao):
 
     def ativar(self, estado: Estado):
         while True:
-            escolha = input("Digite o rank (3 a 8) do personagem que deseja roubar: ")
+            escolha = input("Digite o rank (3 a 8) do personagem que deseja roubar (não pode ser o rank assassinado): ")
             try:
                 escolha = int(escolha)
             except ValueError:
@@ -167,6 +170,11 @@ class HabilidadeLadrao(Acao):
             if not 3 < escolha < 8:
                 print("Escolha inválida.")
                 continue
+            for morto in estado.jogadores:
+                if morto.morto and morto.personagem.rank == escolha:
+                    print("Escolha inválida.")
+                    continue
+            break
 
         for jogador in estado.jogadores:
             if jogador.personagem.rank == escolha:

@@ -61,6 +61,9 @@ while not final_jogo:
 
         # inicia turno do jogador
         while True:
+            # Printar estado
+            print(simulacao.estado)
+
             print(jogador.nome)
             # Mostra apenas ações disponíveis segundo regras do jogo
             print("Ações disponíveis: ")
@@ -78,14 +81,12 @@ while not final_jogo:
                 if not 0 <= escolha < len(acoes):
                     print("Escolha inválida.")
                     continue
+                break
             # Pula uma linha
             print()
 
             # Executa ação escolhida
             acoes[escolha].ativar(simulacao.estado)
-
-            # Printar estado
-            print(simulacao.estado)
             
             if jogador.acoes_realizadas[TipoAcao.PassarTurno.value]:
                 break
@@ -102,6 +103,7 @@ while not final_jogo:
     simulacao.estado.rodada += 1
     for jogador in simulacao.estado.jogadores:
         jogador.personagem = CartaPersonagem("Nenhum", 0)
+        jogador.acoes_realizadas[TipoAcao.PassarTurno] = False
     simulacao.estado.ordenar_jogadores_rei()
     
 
