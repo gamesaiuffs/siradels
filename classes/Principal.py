@@ -1,4 +1,3 @@
-# Imports
 from Simulacao import Simulacao
 from classes.enum.TipoDistrito import TipoDistrito
 from classes.enum.TipoAcao import TipoAcao
@@ -13,12 +12,11 @@ final_jogo = False
 
 # Main Loop
 while not final_jogo:
-    # Cada jogador escolhe seu personagem
+    # Cada jogador escolhe o seu personagem
     foi_escolhido = []
     for jogador in simulacao.estado.jogadores:
         print("---------| Personagens |--------")
         # "Printa" o baralho de personagens
-
         while jogador.personagem.rank == 0:
             print(jogador.nome)
             for personagem in simulacao.estado.tabuleiro.baralho_personagens:

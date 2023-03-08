@@ -38,8 +38,8 @@ class Tabuleiro:
 
     def criar_baralho_personagem(self, num_jogadores):
         # Define as informações de cada personagem
-        assassino = CartaPersonagem(
-            "Assassino", 1,
+        assassina = CartaPersonagem(
+            "Assassina", 1,
             "Anuncie um personagem que você deseja assassinar. O personagem assassinado perde o turno"
         )
         ladrao = CartaPersonagem(
@@ -82,7 +82,7 @@ class Tabuleiro:
         )
 
         # Coloca os personagens numa lista e os embaralha (com exceção do rei que será colocado depois)
-        mao_jogador = [assassino, ladrao, mago, cardeal, alquimista, navegadora, senhor_guerra]
+        mao_jogador = [assassina, ladrao, mago, cardeal, alquimista, navegadora, senhor_guerra]
 
         shuffle(mao_jogador)
 

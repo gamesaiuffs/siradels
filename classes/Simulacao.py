@@ -62,10 +62,10 @@ class Simulacao:
     @staticmethod
     def criar_acoes() -> list[Acao]:
         acoes = [ColetarOuro(),
-                 ColetarCartas()]
-                 #ConstruirDistrito(),
-                 #EfeitoAssassino(),
-                 #EfeitoLadrao(),
+                 ColetarCartas(),
+                 ConstruirDistrito(),
+                 HabilidadeAssassina(),
+                 HabilidadeLadrao()]
                  #EfeitoMago(),
                  #EfeitoRei(),
                  #EfeitoCardealAtivo(),

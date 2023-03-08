@@ -1,6 +1,9 @@
+from typing import List
+
 from Estado import Estado
 from classes.enum.TipoDistrito import TipoDistrito
 from classes.enum.TipoAcao import TipoAcao
+from classes.model.CartaDistrito import CartaDistrito
 
 
 class Acao:
@@ -34,112 +37,130 @@ class ColetarCartas(Acao):
         cartas_compradas = estado.tabuleiro.baralho_distritos[:2]
         del estado.tabuleiro.baralho_distritos[:2]
 
-        print("Executando ação", self.tipo_acao)
         print("Carta 1:")
         print("\t", cartas_compradas[0].imprimir_tudo())
         print("Carta 2:")
         print("\t", cartas_compradas[1].imprimir_tudo())
 
-        escolha = ''
-        while escolha != '1' and escolha != '2':
-            escolha = input("Escolha a carta (1 ou 2) que deseja ficar: ")
+        while True:
+            escolha = input("Escolha a carta (1 ou 2) com que deseja ficar: ")
+            if escolha != '1' and escolha != '2':
+                print("Escolha inválida.")
+                continue
+
             if escolha == '1':
                 estado.jogador_atual().cartas_distrito_mao.append(cartas_compradas[0])
                 estado.tabuleiro.baralho_distritos.append(cartas_compradas[1])
             elif escolha == '2':
                 estado.jogador_atual().cartas_distrito_mao.append(cartas_compradas[1])
                 estado.tabuleiro.baralho_distritos.append(cartas_compradas[0])
-            else:
-                print("Escolha inválida.")
+            break
+
         super().ativar(estado)
 
 
 class ConstruirDistrito(Acao):
     def __init__(self):
-        super().__init__('Escolha um distrito para construir.')
+        super().__init__('Construa um distrito em sua cidade.', TipoAcao.ConstruirDistrito)
 
-    
     def ativar(self, estado: Estado):
-        for i, carta in enumerate(estado.jogador_atual().cartas_distrito_mao):
-            if not carta.nome_do_distrito == 'cofre secreto':
-                print(f"{i + 1}: {carta.imprimir_tudo()}")
+        distritos_para_construir: List[CartaDistrito] = []
+        for carta in estado.jogador_atual().cartas_distrito_mao:
+            # Cofre secreto nunca pode ser construído
+            if carta.nome_do_distrito != 'Cofre Secreto':
+                # Distritos repetidos não podem ser construídos
+                repetido = estado.jogador_atual().construiu_distrito(carta.nome_do_distrito)
+                # Também deve possuir ouro suficiente para construir o distrito
+                if not repetido and carta.valor_do_distrito <= estado.jogador_atual().ouro:
+                    distritos_para_construir.append(carta)
+        if len(distritos_para_construir) == 0:
+            print("Não é possível construir nenhum distrito!")
+            return
 
-        escolha = int(input("Digite o número do distrito que deseja construir: "))
-        if estado.jogador_atual().ouro >= estado.jogador_atual().cartas_distrito_mao[escolha - 1].valor_do_distrito:
+        print(f"0: Não desejo construir nenhum distrito.")
+        for i, carta in enumerate(distritos_para_construir):
+            print(f"{i + 1}: {carta.imprimir_tudo()}")
 
-            estado.jogador_atual().pontuacao += estado.jogador_atual().cartas_distrito_mao[
-                escolha - 1].valor_do_distrito
-
-            estado.jogador_atual().ouro -= estado.jogador_atual().cartas_distrito_mao[escolha - 1].valor_do_distrito
-            estado.jogador_atual().distritos_construidos.append(estado.jogador_atual().cartas_distrito_mao[escolha - 1])
-            estado.jogador_atual().ouro_gasto = estado.jogador_atual().cartas_distrito_mao[
-                escolha - 1].valor_do_distrito
-            estado.jogador_atual().cartas_distrito_mao.pop(escolha - 1)
+        while True:
+            escolha = input("Digite o número do distrito que deseja construir: ")
+            try:
+                escolha = int(escolha)
+            except ValueError:
+                print("Escolha inválida.")
+                continue
+            if escolha < 0 or escolha > len(distritos_para_construir):
+                print("Escolha inválida.")
+                continue
+            if escolha == 0:
+                return
+            # Pontua distrito
+            estado.jogador_atual().pontuacao += distritos_para_construir[escolha - 1].valor_do_distrito
+            # Paga distrito e salva ouro gasto (Alquimista)
+            estado.jogador_atual().ouro -= distritos_para_construir[escolha - 1].valor_do_distrito
+            estado.jogador_atual().ouro_gasto += distritos_para_construir[escolha - 1].valor_do_distrito
+            # Constrói distrito e marca Flag de controle
+            estado.jogador_atual().distritos_construidos.append(distritos_para_construir[escolha - 1])
             estado.jogador_atual().construiu = True
-
+            # Retira distrito cosntruído da mão
+            for carta in estado.jogador_atual().cartas_distrito_mao:
+                if carta.nome_do_distrito == distritos_para_construir[escolha - 1].nome_do_distrito:
+                    estado.jogador_atual().cartas_distrito_mao.remove(carta)
+                    break
+            # Marca final de jogo se jogador construiu o sétimo distrito na sua cidade
             if len(estado.jogador_atual().distritos_construidos) == 7:
                 estado.jogador_atual().terminou = True
-                
-            estado.jogador_atual().acoes_realizadas[TipoAcao.ConstruirDistrito.value] = 1
+            break
 
-        else:
-            print("Ouro insuficiente!")
+        super().ativar(estado)
 
 
-class EfeitoAssassino(Acao):
+class HabilidadeAssassina(Acao):
     def __init__(self):
-        super().__init__('Anuncie um personagem que você deseja assassinar. O personagem assassinado perde o turno.')
-
+        super().__init__('Anuncie um personagem que você deseja assassinar. O personagem assassinado perde o turno.', TipoAcao.HabilidadeAssassina)
     
     def ativar(self, estado: Estado):
-        # for numero_jogadores in range(len(estado.jogadores)):
-        #     print(estado.jogadores[numero_jogadores])
-
-        # jogador_escolhido = int(input())
-
-        # estado.jogadores[jogador_escolhido - 1].morto = True
-        # estado.jogador_atual().acoes_realizadas[TipoAcao.EfeitoAssassino.value] = 1
-        print("Rank do personagem: ")
-
-        personagem_escolhido = int(input())
+        while True:
+            escolha = input("Digite o rank (2 a 8) do personagem que deseja assassinar: ")
+            try:
+                escolha = int(escolha)
+            except ValueError:
+                print("Escolha inválida.")
+                continue
+            if not 2 < escolha < 8:
+                print("Escolha inválida.")
+                continue
         
-        for index, jogador in enumerate(estado.jogadores):
-            if jogador.personagem.rank == personagem_escolhido:
-                jogador_escolhido = jogador
+        for jogador in estado.jogadores:
+            if jogador.personagem.rank == escolha:
+                jogador.morto = True
                 break
-            else:
-                jogador_escolhido = None
-                
-        if jogador_escolhido != None:
-            print(jogador_escolhido)
-            estado.jogadores[index].morto = True
-        
-        estado.jogador_atual().acoes_realizadas[TipoAcao.EfeitoAssassino.value] = 1
+
+        super().ativar(estado)
 
 
-class EfeitoLadrao(Acao):
+class HabilidadeLadrao(Acao):
     def __init__(self):
         super().__init__(
-            'Anuncie um personagem que você deseja roubar. O personagem roubado entrega todo seu ouro ao ladrão.')
+            'Anuncie um personagem que você deseja roubar. O personagem roubado entrega todo seu ouro ao ladrão.', TipoAcao.HabilidadeLadrao)
 
-    
     def ativar(self, estado: Estado):
-        print("Rank do personagem: ")
+        while True:
+            escolha = input("Digite o rank (3 a 8) do personagem que deseja roubar: ")
+            try:
+                escolha = int(escolha)
+            except ValueError:
+                print("Escolha inválida.")
+                continue
+            if not 3 < escolha < 8:
+                print("Escolha inválida.")
+                continue
 
-        personagem_escolhido = int(input())
-        
-        for index, jogador in enumerate(estado.jogadores):
-            if jogador.personagem.rank == personagem_escolhido:
-                jogador_escolhido = jogador
+        for jogador in estado.jogadores:
+            if jogador.personagem.rank == escolha:
+                jogador.roubado = True
                 break
-            else:
-                jogador_escolhido = None
-                
-        if jogador_escolhido != None:
-            print(jogador_escolhido)
-            estado.jogadores[index].roubado = True
-        
-        estado.jogador_atual().acoes_realizadas[TipoAcao.EfeitoLadrao.value] = 1
+
+        super().ativar(estado)
 
 
 class EfeitoMago(Acao):
