@@ -7,18 +7,21 @@ class TipoAcao(Enum):
     def _generate_next_value_(name: str, start: int, count: int, last_values: list[int]) -> int:
         return count
 
+    # Final de turno
+    PassarTurno = auto()
+
     # Ações básicas
-    ColetarOuro = auto()
-    ColetarCartas = auto()
-    ConstruirDistrito = auto()
+    ColetarOuro = auto()  # implementado
+    ColetarCartas = auto()  # implementado
+    ConstruirDistrito = auto()  # implementado
 
     # Ações de personagem
     # Rank 1
-    HabilidadeAssassina = auto()
+    HabilidadeAssassina = auto()  # implementado
     HabilidadeBruxa = auto()
     HabilidadeMagistrado = auto()
     # Rank 2
-    HabilidadeLadrao = auto()
+    HabilidadeLadrao = auto()  # implementado
     HabilidadeEspiao = auto()
     HabilidadeChantagista = auto()
     # Rank 3
@@ -53,7 +56,6 @@ class TipoAcao(Enum):
 
     # Distritos Especiais
     # Ações Ativas
-    CofreSecreto = auto()
     Laboratorio = auto()
     Necropole = auto()
     Teatro = auto()
@@ -66,7 +68,8 @@ class TipoAcao(Enum):
     Muralha = auto()
     MinaDeOuro = auto()  # implementado
     TesouroImperial = auto()
-    AbrigoParaPobres = auto()
+    AbrigoParaPobres = auto()  # implementado
+    CofreSecreto = auto()  # implementado
     BairroAssombrado = auto()
     EscolaDeMagia = auto()
 
@@ -86,6 +89,3 @@ class TipoAcao(Enum):
     Capitolio = auto()
     TorreDeMarfim = auto()
     SalaDeMapas = auto()
-
-    # Final de turno
-    PassarTurno = auto()

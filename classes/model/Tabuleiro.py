@@ -43,7 +43,7 @@ class Tabuleiro:
             "Anuncie um personagem que você deseja assassinar. O personagem assassinado perde o turno"
         )
         ladrao = CartaPersonagem(
-            "Ladrao", 2,
+            "Ladrão", 2,
             "Anuncie um personagem que você deseja roubar. "
             "Quando o personagem roubado for revelado, você pega todo o ouro dele"
         )

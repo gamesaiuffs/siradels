@@ -61,7 +61,8 @@ class Simulacao:
 
     @staticmethod
     def criar_acoes() -> list[Acao]:
-        acoes = [ColetarOuro(),
+        acoes = [PassarTurno(),
+                 ColetarOuro(),
                  ColetarCartas(),
                  ConstruirDistrito(),
                  HabilidadeAssassina(),
@@ -79,18 +80,12 @@ class Simulacao:
                  #Teatro(),
                  #Estrutura(),
                  #Estabulo(),
-                 #CovilDosLadroes(),
-                 #PassarTurno()]
+                 #CovilDosLadroes()]
         return acoes
 
     def acoes_disponiveis(self) -> list[Acao]:
         #acoes_disponiveis = []
         return self.acoes
-        # adicionar flag nas ações
-        # if self.estado.jogador_atual().morto:
-        #     acoes_disponiveis.append(self.acoes[TipoAcao.PassarTurno.value])
-        #     return acoes_disponiveis
-
         # for acao in TipoAcao:
         #     if acao == TipoAcao.ColetarOuro:
         #         if not self.estado.jogador_atual().coletou_recursos():

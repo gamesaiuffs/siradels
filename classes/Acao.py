@@ -18,9 +18,25 @@ class Acao:
         estado.jogador_atual().acoes_realizadas[self.tipo_acao.value] = True
 
 
+class PassarTurno(Acao):
+    def __init__(self):
+        super().__init__("Passar seu turno.", TipoAcao.PassarTurno)
+
+    def ativar(self, estado: Estado):
+        for distrito in estado.jogador_atual().distritos_construidos:
+            if distrito.nome_do_distrito == 'Abrigo para Pobres' and estado.jogador_atual().ouro == 0:
+                estado.jogador_atual().ouro += 1
+
+        jogador = estado.jogador_atual()
+        jogador.ouro_gasto, jogador.roubado, jogador.morto, jogador.construiu = 0, False, False, False
+        jogador.acoes_realizadas = [False for _ in range(len(TipoAcao))]
+        jogador.acoes_realizadas[TipoAcao.PassarTurno.value] = 1
+        estado.turno += 1
+
+
 class ColetarOuro(Acao):
     def __init__(self):
-        super().__init__('Pegue dois ouros do banco.', TipoAcao.ColetarOuro)
+        super().__init__("Pegue dois ouros do banco.", TipoAcao.ColetarOuro)
 
     def ativar(self, estado: Estado):
         if estado.jogador_atual().construiu_distrito('Mina de Ouro'):
@@ -31,7 +47,7 @@ class ColetarOuro(Acao):
 
 class ColetarCartas(Acao):
     def __init__(self):
-        super().__init__('Compre duas cartas do baralho de distritos, escolha uma e descarte a outra.', TipoAcao.ColetarCartas)
+        super().__init__("Compre duas cartas do baralho de distritos, escolha uma e descarte a outra.", TipoAcao.ColetarCartas)
 
     def ativar(self, estado: Estado):
         cartas_compradas = estado.tabuleiro.baralho_distritos[:2]
@@ -61,7 +77,7 @@ class ColetarCartas(Acao):
 
 class ConstruirDistrito(Acao):
     def __init__(self):
-        super().__init__('Construa um distrito em sua cidade.', TipoAcao.ConstruirDistrito)
+        super().__init__("Construa um distrito em sua cidade.", TipoAcao.ConstruirDistrito)
 
     def ativar(self, estado: Estado):
         distritos_para_construir: List[CartaDistrito] = []
@@ -106,9 +122,6 @@ class ConstruirDistrito(Acao):
                 if carta.nome_do_distrito == distritos_para_construir[escolha - 1].nome_do_distrito:
                     estado.jogador_atual().cartas_distrito_mao.remove(carta)
                     break
-            # Marca final de jogo se jogador construiu o sétimo distrito na sua cidade
-            if len(estado.jogador_atual().distritos_construidos) == 7:
-                estado.jogador_atual().terminou = True
             break
 
         super().ativar(estado)
@@ -116,7 +129,7 @@ class ConstruirDistrito(Acao):
 
 class HabilidadeAssassina(Acao):
     def __init__(self):
-        super().__init__('Anuncie um personagem que você deseja assassinar. O personagem assassinado perde o turno.', TipoAcao.HabilidadeAssassina)
+        super().__init__("Anuncie um personagem que você deseja assassinar. O personagem assassinado perde o turno.", TipoAcao.HabilidadeAssassina)
     
     def ativar(self, estado: Estado):
         while True:
@@ -141,7 +154,7 @@ class HabilidadeAssassina(Acao):
 class HabilidadeLadrao(Acao):
     def __init__(self):
         super().__init__(
-            'Anuncie um personagem que você deseja roubar. O personagem roubado entrega todo seu ouro ao ladrão.', TipoAcao.HabilidadeLadrao)
+            "Anuncie um personagem que você deseja roubar. O personagem roubado entrega todo seu ouro ao ladrão.", TipoAcao.HabilidadeLadrao)
 
     def ativar(self, estado: Estado):
         while True:
@@ -367,8 +380,7 @@ class EfeitoAlquimista(Acao):
 
     
     def ativar(self, estado: Estado):
-        if estado.jogador_atual().construiu or estado.jogador_atual().construiu_estabulo:
-            estado.jogador_atual().ouro += estado.jogador_atual().ouro_gasto
+        estado.jogador_atual().ouro += estado.jogador_atual().ouro_gasto
         estado.jogador_atual().acoes_realizadas[TipoAcao.EfeitoAlquimista.value] = 1
 
 
@@ -510,24 +522,6 @@ class Estrutura(Acao):
         estado.jogador_atual().acoes_realizadas[TipoAcao.Estrutura.value] = 1
 
 
-class PassarTurno(Acao):
-    def __init__(self):
-        super().__init__("Passar turno")
-
-    
-    def ativar(self, estado: Estado):
-        for _, distrito in enumerate(estado.jogador_atual().distritos_construidos):
-            if distrito.nome_do_distrito == 'abrigo para pobres' and estado.jogador_atual().ouro == 0:
-                estado.jogador_atual().ouro += 1
-
-        jogador = estado.jogador_atual()
-        jogador.ouro_gasto, jogador.roubado, jogador.morto, jogador.construiu = 0, False, False, False
-        jogador.acoes_realizadas = [0 for _ in range(len(TipoAcao))]
-        jogador.acoes_realizadas[TipoAcao.PassarTurno.value] = 1
-        estado.turno += 1
-        
-
-
 class Estabulo(Acao):
     def __init__(self):
         super().__init__("A construção dos Estabulos não conta para o seu limite de construção neste turno.")
@@ -544,7 +538,6 @@ class Estabulo(Acao):
                     estado.jogador_atual().ouro -= estabulo.valor_do_distrito
                     estado.jogador_atual().distritos_construidos.append(estabulo)
                     estado.jogador_atual().cartas_distrito_mao.remove(estabulo)
-                    estado.jogador_atual().construiu_estabulo = True
                     estado.jogador_atual().ouro_gasto = estabulo.valor_do_distrito
 
                     if len(estado.jogador_atual().distritos_construidos) == 7:

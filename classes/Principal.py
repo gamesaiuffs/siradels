@@ -36,57 +36,67 @@ while not final_jogo:
     # Ordena os jogadores
     simulacao.estado.ordenar_jogadores()
 
-    # Printar estad
+    # Printar estado
     print(simulacao.estado)
 
-    # Cada jogador faz suas ações
+    # Cada jogador faz as suas ações
     for jogador in simulacao.estado.jogadores:
-        
-        # Atribui a flag rei ao jogador com o rei
-        if jogador.personagem.rank == 4:
-            for antigorei in simulacao.estado.jogadores:
-                if antigorei.rei:
-                    antigorei.rei = False
-            jogador.rei = True
-            
-        if jogador.roubado:
-            simulacao.estado.jogadores[1].ouro += jogador.ouro
-            jogador.ouro = 0 
-            
-        fim_turno = False
-        while not fim_turno:
-            print(jogador.nome)
-            print("Ações disponíveis: ")
+        # Aplica habilidades/efeitos de início de turno
 
+        # Aplica habilidade da Assassina
+        if jogador.morto:
+            continue
+        # Aplica habilidade do Ladrão
+        if jogador.roubado:
+            for ladrao in simulacao.estado.jogadores:
+                if ladrao.personagem.nome == "Ladrão":
+                    ladrao.ouro += jogador.ouro
+                    jogador.ouro = 0
+                    break
+        # Aplica habilidade do Rei
+        if jogador.personagem.nome == "Rei":
+            for antigorei in simulacao.estado.jogadores:
+                antigorei.rei = False
+            jogador.rei = True
+
+        # inicia turno do jogador
+        while True:
+            print(jogador.nome)
+            # Mostra apenas ações disponíveis segundo regras do jogo
+            print("Ações disponíveis: ")
             acoes = simulacao.acoes_disponiveis()
             for indexAcao, acao in enumerate(acoes):
                 print(f"\t{indexAcao} - {acao.descricao}")
 
-            acao_escolhida = int(input("Escolha uma ação: "))
+            while True:
+                escolha = input("Escolha sua ação: ")
+                try:
+                    escolha = int(escolha)
+                except ValueError:
+                    print("Escolha inválida.")
+                    continue
+                if not 0 <= escolha < len(acoes):
+                    print("Escolha inválida.")
+                    continue
+            # Pula uma linha
             print()
-            if acao_escolhida == -1:
-                final_jogo = True
-                break
 
-            if 0 <= acao_escolhida < len(acoes):
-                acoes[acao_escolhida].ativar(simulacao.estado)
-            else:
-                print("Escolha inválida")
+            # Executa ação escolhida
+            acoes[escolha].ativar(simulacao.estado)
 
-            # Printar estad
+            # Printar estado
             print(simulacao.estado)
             
-            if jogador.acoes_realizadas[TipoAcao.PassarTurno.value] == 1:
-                fim_turno = True
+            if jogador.acoes_realizadas[TipoAcao.PassarTurno.value]:
+                break
 
+        # Marca fim de jogo e jogador finalizador
         if len(jogador.distritos_construidos) >= 7:
             jogador.terminou = True 
             if jogador_finalizador is None:
                 jogador_finalizador = jogador
 
-
-
-    # verificar final de jogo e atualizar flag
+    # Preparação para nova rodada
     simulacao.estado.tabuleiro.baralho_personagens = simulacao.estado.tabuleiro.criar_baralho_personagem(num_jogadores)
     simulacao.estado.turno = 1
     simulacao.estado.rodada += 1
@@ -95,9 +105,8 @@ while not final_jogo:
     simulacao.estado.ordenar_jogadores_rei()
     
 
+# Rotina de fim de jogo
 # contabilizar a pontuacao e verificar ponto
-
-
 for jogador in simulacao.estado.jogadores:
 
     # +1 ponto pra cada moeada do valor de distrito
@@ -139,7 +148,7 @@ for jogador in simulacao.estado.jogadores:
 
     # cofre secreto (n pode ser construido) - revelar no final - +3 pontos
     for distrito in jogador.cartas_distrito_mao:
-        if distrito.nome_do_distrito == 'cofre secreto':
+        if distrito.nome_do_distrito == 'Cofre Secreto':
             soma_pontos += 3
             cont_pontos_distritos_especiais += 3
 
