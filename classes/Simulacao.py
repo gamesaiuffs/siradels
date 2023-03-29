@@ -18,7 +18,7 @@ class Simulacao:
     # Cria o estado inicial do tabuleiro
     def criar_estado_inicial(self, automatico) -> Estado:
         # Constrói o tabuleiro
-        tabuleiro = Tabuleiro(self.num_jogadores)
+        tabuleiro = Tabuleiro(self.num_jogadores, 8)
         if automatico:
             jogadores = self.criar_jogadores_automatico()
         else:
@@ -66,9 +66,9 @@ class Simulacao:
                  ColetarCartas(),
                  ConstruirDistrito(),
                  HabilidadeAssassina(),
-                 HabilidadeLadrao()]
-                 #EfeitoMago(),
-                 #EfeitoRei(),
+                 HabilidadeLadrao(),
+                 HabilidadeMago(),
+                 HabilidadeRei()]
                  #EfeitoCardealAtivo(),
                  #EfeitoCardealPassivo(),
                  #EfeitoAlquimista(),

@@ -23,15 +23,19 @@ class PassarTurno(Acao):
         super().__init__("Passar seu turno.", TipoAcao.PassarTurno)
 
     def ativar(self, estado: Estado):
-        for distrito in estado.jogador_atual().distritos_construidos:
-            if distrito.nome_do_distrito == 'Abrigo para Pobres' and estado.jogador_atual().ouro == 0:
-                estado.jogador_atual().ouro += 1
-
+        # Efeito passivo do distrito Abrigo para Pobres
+        if estado.jogador_atual().ouro == 0:
+            for distrito in estado.jogador_atual().distritos_construidos:
+                if distrito.nome_do_distrito == 'Abrigo para Pobres':
+                    estado.jogador_atual().ouro += 1
+                    break
+        # Otimiza a chamada do jogador atual
         jogador = estado.jogador_atual()
+        # Limpa flags de controle e ações realizadas
         jogador.ouro_gasto, jogador.roubado, jogador.morto, jogador.construiu = 0, False, False, False
         jogador.acoes_realizadas = [False for _ in range(len(TipoAcao))]
+        # Marca flag de ação utilizada
         super().ativar(estado)
-
         # Turno deve ser o último a ser atualizado, pois, afeta ponteiro para jogador atual
         estado.turno += 1
 
@@ -41,9 +45,12 @@ class ColetarOuro(Acao):
         super().__init__("Pegue dois ouros do banco.", TipoAcao.ColetarOuro)
 
     def ativar(self, estado: Estado):
+        # Efeito passivo da carta Mina de Ouro
         if estado.jogador_atual().construiu_distrito('Mina de Ouro'):
             estado.jogador_atual().ouro += 1
+        # Adiciona dois de ouro ao jogador
         estado.jogador_atual().ouro += 2
+        # Marca flag de ação utilizada
         super().ativar(estado)
 
 
@@ -52,20 +59,26 @@ class ColetarCartas(Acao):
         super().__init__("Compre duas cartas do baralho de distritos, escolha uma e descarte a outra.", TipoAcao.ColetarCartas)
 
     def ativar(self, estado: Estado):
+        # Pescar cartas do baralho
         cartas_compradas = estado.tabuleiro.baralho_distritos[:2]
         del estado.tabuleiro.baralho_distritos[:2]
-
+        # Mostra cartas para escolha
         print("Carta 1:")
         print("\t", cartas_compradas[0].imprimir_tudo())
         print("Carta 2:")
         print("\t", cartas_compradas[1].imprimir_tudo())
-
+        # Aguarda escolha do jogador
         while True:
             escolha = input("Escolha a carta (1 ou 2) com que deseja ficar: ")
-            if escolha != '1' and escolha != '2':
+            try:
+                escolha = int(escolha)
+            except ValueError:
                 print("Escolha inválida.")
                 continue
-
+            if not 1 <= escolha <= 2:
+                print("Escolha inválida.")
+                continue
+            # Adicionar na mão do jogador a carta escolhida
             if escolha == '1':
                 estado.jogador_atual().cartas_distrito_mao.append(cartas_compradas[0])
                 estado.tabuleiro.baralho_distritos.append(cartas_compradas[1])
@@ -73,7 +86,7 @@ class ColetarCartas(Acao):
                 estado.jogador_atual().cartas_distrito_mao.append(cartas_compradas[1])
                 estado.tabuleiro.baralho_distritos.append(cartas_compradas[0])
             break
-
+        # Marca flag de ação utilizada
         super().ativar(estado)
 
 
@@ -82,23 +95,24 @@ class ConstruirDistrito(Acao):
         super().__init__("Construa um distrito em sua cidade.", TipoAcao.ConstruirDistrito)
 
     def ativar(self, estado: Estado):
+        # Identifica distritos que podem ser construídos
         distritos_para_construir: List[CartaDistrito] = []
         for carta in estado.jogador_atual().cartas_distrito_mao:
             # Cofre secreto nunca pode ser construído
             if carta.nome_do_distrito != 'Cofre Secreto':
-                # Distritos repetidos não podem ser construídos
-                repetido = estado.jogador_atual().construiu_distrito(carta.nome_do_distrito)
+                # Distritos repetidos não podem ser construídos (a não ser que seja o Mago)
                 # Também deve possuir ouro suficiente para construir o distrito
-                if not repetido and carta.valor_do_distrito <= estado.jogador_atual().ouro:
+                repetido = estado.jogador_atual().construiu_distrito(carta.nome_do_distrito)
+                if (not repetido or estado.jogador_atual().personagem.nome == 'Mago') and carta.valor_do_distrito <= estado.jogador_atual().ouro:
                     distritos_para_construir.append(carta)
         if len(distritos_para_construir) == 0:
             print("Não é possível construir nenhum distrito!")
             return
-
+        # Mostra opções ao jogador
         print(f"0: Não desejo construir nenhum distrito.")
         for i, carta in enumerate(distritos_para_construir):
             print(f"{i + 1}: {carta.imprimir_tudo()}")
-
+        # Aguarda escolha do jogador
         while True:
             escolha = input("Digite o número do distrito que deseja construir: ")
             try:
@@ -106,26 +120,24 @@ class ConstruirDistrito(Acao):
             except ValueError:
                 print("Escolha inválida.")
                 continue
-            if escolha < 0 or escolha > len(distritos_para_construir):
+            if not 0 <= escolha <= len(distritos_para_construir):
                 print("Escolha inválida.")
                 continue
+            # Finaliza ação se jogador decidiu não construir
             if escolha == 0:
                 return
             # Pontua distrito
             estado.jogador_atual().pontuacao += distritos_para_construir[escolha - 1].valor_do_distrito
-            # Paga distrito e salva ouro gasto (Alquimista)
+            # Paga distrito e salva ouro gasto
             estado.jogador_atual().ouro -= distritos_para_construir[escolha - 1].valor_do_distrito
             estado.jogador_atual().ouro_gasto += distritos_para_construir[escolha - 1].valor_do_distrito
             # Constrói distrito e marca Flag de controle
             estado.jogador_atual().distritos_construidos.append(distritos_para_construir[escolha - 1])
             estado.jogador_atual().construiu = True
-            # Retira distrito cosntruído da mão
-            for carta in estado.jogador_atual().cartas_distrito_mao:
-                if carta.nome_do_distrito == distritos_para_construir[escolha - 1].nome_do_distrito:
-                    estado.jogador_atual().cartas_distrito_mao.remove(carta)
-                    break
+            # Retira distrito construído da mão
+            estado.jogador_atual().cartas_distrito_mao.remove(distritos_para_construir[escolha - 1])
             break
-
+        # Marca flag de ação utilizada
         super().ativar(estado)
 
 
@@ -134,23 +146,27 @@ class HabilidadeAssassina(Acao):
         super().__init__("Anuncie um personagem que você deseja assassinar. O personagem assassinado perde o turno.", TipoAcao.HabilidadeAssassina)
     
     def ativar(self, estado: Estado):
+        # Identifica quantos personagens estão em jogo (8 ou 9)
+        numero_personagens = estado.tabuleiro.numero_personagens
+        # Aguarda escolha do jogador
         while True:
-            escolha = input("Digite o rank (2 a 8) do personagem que deseja assassinar: ")
+            # A Assassina não pode afetar o personagem de rank 1 (ele próprio)
+            escolha = input(f"Digite o rank (2 a {numero_personagens}) do personagem que deseja assassinar: ")
             try:
                 escolha = int(escolha)
             except ValueError:
                 print("Escolha inválida.")
                 continue
-            if not 2 < escolha < 8:
+            if not 2 <= escolha <= numero_personagens:
                 print("Escolha inválida.")
                 continue
+            # Marca flag do efeito da Assassina
+            for jogador in estado.jogadores:
+                if jogador.personagem.rank == escolha:
+                    jogador.morto = True
+                    break
             break
-        
-        for jogador in estado.jogadores:
-            if jogador.personagem.rank == escolha:
-                jogador.morto = True
-                break
-
+        # Marca flag de ação utilizada
         super().ativar(estado)
 
 
@@ -160,76 +176,119 @@ class HabilidadeLadrao(Acao):
             "Anuncie um personagem que você deseja roubar. O personagem roubado entrega todo seu ouro ao ladrão.", TipoAcao.HabilidadeLadrao)
 
     def ativar(self, estado: Estado):
+        # Identifica quantos personagens estão em jogo (8 ou 9)
+        numero_personagens = estado.tabuleiro.numero_personagens
+        # Aguarda escolha do jogador
         while True:
-            escolha = input("Digite o rank (3 a 8) do personagem que deseja roubar (não pode ser o rank assassinado): ")
+            # O Ladrão não pode afetar o personagem de rank 1, 2 (ele próprio) e o personagem morto pela Assassina
+            escolha = input(f"Digite o rank (3 a {numero_personagens}) do personagem que deseja roubar "
+                            f"(não pode ser o rank do personagem assassinado): ")
             try:
                 escolha = int(escolha)
             except ValueError:
                 print("Escolha inválida.")
                 continue
-            if not 3 < escolha < 8:
+            if not 3 <= escolha <= numero_personagens:
                 print("Escolha inválida.")
                 continue
             for morto in estado.jogadores:
                 if morto.morto and morto.personagem.rank == escolha:
                     print("Escolha inválida.")
                     continue
+            # Marca flag do efeito do Ladrão
+            for jogador in estado.jogadores:
+                if jogador.personagem.rank == escolha:
+                    jogador.roubado = True
+                    break
             break
-
-        for jogador in estado.jogadores:
-            if jogador.personagem.rank == escolha:
-                jogador.roubado = True
-                break
-
+        # Marca flag de ação utilizada
         super().ativar(estado)
 
 
-class EfeitoMago(Acao):
+class HabilidadeMago(Acao):
     def __init__(self):
         super().__init__(
-            'Escolha um jogador para ver sua mão de distritos, em seguida, '
-            'escolha uma carta e pague para construí-la imediatamente ou adiciona-a à sua mão. '
-            '(Você pode construir distritos idênticos)')
+            'Olhe a mão de outro jogador e escolha 1 carta. Pague para construí-la imediatamente ou adicione-a à sua mão.'
+            ' Você pode construir distritos idênticos.', TipoAcao.HabilidadeMago)
 
-    
     def ativar(self, estado: Estado):
+        # Mostra opções ao jogador
+        print("Jogadores:")
+        for i, jogador in enumerate(estado.jogadores):
+            print(f"{i+1}: {jogador}")
+        # Aguarda escolha do jogador
+        while True:
+            escolha_jogador = input("Digite o número do jogador que deseja olhar a mão e pegar 1 carta: ")
+            try:
+                escolha_jogador = int(escolha_jogador)
+            except ValueError:
+                print("Escolha inválida.")
+                continue
+            if not 0 < escolha_jogador <= len(estado.jogadores):
+                print("Escolha inválida.")
+                continue
+        # Mostra opções ao jogador
+        print("Mão do jogador escolhido:")
+        for i, carta in enumerate(estado.jogadores[escolha_jogador - 1].cartas_distrito_mao):
+            print(f"{i + 1}: {carta.imprimir_tudo()}")
+        # Aguarda escolha do jogador
+        while True:
+            escolha_carta = input("Digite o número da carta que deseja pegar para construir ou para sua mão: ")
+            try:
+                escolha_carta = int(escolha_carta)
+            except ValueError:
+                print("Escolha inválida.")
+                continue
+            if not 0 < escolha_carta <= len(estado.jogadores[escolha_jogador - 1].cartas_distrito_mao):
+                print("Escolha inválida.")
+                continue
+        # Remove carta escolhida da mão do jogador escolhido
+        distrito = estado.jogadores[escolha_jogador - 1].cartas_distrito_mao[escolha_carta - 1]
+        estado.jogadores[escolha_jogador - 1].cartas_distrito_mao.remove(distrito)
+        # Adiciona carta escolhida na mão do jogador atual
+        estado.jogador_atual().cartas_distrito_mao.append(distrito)
+        # Verifica se é possível construir distrito escolhido
+        if distrito.valor_do_distrito <= estado.jogador_atual().ouro and distrito.nome_do_distrito != 'Cofre Secreto':
+            # Aguarda escolha do jogador
+            while True:
+                escolha_construir = input("Deseja construir o distrito imediatamente? (0 - Não, 1 - Sim) ")
+                try:
+                    escolha_construir = int(escolha_construir)
+                except ValueError:
+                    print("Escolha inválida.")
+                    continue
+                if not 0 <= escolha_construir <= 1:
+                    print("Escolha inválida.")
+                    continue
+                # Constrói distrito imediatamente
+                if escolha_construir == 1:
+                    # Pontua distrito
+                    estado.jogador_atual().pontuacao += distrito.valor_do_distrito
+                    # Paga distrito e salva ouro gasto (Alquimista)
+                    estado.jogador_atual().ouro -= distrito.valor_do_distrito
+                    estado.jogador_atual().ouro_gasto += distrito.valor_do_distrito
+                    # Constrói distrito e marca Flag de controle
+                    estado.jogador_atual().distritos_construidos.append(distrito)
+                    estado.jogador_atual().construiu = True
+                    # Retira distrito construído da mão
+                    estado.jogador_atual().cartas_distrito_mao.remove(distrito)
+                break
+        # Marca flag de ação utilizada
+        super().ativar(estado)
 
-        for numero_jogadores in range(len(estado.jogadores)):
-            print(estado.jogadores[numero_jogadores])
 
-        jogador_escolhido = int(input("selecione o jogador: "))
-
-        for i, carta in enumerate(estado.jogadores[jogador_escolhido - 1].cartas_distrito_mao):
-            if not carta.nome_do_distrito == 'cofre secreto':
-                print(f"{i + 1}: {carta}")
-
-        carta_escohida = int(input('Carta escolhida: '))
-        estado.jogador_atual().cartas_distrito_mao.append(
-            estado.jogadores[jogador_escolhido - 1].cartas_distrito_mao[carta_escohida - 1])
-        estado.jogadores[jogador_escolhido - 1].cartas_distrito_mao.pop(carta_escohida - 1)
-
-        deseja_construir = input("deseja construir imediatamente? (s/n) ").lower()
-        if deseja_construir == "s":
-            estado.jogador_atual().distritos_construidos.append(estado.jogador_atual().cartas_distrito_mao[-1])
-            estado.jogador_atual().ouro -= estado.jogador_atual().cartas_distrito_mao[-1].valor_do_distrito
-            estado.jogador_atual().pontuacao += estado.jogador_atual().cartas_distrito_mao[-1].valor_do_distrito
-            estado.jogador_atual().cartas_distrito_mao.remove(estado.jogador_atual().cartas_distrito_mao[-1])
-            if len(estado.jogador_atual().distritos_construidos) == 7:
-                estado.jogador_atual().terminou = True
-        estado.jogador_atual().acoes_realizadas[TipoAcao.EfeitoMago.value] = 1
-
-
-class EfeitoRei(Acao):
+class HabilidadeRei(Acao):
     def __init__(self):
-        super().__init__('Receba 1 ouro para cada distrito NOBRE contruído')
+        super().__init__('Ganhe 1 ouro para cada um dos seus distritos NOBRES.', TipoAcao.HabilidadeRei)
 
-    
     def ativar(self, estado: Estado):
-        for _, distrito in enumerate(estado.jogador_atual().distritos_construidos):
-            if distrito.tipo_de_distrito == TipoDistrito.Nobre or distrito.nome_do_distrito == 'escola de magia':
+        # Contabiliza distritos nobres para ganhar ouro
+        for distrito in estado.jogador_atual().distritos_construidos:
+            # O efeito da carta Escola de magia é ser contabilizada como qualquer tipo, portanto também é nobre
+            if distrito.tipo_de_distrito == TipoDistrito.Nobre or distrito.nome_do_distrito == 'Escola de Magia':
                 estado.jogador_atual().ouro += 1
-                estado.jogador_atual().pontuacao += 1
-        estado.jogador_atual().acoes_realizadas[TipoAcao.EfeitoRei.value] = 1
+        # Marca flag de ação utilizada
+        super().ativar(estado)
 
 
 class EfeitoCardealAtivo(Acao):

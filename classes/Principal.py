@@ -53,7 +53,7 @@ while not final_jogo:
                     ladrao.ouro += jogador.ouro
                     jogador.ouro = 0
                     break
-        # Aplica habilidade do Rei
+        # Aplica habilidade passiva do Rei
         if jogador.personagem.nome == "Rei":
             for antigorei in simulacao.estado.jogadores:
                 antigorei.rei = False

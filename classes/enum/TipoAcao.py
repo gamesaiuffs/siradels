@@ -26,10 +26,10 @@ class TipoAcao(Enum):
     HabilidadeChantagista = auto()
     # Rank 3
     HabilidadeIlusionista = auto()
-    HabilidadeMago = auto()
+    HabilidadeMago = auto()  # implementado
     HabilidadeVidente = auto()
     # Rank 4
-    HabilidadeRei = auto()
+    HabilidadeRei = auto()  # implementado
     HabilidadeImperador = auto()
     HabilidadePatricio = auto()
     # Rank 5
@@ -66,12 +66,12 @@ class TipoAcao(Enum):
     # Ações Passivas
     PortaoDoDragao = auto()
     Muralha = auto()
-    MinaDeOuro = auto()  # implementado
+    MinaDeOuro = auto()  # implementado (parcial)
     TesouroImperial = auto()
     AbrigoParaPobres = auto()  # implementado
-    CofreSecreto = auto()  # implementado
+    CofreSecreto = auto()  # implementado (parcial)
     BairroAssombrado = auto()
-    EscolaDeMagia = auto()
+    EscolaDeMagia = auto()  # implementado (parcial)
 
     Parque = auto()
     Monumento = auto()

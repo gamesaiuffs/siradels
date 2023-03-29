@@ -7,11 +7,12 @@ from random import shuffle
 
 class Tabuleiro:
     # Construtor
-    def __init__(self, num_jogadores):
+    def __init__(self, num_jogadores, numero_personagens):
         self.cartas_visiveis = []
         self.cartas_nao_visiveis = []
         self.baralho_personagens = self.criar_baralho_personagem(num_jogadores)
         self.baralho_distritos = self.criar_baralho_distritos()
+        self.numero_personagens = numero_personagens
 
     # To String
     def __str__(self):
