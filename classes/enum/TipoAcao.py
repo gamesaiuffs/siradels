@@ -35,18 +35,18 @@ class TipoAcao(Enum):
     # Rank 5
     HabilidadeBispo = auto()
     HabilidadeAbade = auto()
-    HabilidadeCardealAtivo = auto()
-    HabilidadeCardealPassivo = auto()
+    HabilidadeCardeal = auto()  # implementado
     # Rank 6
     HabilidadeComerciante = auto()
-    HabilidadeAlquimista = auto()
+    # HabilidadeAlquimista = auto() implementado - habilidade passiva somente
     HabilidadeMercador = auto()
     # Rank 7
     HabilidadeArquiteta = auto()
-    HabilidadeNavegadora = auto()
+    HabilidadeNavegadora = auto()  # implementado
     HabilidadeEstudiosa = auto()
     # Rank 8
-    HabilidadeSenhordaGuerra = auto()
+    HabilidadeSenhordaGuerraDestruir = auto()  # implementado
+    HabilidadeSenhordaGuerraColetar = auto()  # implementado
     HabilidadeDiplomata = auto()
     HabilidadeMarechal = auto()
     # Rank 9

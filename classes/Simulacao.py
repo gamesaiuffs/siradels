@@ -68,12 +68,11 @@ class Simulacao:
                  HabilidadeAssassina(),
                  HabilidadeLadrao(),
                  HabilidadeMago(),
-                 HabilidadeRei()]
-                 #EfeitoCardealAtivo(),
-                 #EfeitoCardealPassivo(),
-                 #EfeitoAlquimista(),
-                 #EfeitoNavegadora(),
-                 #EfeitoSenhordaGuerra(),
+                 HabilidadeRei(),
+                 HabilidadeCardeal(),
+                 HabilidadeNavegadora(),
+                 HabilidadeSenhordaGuerraDestruir(),
+                 HabilidadeSenhordaGuerraColetar()]
                  #CofreSecreto(),
                  #Laboratorio(),
                  #Necropole(),
