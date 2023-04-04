@@ -55,24 +55,17 @@ class TipoAcao(Enum):
     HabilidadeColetorDeImpostos = auto()
 
     # Distritos Especiais
-    # Ações Ativas
-    Laboratorio = auto()
-    Necropole = auto()
+    Laboratorio = auto()  # implementado
     Teatro = auto()
     Estrutura = auto()
     Estabulos = auto()
-    CovilDosLadroes = auto()
-
-    # Ações Passivas
     PortaoDoDragao = auto()
     Muralha = auto()
     MinaDeOuro = auto()  # implementado (parcial)
     TesouroImperial = auto()
-    AbrigoParaPobres = auto()  # implementado
     CofreSecreto = auto()  # implementado (parcial)
     BairroAssombrado = auto()
     EscolaDeMagia = auto()  # implementado (parcial)
-
     Parque = auto()
     Monumento = auto()
     Estatua = auto()

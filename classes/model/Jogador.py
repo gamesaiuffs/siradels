@@ -17,7 +17,6 @@ class Jogador:
         self.rei = False
         self.morto = False
         self.roubado = False
-        self.construiu = False
         self.ouro_gasto = 0
         self.acoes_realizadas = [False for _ in range(len(TipoAcao))]
         self.terminou = False  # True se o jogador construiu 7 distritos
