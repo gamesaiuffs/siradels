@@ -216,8 +216,8 @@ class ConstruirDistrito(Acao):
                         break
             # Construção de necrópole sem custo de ouro
             elif escolha_construir <= len(distritos_para_construir) + len(distritos_para_construir_cardeal) + len(distritos_para_construir_necropole):
-                (distrito, destruido) = distritos_para_construir_necropole
-                [escolha_construir - len(distritos_para_construir) - len(distritos_para_construir_cardeal) - 1]
+                (distrito, destruido) = distritos_para_construir_necropole[escolha_construir - len(distritos_para_construir) -
+                                                                           len(distritos_para_construir_cardeal) - 1]
                 # Retira distrito construído da mão
                 estado.jogador_atual().cartas_distrito_mao.remove(distrito)
                 # Destrói distrito escolhido
@@ -225,8 +225,9 @@ class ConstruirDistrito(Acao):
                 estado.tabuleiro.baralho_distritos.append(destruido)
             # Construção de covil dos ladrões com custo misto de ouro e cartas
             else:
-                (distrito, qtd_ouro, qtd_cartas) = distritos_para_construir_necropole
-                [escolha_construir - len(distritos_para_construir) - len(distritos_para_construir_cardeal) - len(distritos_para_construir_necropole) - 1]
+                (distrito, qtd_ouro, qtd_cartas) = distritos_para_construir_necropole[escolha_construir - len(distritos_para_construir) -
+                                                                                      len(distritos_para_construir_cardeal) -
+                                                                                      len(distritos_para_construir_necropole) - 1]
                 # Retira distrito construído da mão
                 estado.jogador_atual().cartas_distrito_mao.remove(distrito)
                 # Paga distrito e salva ouro gasto
