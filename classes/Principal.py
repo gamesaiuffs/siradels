@@ -90,9 +90,14 @@ while not final_jogo:
             
             if jogador.acoes_realizadas[TipoAcao.PassarTurno.value]:
                 break
-
-        # Marca fim de jogo e jogador finalizador
-        if len(jogador.distritos_construidos) >= 7:
+        # Identifica se o jogador construiu o Monumento
+        monumento = False
+        for construido in jogador.distritos_construidos:
+            if construido.nome_do_distrito == 'Monumento':
+                monumento = True
+                break
+        # Marca fim de jogo e jogador finalizador (monumento conta como 2 distritos para fins de uma cidade completa)
+        if len(jogador.distritos_construidos) >= 7 or (len(jogador.distritos_construidos) == 6 and monumento):
             jogador.terminou = True 
             if jogador_finalizador is None:
                 jogador_finalizador = jogador

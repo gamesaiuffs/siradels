@@ -57,8 +57,6 @@ class TipoAcao(Enum):
     # Distritos Especiais
     Laboratorio = auto()  # implementado
     Teatro = auto()
-    Estrutura = auto()
-    Estabulos = auto()
     PortaoDoDragao = auto()
     Muralha = auto()
     MinaDeOuro = auto()  # implementado (parcial)
@@ -67,14 +65,11 @@ class TipoAcao(Enum):
     BairroAssombrado = auto()
     EscolaDeMagia = auto()  # implementado (parcial)
     Parque = auto()
-    Monumento = auto()
     Estatua = auto()
     Forja = auto()
     PocoDosDesejos = auto()
-    Pedreira = auto()
     TorreDeMenagem = auto()
     Biblioteca = auto()
-    Fabrica = auto()
     Arsenal = auto()
     Basilica = auto()
     Museu = auto()

@@ -105,23 +105,54 @@ class ConstruirDistrito(Acao):
         distritos_para_construir_cardeal: List[(CartaDistrito, Jogador)] = []
         # Identifica distritos que podem ser destruídos para construir a necrópole sem custo
         distritos_para_construir_necropole: List[(CartaDistrito, CartaDistrito)] = []
-        # Identifica opções especiais para ocnstruir o covil dos ladrões (divisão do custo em ouro e cartas da mão)
+        # Identifica opções especiais para construir o covil dos ladrões (divisão do custo em ouro e cartas da mão)
         distritos_para_construir_covil_ladroes: List[(CartaDistrito, int, int)] = []
+        # Identifica opções de construção ao destruir a Estrutura
+        distritos_para_construir_estrutura: List[CartaDistrito] = []
+        # Identifica se o jogador construiu a Fábrica (afeta custo dos distritos especiais)
+        fabrica = False
+        for construido in estado.jogador_atual().distritos_construidos:
+            if construido.nome_do_distrito == 'Fábrica':
+                fabrica = True
+                break
+        # Identifica se o jogador construiu a Fábrica (afeta custo dos distritos especiais)
+        estrutura = False
+        for construido in estado.jogador_atual().distritos_construidos:
+            if construido.nome_do_distrito == 'Estrutura':
+                estrutura = True
+                break
         diferenca = 0
         for carta in estado.jogador_atual().cartas_distrito_mao:
+            # O Monumento não pode ser construído se a cidade já possuir 5 ou mais distritos
+            if carta == 'Monumento' and len(estado.jogador_atual().distritos_construidos) >= 5:
+                continue
             # Cofre secreto nunca pode ser construído
             if carta.nome_do_distrito != 'Cofre Secreto':
-                # Distritos repetidos não podem ser construídos (a não ser que seja o Mago)
-                # Também deve possuir ouro suficiente para construir o distrito
+                # Distritos repetidos não podem ser construídos (a não ser que seja o Mago ou tenha construído a Pedreira)
+                pedreira = False
+                for construido in estado.jogador_atual().distritos_construidos:
+                    if construido.nome_do_distrito == 'Pedreira':
+                        pedreira = True
+                        break
                 repetido = estado.jogador_atual().construiu_distrito(carta.nome_do_distrito)
-                if not repetido or estado.jogador_atual().personagem.nome == 'Mago':
-                    if carta.valor_do_distrito <= estado.jogador_atual().ouro:
+                if not repetido or estado.jogador_atual().personagem.nome == 'Mago' or pedreira:
+                    # Pode construir sem custo ao destruir Estrutura
+                    if estrutura:
+                        distritos_para_construir_estrutura.append(carta)
+                    # Deve possuir ouro suficiente para construir o distrito (Fábrica dá desconto para distritos especiais)
+                    if carta.valor_do_distrito <= estado.jogador_atual().ouro or \
+                            (fabrica and carta.tipo_de_distrito == TipoDistrito.Especial and carta.valor_do_distrito - 1 <= estado.jogador_atual().ouro):
                         distritos_para_construir.append(carta)
                     # Habilidade do Cardeal
                     # se não tiver ouro suficiente para construir um distrito, troque as suas cartas pelo ouro de outro jogador (1 carta:1 ouro).
+                    # Fábrica concede 1 de desconto para distritos especiais
                     elif estado.jogador_atual().personagem.nome == 'Cardeal' and \
-                            carta.valor_do_distrito <= len(estado.jogador_atual().cartas_distrito_mao) + estado.jogador_atual().ouro - 1:
+                            carta.valor_do_distrito <= len(estado.jogador_atual().cartas_distrito_mao) + estado.jogador_atual().ouro - 1 or \
+                            (fabrica and carta.valor_do_distrito - 1 <= len(estado.jogador_atual().cartas_distrito_mao) + estado.jogador_atual().ouro - 1):
                         diferenca = carta.valor_do_distrito - estado.jogador_atual().ouro
+                        # Fábrica concede 1 de desconto para distritos especiais
+                        if fabrica and carta.tipo_de_distrito == TipoDistrito.Especial:
+                            diferenca -= 1
                         # Identifica jogadores que podem pagar o ouro que falta
                         for jogador in estado.jogadores:
                             if jogador != estado.jogador_atual() and jogador.ouro >= diferenca:
@@ -129,11 +160,16 @@ class ConstruirDistrito(Acao):
                 # A necrópole pode ser construída sem custo destruindo um dos seus distritos
                 if carta.nome_do_distrito == 'Necrópole':
                     for distrito_construido in estado.jogador_atual().distritos_construidos:
-                        distritos_para_construir_necropole.append((carta, distrito_construido))
+                        # O caso da Estrutura foi tratado em separado
+                        if not distrito_construido.nome_do_distrito == 'Estrutura':
+                            distritos_para_construir_necropole.append((carta, distrito_construido))
                 # O covil dos ladrões pode ser construído com um custo misto de ouro e cartas da mão
                 if carta.nome_do_distrito == 'Covil dos Ladrões':
                     qtd_cartas = len(estado.jogador_atual().cartas_distrito_mao) - 1
                     qtd_ouro = carta.valor_do_distrito - 1
+                    # Fábrica concede 1 de desconto para distritos especiais
+                    if fabrica:
+                        qtd_ouro -= 1
                     while qtd_ouro + qtd_cartas >= carta.valor_do_distrito:
                         if qtd_ouro > estado.jogador_atual().ouro:
                             qtd_ouro -= 1
@@ -157,10 +193,13 @@ class ConstruirDistrito(Acao):
             print(f'{i}: {carta.imprimir_tudo()} - Jogador: {jogador.nome}')
         for carta, distrito in distritos_para_construir_necropole:
             i += 1
-            print(f'{i}: {carta.imprimir_tudo()} - Distrito para destruir: {distrito}')
+            print(f'{i}: {carta.imprimir_tudo()} - Distrito para destruir: {distrito.nome_do_distrito}')
         for carta, qtd_ouro, qtd_cartas in distritos_para_construir_covil_ladroes:
             i += 1
             print(f'{i}: {carta.imprimir_tudo()} - Custo em ouro: {qtd_ouro} - Custo em cartas da mão: {qtd_cartas}')
+        for carta in distritos_para_construir_estrutura:
+            i += 1
+            print(f'{i}: {carta.imprimir_tudo()} - Distrito para destruir: Estrutura')
         # Aguarda escolha do jogador
         while True:
             escolha_construir = input('Digite o número do distrito que deseja construir: ')
@@ -170,7 +209,7 @@ class ConstruirDistrito(Acao):
                 print('Escolha inválida.')
                 continue
             if not 0 <= escolha_construir <= len(distritos_para_construir) + len(distritos_para_construir_cardeal) + \
-                   len(distritos_para_construir_necropole) + len(distritos_para_construir_covil_ladroes):
+                   len(distritos_para_construir_necropole) + len(distritos_para_construir_covil_ladroes) + len(distritos_para_construir_estrutura):
                 print('Escolha inválida.')
                 continue
             # Finaliza ação se jogador decidiu não construir
@@ -184,6 +223,10 @@ class ConstruirDistrito(Acao):
                 # Paga distrito e salva ouro gasto
                 estado.jogador_atual().ouro -= distrito.valor_do_distrito
                 estado.jogador_atual().ouro_gasto += distrito.valor_do_distrito
+                # Fábrica concede 1 de desconto para distritos especiais
+                if fabrica and distrito.tipo_de_distrito == TipoDistrito.Especial:
+                    estado.jogador_atual().ouro += 1
+                    estado.jogador_atual().ouro_gasto -= 1
             # Construção com efeito passivo do Cardeal
             elif escolha_construir <= len(distritos_para_construir) + len(distritos_para_construir_cardeal):
                 (distrito, jogador) = distritos_para_construir_cardeal[escolha_construir - len(distritos_para_construir) - 1]
@@ -192,6 +235,10 @@ class ConstruirDistrito(Acao):
                 # Paga distrito e salva ouro gasto
                 estado.jogador_atual().ouro -= distrito.valor_do_distrito
                 estado.jogador_atual().ouro_gasto += distrito.valor_do_distrito
+                # Fábrica concede 1 de desconto para distritos especiais
+                if fabrica and distrito.tipo_de_distrito == TipoDistrito.Especial:
+                    estado.jogador_atual().ouro += 1
+                    estado.jogador_atual().ouro_gasto -= 1
                 # Jogador escolhido recebe cartas em troca pelo dinheiro pago
                 for i in range(diferenca):
                     print(f'Escolha as cartas que trocará pelo ouro recebido do jogador escolhido. Faltam {diferenca - i} cartas.')
@@ -216,16 +263,20 @@ class ConstruirDistrito(Acao):
                         break
             # Construção de necrópole sem custo de ouro
             elif escolha_construir <= len(distritos_para_construir) + len(distritos_para_construir_cardeal) + len(distritos_para_construir_necropole):
-                (distrito, destruido) = distritos_para_construir_necropole[escolha_construir - len(distritos_para_construir) -
+                (distrito, destruido) = distritos_para_construir_necropole[escolha_construir -
+                                                                           len(distritos_para_construir) -
                                                                            len(distritos_para_construir_cardeal) - 1]
                 # Retira distrito construído da mão
                 estado.jogador_atual().cartas_distrito_mao.remove(distrito)
-                # Destrói distrito escolhido
+                # Destrói distrito escolhido e remove pontos parciais
                 estado.jogador_atual().distritos_construidos.remove(destruido)
                 estado.tabuleiro.baralho_distritos.append(destruido)
+                estado.jogador_atual().pontuacao -= destruido.valor_do_distrito
             # Construção de covil dos ladrões com custo misto de ouro e cartas
-            else:
-                (distrito, qtd_ouro, qtd_cartas) = distritos_para_construir_necropole[escolha_construir - len(distritos_para_construir) -
+            elif escolha_construir <= len(distritos_para_construir) + len(distritos_para_construir_cardeal) + len(distritos_para_construir_necropole) + \
+                    len(distritos_para_construir_covil_ladroes):
+                (distrito, qtd_ouro, qtd_cartas) = distritos_para_construir_necropole[escolha_construir -
+                                                                                      len(distritos_para_construir) -
                                                                                       len(distritos_para_construir_cardeal) -
                                                                                       len(distritos_para_construir_necropole) - 1]
                 # Retira distrito construído da mão
@@ -253,13 +304,31 @@ class ConstruirDistrito(Acao):
                         estado.jogador_atual().cartas_distrito_mao.remove(carta)
                         estado.tabuleiro.baralho_distritos.append(carta)
                         break
+            # Construção sem custo destruíndo a Estrutura
+            else:
+                distrito = distritos_para_construir_necropole[escolha_construir -
+                                                              len(distritos_para_construir) -
+                                                              len(distritos_para_construir_cardeal) -
+                                                              len(distritos_para_construir_necropole) -
+                                                              len(distritos_para_construir_covil_ladroes) - 1]
+                # Retira distrito construído da mão
+                estado.jogador_atual().cartas_distrito_mao.remove(distrito)
+                # Identifica estrutura
+                for destruido in estado.jogador_atual().distritos_construidos:
+                    if destruido.nome_do_distrito == 'Estrutura':
+                        # Destrói estrutura e remove pontos parciais
+                        estado.jogador_atual().distritos_construidos.remove(destruido)
+                        estado.tabuleiro.baralho_distritos.append(destruido)
+                        estado.jogador_atual().pontuacao -= destruido.valor_do_distrito
+                        break
             # Pontua distrito
             estado.jogador_atual().pontuacao += distrito.valor_do_distrito
             # Constrói distrito
             estado.jogador_atual().distritos_construidos.append(distrito)
             break
-        # Marca flag de ação utilizada
-        super().ativar(estado)
+        # Marca flag de ação utilizada (a construção dos estábulos não conta para o limite de construções do turno)
+        if not estado.jogador_atual().distritos_construidos[-1].nome_do_distrito == 'Estábulos':
+            super().ativar(estado)
 
 
 class HabilidadeAssassina(Acao):

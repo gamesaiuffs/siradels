@@ -138,8 +138,7 @@ class Tabuleiro:
 
         # Distritos especiais
         especiais = [CartaDistrito(0, TipoDistrito.Especial, 'Cofre Secreto', 1,
-                                   "O Cofre não pode ser contruído. "
-                                   "Ao final da partida, revele o Cofre Secreto da sua mão para marcar 3 pontos extras."),
+                                   "O Cofre não pode ser contruído. Ao final da partida, revele o Cofre Secreto da sua mão para marcar 3 pontos extras."),
                      CartaDistrito(2, TipoDistrito.Especial, 'Bairro Assombrado', 1,
                                    "Ao final da partida, o Bairro Assombrado vale como 1 tipo de distrito à sua escolha."),
                      CartaDistrito(2, TipoDistrito.Especial, 'Estábulos', 1,
@@ -163,8 +162,7 @@ class Tabuleiro:
                                    "Uma vez por turno, coloque 1 carta da sua mão, voltada para baixo, sob o museu. "
                                    "Ao final da partida, marque 1 ponto extra para cada carta sob o Museu."),
                      CartaDistrito(4, TipoDistrito.Especial, 'Basílica', 1,
-                                   "Ao final da partida, marque 1 ponto extra para cada distrito especial na sua cidade "
-                                   "que tenha um número ímpar como custo."),
+                                   "Ao final da partida, marque 1 ponto extra para cada distrito especial na sua cidade que tenha um número ímpar como custo."),
                      CartaDistrito(5, TipoDistrito.Especial, 'Fábrica', 1,
                                    "Você paga 1 ouro a menos para construir qualquer outro distrito ESPECIAL."),
                      CartaDistrito(5, TipoDistrito.Especial, 'Pedreira', 1,
@@ -197,8 +195,7 @@ class Tabuleiro:
                      CartaDistrito(6, TipoDistrito.Especial, 'Mina de Ouro', 1,
                                    "Se você optar por ganhar ouro ao coletar recursos, ganhe 1 ouro extra."),
                      CartaDistrito(6, TipoDistrito.Especial, 'Covil dos Ladrões', 1,
-                                   "Pague parte ou todo o custo do Covil dos Ladrões com cartas da sua mão, em vez de  ouro, "
-                                   "a uma taxa de 1 carta: 1 ouro."),
+                                   "Pague parte ou todo o custo do Covil dos Ladrões com cartas da sua mão, em vez de  ouro, a uma taxa de 1 carta: 1 ouro."),
                      CartaDistrito(6, TipoDistrito.Especial, 'Escola de Magia', 1,
                                    "Ao usar habilidades que obtêm recursos pelos seus distritos, "
                                    "a Escola de Magia vale como o tipo de distrito à sua escolha."),
