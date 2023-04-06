@@ -537,9 +537,16 @@ class HabilidadeSenhordaGuerraDestruir(Acao):
             # Não é possível destruir um distrito de um jogador com 7+ distritos
             # É permitido destruir um dos seus próprios distritos
             if not jogador.terminou:
+                # Identifica se jogador construiu a Muralha (aumenta o custo de destruição)
+                muralha = 1 if jogador.construiu_distrito('Muralha') else 0
                 for carta in jogador.distritos_construidos:
+                    # Trata caso especial da Muralha (efeito dela não afeta a si mesmo)
+                    if carta.nome_do_distrito == 'Muralha' and carta.valor_do_distrito <= estado.jogador_atual().ouro + 1:
+                        distritos_para_destruir.append((carta, jogador))
+                        continue
+                    # Não é possível destruir a Torre de Menagem
                     # Precisa ter ouro suficiente para destruir o distrito
-                    if carta.valor_do_distrito <= estado.jogador_atual().ouro + 1:
+                    if not carta.nome_do_distrito == 'Torre de Menagem' and carta.valor_do_distrito + muralha <= estado.jogador_atual().ouro + 1:
                         distritos_para_destruir.append((carta, jogador))
         if len(distritos_para_destruir) == 0:
             print('Não é possível destruir nenhum distrito!')
@@ -561,7 +568,11 @@ class HabilidadeSenhordaGuerraDestruir(Acao):
                 continue
             # Paga o custo e destrói distrito escolhido do jogador alvo
             (distrito, jogador) = distritos_para_destruir[escolha - 1]
-            estado.jogador_atual().ouro -= distrito.valor_do_distrito - 1
+            # Trata caso especial da Muralha (efeito dela não afeta a si mesmo)
+            if distrito.nome_do_distrito == 'Muralha':
+                estado.jogador_atual().ouro -= distrito.valor_do_distrito - 1
+            else:
+                estado.jogador_atual().ouro -= distrito.valor_do_distrito - 1 + muralha
             jogador.pontuacao -= distrito.valor_do_distrito
             jogador.distritos_construidos.remove(distrito)
             estado.tabuleiro.baralho_distritos.append(distrito)
@@ -662,6 +673,7 @@ class Arsenal(Acao):
                 if arsenal.nome_do_distrito == 'Arsenal':
                     estado.jogador_atual().distritos_construidos.remove(arsenal)
                     estado.tabuleiro.baralho_distritos.append(arsenal)
+                    estado.jogador_atual().pontuacao -= arsenal.valor_do_distrito
                     break
             break
         # Marca flag de ação utilizada
