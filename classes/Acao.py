@@ -532,7 +532,7 @@ class HabilidadeSenhordaGuerraDestruir(Acao):
 
     def ativar(self, estado: Estado):
         # Identifica distritos que podem ser destruídos
-        distritos_para_destruir: List[(CartaDistrito, Jogador)] = []
+        distritos_para_destruir: List[(CartaDistrito, Jogador, int)] = []
         for jogador in estado.jogadores:
             # Não é possível destruir um distrito de um jogador com 7+ distritos
             # É permitido destruir um dos seus próprios distritos
@@ -542,12 +542,12 @@ class HabilidadeSenhordaGuerraDestruir(Acao):
                 for carta in jogador.distritos_construidos:
                     # Trata caso especial da Muralha (efeito dela não afeta a si mesmo)
                     if carta.nome_do_distrito == 'Muralha' and carta.valor_do_distrito <= estado.jogador_atual().ouro + 1:
-                        distritos_para_destruir.append((carta, jogador))
+                        distritos_para_destruir.append((carta, jogador, muralha))
                         continue
                     # Não é possível destruir a Torre de Menagem
                     # Precisa ter ouro suficiente para destruir o distrito
                     if not carta.nome_do_distrito == 'Torre de Menagem' and carta.valor_do_distrito + muralha <= estado.jogador_atual().ouro + 1:
-                        distritos_para_destruir.append((carta, jogador))
+                        distritos_para_destruir.append((carta, jogador, muralha))
         if len(distritos_para_destruir) == 0:
             print('Não é possível destruir nenhum distrito!')
             return
@@ -567,7 +567,7 @@ class HabilidadeSenhordaGuerraDestruir(Acao):
                 print('Escolha inválida.')
                 continue
             # Paga o custo e destrói distrito escolhido do jogador alvo
-            (distrito, jogador) = distritos_para_destruir[escolha - 1]
+            (distrito, jogador, muralha) = distritos_para_destruir[escolha - 1]
             # Trata caso especial da Muralha (efeito dela não afeta a si mesmo)
             if distrito.nome_do_distrito == 'Muralha':
                 estado.jogador_atual().ouro -= distrito.valor_do_distrito - 1
