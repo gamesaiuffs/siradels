@@ -56,24 +56,6 @@ class TipoAcao(Enum):
 
     # Distritos Especiais
     Laboratorio = auto()  # implementado
-    Teatro = auto()
-    PortaoDoDragao = auto()
-    Muralha = auto()
-    MinaDeOuro = auto()  # implementado (parcial)
-    TesouroImperial = auto()
-    CofreSecreto = auto()  # implementado (parcial)
-    BairroAssombrado = auto()
-    EscolaDeMagia = auto()  # implementado (parcial)
-    Parque = auto()
-    Estatua = auto()
-    Forja = auto()
-    PocoDosDesejos = auto()
-    TorreDeMenagem = auto()
-    Biblioteca = auto()
-    Arsenal = auto()
-    Basilica = auto()
-    Museu = auto()
-    Observatorio = auto()
-    Capitolio = auto()
-    TorreDeMarfim = auto()
-    SalaDeMapas = auto()
+    Arsenal = auto()  # implementado
+    Forja = auto()  # implementado
+    Museu = auto()  # implementado

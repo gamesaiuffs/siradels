@@ -72,14 +72,11 @@ class Simulacao:
                  HabilidadeCardeal(),
                  HabilidadeNavegadora(),
                  HabilidadeSenhordaGuerraDestruir(),
-                 HabilidadeSenhordaGuerraColetar()]
-                 #CofreSecreto(),
-                 #Laboratorio(),
-                 #Necropole(),
-                 #Teatro(),
-                 #Estrutura(),
-                 #Estabulo(),
-                 #CovilDosLadroes()]
+                 HabilidadeSenhordaGuerraColetar(),
+                 Laboratorio(),
+                 Arsenal(),
+                 Forja(),
+                 Museu()]
         return acoes
 
     def acoes_disponiveis(self) -> list[Acao]:

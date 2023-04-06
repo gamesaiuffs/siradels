@@ -26,10 +26,15 @@ class PassarTurno(Acao):
     def ativar(self, estado: Estado):
         # Efeito passivo do distrito Abrigo para Pobres
         if estado.jogador_atual().ouro == 0:
-            for distrito in estado.jogador_atual().distritos_construidos:
-                if distrito.nome_do_distrito == 'Abrigo para Pobres':
-                    estado.jogador_atual().ouro += 1
-                    break
+            if estado.jogador_atual().construiu_distrito('Abrigo para Pobres'):
+                estado.jogador_atual().ouro += 1
+        # Efeito passivo do distrito Parque
+        if len(estado.jogador_atual().cartas_distrito_mao) == 0:
+            if estado.jogador_atual().construiu_distrito('Parque'):
+                # Pescar cartas do baralho e adicionar na mão do jogador
+                cartas_compradas = estado.tabuleiro.baralho_distritos[:2]
+                del estado.tabuleiro.baralho_distritos[:2]
+                estado.jogador_atual().cartas_distrito_mao.extend(cartas_compradas)
         # Efeito passivo do Alquimista
         if estado.jogador_atual().personagem.nome == 'Alquimista':
             estado.jogador_atual().ouro += estado.jogador_atual().ouro_gasto
@@ -63,32 +68,45 @@ class ColetarCartas(Acao):
         super().__init__('Compre duas cartas do baralho de distritos, escolha uma e descarte a outra.', TipoAcao.ColetarCartas)
 
     def ativar(self, estado: Estado):
+        qtd_cartas = 2
+        # Efeito passivo da carta Observatório
+        if estado.jogador_atual().construiu_distrito('Observatório'):
+            qtd_cartas = 3
         # Pescar cartas do baralho
-        cartas_compradas = estado.tabuleiro.baralho_distritos[:2]
-        del estado.tabuleiro.baralho_distritos[:2]
+        cartas_compradas = estado.tabuleiro.baralho_distritos[:qtd_cartas]
+        del estado.tabuleiro.baralho_distritos[:qtd_cartas]
+        # Efeito passivo da carta Biblioteca
+        if estado.jogador_atual().construiu_distrito('Biblioteca'):
+            estado.jogador_atual().cartas_distrito_mao.extend(cartas_compradas)
+            return
         # Mostra cartas para escolha
-        print('Carta 1:')
-        print('\t', cartas_compradas[0].imprimir_tudo())
-        print('Carta 2:')
-        print('\t', cartas_compradas[1].imprimir_tudo())
+        print(f'Carta 1: {cartas_compradas[0].imprimir_tudo()}')
+        print(f'Carta 2: {cartas_compradas[1].imprimir_tudo()}')
+        if qtd_cartas == 3:
+            print(f'Carta 3: {cartas_compradas[2].imprimir_tudo()}')
         # Aguarda escolha do jogador
         while True:
-            escolha = input('Escolha a carta (1 ou 2) com que deseja ficar: ')
+            escolha = input('Escolha a carta com que deseja ficar: ')
             try:
                 escolha = int(escolha)
             except ValueError:
                 print('Escolha inválida.')
                 continue
-            if not 1 <= escolha <= 2:
+            if not 1 <= escolha <= qtd_cartas:
                 print('Escolha inválida.')
                 continue
-            # Adicionar na mão do jogador a carta escolhida
+            # Adicionar na mão do jogador a carta escolhida e descarta cartas que não foram escolhidas
             if escolha == 1:
                 estado.jogador_atual().cartas_distrito_mao.append(cartas_compradas[0])
                 estado.tabuleiro.baralho_distritos.append(cartas_compradas[1])
             elif escolha == 2:
                 estado.jogador_atual().cartas_distrito_mao.append(cartas_compradas[1])
                 estado.tabuleiro.baralho_distritos.append(cartas_compradas[0])
+            elif escolha == 3:
+                estado.jogador_atual().cartas_distrito_mao.append(cartas_compradas[2])
+                estado.tabuleiro.baralho_distritos.extend(cartas_compradas[:1])
+            if qtd_cartas == 3 and 1 <= escolha <= 2:
+                estado.tabuleiro.baralho_distritos.append(cartas_compradas[2])
             break
         # Marca flag de ação utilizada
         super().ativar(estado)
@@ -110,17 +128,11 @@ class ConstruirDistrito(Acao):
         # Identifica opções de construção ao destruir a Estrutura
         distritos_para_construir_estrutura: List[CartaDistrito] = []
         # Identifica se o jogador construiu a Fábrica (afeta custo dos distritos especiais)
-        fabrica = False
-        for construido in estado.jogador_atual().distritos_construidos:
-            if construido.nome_do_distrito == 'Fábrica':
-                fabrica = True
-                break
-        # Identifica se o jogador construiu a Fábrica (afeta custo dos distritos especiais)
-        estrutura = False
-        for construido in estado.jogador_atual().distritos_construidos:
-            if construido.nome_do_distrito == 'Estrutura':
-                estrutura = True
-                break
+        fabrica = estado.jogador_atual().construiu_distrito('Fábrica')
+        # Identifica se o jogador construiu a Estrutura (adiciona opções de construção sem custo)
+        estrutura = estado.jogador_atual().construiu_distrito('Estrutura')
+        # Identifica se o jogador construiu a Pedreira (adiciona opções de construção repetida)
+        pedreira = estado.jogador_atual().construiu_distrito('Pedreira')
         diferenca = 0
         for carta in estado.jogador_atual().cartas_distrito_mao:
             # O Monumento não pode ser construído se a cidade já possuir 5 ou mais distritos
@@ -129,11 +141,6 @@ class ConstruirDistrito(Acao):
             # Cofre secreto nunca pode ser construído
             if carta.nome_do_distrito != 'Cofre Secreto':
                 # Distritos repetidos não podem ser construídos (a não ser que seja o Mago ou tenha construído a Pedreira)
-                pedreira = False
-                for construido in estado.jogador_atual().distritos_construidos:
-                    if construido.nome_do_distrito == 'Pedreira':
-                        pedreira = True
-                        break
                 repetido = estado.jogador_atual().construiu_distrito(carta.nome_do_distrito)
                 if not repetido or estado.jogador_atual().personagem.nome == 'Mago' or pedreira:
                     # Pode construir sem custo ao destruir Estrutura
@@ -512,7 +519,7 @@ class HabilidadeNavegadora(Acao):
             if escolha == 1:
                 estado.jogador_atual().ouro += 4
             elif escolha == 2:
-                estado.jogador_atual().cartas_distrito_mao.append(estado.tabuleiro.baralho_distritos[0:4])
+                estado.jogador_atual().cartas_distrito_mao.extend(estado.tabuleiro.baralho_distritos[0:4])
                 del estado.tabuleiro.baralho_distritos[0:4]
             break
         # Marca flag de ação utilizada
@@ -528,7 +535,7 @@ class HabilidadeSenhordaGuerraDestruir(Acao):
         distritos_para_destruir: List[(CartaDistrito, Jogador)] = []
         for jogador in estado.jogadores:
             # Não é possível destruir um distrito de um jogador com 7+ distritos
-            # É permitido destruir um de seus próprios distritos
+            # É permitido destruir um dos seus próprios distritos
             if not jogador.terminou:
                 for carta in jogador.distritos_construidos:
                     # Precisa ter ouro suficiente para destruir o distrito
@@ -552,11 +559,17 @@ class HabilidadeSenhordaGuerraDestruir(Acao):
             if not 0 < escolha <= len(distritos_para_destruir):
                 print('Escolha inválida.')
                 continue
+            # Paga o custo e destrói distrito escolhido do jogador alvo
             (distrito, jogador) = distritos_para_destruir[escolha - 1]
             estado.jogador_atual().ouro -= distrito.valor_do_distrito - 1
             jogador.pontuacao -= distrito.valor_do_distrito
             jogador.distritos_construidos.remove(distrito)
             estado.tabuleiro.baralho_distritos.append(distrito)
+            # Indentifica se o distrito destruído foi o Museu e aplica efeitos secundários
+            if distrito.nome_do_distrito == 'Museu':
+                jogador.pontuacao -= len(jogador.distritos_museu)
+                estado.tabuleiro.baralho_distritos.extend(jogador.distritos_museu)
+                jogador.distritos_museu = []
             break
         # Marca flag de ação utilizada
         super().ativar(estado)
@@ -598,6 +611,101 @@ class Laboratorio(Acao):
             carta = estado.jogador_atual().cartas_distrito_mao.pop(escolha_carta - 1)
             estado.tabuleiro.baralho_distritos.append(carta)
             estado.jogador_atual().ouro += 2
+            break
+        # Marca flag de ação utilizada
+        super().ativar(estado)
+
+
+class Arsenal(Acao):
+    def __init__(self):
+        super().__init__('No seu turno, destrua o Arsenal para destruir 1 distrito à sua escolha.', TipoAcao.Arsenal)
+
+    def ativar(self, estado: Estado):
+        # Identifica distritos que podem ser destruídos
+        distritos_para_destruir: List[(CartaDistrito, Jogador)] = []
+        for jogador in estado.jogadores:
+            # Não é possível destruir um distrito de um jogador com 7+ distritos
+            # É permitido destruir um dos seus próprios distritos
+            if not jogador.terminou:
+                for carta in jogador.distritos_construidos:
+                    distritos_para_destruir.append((carta, jogador))
+        if len(distritos_para_destruir) == 0:
+            print('Não é possível destruir nenhum distrito!')
+            return
+        # Mostra opções ao jogador
+        print('Distritos que podem ser destruídos:')
+        for i, (carta, jogador) in enumerate(distritos_para_destruir):
+            print(f'{i + 1}: {carta.imprimir_tudo()} - Jogador: {jogador.nome}')
+        # Aguarda escolha do jogador
+        while True:
+            escolha = input('Digite o número do distrito que deseja destruir: ')
+            try:
+                escolha = int(escolha)
+            except ValueError:
+                print('Escolha inválida.')
+                continue
+            if not 0 < escolha <= len(distritos_para_destruir):
+                print('Escolha inválida.')
+                continue
+            # Paga o custo e destrói distrito escolhido do jogador alvo
+            (distrito, jogador) = distritos_para_destruir[escolha - 1]
+            jogador.pontuacao -= distrito.valor_do_distrito
+            jogador.distritos_construidos.remove(distrito)
+            estado.tabuleiro.baralho_distritos.append(distrito)
+            # Indentifica se o distrito destruído foi o Museu e aplica efeitos secundários
+            if distrito.nome_do_distrito == 'Museu':
+                jogador.pontuacao -= len(jogador.distritos_museu)
+                estado.tabuleiro.baralho_distritos.extend(jogador.distritos_museu)
+                jogador.distritos_museu = []
+            # Identifica e destrói Arsenal
+            for arsenal in estado.jogador_atual().distritos_construidos:
+                if arsenal.nome_do_distrito == 'Arsenal':
+                    estado.jogador_atual().distritos_construidos.remove(arsenal)
+                    estado.tabuleiro.baralho_distritos.append(arsenal)
+                    break
+            break
+        # Marca flag de ação utilizada
+        super().ativar(estado)
+
+
+class Forja(Acao):
+    def __init__(self):
+        super().__init__('Uma vez por turno, pague 2 ouros para receber 3 cartas.', TipoAcao.Forja)
+
+    def ativar(self, estado: Estado):
+        # Pescar cartas do baralho e adicionar na mão do jogador
+        cartas_compradas = estado.tabuleiro.baralho_distritos[:3]
+        del estado.tabuleiro.baralho_distritos[:3]
+        estado.jogador_atual().cartas_distrito_mao.extend(cartas_compradas)
+        # Paga custo do efeito
+        estado.jogador_atual().ouro -= 2
+        # Marca flag de ação utilizada
+        super().ativar(estado)
+
+
+class Museu(Acao):
+    def __init__(self):
+        super().__init__('Uma vez por turno, coloque 1 carta da sua mão, voltada para baixo, sob o museu.'
+                         'Ao final da partida, marque 1 ponto extra para cada carta sob o Museu', TipoAcao.Museu)
+
+    def ativar(self, estado: Estado):
+        # Mostra opções ao jogador
+        for i, carta in enumerate(estado.jogador_atual().cartas_distrito_mao):
+            print(f'{i + 1}: {carta.imprimir_tudo()}')
+        while True:
+            escolha_carta = input('Digite o número do distrito que deseja colocar no Museu: ')
+            try:
+                escolha_carta = int(escolha_carta)
+            except ValueError:
+                print('Escolha inválida.')
+                continue
+            if not 0 < escolha_carta <= len(estado.jogador_atual().cartas_distrito_mao):
+                print('Escolha inválida.')
+                continue
+            # Descarta carta e atualiza pontuação parcial
+            carta = estado.jogador_atual().cartas_distrito_mao.pop(escolha_carta - 1)
+            estado.jogador_atual().distritos_museu.append(carta)
+            estado.jogador_atual().pontuacao += 1
             break
         # Marca flag de ação utilizada
         super().ativar(estado)

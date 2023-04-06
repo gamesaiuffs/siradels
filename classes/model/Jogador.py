@@ -14,6 +14,7 @@ class Jogador:
         self.ouro = 2
         self.cartas_distrito_mao: List[CartaDistrito] = []
         self.distritos_construidos: List[CartaDistrito] = []
+        self.distritos_museu: List[CartaDistrito] = []
         self.rei = False
         self.morto = False
         self.roubado = False
