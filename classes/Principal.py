@@ -112,75 +112,7 @@ while not final_jogo:
     simulacao.estado.ordenar_jogadores_rei()
     
 
-# Rotina de fim de jogo
-# contabilizar a pontuacao e verificar ponto
+simulacao.computar_pontuacao_final()
 for jogador in simulacao.estado.jogadores:
-
-    # +1 ponto pra cada moeada do valor de distrito
-    soma_pontos = 0
-    cont_pontos_distrito = 0
-    for distrito in jogador.distritos_construidos:
-        cont_pontos_distrito += distrito.valor_do_distrito
-        soma_pontos += distrito.valor_do_distrito
-    
-    # +3 se tem um distrito de cada tipo
-    tipos_distritos = [] 
-    cont_pontos_tipos_distritos = 0
-    num_dist_especiais = 0
-    for distrito in jogador.distritos_construidos:
-        if distrito.tipo_de_distrito not in tipos_distritos:
-            tipos_distritos.append(distrito.tipo_de_distrito)
-        if distrito.tipo_de_distrito == TipoDistrito.Especial:
-            num_dist_especiais += 1
-
-    if len(tipos_distritos) == TipoDistrito.Especial:
-        cont_pontos_tipos_distritos = 3
-        soma_pontos += 3
-
-    # +4 pro primeiro q fechar 7 distritos 
-    cont_pontos_finalizador = 0
-    if jogador_finalizador == jogador:
-        cont_pontos_finalizador = 4
-        soma_pontos += 4
-
-    # +2 pros outros q fecharam 7 distritos 
-    cont_pontos_finalizador_segundo = 0
-    if jogador_finalizador != jogador and jogador.terminou: 
-        cont_pontos_finalizador_segundo = 2
-        soma_pontos += 2
-
-    # pontos extras de distritos especiais 
-    cont_pontos_distritos_especiais = 0
-    soma_pontos += 0 
-
-    # cofre secreto (n pode ser construido) - revelar no final - +3 pontos
-    for distrito in jogador.cartas_distrito_mao:
-        if distrito.nome_do_distrito == 'Cofre Secreto':
-            soma_pontos += 3
-            cont_pontos_distritos_especiais += 3
-
-    for distrito_construido in jogador.distritos_construidos:
-        
-        # tesouro imperial
-        if distrito_construido.nome_do_distrito == 'tesouro imperial':
-            soma_pontos += jogador.ouro
-            cont_pontos_distritos_especiais += jogador.ouro
-
-        # Portão do dragão
-        elif distrito_construido.nome_do_distrito == 'portao do dragao':
-            soma_pontos += 2
-            cont_pontos_distritos_especiais += 2
-
-        # bairro assombrado
-        elif distrito_construido.nome_do_distrito == 'bairro_assombrado':
-            if len(tipos_distritos) == 4 and num_dist_especiais > 1:
-                soma_pontos += 3
-                cont_pontos_distritos_especiais += 3
-
     print(f"\n\n{jogador.nome}\n\t"
-          f"Pontos por valor de distrito: {cont_pontos_distrito}\n\t"
-          f"Pontos por tipos de distritos: {cont_pontos_tipos_distritos}\n\t"
-          f"Pontos por terminar primeiro: {cont_pontos_finalizador}\n\t"
-          f"Pontos por terminar após o primeiro: {cont_pontos_finalizador_segundo}\n\t"
-          f"Pontos por distritos especiais: {cont_pontos_distritos_especiais}\n\t"
-          f"Pontuação total: {soma_pontos}")
+          f"Pontuação total: {jogador.pontuacao_final}")

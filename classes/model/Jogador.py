@@ -9,6 +9,7 @@ class Jogador:
     # Construtor
     def __init__(self, nome: str):
         self.pontuacao = 0
+        self.pontuacao_final = 0
         self.nome = nome
         self.personagem = CartaPersonagem("Nenhum", 0)
         self.ouro = 2

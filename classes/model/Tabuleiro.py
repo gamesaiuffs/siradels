@@ -184,9 +184,9 @@ class Tabuleiro:
                                    "Se você tiver pelo menos 3 distritos do mesmo tipo no final da partida, marque 3 pontos extras."),
                      CartaDistrito(6, TipoDistrito.Especial, 'Portão do Dragão', 1,
                                    "Ao final da partida, marque 2 pontos extras."),
-                     CartaDistrito(6, TipoDistrito.Especial, 'Teatro', 1,
-                                   "Ao final de cada fase de escolha, você pode trocar a sua carta de personagem escolhida "
-                                   "com a carta de personagem de um oponente."),
+                     # CartaDistrito(6, TipoDistrito.Especial, 'Teatro', 1,
+                     #              "Ao final de cada fase de escolha, você pode trocar a sua carta de personagem escolhida "
+                     #              "com a carta de personagem de um oponente."),
                      CartaDistrito(6, TipoDistrito.Especial, 'Muralha', 1,
                                    "O personagem de ranque 8 deve pagar 1 ouro a mais para usar a habilidade "
                                    "dele contra qualquer outro distrito na sua cidade."),
