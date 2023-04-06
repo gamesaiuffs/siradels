@@ -126,7 +126,6 @@ class Tabuleiro:
                    CartaDistrito(3, TipoDistrito.Comercial, 'Docas', 3),
                    CartaDistrito(4, TipoDistrito.Comercial, 'Porto', 3),
                    CartaDistrito(5, TipoDistrito.Comercial, 'Prefeitura', 2)]
-
         # Criando duplicatas dos distritos básicos conforme quantidade
         aux = []
         for carta in baralho:
@@ -135,8 +134,7 @@ class Tabuleiro:
                 aux.append(carta)
                 qtd += 1
         baralho.extend(aux)
-
-        # Distritos especiais
+        # Instância os distritos especiais
         especiais = [CartaDistrito(0, TipoDistrito.Especial, 'Cofre Secreto', 1,
                                    "O Cofre não pode ser contruído. Ao final da partida, revele o Cofre Secreto da sua mão para marcar 3 pontos extras."),
                      CartaDistrito(2, TipoDistrito.Especial, 'Bairro Assombrado', 1,
@@ -203,12 +201,9 @@ class Tabuleiro:
                                    "Se você optar por comprar cartas ao coletar recursos, mantenha todas elas em sua mão."),
                      CartaDistrito(6, TipoDistrito.Especial, 'Parque', 1,
                                    "Se não houver cartas na sua mão no fim do seu turno, ganhe 2 cartas.")]
-
         # Selecionar 14 cartas de distritos especiais aleatoriamente
         shuffle(especiais)
         baralho.extend(especiais[0:14])
-
         # Embaralhar baralho final
         shuffle(baralho)
-
         return baralho

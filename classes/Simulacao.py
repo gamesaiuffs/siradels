@@ -51,32 +51,39 @@ class Simulacao:
     # Cria os jogadores de forma manual
     def criar_jogadores_manual(self) -> list[Jogador]:
         lista_jogadores = []
-        # Loop para nomear os jogadores
+        # Laço para nomear os jogadores
         for jogador in range(self.num_jogadores):
-            # O usuário deve digitar o nome de cada um dos jogadores
+            # Informar o nome de cada um dos jogadores
             nome_jogador = input("Digite o nome do jogador:")
             lista_jogadores.append(Jogador(nome_jogador))
 
         return lista_jogadores
 
     @staticmethod
+    # Cria lista de ações (ativas) do jogo
     def criar_acoes() -> list[Acao]:
-        acoes = [PassarTurno(),
-                 ColetarOuro(),
-                 ColetarCartas(),
-                 ConstruirDistrito(),
+        # Ações básicas
+        acoes = [PassarTurno(), ColetarOuro(), ColetarCartas(), ConstruirDistrito(),
+                 # Ações de personagem Rank 1
                  HabilidadeAssassina(),
+                 # Ações de personagem Rank 2
                  HabilidadeLadrao(),
+                 # Ações de personagem Rank 3
                  HabilidadeMago(),
+                 # Ações de personagem Rank 4
                  HabilidadeRei(),
+                 # Ações de personagem Rank 5
                  HabilidadeCardeal(),
+                 # Ações de personagem Rank 6
+
+                 # Ações de personagem Rank 7
                  HabilidadeNavegadora(),
-                 HabilidadeSenhordaGuerraDestruir(),
-                 HabilidadeSenhordaGuerraColetar(),
-                 Laboratorio(),
-                 Arsenal(),
-                 Forja(),
-                 Museu()]
+                 # Ações de personagem Rank 8
+                 HabilidadeSenhordaGuerraDestruir(), HabilidadeSenhordaGuerraColetar(),
+                 # Ações de personagem Rank 9
+
+                 # Ações de distritos especiais
+                 Laboratorio(), Arsenal(), Forja(), Museu()]
         return acoes
 
     def acoes_disponiveis(self) -> list[Acao]:
