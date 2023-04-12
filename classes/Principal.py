@@ -108,7 +108,7 @@ while not final_jogo:
     simulacao.estado.rodada += 1
     for jogador in simulacao.estado.jogadores:
         jogador.personagem = CartaPersonagem("Nenhum", 0)
-        jogador.acoes_realizadas[TipoAcao.PassarTurno] = False
+        jogador.acoes_realizadas[TipoAcao.PassarTurno.value] = False
     simulacao.estado.ordenar_jogadores_rei()
     
 
