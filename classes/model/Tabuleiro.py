@@ -202,8 +202,9 @@ class Tabuleiro:
                      CartaDistrito(6, TipoDistrito.Especial, 'Parque', 1,
                                    "Se não houver cartas na sua mão no fim do seu turno, ganhe 2 cartas.")]
         # Selecionar 14 cartas de distritos especiais aleatoriamente
-        shuffle(especiais)
-        baralho.extend(especiais[0:14])
+        #shuffle(especiais)
+        #baralho.extend(especiais[0:14])
+        especiais.extend(baralho)
         # Embaralhar baralho final
-        shuffle(baralho)
-        return baralho
+        #shuffle(baralho)
+        return especiais

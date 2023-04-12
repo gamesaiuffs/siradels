@@ -136,57 +136,63 @@ class ConstruirDistrito(Acao):
         diferenca = 0
         for carta in estado.jogador_atual().cartas_distrito_mao:
             # O Monumento não pode ser construído se a cidade já possuir 5 ou mais distritos
-            if carta == 'Monumento' and len(estado.jogador_atual().distritos_construidos) >= 5:
+            if carta.nome_do_distrito == 'Monumento' and len(estado.jogador_atual().distritos_construidos) >= 5:
                 continue
             # Cofre secreto nunca pode ser construído
             if carta.nome_do_distrito != 'Cofre Secreto':
-                # Distritos repetidos não podem ser construídos (a não ser que seja o Mago ou tenha construído a Pedreira)
-                repetido = estado.jogador_atual().construiu_distrito(carta.nome_do_distrito)
-                if not repetido or estado.jogador_atual().personagem.nome == 'Mago' or pedreira:
-                    # Pode construir sem custo ao destruir Estrutura
-                    if estrutura:
-                        distritos_para_construir_estrutura.append(carta)
-                    # Deve possuir ouro suficiente para construir o distrito (Fábrica dá desconto para distritos especiais)
-                    if carta.valor_do_distrito <= estado.jogador_atual().ouro or \
-                            (fabrica and carta.tipo_de_distrito == TipoDistrito.Especial and carta.valor_do_distrito - 1 <= estado.jogador_atual().ouro):
-                        distritos_para_construir.append(carta)
-                    # Habilidade do Cardeal
-                    # se não tiver ouro suficiente para construir um distrito, troque as suas cartas pelo ouro de outro jogador (1 carta:1 ouro).
-                    # Fábrica concede 1 de desconto para distritos especiais
-                    elif estado.jogador_atual().personagem.nome == 'Cardeal' and \
-                            carta.valor_do_distrito <= len(estado.jogador_atual().cartas_distrito_mao) + estado.jogador_atual().ouro - 1 or \
-                            (fabrica and carta.valor_do_distrito - 1 <= len(estado.jogador_atual().cartas_distrito_mao) + estado.jogador_atual().ouro - 1):
-                        diferenca = carta.valor_do_distrito - estado.jogador_atual().ouro
-                        # Fábrica concede 1 de desconto para distritos especiais
-                        if fabrica and carta.tipo_de_distrito == TipoDistrito.Especial:
-                            diferenca -= 1
-                        # Identifica jogadores que podem pagar o ouro que falta
-                        for jogador in estado.jogadores:
-                            if jogador != estado.jogador_atual() and jogador.ouro >= diferenca:
-                                distritos_para_construir_cardeal.append((carta, jogador))
-                # A necrópole pode ser construída sem custo destruindo um dos seus distritos
-                if carta.nome_do_distrito == 'Necrópole':
-                    for distrito_construido in estado.jogador_atual().distritos_construidos:
-                        # O caso da Estrutura foi tratado em separado
-                        if not distrito_construido.nome_do_distrito == 'Estrutura':
-                            distritos_para_construir_necropole.append((carta, distrito_construido))
-                # O covil dos ladrões pode ser construído com um custo misto de ouro e cartas da mão
-                if carta.nome_do_distrito == 'Covil dos Ladrões':
-                    qtd_cartas = len(estado.jogador_atual().cartas_distrito_mao) - 1
-                    qtd_ouro = carta.valor_do_distrito - 1
-                    # Fábrica concede 1 de desconto para distritos especiais
-                    if fabrica:
+                continue
+            # Distritos repetidos não podem ser construídos (a não ser que seja o Mago ou tenha construído a Pedreira)
+            repetido = estado.jogador_atual().construiu_distrito(carta.nome_do_distrito)
+            if repetido and not (estado.jogador_atual().personagem.nome == 'Mago' or pedreira):
+                continue
+            # Pode construir sem custo ao destruir Estrutura
+            if estrutura:
+                distritos_para_construir_estrutura.append(carta)
+            # Deve possuir ouro suficiente para construir o distrito (Fábrica dá desconto para distritos especiais)
+            if carta.valor_do_distrito <= estado.jogador_atual().ouro or \
+                    (fabrica and carta.tipo_de_distrito == TipoDistrito.Especial and carta.valor_do_distrito - 1 <= estado.jogador_atual().ouro):
+                distritos_para_construir.append(carta)
+            # Habilidade do Cardeal
+            # se não tiver ouro suficiente para construir um distrito, troque as suas cartas pelo ouro de outro jogador (1 carta:1 ouro).
+            # Fábrica concede 1 de desconto para distritos especiais
+            elif estado.jogador_atual().personagem.nome == 'Cardeal' and \
+                    carta.valor_do_distrito <= len(estado.jogador_atual().cartas_distrito_mao) + estado.jogador_atual().ouro - 1 or \
+                    (fabrica and carta.valor_do_distrito - 1 <= len(estado.jogador_atual().cartas_distrito_mao) + estado.jogador_atual().ouro - 1):
+                diferenca = carta.valor_do_distrito - estado.jogador_atual().ouro
+                # Fábrica concede 1 de desconto para distritos especiais
+                if fabrica and carta.tipo_de_distrito == TipoDistrito.Especial:
+                    diferenca -= 1
+                # Identifica jogadores que podem pagar o ouro que falta
+                for jogador in estado.jogadores:
+                    if jogador != estado.jogador_atual() and jogador.ouro >= diferenca:
+                        distritos_para_construir_cardeal.append((carta, jogador))
+            # A necrópole pode ser construída sem custo destruindo um dos seus distritos
+            if carta.nome_do_distrito == 'Necrópole':
+                for distrito_construido in estado.jogador_atual().distritos_construidos:
+                    # O caso da Estrutura foi tratado em separado
+                    if not distrito_construido.nome_do_distrito == 'Estrutura':
+                        distritos_para_construir_necropole.append((carta, distrito_construido))
+            # O covil dos ladrões pode ser construído com um custo misto de ouro e cartas da mão
+            if carta.nome_do_distrito == 'Covil dos Ladrões':
+                qtd_cartas = len(estado.jogador_atual().cartas_distrito_mao) - 1
+                # Não é necessário ter mais que 6 cartas no pagamento, pois o custo do distrito é 6
+                if qtd_cartas > 6:
+                    qtd_cartas = 6
+                qtd_ouro = carta.valor_do_distrito - 1
+                # Fábrica concede 1 de desconto para distritos especiais
+                if fabrica:
+                    qtd_ouro -= 1
+                while qtd_ouro + qtd_cartas >= carta.valor_do_distrito:
+                    if qtd_ouro > estado.jogador_atual().ouro:
                         qtd_ouro -= 1
-                    while qtd_ouro + qtd_cartas >= carta.valor_do_distrito:
-                        if qtd_ouro > estado.jogador_atual().ouro:
-                            qtd_ouro -= 1
-                            continue
-                        distritos_para_construir_covil_ladroes.append((carta, qtd_ouro, carta.valor_do_distrito - qtd_ouro))
-                        if qtd_ouro > 0:
-                            qtd_ouro -= 1
-                        else:
-                            qtd_cartas -= 1
-        if len(distritos_para_construir) + len(distritos_para_construir_cardeal) + len(distritos_para_construir_necropole) == 0:
+                        continue
+                    distritos_para_construir_covil_ladroes.append((carta, qtd_ouro, carta.valor_do_distrito - qtd_ouro))
+                    if qtd_ouro > 0:
+                        qtd_ouro -= 1
+                    else:
+                        qtd_cartas -= 1
+        if len(distritos_para_construir) + len(distritos_para_construir_cardeal) + len(distritos_para_construir_necropole) + \
+           len(distritos_para_construir_covil_ladroes) + len(distritos_para_construir_estrutura) == 0:
             print('Não é possível construir nenhum distrito!')
             return
         # Mostra opções ao jogador
@@ -282,10 +288,10 @@ class ConstruirDistrito(Acao):
             # Construção de covil dos ladrões com custo misto de ouro e cartas
             elif escolha_construir <= len(distritos_para_construir) + len(distritos_para_construir_cardeal) + len(distritos_para_construir_necropole) + \
                     len(distritos_para_construir_covil_ladroes):
-                (distrito, qtd_ouro, qtd_cartas) = distritos_para_construir_necropole[escolha_construir -
-                                                                                      len(distritos_para_construir) -
-                                                                                      len(distritos_para_construir_cardeal) -
-                                                                                      len(distritos_para_construir_necropole) - 1]
+                (distrito, qtd_ouro, qtd_cartas) = distritos_para_construir_covil_ladroes[escolha_construir -
+                                                                                          len(distritos_para_construir) -
+                                                                                          len(distritos_para_construir_cardeal) -
+                                                                                          len(distritos_para_construir_necropole) - 1]
                 # Retira distrito construído da mão
                 estado.jogador_atual().cartas_distrito_mao.remove(distrito)
                 # Paga distrito e salva ouro gasto
@@ -313,7 +319,7 @@ class ConstruirDistrito(Acao):
                         break
             # Construção sem custo destruíndo a Estrutura
             else:
-                distrito = distritos_para_construir_necropole[escolha_construir -
+                distrito = distritos_para_construir_estrutura[escolha_construir -
                                                               len(distritos_para_construir) -
                                                               len(distritos_para_construir_cardeal) -
                                                               len(distritos_para_construir_necropole) -
