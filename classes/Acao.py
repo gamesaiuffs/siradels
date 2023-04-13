@@ -41,7 +41,7 @@ class PassarTurno(Acao):
         # Otimiza a chamada do jogador atual
         jogador = estado.jogador_atual()
         # Limpa flags de controle e ações realizadas
-        jogador.ouro_gasto, jogador.roubado, jogador.morto, jogador.construiu = 0, False, False, False
+        jogador.ouro_gasto, jogador.roubado, jogador.construiu = 0, False, False
         jogador.acoes_realizadas = [False for _ in range(len(TipoAcao))]
         # Marca flag de ação utilizada
         super().ativar(estado)
@@ -400,7 +400,7 @@ class HabilidadeLadrao(Acao):
             for morto in estado.jogadores:
                 if morto.morto and morto.personagem.rank == escolha:
                     print('Escolha inválida.')
-                    continue
+                    return
             # Marca flag do efeito do Ladrão
             for jogador in estado.jogadores:
                 if jogador.personagem.rank == escolha:
@@ -654,7 +654,7 @@ class HabilidadeNavegadora(Acao):
     def ativar(self, estado: Estado):
         # Aguarda escolha do jogador
         while True:
-            escolha = input('Qual recurso deseja ganhar? (0 - ouro, 1 - cartas) ')
+            escolha = input('Qual recurso deseja ganhar? (0 - ouro, 1 - cartas): ')
             try:
                 escolha = int(escolha)
             except ValueError:
@@ -663,9 +663,9 @@ class HabilidadeNavegadora(Acao):
             if not 0 <= escolha <= 1:
                 print('Escolha inválida.')
                 continue
-            if escolha == 1:
+            if escolha == 0:
                 estado.jogador_atual().ouro += 4
-            elif escolha == 2:
+            elif escolha == 1:
                 estado.jogador_atual().cartas_distrito_mao.extend(estado.tabuleiro.baralho_distritos[0:4])
                 del estado.tabuleiro.baralho_distritos[0:4]
             break
@@ -699,7 +699,6 @@ class HabilidadeSenhordaGuerraDestruir(Acao):
             return
         # Mostra opções ao jogador
         print(f'0: Não desejo destruir nenhum distrito.')
-        print('Distritos que podem ser destruídos:')
         for i, (carta, jogador, muralha) in enumerate(distritos_para_destruir):
             print(f'{i + 1}: {carta.imprimir_tudo()} - Jogador: {jogador.nome}')
         # Aguarda escolha do jogador
@@ -788,13 +787,14 @@ class Arsenal(Acao):
             # Não é possível destruir um distrito de um jogador com 7+ distritos
             if not jogador.terminou:
                 for carta in jogador.distritos_construidos:
-                    distritos_para_destruir.append((carta, jogador))
+                    # Não é possível destruir o próprio Arsenal
+                    if carta.nome_do_distrito != 'Arsenal':
+                        distritos_para_destruir.append((carta, jogador))
         if len(distritos_para_destruir) == 0:
             print('Não é possível destruir nenhum distrito!')
             return
         # Mostra opções ao jogador
         print(f'0: Não desejo destruir nenhum distrito.')
-        print('Distritos que podem ser destruídos:')
         for i, (carta, jogador) in enumerate(distritos_para_destruir):
             print(f'{i + 1}: {carta.imprimir_tudo()} - Jogador: {jogador.nome}')
         # Aguarda escolha do jogador

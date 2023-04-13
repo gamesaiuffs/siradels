@@ -42,9 +42,15 @@ while not final_jogo:
     # Cada jogador faz as suas ações
     for jogador in simulacao.estado.jogadores:
         # Aplica habilidades/efeitos de início de turno
-
+        # Aplica habilidade passiva do Rei
+        if jogador.personagem.nome == "Rei":
+            for antigorei in simulacao.estado.jogadores:
+                antigorei.rei = False
+            jogador.rei = True
         # Aplica habilidade da Assassina
         if jogador.morto:
+            jogador.morto = False
+            simulacao.estado.turno += 1
             continue
         # Aplica habilidade do Ladrão
         if jogador.roubado:
@@ -53,13 +59,7 @@ while not final_jogo:
                     ladrao.ouro += jogador.ouro
                     jogador.ouro = 0
                     break
-        # Aplica habilidade passiva do Rei
-        if jogador.personagem.nome == "Rei":
-            for antigorei in simulacao.estado.jogadores:
-                antigorei.rei = False
-            jogador.rei = True
-
-        # inicia turno do jogador
+        # Inicia turno do jogador
         while True:
             # Printar estado
             print(simulacao.estado)
@@ -101,6 +101,7 @@ while not final_jogo:
             jogador.terminou = True 
             if jogador_finalizador is None:
                 jogador_finalizador = jogador
+            final_jogo = True
 
     # Preparação para nova rodada
     simulacao.estado.tabuleiro.baralho_personagens = simulacao.estado.tabuleiro.criar_baralho_personagem(num_jogadores)
