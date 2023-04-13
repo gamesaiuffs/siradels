@@ -206,7 +206,7 @@ class ConstruirDistrito(Acao):
             print(f'{i}: {carta.imprimir_tudo()}')
         for carta, jogador in distritos_para_construir_cardeal:
             i += 1
-            print(f'{i}: {carta.imprimir_tudo()} - Jogador: {jogador.nome}')
+            print(f'{i}: {carta.imprimir_tudo()} - Usar efeito do Cardeal no jogador: {jogador.nome}')
         for carta, distrito in distritos_para_construir_necropole:
             i += 1
             print(f'{i}: {carta.imprimir_tudo()} - Distrito para destruir: {distrito.nome_do_distrito}')
@@ -680,27 +680,27 @@ class HabilidadeSenhordaGuerraDestruir(Acao):
     def ativar(self, estado: Estado):
         # Identifica distritos que podem ser destruídos
         distritos_para_destruir: List[(CartaDistrito, Jogador, int)] = []
+        # É permitido destruir um dos seus próprios distritos
         for jogador in estado.jogadores:
             # Não é possível destruir um distrito de um jogador com 7+ distritos
-            # É permitido destruir um dos seus próprios distritos
             if not jogador.terminou:
                 # Identifica se jogador construiu a Muralha (aumenta o custo de destruição)
                 muralha = 1 if jogador.construiu_distrito('Muralha') else 0
                 for carta in jogador.distritos_construidos:
-                    # Trata caso especial da Muralha (efeito dela não afeta a si mesmo)
-                    if carta.nome_do_distrito == 'Muralha' and carta.valor_do_distrito <= estado.jogador_atual().ouro + 1:
+                    # Trata caso especial da Muralha (efeito dela não afeta a si própria)
+                    if carta.nome_do_distrito == 'Muralha' and carta.valor_do_distrito - 1 <= estado.jogador_atual().ouro:
                         distritos_para_destruir.append((carta, jogador, muralha))
-                        continue
                     # Não é possível destruir a Torre de Menagem
                     # Precisa ter ouro suficiente para destruir o distrito
-                    if not carta.nome_do_distrito == 'Torre de Menagem' and carta.valor_do_distrito + muralha <= estado.jogador_atual().ouro + 1:
+                    elif not carta.nome_do_distrito == 'Torre de Menagem' and carta.valor_do_distrito - 1 + muralha <= estado.jogador_atual().ouro:
                         distritos_para_destruir.append((carta, jogador, muralha))
         if len(distritos_para_destruir) == 0:
             print('Não é possível destruir nenhum distrito!')
             return
         # Mostra opções ao jogador
+        print(f'0: Não desejo destruir nenhum distrito.')
         print('Distritos que podem ser destruídos:')
-        for i, (carta, jogador) in enumerate(distritos_para_destruir):
+        for i, (carta, jogador, muralha) in enumerate(distritos_para_destruir):
             print(f'{i + 1}: {carta.imprimir_tudo()} - Jogador: {jogador.nome}')
         # Aguarda escolha do jogador
         while True:
@@ -710,9 +710,11 @@ class HabilidadeSenhordaGuerraDestruir(Acao):
             except ValueError:
                 print('Escolha inválida.')
                 continue
-            if not 0 < escolha <= len(distritos_para_destruir):
+            if not 0 <= escolha <= len(distritos_para_destruir):
                 print('Escolha inválida.')
                 continue
+            if escolha == 0:
+                return
             # Paga o custo e destrói distrito escolhido do jogador alvo
             (distrito, jogador, muralha) = distritos_para_destruir[escolha - 1]
             # Trata caso especial da Muralha (efeito dela não afeta a si mesmo)
@@ -781,9 +783,9 @@ class Arsenal(Acao):
     def ativar(self, estado: Estado):
         # Identifica distritos que podem ser destruídos
         distritos_para_destruir: List[(CartaDistrito, Jogador)] = []
+        # É permitido destruir um dos seus próprios distritos
         for jogador in estado.jogadores:
             # Não é possível destruir um distrito de um jogador com 7+ distritos
-            # É permitido destruir um dos seus próprios distritos
             if not jogador.terminou:
                 for carta in jogador.distritos_construidos:
                     distritos_para_destruir.append((carta, jogador))
@@ -791,6 +793,7 @@ class Arsenal(Acao):
             print('Não é possível destruir nenhum distrito!')
             return
         # Mostra opções ao jogador
+        print(f'0: Não desejo destruir nenhum distrito.')
         print('Distritos que podem ser destruídos:')
         for i, (carta, jogador) in enumerate(distritos_para_destruir):
             print(f'{i + 1}: {carta.imprimir_tudo()} - Jogador: {jogador.nome}')
@@ -805,6 +808,8 @@ class Arsenal(Acao):
             if not 0 < escolha <= len(distritos_para_destruir):
                 print('Escolha inválida.')
                 continue
+            if escolha == 0:
+                return
             # Paga o custo e destrói distrito escolhido do jogador alvo
             (distrito, jogador) = distritos_para_destruir[escolha - 1]
             jogador.pontuacao -= distrito.valor_do_distrito
