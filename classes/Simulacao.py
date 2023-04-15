@@ -100,23 +100,23 @@ class Simulacao:
                     print(personagem)
                 # Aguarda escolha do jogador
                 while True:
-                    escolha = input(f'\n{jogador.nome}, escolha uma carta de personagem [Rank]: ')
+                    escolha_rank = input(f'\n{jogador.nome}, escolha uma carta de personagem [Rank]: ')
                     try:
-                        escolha = int(escolha)
+                        escolha_rank = int(escolha_rank)
                     except ValueError:
                         print('Escolha inválida.')
                         continue
-                    if not 1 <= escolha <= self.estado.tabuleiro.num_personagens:
+                    if not 1 <= escolha_rank <= self.estado.tabuleiro.num_personagens:
                         print('Escolha inválida.')
                         continue
-                    if escolha in foi_escolhido:
+                    if escolha_rank in foi_escolhido:
                         print('Escolha inválida.')
                         continue
                     for personagem in self.estado.tabuleiro.baralho_personagens:
-                        if personagem.rank == escolha:
+                        if personagem.rank == escolha_rank:
                             jogador.personagem = personagem
                             self.estado.tabuleiro.baralho_personagens.remove(personagem)
-                            foi_escolhido.append(escolha)
+                            foi_escolhido.append(escolha_rank)
                             break
                     break
             # Reordena os jogadores
@@ -154,20 +154,20 @@ class Simulacao:
                         print(f"\t{indexAcao}: - {acao.descricao}")
                     # Aguarda escolha do jogador
                     while True:
-                        escolha = input("Escolha sua ação: ")
+                        escolha_acao = input("Escolha sua ação: ")
                         try:
-                            escolha = int(escolha)
+                            escolha_acao = int(escolha_acao)
                         except ValueError:
                             print("Escolha inválida.")
                             continue
-                        if not 0 <= escolha < len(acoes):
+                        if not 0 <= escolha_acao < len(acoes):
                             print("Escolha inválida.")
                             continue
                         break
                     # Pula uma linha
                     print()
                     # Executa ação escolhida
-                    acoes[escolha].ativar(self.estado)
+                    acoes[escolha_acao].ativar(self.estado)
                     # Finaliza turno se jogador escolheu a ação de passar o turno
                     if jogador.acoes_realizadas[TipoAcao.PassarTurno.value]:
                         break

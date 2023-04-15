@@ -80,32 +80,32 @@ class ColetarCartas(Acao):
             estado.jogador_atual().cartas_distrito_mao.extend(cartas_compradas)
             return
         # Mostra cartas para escolha
-        print(f'Carta 1: {cartas_compradas[0].imprimir_tudo()}')
-        print(f'Carta 2: {cartas_compradas[1].imprimir_tudo()}')
+        print(f'Carta 0: {cartas_compradas[0].imprimir_tudo()}')
+        print(f'Carta 1: {cartas_compradas[1].imprimir_tudo()}')
         if qtd_cartas == 3:
-            print(f'Carta 3: {cartas_compradas[2].imprimir_tudo()}')
+            print(f'Carta 2: {cartas_compradas[2].imprimir_tudo()}')
         # Aguarda escolha do jogador
         while True:
-            escolha = input('Escolha a carta com que deseja ficar: ')
+            escolha_carta = input('Escolha a carta com que deseja ficar: ')
             try:
-                escolha = int(escolha)
+                escolha_carta = int(escolha_carta)
             except ValueError:
                 print('Escolha inválida.')
                 continue
-            if not 1 <= escolha <= qtd_cartas:
+            if not 0 <= escolha_carta < qtd_cartas:
                 print('Escolha inválida.')
                 continue
             # Adicionar na mão do jogador a carta escolhida e descarta cartas que não foram escolhidas
-            if escolha == 1:
+            if escolha_carta == 0:
                 estado.jogador_atual().cartas_distrito_mao.append(cartas_compradas[0])
                 estado.tabuleiro.baralho_distritos.append(cartas_compradas[1])
-            elif escolha == 2:
+            elif escolha_carta == 1:
                 estado.jogador_atual().cartas_distrito_mao.append(cartas_compradas[1])
                 estado.tabuleiro.baralho_distritos.append(cartas_compradas[0])
-            elif escolha == 3:
+            elif escolha_carta == 2:
                 estado.jogador_atual().cartas_distrito_mao.append(cartas_compradas[2])
                 estado.tabuleiro.baralho_distritos.extend(cartas_compradas[:1])
-            if qtd_cartas == 3 and 1 <= escolha <= 2:
+            if qtd_cartas == 3 and 0 <= escolha_carta < 2:
                 estado.tabuleiro.baralho_distritos.append(cartas_compradas[2])
             break
         # Marca flag de ação utilizada
@@ -195,7 +195,7 @@ class ConstruirDistrito(Acao):
                     else:
                         qtd_cartas -= 1
         if len(distritos_para_construir) + len(distritos_para_construir_cardeal) + len(distritos_para_construir_necropole) + \
-           len(distritos_para_construir_covil_ladroes) + len(distritos_para_construir_estrutura) == 0:
+                len(distritos_para_construir_covil_ladroes) + len(distritos_para_construir_estrutura) == 0:
             print('Não é possível construir nenhum distrito!')
             return
         # Mostra opções ao jogador
@@ -225,7 +225,7 @@ class ConstruirDistrito(Acao):
                 print('Escolha inválida.')
                 continue
             if not 0 <= escolha_construir <= len(distritos_para_construir) + len(distritos_para_construir_cardeal) + \
-                   len(distritos_para_construir_necropole) + len(distritos_para_construir_covil_ladroes) + len(distritos_para_construir_estrutura):
+                    len(distritos_para_construir_necropole) + len(distritos_para_construir_covil_ladroes) + len(distritos_para_construir_estrutura):
                 print('Escolha inválida.')
                 continue
             # Finaliza ação se jogador decidiu não construir
@@ -259,7 +259,7 @@ class ConstruirDistrito(Acao):
                 for i in range(diferenca):
                     print(f'Escolha as cartas que trocará pelo ouro recebido do jogador escolhido. Faltam {diferenca - i} cartas.')
                     for j, carta in enumerate(estado.jogador_atual().cartas_distrito_mao):
-                        print(f'{j + 1}: {carta.imprimir_tudo()}')
+                        print(f'{j}: {carta.imprimir_tudo()}')
                     while True:
                         escolha_carta = input('Digite o número do distrito que deseja trocar pelo ouro: ')
                         try:
@@ -267,11 +267,11 @@ class ConstruirDistrito(Acao):
                         except ValueError:
                             print('Escolha inválida.')
                             continue
-                        if not 0 < escolha_carta <= len(estado.jogador_atual().cartas_distrito_mao):
+                        if not 0 <= escolha_carta < len(estado.jogador_atual().cartas_distrito_mao):
                             print('Escolha inválida.')
                             continue
                         # Troca carta pelo ouro
-                        carta = estado.jogador_atual().cartas_distrito_mao[escolha_carta - 1]
+                        carta = estado.jogador_atual().cartas_distrito_mao[escolha_carta]
                         estado.jogador_atual().ouro += 1
                         jogador.ouro -= 1
                         estado.jogador_atual().cartas_distrito_mao.remove(carta)
@@ -304,7 +304,7 @@ class ConstruirDistrito(Acao):
                 for i in range(qtd_cartas):
                     print(f'Escolha as cartas que usará para pagar o custo. Faltam {qtd_cartas - i} cartas.')
                     for j, carta in enumerate(estado.jogador_atual().cartas_distrito_mao):
-                        print(f'{j + 1}: {carta.imprimir_tudo()}')
+                        print(f'{j}: {carta.imprimir_tudo()}')
                     while True:
                         escolha_carta = input('Digite o número do distrito que deseja descartar: ')
                         try:
@@ -312,11 +312,11 @@ class ConstruirDistrito(Acao):
                         except ValueError:
                             print('Escolha inválida.')
                             continue
-                        if not 0 < escolha_carta <= len(estado.jogador_atual().cartas_distrito_mao):
+                        if not 0 <= escolha_carta < len(estado.jogador_atual().cartas_distrito_mao):
                             print('Escolha inválida.')
                             continue
                         # Descarta carta escolhida
-                        carta = estado.jogador_atual().cartas_distrito_mao[escolha_carta - 1]
+                        carta = estado.jogador_atual().cartas_distrito_mao[escolha_carta]
                         estado.jogador_atual().cartas_distrito_mao.remove(carta)
                         estado.tabuleiro.baralho_distritos.append(carta)
                         break
@@ -355,18 +355,18 @@ class HabilidadeAssassina(Acao):
         # Aguarda escolha do jogador
         while True:
             # A Assassina não pode afetar o personagem de rank 1 (ele próprio)
-            escolha = input(f'Digite o rank (2 a {estado.tabuleiro.num_personagens}) do personagem que deseja assassinar: ')
+            escolha_rank = input(f'Digite o rank (2 a {estado.tabuleiro.num_personagens}) do personagem que deseja assassinar: ')
             try:
-                escolha = int(escolha)
+                escolha_rank = int(escolha_rank)
             except ValueError:
                 print('Escolha inválida.')
                 continue
-            if not 2 <= escolha <= estado.tabuleiro.num_personagens:
+            if not 2 <= escolha_rank <= estado.tabuleiro.num_personagens:
                 print('Escolha inválida.')
                 continue
             # Marca flag do efeito da Assassina
             for jogador in estado.jogadores:
-                if jogador.personagem.rank == escolha:
+                if jogador.personagem.rank == escolha_rank:
                     jogador.morto = True
                     break
             break
@@ -383,23 +383,23 @@ class HabilidadeLadrao(Acao):
         # Aguarda escolha do jogador
         while True:
             # O Ladrão não pode afetar o personagem de rank 1, 2 (ele próprio) e o personagem morto pela Assassina
-            escolha = input(f'Digite o rank (3 a {estado.tabuleiro.num_personagens}) do personagem que deseja roubar '
-                            f'(não pode ser o rank do personagem assassinado): ')
+            escolha_rank = input(f'Digite o rank (3 a {estado.tabuleiro.num_personagens}) do personagem que deseja roubar '
+                                 f'(não pode ser o rank do personagem assassinado): ')
             try:
-                escolha = int(escolha)
+                escolha_rank = int(escolha_rank)
             except ValueError:
                 print('Escolha inválida.')
                 continue
-            if not 3 <= escolha <= estado.tabuleiro.num_personagens:
+            if not 3 <= escolha_rank <= estado.tabuleiro.num_personagens:
                 print('Escolha inválida.')
                 continue
             for morto in estado.jogadores:
-                if morto.morto and morto.personagem.rank == escolha:
+                if morto.morto and morto.personagem.rank == escolha_rank:
                     print('Escolha inválida.')
                     return
             # Marca flag do efeito do Ladrão
             for jogador in estado.jogadores:
-                if jogador.personagem.rank == escolha:
+                if jogador.personagem.rank == escolha_rank:
                     jogador.roubado = True
                     break
             break
@@ -440,7 +440,7 @@ class HabilidadeMago(Acao):
         # Mostra opções ao jogador
         print('Mão do jogador escolhido:')
         for i, carta in enumerate(estado.jogadores[escolha_jogador].cartas_distrito_mao):
-            print(f'{i + 1}: {carta.imprimir_tudo()}')
+            print(f'{i}: {carta.imprimir_tudo()}')
         # Aguarda escolha do jogador
         while True:
             escolha_carta = input('Digite o número da carta que deseja pegar para construir ou para sua mão: ')
@@ -449,12 +449,12 @@ class HabilidadeMago(Acao):
             except ValueError:
                 print('Escolha inválida.')
                 continue
-            if not 0 < escolha_carta <= len(estado.jogadores[escolha_jogador].cartas_distrito_mao):
+            if not 0 <= escolha_carta < len(estado.jogadores[escolha_jogador].cartas_distrito_mao):
                 print('Escolha inválida.')
                 continue
             break
         # Remove carta escolhida da mão do jogador escolhido
-        distrito = estado.jogadores[escolha_jogador].cartas_distrito_mao[escolha_carta - 1]
+        distrito = estado.jogadores[escolha_jogador].cartas_distrito_mao[escolha_carta]
         estado.jogadores[escolha_jogador].cartas_distrito_mao.remove(distrito)
         # Adiciona carta escolhida na mão do jogador atual
         estado.jogador_atual().cartas_distrito_mao.append(distrito)
@@ -541,7 +541,7 @@ class HabilidadeMago(Acao):
                     print('Escolha inválida.')
                     continue
                 if not 0 <= escolha_construir <= len(distritos_para_construir) + \
-                            len(distritos_para_construir_necropole) + len(distritos_para_construir_covil_ladroes) + len(distritos_para_construir_estrutura):
+                        len(distritos_para_construir_necropole) + len(distritos_para_construir_covil_ladroes) + len(distritos_para_construir_estrutura):
                     print('Escolha inválida.')
                     continue
                 # Finaliza ação se jogador decidiu não construir
@@ -582,7 +582,7 @@ class HabilidadeMago(Acao):
                     for i in range(qtd_cartas):
                         print(f'Escolha as cartas que usará para pagar o custo. Faltam {qtd_cartas - i} cartas.')
                         for j, carta in enumerate(estado.jogador_atual().cartas_distrito_mao):
-                            print(f'{j + 1}: {carta.imprimir_tudo()}')
+                            print(f'{j}: {carta.imprimir_tudo()}')
                         while True:
                             escolha_carta = input('Digite o número do distrito que deseja descartar: ')
                             try:
@@ -590,11 +590,11 @@ class HabilidadeMago(Acao):
                             except ValueError:
                                 print('Escolha inválida.')
                                 continue
-                            if not 0 < escolha_carta <= len(estado.jogador_atual().cartas_distrito_mao):
+                            if not 0 <= escolha_carta < len(estado.jogador_atual().cartas_distrito_mao):
                                 print('Escolha inválida.')
                                 continue
                             # Descarta carta escolhida
-                            carta = estado.jogador_atual().cartas_distrito_mao[escolha_carta - 1]
+                            carta = estado.jogador_atual().cartas_distrito_mao[escolha_carta]
                             estado.jogador_atual().cartas_distrito_mao.remove(carta)
                             estado.tabuleiro.baralho_distritos.append(carta)
                             break
@@ -658,18 +658,18 @@ class HabilidadeNavegadora(Acao):
     def ativar(self, estado: Estado):
         # Aguarda escolha do jogador
         while True:
-            escolha = input('Qual recurso deseja ganhar? (0 - ouro, 1 - cartas): ')
+            escolha_recurso = input('Qual recurso deseja ganhar? (0 - ouro, 1 - cartas): ')
             try:
-                escolha = int(escolha)
+                escolha_recurso = int(escolha_recurso)
             except ValueError:
                 print('Escolha inválida.')
                 continue
-            if not 0 <= escolha <= 1:
+            if not 0 <= escolha_recurso <= 1:
                 print('Escolha inválida.')
                 continue
-            if escolha == 0:
+            if escolha_recurso == 0:
                 estado.jogador_atual().ouro += 4
-            elif escolha == 1:
+            elif escolha_recurso == 1:
                 estado.jogador_atual().cartas_distrito_mao.extend(estado.tabuleiro.baralho_distritos[0:4])
                 del estado.tabuleiro.baralho_distritos[0:4]
             break
@@ -707,19 +707,19 @@ class HabilidadeSenhordaGuerraDestruir(Acao):
             print(f'{i + 1}: {carta.imprimir_tudo()} - Jogador: {jogador.nome}')
         # Aguarda escolha do jogador
         while True:
-            escolha = input('Digite o número do distrito que deseja destruir: ')
+            escolha_destruir = input('Digite o número do distrito que deseja destruir: ')
             try:
-                escolha = int(escolha)
+                escolha_destruir = int(escolha_destruir)
             except ValueError:
                 print('Escolha inválida.')
                 continue
-            if not 0 <= escolha <= len(distritos_para_destruir):
+            if not 0 <= escolha_destruir <= len(distritos_para_destruir):
                 print('Escolha inválida.')
                 continue
-            if escolha == 0:
+            if escolha_destruir == 0:
                 return
             # Paga o custo e destrói distrito escolhido do jogador alvo
-            (distrito, jogador, muralha) = distritos_para_destruir[escolha - 1]
+            (distrito, jogador, muralha) = distritos_para_destruir[escolha_destruir - 1]
             # Trata caso especial da Muralha (efeito dela não afeta a si mesmo)
             if distrito.nome_do_distrito == 'Muralha':
                 estado.jogador_atual().ouro -= distrito.valor_do_distrito - 1
@@ -759,7 +759,7 @@ class Laboratorio(Acao):
     def ativar(self, estado: Estado):
         # Mostra opções ao jogador
         for i, carta in enumerate(estado.jogador_atual().cartas_distrito_mao):
-            print(f'{i + 1}: {carta.imprimir_tudo()}')
+            print(f'{i}: {carta.imprimir_tudo()}')
         while True:
             escolha_carta = input('Digite o número do distrito que deseja descartar pelo ouro: ')
             try:
@@ -767,11 +767,11 @@ class Laboratorio(Acao):
             except ValueError:
                 print('Escolha inválida.')
                 continue
-            if not 0 < escolha_carta <= len(estado.jogador_atual().cartas_distrito_mao):
+            if not 0 <= escolha_carta < len(estado.jogador_atual().cartas_distrito_mao):
                 print('Escolha inválida.')
                 continue
             # Descarta carta pelo ouro
-            carta = estado.jogador_atual().cartas_distrito_mao.pop(escolha_carta - 1)
+            carta = estado.jogador_atual().cartas_distrito_mao.pop(escolha_carta)
             estado.tabuleiro.baralho_distritos.append(carta)
             estado.jogador_atual().ouro += 2
             break
@@ -803,19 +803,19 @@ class Arsenal(Acao):
             print(f'{i + 1}: {carta.imprimir_tudo()} - Jogador: {jogador.nome}')
         # Aguarda escolha do jogador
         while True:
-            escolha = input('Digite o número do distrito que deseja destruir: ')
+            escolha_destruir = input('Digite o número do distrito que deseja destruir: ')
             try:
-                escolha = int(escolha)
+                escolha_destruir = int(escolha_destruir)
             except ValueError:
                 print('Escolha inválida.')
                 continue
-            if not 0 < escolha <= len(distritos_para_destruir):
+            if not 0 < escolha_destruir <= len(distritos_para_destruir):
                 print('Escolha inválida.')
                 continue
-            if escolha == 0:
+            if escolha_destruir == 0:
                 return
             # Paga o custo e destrói distrito escolhido do jogador alvo
-            (distrito, jogador) = distritos_para_destruir[escolha - 1]
+            (distrito, jogador) = distritos_para_destruir[escolha_destruir - 1]
             jogador.pontuacao -= distrito.valor_do_distrito
             jogador.distritos_construidos.remove(distrito)
             estado.tabuleiro.baralho_distritos.append(distrito)
@@ -859,7 +859,7 @@ class Museu(Acao):
     def ativar(self, estado: Estado):
         # Mostra opções ao jogador
         for i, carta in enumerate(estado.jogador_atual().cartas_distrito_mao):
-            print(f'{i + 1}: {carta.imprimir_tudo()}')
+            print(f'{i}: {carta.imprimir_tudo()}')
         while True:
             escolha_carta = input('Digite o número do distrito que deseja colocar no Museu: ')
             try:
@@ -867,11 +867,11 @@ class Museu(Acao):
             except ValueError:
                 print('Escolha inválida.')
                 continue
-            if not 0 < escolha_carta <= len(estado.jogador_atual().cartas_distrito_mao):
+            if not 0 <= escolha_carta < len(estado.jogador_atual().cartas_distrito_mao):
                 print('Escolha inválida.')
                 continue
             # Descarta carta e atualiza pontuação parcial
-            carta = estado.jogador_atual().cartas_distrito_mao.pop(escolha_carta - 1)
+            carta = estado.jogador_atual().cartas_distrito_mao.pop(escolha_carta)
             estado.jogador_atual().distritos_museu.append(carta)
             estado.jogador_atual().pontuacao += 1
             break
