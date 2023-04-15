@@ -9,8 +9,8 @@ class Estado:
     def __init__(self, tabuleiro: Tabuleiro, jogadores: list[Jogador]):
         self.tabuleiro = tabuleiro
         self.jogadores = jogadores
-        self.turno = 1
-        self.rodada = 1
+        self.turno = 0
+        self.rodada = 0
 
     # To String
     def __str__(self):
@@ -23,7 +23,7 @@ class Estado:
 
     # A nova rodada é iniciada pelo jogador que possui a coroa e segue em sentido horário
     # Fase de escolha de personagens
-    def ordenar_jogadores_rei(self):
+    def ordenar_jogadores_coroado(self):
         index_rei = 0
         for i, jogador in enumerate(self.jogadores):
             if jogador.rei:
@@ -36,8 +36,13 @@ class Estado:
 
     # Reorganiza a lista de jogadores conforme o rank dos seus personagens
     # Fase de ações
-    def ordenar_jogadores(self):
+    def ordenar_jogadores_personagem(self):
         ordem = [jogador.personagem.rank for jogador in self.jogadores]
+        self.jogadores = sort_together([ordem, self.jogadores])[1]
+
+    # Reorganiza a lista de jogadores conforme a sua pontuação final no jogo
+    def ordenar_jogadores_pontuacao(self):
+        ordem = [jogador.pontuacao_final for jogador in self.jogadores]
         self.jogadores = sort_together([ordem, self.jogadores])[1]
 
     # Retorna o jogador atual/corrente do turno

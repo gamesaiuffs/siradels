@@ -7,12 +7,12 @@ from random import shuffle
 
 class Tabuleiro:
     # Construtor
-    def __init__(self, num_jogadores, numero_personagens):
+    def __init__(self):
         self.cartas_visiveis = []
         self.cartas_nao_visiveis = []
-        self.baralho_personagens = self.criar_baralho_personagem(num_jogadores)
-        self.baralho_distritos = self.criar_baralho_distritos()
-        self.numero_personagens = numero_personagens
+        self.baralho_personagens = []
+        self.baralho_distritos = []
+        self.criar_baralho_distritos()
 
     # To String
     def __str__(self):
@@ -35,7 +35,7 @@ class Tabuleiro:
 
     # Cria baralho com as cartas dos personagens
     # Não foram implementados os demais personagens (necessitará de adaptação para incluí-los)
-    def criar_baralho_personagem(self, num_jogadores):
+    def criar_baralho_personagem(self, num_jogadores, num_personagens):
         assassina = CartaPersonagem("Assassina", 1, "Anuncie um personagem que você deseja assassinar. O personagem assassinado perde o turno")
         ladrao = CartaPersonagem(
             "Ladrão", 2, "Anuncie um personagem que você deseja roubar. Quando o personagem roubado for revelado, você pega todo o ouro dele")
@@ -70,11 +70,10 @@ class Tabuleiro:
             self.cartas_nao_visiveis.append(mao_jogador.pop(0))
         # Coloca o rei na lista de personagens (nunca deve ser descartado)
         mao_jogador.append(rei)
-        return mao_jogador
+        self.baralho_personagens = mao_jogador
 
-    # Cria baralho com as cartas de distritos
-    @staticmethod
-    def criar_baralho_distritos():
+        # Cria baralho com as cartas de distritos
+    def criar_baralho_distritos(self):
         #  Instância os distritos básicos
         baralho = [CartaDistrito(1, TipoDistrito.Religioso, 'Templo', 3),
                    CartaDistrito(2, TipoDistrito.Religioso, 'Igreja', 3),
@@ -174,4 +173,4 @@ class Tabuleiro:
         especiais.extend(baralho)
         # Embaralhar baralho final
         #shuffle(baralho)
-        return especiais
+        self.baralho_distritos = especiais
