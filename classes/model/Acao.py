@@ -154,7 +154,7 @@ class ConstruirDistrito(Acao):
                     (fabrica and carta.tipo_de_distrito == TipoDistrito.Especial and carta.valor_do_distrito - 1 <= estado.jogador_atual().ouro):
                 distritos_para_construir.append(carta)
             # Habilidade do Cardeal
-            # se não tiver ouro suficiente para construir um distrito, troque as suas cartas pelo ouro de outro jogador (1 carta:1 ouro).
+            # se não tiver ouro suficiente para construir um distrito, troque as suas cartas pelo ouro de outro jogador (1 carta: 1 ouro).
             # Fábrica concede 1 de desconto para distritos especiais
             elif estado.jogador_atual().personagem.nome == 'Cardeal' and \
                     carta.valor_do_distrito <= len(estado.jogador_atual().cartas_distrito_mao) + estado.jogador_atual().ouro - 1 or \
@@ -352,18 +352,16 @@ class HabilidadeAssassina(Acao):
         super().__init__('Assassina: Anuncie um personagem que você deseja assassinar. O personagem assassinado perde o turno.', TipoAcao.HabilidadeAssassina)
 
     def ativar(self, estado: Estado):
-        # Identifica quantos personagens estão em jogo (8 ou 9)
-        numero_personagens = estado.tabuleiro.numero_personagens
         # Aguarda escolha do jogador
         while True:
             # A Assassina não pode afetar o personagem de rank 1 (ele próprio)
-            escolha = input(f'Digite o rank (2 a {numero_personagens}) do personagem que deseja assassinar: ')
+            escolha = input(f'Digite o rank (2 a {estado.tabuleiro.num_personagens}) do personagem que deseja assassinar: ')
             try:
                 escolha = int(escolha)
             except ValueError:
                 print('Escolha inválida.')
                 continue
-            if not 2 <= escolha <= numero_personagens:
+            if not 2 <= escolha <= estado.tabuleiro.num_personagens:
                 print('Escolha inválida.')
                 continue
             # Marca flag do efeito da Assassina
@@ -382,19 +380,17 @@ class HabilidadeLadrao(Acao):
             'Ladrão: Anuncie um personagem que você deseja roubar. O personagem roubado entrega todo seu ouro ao ladrão.', TipoAcao.HabilidadeLadrao)
 
     def ativar(self, estado: Estado):
-        # Identifica quantos personagens estão em jogo (8 ou 9)
-        numero_personagens = estado.tabuleiro.numero_personagens
         # Aguarda escolha do jogador
         while True:
             # O Ladrão não pode afetar o personagem de rank 1, 2 (ele próprio) e o personagem morto pela Assassina
-            escolha = input(f'Digite o rank (3 a {numero_personagens}) do personagem que deseja roubar '
+            escolha = input(f'Digite o rank (3 a {estado.tabuleiro.num_personagens}) do personagem que deseja roubar '
                             f'(não pode ser o rank do personagem assassinado): ')
             try:
                 escolha = int(escolha)
             except ValueError:
                 print('Escolha inválida.')
                 continue
-            if not 3 <= escolha <= numero_personagens:
+            if not 3 <= escolha <= estado.tabuleiro.num_personagens:
                 print('Escolha inválida.')
                 continue
             for morto in estado.jogadores:
@@ -417,10 +413,16 @@ class HabilidadeMago(Acao):
             'Mago: Olhe a mão de outro jogador e escolha 1 carta. Pague para construí-la imediatamente ou adicione-a à sua mão.', TipoAcao.HabilidadeMago)
 
     def ativar(self, estado: Estado):
-        # Mostra opções ao jogador
+        # Mostra opções ao jogador (não pode escolher a si mesmo)
         print('Jogadores:')
-        for i, jogador in enumerate(estado.jogadores):
-            print(f'{i + 1}: {jogador.nome}')
+        i = 0
+        i_jogador_atual = 0
+        for jogador in estado.jogadores:
+            if jogador == estado.jogador_atual():
+                i_jogador_atual = i
+            else:
+                print(f'{i}: {jogador.nome}')
+                i += 1
         # Aguarda escolha do jogador
         while True:
             escolha_jogador = input('Digite o número do jogador que deseja olhar a mão e pegar 1 carta: ')
@@ -429,13 +431,15 @@ class HabilidadeMago(Acao):
             except ValueError:
                 print('Escolha inválida.')
                 continue
-            if not 0 < escolha_jogador <= len(estado.jogadores):
+            if not 0 <= escolha_jogador < len(estado.jogadores) - 1:
                 print('Escolha inválida.')
                 continue
             break
+        if escolha_jogador >= i_jogador_atual:
+            escolha_jogador += 1
         # Mostra opções ao jogador
         print('Mão do jogador escolhido:')
-        for i, carta in enumerate(estado.jogadores[escolha_jogador - 1].cartas_distrito_mao):
+        for i, carta in enumerate(estado.jogadores[escolha_jogador].cartas_distrito_mao):
             print(f'{i + 1}: {carta.imprimir_tudo()}')
         # Aguarda escolha do jogador
         while True:
@@ -445,13 +449,13 @@ class HabilidadeMago(Acao):
             except ValueError:
                 print('Escolha inválida.')
                 continue
-            if not 0 < escolha_carta <= len(estado.jogadores[escolha_jogador - 1].cartas_distrito_mao):
+            if not 0 < escolha_carta <= len(estado.jogadores[escolha_jogador].cartas_distrito_mao):
                 print('Escolha inválida.')
                 continue
             break
         # Remove carta escolhida da mão do jogador escolhido
-        distrito = estado.jogadores[escolha_jogador - 1].cartas_distrito_mao[escolha_carta - 1]
-        estado.jogadores[escolha_jogador - 1].cartas_distrito_mao.remove(distrito)
+        distrito = estado.jogadores[escolha_jogador].cartas_distrito_mao[escolha_carta - 1]
+        estado.jogadores[escolha_jogador].cartas_distrito_mao.remove(distrito)
         # Adiciona carta escolhida na mão do jogador atual
         estado.jogador_atual().cartas_distrito_mao.append(distrito)
         # Identifica distritos que podem ser construídos

@@ -43,7 +43,7 @@ class Estado:
     # Reorganiza a lista de jogadores conforme a sua pontuação final no jogo
     def ordenar_jogadores_pontuacao(self):
         ordem = [jogador.pontuacao_final for jogador in self.jogadores]
-        self.jogadores = sort_together([ordem, self.jogadores])[1]
+        self.jogadores = sort_together([ordem, self.jogadores], reverse=True)[1]
 
     # Retorna o jogador atual/corrente do turno
     def jogador_atual(self) -> Jogador:

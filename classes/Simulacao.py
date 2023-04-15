@@ -10,19 +10,17 @@ class Simulacao:
     def __init__(self, num_jogadores: int = 6, num_personagens: int = 8, automatico: bool = True):
         # Define o número de jogadores
         self.num_jogadores = num_jogadores
-        # Define o número de personagens (8 ou 9)
-        self.num_personagens = num_personagens
         # Define se a criação dos jogadores: 0 -> Manual ou 1 -> Automática
-        self.estado = self.criar_estado_inicial(automatico)
+        self.estado = self.criar_estado_inicial(num_personagens, automatico)
         # Instância as ações do jogo
         self.acoes = self.criar_acoes()
         # Primeiro jogador a finalizar cidade (construir 7 ou mais distritos)
         self.jogador_finalizador = None
 
     # Cria o estado inicial do tabuleiro
-    def criar_estado_inicial(self, automatico) -> Estado:
+    def criar_estado_inicial(self, num_personagens, automatico) -> Estado:
         # Constrói o tabuleiro
-        tabuleiro = Tabuleiro()
+        tabuleiro = Tabuleiro(num_personagens)
         if automatico:
             jogadores = self.criar_jogadores_automatico()
         else:
@@ -88,7 +86,7 @@ class Simulacao:
         # Laço de rodadas do jogo
         while not final_jogo:
             # Preparação para nova rodada
-            self.estado.tabuleiro.criar_baralho_personagem(self.num_jogadores, self.num_personagens)
+            self.estado.tabuleiro.criar_baralho_personagem(self.num_jogadores)
             self.estado.turno = 1
             self.estado.rodada += 1
             for jogador in self.estado.jogadores:
@@ -108,7 +106,7 @@ class Simulacao:
                     except ValueError:
                         print('Escolha inválida.')
                         continue
-                    if not 1 <= escolha <= self.num_personagens:
+                    if not 1 <= escolha <= self.estado.tabuleiro.num_personagens:
                         print('Escolha inválida.')
                         continue
                     if escolha in foi_escolhido:
@@ -183,8 +181,8 @@ class Simulacao:
                 # Marca fim de jogo e jogador finalizador (monumento conta como 2 distritos para fins de uma cidade completa)
                 if len(jogador.distritos_construidos) >= 7 or (len(jogador.distritos_construidos) == 6 and monumento):
                     jogador.terminou = True
-                    if jogador_finalizador is None:
-                        jogador_finalizador = jogador
+                    if self.jogador_finalizador is None:
+                        self.jogador_finalizador = jogador
                     final_jogo = True
         # Rotina de final de jogo
         self.computar_pontuacao_final()
@@ -192,8 +190,8 @@ class Simulacao:
         # Mostra estado final
         print(self.estado)
         for jogador in self.estado.jogadores:
-            print(f"\n\n{jogador.nome}\n\t"
-                  f"Pontuação final: {jogador.pontuacao_final}")
+            print(f"{jogador.nome} - Pontuação final: {jogador.pontuacao_final}")
+        return self.estado
 
     # Retorna apenas as ações disponíveis para o estado atual da simulação
     def acoes_disponiveis(self) -> list[Acao]:
@@ -318,8 +316,8 @@ class Simulacao:
                     contador_tipos[3] += 1
                 elif tipo_construido.tipo_de_distrito == TipoDistrito.Especial:
                     contador_tipos[4] += 1
+            jogador.pontuacao_final += 3
             for qtd_tipo in contador_tipos:
-                jogador.pontuacao_final += 3
                 if qtd_tipo == 0:
                     jogador.pontuacao_final -= 3
                     break
@@ -346,7 +344,7 @@ class Simulacao:
                             jogador.pontuacao_final += 1
                 # Poço dos Desejos (Ao final da partida, marque 1 ponto extra para cada distrito ESPECIAL na sua cidade)
                 if distrito_construido.nome_do_distrito == 'Poço dos Desejos':
-                    jogador.pontuacao_final += qtd_tipo[4]
+                    jogador.pontuacao_final += contador_tipos[4]
                 # Tesouro Imperial (Ao final da partida, marque 1 ponto extra para cada ouro em seu tesouro)
                 if distrito_construido.nome_do_distrito == 'Tesouro Imperial':
                     jogador.pontuacao_final += jogador.ouro
@@ -356,7 +354,7 @@ class Simulacao:
                 # Portão do Dragão (Ao final da partida, marque 2 pontos extras)
                 if distrito_construido.nome_do_distrito == 'Portão do Dragão':
                     jogador.pontuacao_final += 2
-                # Capitólio (Se você tiver pelo menos 3 distritos do mesmo tipo no final da partida, marque 3 pontos extras)
+                # Capitólio (Se tiver pelo menos 3 distritos do mesmo tipo no final da partida, marque 3 pontos extras)
                 pontuou_capitolio = False
                 if distrito_construido.nome_do_distrito == 'Capitólio':
                     for qtd_tipo in contador_tipos:
@@ -366,40 +364,44 @@ class Simulacao:
                             break
                 # Torre de Marfim (Se a Torre de Marfim for o único distrito ESPECIAL na sua cidade ao final da partida, marque 5 pontos extras)
                 if distrito_construido.nome_do_distrito == 'Torre de Marfim':
-                    if qtd_tipo[4] == 1:
+                    if contador_tipos[4] == 1:
                         jogador.pontuacao_final += 5
                 # Bairro Assombrado (Ao final da partida, o Bairro Assombrado vale como 1 tipo de distrito à sua escolha)
                 if distrito_construido.nome_do_distrito == 'Bairro Assombrado':
                     melhor_pontuacao = 0
-                    # Transformar bairro assombrado no tipo faltante
-                    if qtd_tipo[4] > 1 and (qtd_tipo[0] == 0 ^ qtd_tipo[1] == 0 ^ qtd_tipo[2] == 0 ^ qtd_tipo[3] == 0):
+                    # Identifica se falta somente 1 tipo de distrito e tem mais de um distrito especial
+                    if contador_tipos[4] > 1 and \
+                            ((contador_tipos[0] == 0 and contador_tipos[1] * contador_tipos[2] * contador_tipos[3] != 0) or
+                             (contador_tipos[1] == 0 and contador_tipos[0] * contador_tipos[2] * contador_tipos[3] != 0) or
+                             (contador_tipos[2] == 0 and contador_tipos[1] * contador_tipos[0] * contador_tipos[3] != 0) or
+                             (contador_tipos[3] == 0 and contador_tipos[1] * contador_tipos[2] * contador_tipos[0] != 0)):
                         ponto_potencial = 3
                         # perde 1 ponto caso também tenha poço dos desejos
                         if jogador.construiu_distrito('Poço dos Desejos'):
                             ponto_potencial -= 1
                         # perde 3 pontos caso pontuou capitólio com exatamente 3 distritos especiais
                         if jogador.construiu_distrito('Capitólio') and \
-                                qtd_tipo[4] == 3 and qtd_tipo[0] < 3 and qtd_tipo[1] < 3 and qtd_tipo[2] < 3 and qtd_tipo[3] < 3:
+                                contador_tipos[4] == 3 and contador_tipos[0] < 3 and contador_tipos[1] < 3 and contador_tipos[2] < 3 and contador_tipos[3] < 3:
                             ponto_potencial -= 3
                         # ganha 5 pontos caso tenha torre de marfim como único distrito especial
-                        if jogador.construiu_distrito('Torre de Marfim') and qtd_tipo[4] == 2:
+                        if jogador.construiu_distrito('Torre de Marfim') and contador_tipos[4] == 2:
                             ponto_potencial += 5
                         if ponto_potencial > 0:
                             melhor_pontuacao = ponto_potencial
                     # Transformar bairro assombrado para pontuar capitólio
                     if jogador.construiu_distrito('Capitólio') and not pontuou_capitolio and \
-                            (qtd_tipo[0] == 2 or qtd_tipo[1] == 2 or qtd_tipo[2] == 2 or qtd_tipo[3] == 2):
+                            (contador_tipos[0] == 2 or contador_tipos[1] == 2 or contador_tipos[2] == 2 or contador_tipos[3] == 2):
                         ponto_potencial = 3
                         # perde 1 ponto caso também tenha poço dos desejos
                         if jogador.construiu_distrito('Poço dos Desejos'):
                             ponto_potencial -= 1
                         # ganha 5 pontos caso tenha torre de marfim como único distrito especial
-                        if jogador.construiu_distrito('Torre de Marfim') and qtd_tipo[4] == 2:
+                        if jogador.construiu_distrito('Torre de Marfim') and contador_tipos[4] == 2:
                             ponto_potencial += 5
                         if melhor_pontuacao < ponto_potencial:
                             melhor_pontuacao = ponto_potencial
                     # Transformar bairro assombrado para pontuar torre de marfim
-                    if jogador.construiu_distrito('Torre de Marfim') and qtd_tipo[4] == 2:
+                    if jogador.construiu_distrito('Torre de Marfim') and contador_tipos[4] == 2:
                         if melhor_pontuacao < 5:
                             melhor_pontuacao = 5
                     jogador.pontuacao_final += melhor_pontuacao

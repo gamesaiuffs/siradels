@@ -7,7 +7,9 @@ from random import shuffle
 
 class Tabuleiro:
     # Construtor
-    def __init__(self):
+    def __init__(self, num_personagens: int):
+        # Define o número de personagens (8 ou 9)
+        self.num_personagens = num_personagens
         self.cartas_visiveis = []
         self.cartas_nao_visiveis = []
         self.baralho_personagens = []
@@ -35,7 +37,7 @@ class Tabuleiro:
 
     # Cria baralho com as cartas dos personagens
     # Não foram implementados os demais personagens (necessitará de adaptação para incluí-los)
-    def criar_baralho_personagem(self, num_jogadores, num_personagens):
+    def criar_baralho_personagem(self, num_jogadores):
         assassina = CartaPersonagem("Assassina", 1, "Anuncie um personagem que você deseja assassinar. O personagem assassinado perde o turno")
         ladrao = CartaPersonagem(
             "Ladrão", 2, "Anuncie um personagem que você deseja roubar. Quando o personagem roubado for revelado, você pega todo o ouro dele")
