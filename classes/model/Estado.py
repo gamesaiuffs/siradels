@@ -19,23 +19,23 @@ class Estado:
             jogadores_print_str += jogador.__str__()
             jogadores_print_str += "\n"
         return f"\nRODADA {self.rodada}\nTURNO {self.turno}\n\n" \
-               f"Tabuleiro:  {self.tabuleiro}\nJogadores:  {jogadores_print_str}"
+               f"Tabuleiro: {self.tabuleiro}\nJogadores: {jogadores_print_str}"
 
+    # A nova rodada é iniciada pelo jogador que possui a coroa e segue em sentido horário
+    # Fase de escolha de personagens
     def ordenar_jogadores_rei(self):
-        ordenados, index_rei = [], 0
+        index_rei = 0
         for i, jogador in enumerate(self.jogadores):
             if jogador.rei:
                 index_rei = i
-                ordenados.insert(0, jogador)
-        
-        for i in range(index_rei + 1, len(self.jogadores)):
-            ordenados.append(self.jogadores[i])
-        for i in range(index_rei):
-            ordenados.append(self.jogadores[i])
-
+                break
+        ordenados = []
+        ordenados.extend(self.jogadores[index_rei:])
+        ordenados.extend(self.jogadores[:index_rei])
         self.jogadores = ordenados
 
-    # Reorganiza a lista de jogadores de acordo com seus personagens
+    # Reorganiza a lista de jogadores conforme o rank dos seus personagens
+    # Fase de ações
     def ordenar_jogadores(self):
         ordem = [jogador.personagem.rank for jogador in self.jogadores]
         self.jogadores = sort_together([ordem, self.jogadores])[1]

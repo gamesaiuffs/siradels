@@ -1,7 +1,6 @@
 # Imports
 from random import shuffle
-from Acao import *
-from classes.enum.TipoAcao import TipoAcao
+from classes.model.Acao import *
 from classes.model.Tabuleiro import Tabuleiro
 from classes.model.Jogador import Jogador
 

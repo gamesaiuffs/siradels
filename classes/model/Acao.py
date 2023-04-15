@@ -1,6 +1,6 @@
 from typing import List
 
-from Estado import Estado
+from classes.model.Estado import Estado
 from classes.enum.TipoDistrito import TipoDistrito
 from classes.enum.TipoAcao import TipoAcao
 from classes.model.CartaDistrito import CartaDistrito

@@ -19,96 +19,63 @@ class Tabuleiro:
         texto_baralho = "Nenhuma carta!" if len(self.baralho_distritos) == 0 else ""
         for carta in self.baralho_distritos:
             texto_baralho += carta.__str__() + " | "
-
         texto_cartas_visiveis = "Nenhuma carta!" if len(self.cartas_visiveis) == 0 else ""
         for carta in self.cartas_visiveis:
             texto_cartas_visiveis += carta.__str__() + " | "
-
         texto_cartas_n_visiveis = "Nenhuma carta!" if len(self.cartas_nao_visiveis) == 0 else ""
         for carta in self.cartas_nao_visiveis:
             texto_cartas_n_visiveis += carta.__str__() + " | "
-
         texto_personagens = ""
         for carta in self.baralho_personagens:
             texto_personagens += carta.__str__() + " | "
-
         return f"\nBaralho: {texto_baralho}" \
                f"\nCartas visiveis: {texto_cartas_visiveis}" \
                f"\nCartas não visiveis: {texto_cartas_n_visiveis}" \
                f"\nPersonagens que sobraram: {texto_personagens}\n"
 
+    # Cria baralho com as cartas dos personagens
+    # Não foram implementados os demais personagens (necessitará de adaptação para incluí-los)
     def criar_baralho_personagem(self, num_jogadores):
-        # Define as informações de cada personagem
-        assassina = CartaPersonagem(
-            "Assassina", 1,
-            "Anuncie um personagem que você deseja assassinar. O personagem assassinado perde o turno"
-        )
+        assassina = CartaPersonagem("Assassina", 1, "Anuncie um personagem que você deseja assassinar. O personagem assassinado perde o turno")
         ladrao = CartaPersonagem(
-            "Ladrão", 2,
-            "Anuncie um personagem que você deseja roubar. "
-            "Quando o personagem roubado for revelado, você pega todo o ouro dele"
-        )
+            "Ladrão", 2, "Anuncie um personagem que você deseja roubar. Quando o personagem roubado for revelado, você pega todo o ouro dele")
         mago = CartaPersonagem(
-            "Mago", 3,
-            "Olhe a mão de outro jogador e escolha 1 carta. "
-            "Pague para construí-la imediatamente ou adicione-a à sua mão \
-            \n\tVocê pode construir distritos idênticos."
-        )
-        rei = CartaPersonagem(
-            "Rei", 4,
-            "Pegue a coroa \
-            \n\tGanhe 1 ouro para cada um dos seus distritos NOBRES."
-        )
+            "Mago", 3, "Olhe a mão de outro jogador e escolha 1 carta. Pague para construí-la imediatamente ou adicione-a à sua mão. "
+                       "Você pode construir distritos idênticos.")
+        rei = CartaPersonagem("Rei", 4, "Pegue a coroa. Ganhe 1 ouro para cada um dos seus distritos NOBRES.")
         cardeal = CartaPersonagem(
-            "Cardeal", 5,
-            "Se você não tiver ouro suficiente para construir um distrito, "
-            "troque suas cartas pelo ouro de outro jogador (1 carta: 1 ouro). \
-            \n\tGanhe 1 carta para cada um dos seus distritos RELIGIOSOS."
-        )
+            "Cardeal", 5, "Se você não tiver ouro suficiente para construir um distrito, troque suas cartas pelo ouro de outro jogador (1 carta: 1 ouro). "
+                          "Ganhe 1 carta para cada um dos seus distritos RELIGIOSOS.")
         alquimista = CartaPersonagem(
-            "Alquimista", 6,
-            "Ao final do seu turno, você pega de volta todo o ouro pago "
-            "para construir distritos neste turno. Você não pode pagar mais ouro do que tem."
-        )
-        navegadora = CartaPersonagem(
-            "Navegadora", 7,
-            "Ganhe 4 ouros extras ou 4 cartas extras \
-            \n\tVocê não pode construir distritos."
-        )
+            "Alquimista", 6, "Ao final do seu turno, você pega de volta todo o ouro pago para construir distritos neste turno. "
+                             "Você não pode pagar mais ouro do que tem.")
+        navegadora = CartaPersonagem("Navegadora", 7, "Ganhe 4 ouros extras ou 4 cartas extras. Você não pode construir distritos.")
         senhor_guerra = CartaPersonagem(
-            "Senhor da Guerra",
-            8,
-            "Destrua 1 distrito, pagando 1 ouro a menos que o custo dele. \
-            \n\tGanhe 1 ouro para cada um dos seus distritos MILITARES"
-        )
-
+            "Senhor da Guerra", 8, "Destrua 1 distrito, pagando 1 ouro a menos que o custo dele. Ganhe 1 ouro para cada um dos seus distritos MILITARES")
         # Coloca os personagens numa lista e os embaralha (com exceção do rei que será colocado depois)
         mao_jogador = [assassina, ladrao, mago, cardeal, alquimista, navegadora, senhor_guerra]
-
         shuffle(mao_jogador)
-
+        # Regras específicas para o baralho de personagens de acordo com número d ejogadores
         if num_jogadores == 4:
             # Duas cartas viradas para cima e uma para baixo
             self.cartas_visiveis.append(mao_jogador.pop(0))
             self.cartas_visiveis.append(mao_jogador.pop(0))
             self.cartas_nao_visiveis.append(mao_jogador.pop(0))
-
         elif num_jogadores == 5:
             # Uma carta virada para cima e uma para baixo
             self.cartas_visiveis.append(mao_jogador.pop(0))
             self.cartas_nao_visiveis.append(mao_jogador.pop(0))
-
         elif num_jogadores == 6:
             # Uma carta virada para baixo
             self.cartas_nao_visiveis.append(mao_jogador.pop(0))
-
-        # Coloca o rei na lista de personagens
+        # Coloca o rei na lista de personagens (nunca deve ser descartado)
         mao_jogador.append(rei)
         return mao_jogador
 
+    # Cria baralho com as cartas de distritos
     @staticmethod
     def criar_baralho_distritos():
-        # Distritos básicos
+        #  Instância os distritos básicos
         baralho = [CartaDistrito(1, TipoDistrito.Religioso, 'Templo', 3),
                    CartaDistrito(2, TipoDistrito.Religioso, 'Igreja', 3),
                    CartaDistrito(3, TipoDistrito.Religioso, 'Mosteiro', 3),
@@ -184,9 +151,9 @@ class Tabuleiro:
                                    "Se você tiver pelo menos 3 distritos do mesmo tipo no final da partida, marque 3 pontos extras."),
                      CartaDistrito(6, TipoDistrito.Especial, 'Portão do Dragão', 1,
                                    "Ao final da partida, marque 2 pontos extras."),
+                     # Teatro não foi implementado
                      # CartaDistrito(6, TipoDistrito.Especial, 'Teatro', 1,
-                     #              "Ao final de cada fase de escolha, você pode trocar a sua carta de personagem escolhida "
-                     #              "com a carta de personagem de um oponente."),
+                     #  "Ao final de cada fase de escolha, você pode trocar a sua carta de personagem escolhida com a carta de personagem de um oponente."),
                      CartaDistrito(6, TipoDistrito.Especial, 'Muralha', 1,
                                    "O personagem de ranque 8 deve pagar 1 ouro a mais para usar a habilidade "
                                    "dele contra qualquer outro distrito na sua cidade."),
