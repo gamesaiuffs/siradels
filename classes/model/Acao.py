@@ -4,6 +4,7 @@ from classes.model.Estado import Estado
 from classes.enum.TipoDistrito import TipoDistrito
 from classes.enum.TipoAcao import TipoAcao
 from classes.model.CartaDistrito import CartaDistrito
+from classes.model.CartaPersonagem import CartaPersonagem
 from classes.model.Jogador import Jogador
 
 
@@ -80,10 +81,10 @@ class ColetarCartas(Acao):
             estado.jogador_atual().cartas_distrito_mao.extend(cartas_compradas)
             return
         # Mostra cartas para escolha
-        print(f'Carta 0: {cartas_compradas[0].imprimir_tudo()}')
-        print(f'Carta 1: {cartas_compradas[1].imprimir_tudo()}')
+        print(f'0: {cartas_compradas[0].imprimir_tudo()}')
+        print(f'1: {cartas_compradas[1].imprimir_tudo()}')
         if qtd_cartas == 3:
-            print(f'Carta 2: {cartas_compradas[2].imprimir_tudo()}')
+            print(f'2: {cartas_compradas[2].imprimir_tudo()}')
         # Aguarda escolha do jogador
         while True:
             escolha_carta = input('Escolha a carta com que deseja ficar: ')
@@ -352,21 +353,30 @@ class HabilidadeAssassina(Acao):
         super().__init__('Assassina: Anuncie um personagem que você deseja assassinar. O personagem assassinado perde o turno.', TipoAcao.HabilidadeAssassina)
 
     def ativar(self, estado: Estado):
+        # Mostra opções ao jogador
+        # A Assassina não pode afetar o personagem de rank 1 (ele próprio)
+        # Não faz sentido escolher um personagem descartado visível
+        i = 0
+        opcoes_personagem: List[CartaPersonagem] = []
+        for personagem in estado.tabuleiro.personagens:
+            if personagem.rank > 1 and personagem not in estado.tabuleiro.cartas_visiveis:
+                opcoes_personagem.append(personagem)
+                print(f'{i}: {personagem}')
+                i += 1
         # Aguarda escolha do jogador
         while True:
-            # A Assassina não pode afetar o personagem de rank 1 (ele próprio)
-            escolha_rank = input(f'Digite o rank (2 a {estado.tabuleiro.num_personagens}) do personagem que deseja assassinar: ')
+            escolha_personagem = input(f'Digite o número do personagem que deseja assassinar: ')
             try:
-                escolha_rank = int(escolha_rank)
+                escolha_personagem = int(escolha_personagem)
             except ValueError:
                 print('Escolha inválida.')
                 continue
-            if not 2 <= escolha_rank <= estado.tabuleiro.num_personagens:
+            if not 0 <= escolha_personagem < len(opcoes_personagem):
                 print('Escolha inválida.')
                 continue
             # Marca flag do efeito da Assassina
             for jogador in estado.jogadores:
-                if jogador.personagem.rank == escolha_rank:
+                if jogador.personagem == opcoes_personagem[escolha_personagem]:
                     jogador.morto = True
                     break
             break
@@ -380,26 +390,35 @@ class HabilidadeLadrao(Acao):
             'Ladrão: Anuncie um personagem que você deseja roubar. O personagem roubado entrega todo seu ouro ao ladrão.', TipoAcao.HabilidadeLadrao)
 
     def ativar(self, estado: Estado):
+        # O Ladrão não pode afetar o personagem morto pela Assassina
+        personagem_assassinado = None
+        for jogador in estado.jogadores:
+            if jogador.morto:
+                personagem_assassinado = jogador.personagem
+        # O Ladrão não pode afetar o personagem de rank 1 e 2 (ele próprio)
+        # Não faz sentido escolher um personagem descartado visível
+        i = 0
+        opcoes_personagem: List[CartaPersonagem] = []
+        for personagem in estado.tabuleiro.personagens:
+            if personagem != personagem_assassinado and personagem.rank > 2 and personagem not in estado.tabuleiro.cartas_visiveis:
+                opcoes_personagem.append(personagem)
+                # Mostra opções ao jogador
+                print(f'{i}: {personagem}')
+                i += 1
         # Aguarda escolha do jogador
         while True:
-            # O Ladrão não pode afetar o personagem de rank 1, 2 (ele próprio) e o personagem morto pela Assassina
-            escolha_rank = input(f'Digite o rank (3 a {estado.tabuleiro.num_personagens}) do personagem que deseja roubar '
-                                 f'(não pode ser o rank do personagem assassinado): ')
+            escolha_personagem = input(f'Digite o número do personagem que deseja roubar: ')
             try:
-                escolha_rank = int(escolha_rank)
+                escolha_personagem = int(escolha_personagem)
             except ValueError:
                 print('Escolha inválida.')
                 continue
-            if not 3 <= escolha_rank <= estado.tabuleiro.num_personagens:
+            if not 0 <= escolha_personagem < len(opcoes_personagem):
                 print('Escolha inválida.')
                 continue
-            for morto in estado.jogadores:
-                if morto.morto and morto.personagem.rank == escolha_rank:
-                    print('Escolha inválida.')
-                    return
             # Marca flag do efeito do Ladrão
             for jogador in estado.jogadores:
-                if jogador.personagem.rank == escolha_rank:
+                if jogador.personagem == opcoes_personagem[escolha_personagem]:
                     jogador.roubado = True
                     break
             break

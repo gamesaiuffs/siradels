@@ -3,6 +3,8 @@ from classes.enum.TipoDistrito import TipoDistrito
 from classes.model.CartaDistrito import CartaDistrito
 from classes.model.CartaPersonagem import CartaPersonagem
 from random import shuffle
+from more_itertools import sort_together
+from typing import List
 
 
 class Tabuleiro:
@@ -10,10 +12,11 @@ class Tabuleiro:
     def __init__(self, num_personagens: int):
         # Define o número de personagens (8 ou 9)
         self.num_personagens = num_personagens
-        self.cartas_visiveis = []
-        self.cartas_nao_visiveis = []
-        self.baralho_personagens = []
-        self.baralho_distritos = []
+        self.cartas_visiveis: List[CartaPersonagem] = []
+        self.cartas_nao_visiveis: List[CartaPersonagem] = []
+        self.baralho_personagens: List[CartaPersonagem] = []
+        self.personagens: List[CartaPersonagem] = []
+        self.baralho_distritos: List[CartaDistrito] = []
         self.criar_baralho_distritos()
 
     # To String
@@ -55,6 +58,8 @@ class Tabuleiro:
         senhor_guerra = CartaPersonagem(
             "Senhor da Guerra", 8, "Destrua 1 distrito, pagando 1 ouro a menos que o custo dele. Ganhe 1 ouro para cada um dos seus distritos MILITARES")
         # Coloca os personagens numa lista e os embaralha (com exceção do rei que será colocado depois)
+        if not self.personagens:
+            self.personagens = [assassina, ladrao, mago, rei, cardeal, alquimista, navegadora, senhor_guerra]
         mao_jogador = [assassina, ladrao, mago, cardeal, alquimista, navegadora, senhor_guerra]
         shuffle(mao_jogador)
         # Regras específicas para o baralho de personagens de acordo com número d ejogadores
@@ -73,8 +78,14 @@ class Tabuleiro:
         # Coloca o rei na lista de personagens (nunca deve ser descartado)
         mao_jogador.append(rei)
         self.baralho_personagens = mao_jogador
+        self.ordenar_baralho_personagem()
 
-        # Cria baralho com as cartas de distritos
+    # Reorganiza as cartas de personagem conforme o rank
+    def ordenar_baralho_personagem(self):
+        ordem = [personagem.rank for personagem in self.baralho_personagens]
+        self.baralho_personagens = list(sort_together([ordem, self.baralho_personagens])[1])
+
+    # Cria baralho com as cartas de distritos
     def criar_baralho_distritos(self):
         #  Instância os distritos básicos
         baralho = [CartaDistrito(1, TipoDistrito.Religioso, 'Templo', 3),

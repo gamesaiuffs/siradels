@@ -7,7 +7,7 @@ class CartaPersonagem:
 
     # To String
     def __str__(self) -> str:
-        return f"{self.nome} - {self.rank}"
+        return f"{self.nome} - Rank({self.rank})"
     
     # Pegar apenas o nome do personagem
     def obter_nome(self):

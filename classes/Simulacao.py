@@ -93,31 +93,25 @@ class Simulacao:
                 jogador.acoes_realizadas[TipoAcao.PassarTurno.value] = False
             self.estado.ordenar_jogadores_coroado()
             # Fase de escolha de personagens
-            foi_escolhido = []
             for jogador in self.estado.jogadores:
+                i = 0
                 print('\n---------| Personagens |--------')
                 for personagem in self.estado.tabuleiro.baralho_personagens:
-                    print(personagem)
+                    print(f'{i}: {personagem}')
+                    i += 1
                 # Aguarda escolha do jogador
                 while True:
-                    escolha_rank = input(f'\n{jogador.nome}, escolha uma carta de personagem [Rank]: ')
+                    escolha_personagem = input(f'\n{jogador.nome}, escolha um personagem disponível: ')
                     try:
-                        escolha_rank = int(escolha_rank)
+                        escolha_personagem = int(escolha_personagem)
                     except ValueError:
                         print('Escolha inválida.')
                         continue
-                    if not 1 <= escolha_rank <= self.estado.tabuleiro.num_personagens:
+                    if not 0 <= escolha_personagem < len(self.estado.tabuleiro.baralho_personagens):
                         print('Escolha inválida.')
                         continue
-                    if escolha_rank in foi_escolhido:
-                        print('Escolha inválida.')
-                        continue
-                    for personagem in self.estado.tabuleiro.baralho_personagens:
-                        if personagem.rank == escolha_rank:
-                            jogador.personagem = personagem
-                            self.estado.tabuleiro.baralho_personagens.remove(personagem)
-                            foi_escolhido.append(escolha_rank)
-                            break
+                    jogador.personagem = self.estado.tabuleiro.baralho_personagens[escolha_personagem]
+                    self.estado.tabuleiro.baralho_personagens.remove(jogador.personagem)
                     break
             # Reordena os jogadores
             self.estado.ordenar_jogadores_personagem()
@@ -146,7 +140,7 @@ class Simulacao:
                     # Mostra o estado atual
                     print(self.estado)
                     # Mostra o jogador atual
-                    print(jogador.nome)
+                    print(f'{jogador.personagem}, {jogador.nome}')
                     # Mostra apenas ações disponíveis segundo regras do jogo
                     print("Ações disponíveis: ")
                     acoes = self.acoes_disponiveis()
