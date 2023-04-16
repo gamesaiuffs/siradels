@@ -10,51 +10,51 @@ class TipoAcao(Enum):
     PassarTurno = auto()
 
     # Ações básicas
-    ColetarOuro = auto()  # implementado
-    ColetarCartas = auto()  # implementado
-    ConstruirDistrito = auto()  # implementado
+    ColetarOuro = auto()
+    ColetarCartas = auto()
+    ConstruirDistrito = auto()
 
     # Ações de personagem
     # Rank 1
-    HabilidadeAssassina = auto()  # implementado
-    HabilidadeBruxa = auto()
-    HabilidadeMagistrado = auto()
+    HabilidadeAssassina = auto()
+    # HabilidadeBruxa = auto()
+    # HabilidadeMagistrado = auto()
     # Rank 2
-    HabilidadeLadrao = auto()  # implementado
-    HabilidadeEspiao = auto()
-    HabilidadeChantagista = auto()
+    HabilidadeLadrao = auto()
+    # HabilidadeEspiao = auto()
+    # HabilidadeChantagista = auto()
     # Rank 3
-    HabilidadeIlusionista = auto()
-    HabilidadeMago = auto()  # implementado
-    HabilidadeVidente = auto()
+    # HabilidadeIlusionista = auto()
+    HabilidadeMago = auto()
+    # HabilidadeVidente = auto()
     # Rank 4
-    HabilidadeRei = auto()  # implementado
-    HabilidadeImperador = auto()
-    HabilidadePatricio = auto()
+    HabilidadeRei = auto()
+    # HabilidadeImperador = auto()
+    # HabilidadePatricio = auto()
     # Rank 5
-    HabilidadeBispo = auto()
-    HabilidadeAbade = auto()
-    HabilidadeCardeal = auto()  # implementado
+    # HabilidadeBispo = auto()
+    # HabilidadeAbade = auto()
+    HabilidadeCardeal = auto()
     # Rank 6
-    HabilidadeComerciante = auto()
+    # HabilidadeComerciante = auto()
     # HabilidadeAlquimista = auto() implementado - habilidade passiva somente
-    HabilidadeMercador = auto()
+    # HabilidadeMercador = auto()
     # Rank 7
-    HabilidadeArquiteta = auto()
-    HabilidadeNavegadora = auto()  # implementado
-    HabilidadeEstudiosa = auto()
+    # HabilidadeArquiteta = auto()
+    HabilidadeNavegadora = auto()
+    # HabilidadeEstudiosa = auto()
     # Rank 8
-    HabilidadeSenhordaGuerraDestruir = auto()  # implementado
-    HabilidadeSenhordaGuerraColetar = auto()  # implementado
-    HabilidadeDiplomata = auto()
-    HabilidadeMarechal = auto()
+    HabilidadeSenhordaGuerraDestruir = auto()
+    HabilidadeSenhordaGuerraColetar = auto()
+    # HabilidadeDiplomata = auto()
+    # HabilidadeMarechal = auto()
     # Rank 9
-    HabilidadeRainha = auto()
-    HabilidadeArtista = auto()
-    HabilidadeColetorDeImpostos = auto()
+    # HabilidadeRainha = auto()
+    # HabilidadeArtista = auto()
+    # HabilidadeColetorDeImpostos = auto()
 
     # Distritos Especiais
-    Laboratorio = auto()  # implementado
-    Arsenal = auto()  # implementado
-    Forja = auto()  # implementado
-    Museu = auto()  # implementado
+    Laboratorio = auto()
+    Arsenal = auto()
+    Forja = auto()
+    Museu = auto()

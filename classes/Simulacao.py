@@ -189,96 +189,48 @@ class Simulacao:
 
     # Retorna apenas as ações disponíveis para o estado atual da simulação
     def acoes_disponiveis(self) -> list[Acao]:
-        acoes_disponiveis = []
         return self.acoes
-        for acao in TipoAcao:
-            if acao == TipoAcao.ColetarOuro:
-                if not self.estado.jogador_atual().coletou_recursos():
-                    acoes_disponiveis.append(self.acoes[acao.value])
-            if acao == TipoAcao.ColetarCartas:
-                if not self.estado.jogador_atual().coletou_recursos():
-                    acoes_disponiveis.append(self.acoes[acao.value])
-            if acao == TipoAcao.PassarTurno:
-                if self.estado.jogador_atual().coletou_recursos():
-                    acoes_disponiveis.append(self.acoes[acao.value])
-            if acao == TipoAcao.ConstruirDistrito:
-                if self.estado.jogador_atual().coletou_recursos() and \
-                        self.estado.jogador_atual().acoes_realizadas[TipoAcao.ConstruirDistrito.value] != 1:
-                    if self.estado.jogador_atual().personagem.nome != "Navegadora":
-                        acoes_disponiveis.append(self.acoes[acao.value])
-            if acao == TipoAcao.HabilidadeAssassina:
-                if self.estado.jogador_atual().acoes_realizadas[
-                    TipoAcao.HabilidadeAssassina.value] != 1 and \
-                        self.estado.jogador_atual().personagem.nome == "Assassino":
-                    acoes_disponiveis.append(self.acoes[acao.value])
-            if acao == TipoAcao.HabilidadeLadrao:
-                if self.estado.jogador_atual().acoes_realizadas[
-                    TipoAcao.HabilidadeLadrao.value] != 1 \
-                        and self.estado.jogador_atual().personagem.nome == "Ladrao":
-                    acoes_disponiveis.append(self.acoes[acao.value])
-            if acao == TipoAcao.HabilidadeMago:
-                if self.estado.jogador_atual().acoes_realizadas[
-                    TipoAcao.HabilidadeMago.value] != 1 and \
-                        self.estado.jogador_atual().personagem.nome == "Mago":
-                    acoes_disponiveis.append(self.acoes[acao.value])
-            if acao == TipoAcao.HabilidadeRei:
-                if self.estado.jogador_atual().acoes_realizadas[
-                    TipoAcao.HabilidadeRei.value] != 1 and \
-                        self.estado.jogador_atual().personagem.nome == "Rei":
-                    acoes_disponiveis.append(self.acoes[acao.value])
-            if acao == TipoAcao.HabilidadeCardealAtivo:
-                if self.estado.jogador_atual().acoes_realizadas[
-                    TipoAcao.HabilidadeCardealAtivo.value] != 1 and \
-                        self.estado.jogador_atual().personagem.nome == "Cardeal" and \
-                        self.estado.jogador_atual().construiu == False:
-                    acoes_disponiveis.append(self.acoes[acao.value])
-            if acao == TipoAcao.HabilidadeCardealPassivo:
-                if self.estado.jogador_atual().acoes_realizadas[
-                    TipoAcao.HabilidadeCardealPassivo.value] != 1 and \
-                        self.estado.jogador_atual().personagem.nome == "Cardeal":
-                    acoes_disponiveis.append(self.acoes[acao.value])
-            if acao == TipoAcao.HabilidadeAlquimista:
-                if self.estado.jogador_atual().acoes_realizadas[
-                    TipoAcao.HabilidadeAlquimista.value] != 1 and \
-                        self.estado.jogador_atual().personagem.nome == "Alquimista":
-                    acoes_disponiveis.append(self.acoes[acao.value])
-                    # Disponivel apenas no final do turno
-            if acao == TipoAcao.HabilidadeNavegadora:
-                if self.estado.jogador_atual().acoes_realizadas[
-                    TipoAcao.HabilidadeNavegadora.value] != 1 and \
-                        self.estado.jogador_atual().personagem.nome == "Navegadora":
-                    acoes_disponiveis.append(self.acoes[acao.value])
-            if acao == TipoAcao.HabilidadeSenhordaGuerra:
-                if self.estado.jogador_atual().acoes_realizadas[
-                    TipoAcao.HabilidadeSenhordaGuerra.value] != 1 and \
-                        self.estado.jogador_atual().personagem.nome == "SenhordaGuerra":
-                    acoes_disponiveis.append(self.acoes[acao.value])
-            if acao == TipoAcao.Laboratorio:
-                if self.estado.jogador_atual().acoes_realizadas[TipoAcao.Laboratorio.value] != 1 and len(
-                        self.estado.jogador_atual().cartas_distrito_mao) > 0:
-                    for nomeDistrito in self.estado.jogador_atual().distritos_construidos:
-                        if nomeDistrito.nome_do_distrito == "laboratorio":
-                            acoes_disponiveis.append(self.acoes[acao.value])
-            if acao == TipoAcao.Necropole:
-                if len(self.estado.jogador_atual().distritos_construidos) > 0:
-                    for nomeDistrito in self.estado.jogador_atual().cartas_distrito_mao:
-                        if nomeDistrito.nome_do_distrito == "necropole":
-                            acoes_disponiveis.append(self.acoes[acao.value])
-            if acao == TipoAcao.Estrutura:
-                if len(self.estado.jogador_atual().cartas_distrito_mao) > 0:
-                    for nomeDistrito in self.estado.jogador_atual().distritos_construidos:
-                        if nomeDistrito.nome_do_distrito == "estrutura":
-                            acoes_disponiveis.append(self.acoes[acao.value])
-            if acao == TipoAcao.Estabulos:
-                for nomeDistrito in self.estado.jogador_atual().cartas_distrito_mao:
-                    if nomeDistrito.nome_do_distrito == "estabulos" and self.estado.jogador_atual().personagem.nome != "Navegadora":
-                        acoes_disponiveis.append(self.acoes[acao.value])
-                    # if self.estado.jogador_atual().personagem.nome != "Navegadora":
-                    #     acoes_disponiveis.append(self.acoes[acao.value])
-            if acao == TipoAcao.CovilDosLadroes:
-                for nomeDistrito in self.estado.jogador_atual().cartas_distrito_mao:
-                    if nomeDistrito.nome_do_distrito == "covil dos ladroes":
-                        acoes_disponiveis.append(self.acoes[acao.value])
+        acoes_disponiveis = []
+        acoes_realizadas = self.estado.jogador_atual().acoes_realizadas
+        # Deve ter coletado recursos primeiro para poder realizar demais ações no turno
+        if acoes_realizadas[TipoAcao.ColetarOuro.value] or acoes_realizadas[TipoAcao.ColetarCartas.value]:
+            acoes_disponiveis.append(self.acoes[TipoAcao.PassarTurno.value])
+            # Só pode construir 1 distrito por turno (Navegadora não pode cosntruir distritos no turno)
+            if not acoes_realizadas[TipoAcao.ConstruirDistrito.value] and self.estado.jogador_atual().personagem.nome != 'Navegadora':
+                acoes_disponiveis.append(self.acoes[TipoAcao.ConstruirDistrito.value])
+            # As habilidades dos personagens só podem ser utilizadas uma única vez
+            # O jogador deve possuir a carta do personagem para usar a sua habilidade
+            if not acoes_realizadas[TipoAcao.HabilidadeAssassina.value] and self.estado.jogador_atual().personagem.nome == 'Assassina':
+                acoes_disponiveis.append(self.acoes[TipoAcao.HabilidadeAssassina.value])
+            if not acoes_realizadas[TipoAcao.HabilidadeLadrao.value] and self.estado.jogador_atual().personagem.nome == 'Ladrão':
+                acoes_disponiveis.append(self.acoes[TipoAcao.HabilidadeLadrao.value])
+            if not acoes_realizadas[TipoAcao.HabilidadeMago.value] and self.estado.jogador_atual().personagem.nome == 'Mago':
+                acoes_disponiveis.append(self.acoes[TipoAcao.HabilidadeMago.value])
+            if not acoes_realizadas[TipoAcao.HabilidadeRei.value] and self.estado.jogador_atual().personagem.nome == 'Rei':
+                acoes_disponiveis.append(self.acoes[TipoAcao.HabilidadeRei.value])
+            if not acoes_realizadas[TipoAcao.HabilidadeCardeal.value] and self.estado.jogador_atual().personagem.nome == 'Cardeal':
+                acoes_disponiveis.append(self.acoes[TipoAcao.HabilidadeCardeal.value])
+            if not acoes_realizadas[TipoAcao.HabilidadeNavegadora.value] and self.estado.jogador_atual().personagem.nome == 'Navegadora':
+                acoes_disponiveis.append(self.acoes[TipoAcao.HabilidadeNavegadora.value])
+            if self.estado.jogador_atual().personagem.nome == 'Senhor da Guerra':
+                if not acoes_realizadas[TipoAcao.HabilidadeSenhordaGuerraDestruir.value]:
+                    acoes_disponiveis.append(self.acoes[TipoAcao.HabilidadeSenhordaGuerraDestruir.value])
+                if not acoes_realizadas[TipoAcao.HabilidadeSenhordaGuerraColetar.value]:
+                    acoes_disponiveis.append(self.acoes[TipoAcao.HabilidadeSenhordaGuerraColetar.value])
+            # As habilidades dos distritos especiais só podem ser utilizadas uma única vez
+            # O jogador deve ter o distrito construído na sua cidade para usar a sua habilidade
+            if not acoes_realizadas[TipoAcao.Laboratorio.value] and self.estado.jogador_atual().construiu_distrito('Laboratório'):
+                acoes_disponiveis.append(self.acoes[TipoAcao.Laboratorio.value])
+            if not acoes_realizadas[TipoAcao.Arsenal.value] and self.estado.jogador_atual().construiu_distrito('Arsenal'):
+                acoes_disponiveis.append(self.acoes[TipoAcao.Arsenal.value])
+            if not acoes_realizadas[TipoAcao.Forja.value] and self.estado.jogador_atual().construiu_distrito('Forja'):
+                acoes_disponiveis.append(self.acoes[TipoAcao.Forja.value])
+            if not acoes_realizadas[TipoAcao.Museu.value] and self.estado.jogador_atual().construiu_distrito('Museu'):
+                acoes_disponiveis.append(self.acoes[TipoAcao.Museu.value])
+        # Só pode coletar recursos uma vez ao turno (coletar ouro ou carta)
+        else:
+            acoes_disponiveis.append(self.acoes[TipoAcao.ColetarOuro.value])
+            acoes_disponiveis.append(self.acoes[TipoAcao.ColetarCartas.value])
         return acoes_disponiveis
 
     # Mostra menu com ações

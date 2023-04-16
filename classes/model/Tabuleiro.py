@@ -180,10 +180,14 @@ class Tabuleiro:
                                    "Se você optar por comprar cartas ao coletar recursos, mantenha todas elas em sua mão."),
                      CartaDistrito(6, TipoDistrito.Especial, 'Parque', 1,
                                    "Se não houver cartas na sua mão no fim do seu turno, ganhe 2 cartas.")]
-        # Selecionar 14 cartas de distritos especiais aleatoriamente
-        #shuffle(especiais)
-        #baralho.extend(especiais[0:14])
+
         especiais.extend(baralho)
-        # Embaralhar baralho final
-        #shuffle(baralho)
         self.baralho_distritos = especiais
+
+
+        # Selecionar 14 cartas de distritos especiais aleatoriamente
+    #    shuffle(especiais)
+    #    baralho.extend(especiais[0:14])
+        # Embaralhar baralho final
+    #    shuffle(baralho)
+    #    self.baralho_distritos = baralho
