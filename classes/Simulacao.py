@@ -40,7 +40,7 @@ class Simulacao:
         lista_jogadores = []
         for jogador in range(self.num_jogadores):
             # Bot 1, Bot 2, ..., Bot N
-            lista_jogadores.append(Jogador(f"Bot {jogador + 1}"))
+            lista_jogadores.append(Jogador(f'Bot {jogador + 1}'))
         return lista_jogadores
 
     # Cria os jogadores de forma manual
@@ -49,7 +49,7 @@ class Simulacao:
         # Laço para nomear os jogadores
         for jogador in range(self.num_jogadores):
             # Informar o nome de cada um dos jogadores
-            nome_jogador = input("Digite o nome do jogador:")
+            nome_jogador = input('Digite o nome do jogador:')
             lista_jogadores.append(Jogador(nome_jogador))
         return lista_jogadores
 
@@ -119,7 +119,7 @@ class Simulacao:
             for jogador in self.estado.jogadores:
                 # Aplica habilidades/efeitos de início de turno
                 # Aplica habilidade passiva do Rei
-                if jogador.personagem.nome == "Rei":
+                if jogador.personagem.nome == 'Rei':
                     for antigorei in self.estado.jogadores:
                         antigorei.rei = False
                     jogador.rei = True
@@ -131,7 +131,7 @@ class Simulacao:
                 # Aplica habilidade do Ladrão
                 if jogador.roubado:
                     for ladrao in self.estado.jogadores:
-                        if ladrao.personagem.nome == "Ladrão":
+                        if ladrao.personagem.nome == 'Ladrão':
                             ladrao.ouro += jogador.ouro
                             jogador.ouro = 0
                             break
@@ -142,20 +142,20 @@ class Simulacao:
                     # Mostra o jogador atual
                     print(f'{jogador.personagem}, {jogador.nome}')
                     # Mostra apenas ações disponíveis segundo regras do jogo
-                    print("Ações disponíveis: ")
+                    print('Ações disponíveis: ')
                     acoes = self.acoes_disponiveis()
                     for indexAcao, acao in enumerate(acoes):
-                        print(f"\t{indexAcao}: - {acao.descricao}")
+                        print(f'\t{indexAcao}: - {acao.descricao}')
                     # Aguarda escolha do jogador
                     while True:
-                        escolha_acao = input("Escolha sua ação: ")
+                        escolha_acao = input('Escolha sua ação: ')
                         try:
                             escolha_acao = int(escolha_acao)
                         except ValueError:
-                            print("Escolha inválida.")
+                            print('Escolha inválida.')
                             continue
                         if not 0 <= escolha_acao < len(acoes):
-                            print("Escolha inválida.")
+                            print('Escolha inválida.')
                             continue
                         break
                     # Pula uma linha
@@ -184,7 +184,7 @@ class Simulacao:
         # Mostra estado final
         print(self.estado)
         for jogador in self.estado.jogadores:
-            print(f"{jogador.nome} - Pontuação final: {jogador.pontuacao_final}")
+            print(f'{jogador.nome} - Pontuação final: {jogador.pontuacao_final}')
         return self.estado
 
     # Retorna apenas as ações disponíveis para o estado atual da simulação
@@ -243,9 +243,9 @@ class Simulacao:
     @staticmethod
     def imprimir_menu_acoes(acoes: list[Acao]) -> str:
         i = iter(acoes)
-        texto = "Escolha uma ação das seguintes: \n\t" + str(next(i))
+        texto = 'Escolha uma ação das seguintes: \n\t' + str(next(i))
         for distrito in i:
-            texto += ", " + str(distrito)
+            texto += ', ' + str(distrito)
         return texto
 
     # Computa a pontuaçào final de cada jogador para definir vencedor

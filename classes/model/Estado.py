@@ -14,12 +14,12 @@ class Estado:
 
     # To String
     def __str__(self):
-        jogadores_print_str = ""
+        jogadores_print_str = ''
         for jogador in self.jogadores:
             jogadores_print_str += jogador.__str__()
-            jogadores_print_str += "\n"
-        return f"\nRODADA {self.rodada}\nTURNO {self.turno}\n\n" \
-               f"Tabuleiro: {self.tabuleiro}\nJogadores: {jogadores_print_str}"
+            jogadores_print_str += '\n'
+        return f'\nRODADA {self.rodada}\nTURNO {self.turno}\n\n' \
+               f'Tabuleiro: {self.tabuleiro}\nJogadores: {jogadores_print_str}'
 
     # A nova rodada é iniciada pelo jogador que possui a coroa e segue em sentido horário
     # Fase de escolha de personagens

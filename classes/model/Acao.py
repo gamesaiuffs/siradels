@@ -75,6 +75,7 @@ class ColetarCartas(Acao):
             qtd_cartas = 3
         # Baralho vazio
         if not estado.tabuleiro.baralho_distritos:
+            print('Baralho vazio!')
             super().ativar(estado)
             return
         # Cartas insuficientes no baralho para pescar
