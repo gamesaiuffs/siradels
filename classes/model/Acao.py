@@ -449,7 +449,7 @@ class HabilidadeMago(Acao):
         i = 0
         opcoes_jogadores: List[Jogador] = []
         for jogador in estado.jogadores:
-            if jogador != estado.jogador_atual() and not jogador.cartas_distrito_mao:
+            if jogador != estado.jogador_atual() and len(jogador.cartas_distrito_mao) > 0:
                 opcoes_jogadores.append(jogador)
                 print(f'{i}: {jogador.nome}')
                 i += 1

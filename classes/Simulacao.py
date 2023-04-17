@@ -189,7 +189,6 @@ class Simulacao:
 
     # Retorna apenas as ações disponíveis para o estado atual da simulação
     def acoes_disponiveis(self) -> list[Acao]:
-        return self.acoes
         acoes_disponiveis = []
         acoes_realizadas = self.estado.jogador_atual().acoes_realizadas
         # Deve ter coletado recursos primeiro para poder realizar demais ações no turno
@@ -221,17 +220,17 @@ class Simulacao:
             # O jogador deve ter o distrito construído na sua cidade para usar a sua habilidade
             if not acoes_realizadas[TipoAcao.Laboratorio.value] and self.estado.jogador_atual().construiu_distrito('Laboratório'):
                 # Deve possuir ao menos 1 carta na mão
-                if len(estado.jogador_atual().cartas_distrito_mao) > 0:
+                if len(self.estado.jogador_atual().cartas_distrito_mao) > 0:
                     acoes_disponiveis.append(self.acoes[TipoAcao.Laboratorio.value])
             if not acoes_realizadas[TipoAcao.Arsenal.value] and self.estado.jogador_atual().construiu_distrito('Arsenal'):
                 acoes_disponiveis.append(self.acoes[TipoAcao.Arsenal.value])
             if not acoes_realizadas[TipoAcao.Forja.value] and self.estado.jogador_atual().construiu_distrito('Forja'):
                 # Deve possuir ao menos 2 ouros
-                if estado.jogador_atual().ouro >= 2:
+                if self.estado.jogador_atual().ouro >= 2:
                     acoes_disponiveis.append(self.acoes[TipoAcao.Forja.value])
             if not acoes_realizadas[TipoAcao.Museu.value] and self.estado.jogador_atual().construiu_distrito('Museu'):
                 # Deve possuir ao menos 1 carta na mão
-                if len(estado.jogador_atual().cartas_distrito_mao) > 0:
+                if len(self.estado.jogador_atual().cartas_distrito_mao) > 0:
                     acoes_disponiveis.append(self.acoes[TipoAcao.Museu.value])
         # Só pode coletar recursos uma vez ao turno (coletar ouro ou carta)
         else:
