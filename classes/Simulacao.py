@@ -220,13 +220,19 @@ class Simulacao:
             # As habilidades dos distritos especiais só podem ser utilizadas uma única vez
             # O jogador deve ter o distrito construído na sua cidade para usar a sua habilidade
             if not acoes_realizadas[TipoAcao.Laboratorio.value] and self.estado.jogador_atual().construiu_distrito('Laboratório'):
-                acoes_disponiveis.append(self.acoes[TipoAcao.Laboratorio.value])
+                # Deve possuir ao menos 1 carta na mão
+                if len(estado.jogador_atual().cartas_distrito_mao) > 0:
+                    acoes_disponiveis.append(self.acoes[TipoAcao.Laboratorio.value])
             if not acoes_realizadas[TipoAcao.Arsenal.value] and self.estado.jogador_atual().construiu_distrito('Arsenal'):
                 acoes_disponiveis.append(self.acoes[TipoAcao.Arsenal.value])
             if not acoes_realizadas[TipoAcao.Forja.value] and self.estado.jogador_atual().construiu_distrito('Forja'):
-                acoes_disponiveis.append(self.acoes[TipoAcao.Forja.value])
+                # Deve possuir ao menos 2 ouros
+                if estado.jogador_atual().ouro >= 2:
+                    acoes_disponiveis.append(self.acoes[TipoAcao.Forja.value])
             if not acoes_realizadas[TipoAcao.Museu.value] and self.estado.jogador_atual().construiu_distrito('Museu'):
-                acoes_disponiveis.append(self.acoes[TipoAcao.Museu.value])
+                # Deve possuir ao menos 1 carta na mão
+                if len(estado.jogador_atual().cartas_distrito_mao) > 0:
+                    acoes_disponiveis.append(self.acoes[TipoAcao.Museu.value])
         # Só pode coletar recursos uma vez ao turno (coletar ouro ou carta)
         else:
             acoes_disponiveis.append(self.acoes[TipoAcao.ColetarOuro.value])

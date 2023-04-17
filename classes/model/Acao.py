@@ -73,12 +73,21 @@ class ColetarCartas(Acao):
         # Efeito passivo da carta Observatório
         if estado.jogador_atual().construiu_distrito('Observatório'):
             qtd_cartas = 3
+        # Baralho vazio
+        if not estado.tabuleiro.baralho_distritos:
+            super().ativar(estado)
+            return
+        # Cartas insuficientes no baralho para pescar
+        if len(estado.tabuleiro.baralho_distritos) < qtd_cartas:
+            qtd_cartas = len(estado.tabuleiro.baralho_distritos)
         # Pescar cartas do baralho
         cartas_compradas = estado.tabuleiro.baralho_distritos[:qtd_cartas]
         del estado.tabuleiro.baralho_distritos[:qtd_cartas]
         # Efeito passivo da carta Biblioteca
-        if estado.jogador_atual().construiu_distrito('Biblioteca'):
+        # Se só existe uma carta no baralho ela é a única opção
+        if estado.jogador_atual().construiu_distrito('Biblioteca') or qtd_cartas == 1:
             estado.jogador_atual().cartas_distrito_mao.extend(cartas_compradas)
+            super().ativar(estado)
             return
         # Mostra cartas para escolha
         print(f'0: {cartas_compradas[0].imprimir_tudo()}')
@@ -198,6 +207,7 @@ class ConstruirDistrito(Acao):
         if len(distritos_para_construir) + len(distritos_para_construir_cardeal) + len(distritos_para_construir_necropole) + \
                 len(distritos_para_construir_covil_ladroes) + len(distritos_para_construir_estrutura) == 0:
             print('Não é possível construir nenhum distrito!')
+            super().ativar(estado)
             return
         # Mostra opções ao jogador
         print(f'0: Não desejo construir nenhum distrito.')
@@ -231,6 +241,7 @@ class ConstruirDistrito(Acao):
                 continue
             # Finaliza ação se jogador decidiu não construir
             if escolha_construir == 0:
+                super().ativar(estado)
                 return
             # Construção normal
             if escolha_construir <= len(distritos_para_construir):
@@ -435,13 +446,16 @@ class HabilidadeMago(Acao):
         # Mostra opções ao jogador (não pode escolher a si mesmo)
         print('Jogadores:')
         i = 0
-        i_jogador_atual = 0
+        opcoes_jogadores: List[Jogador] = []
         for jogador in estado.jogadores:
-            if jogador == estado.jogador_atual():
-                i_jogador_atual = i
-            else:
+            if jogador != estado.jogador_atual() and not jogador.cartas_distrito_mao:
+                opcoes_jogadores.append(jogador)
                 print(f'{i}: {jogador.nome}')
                 i += 1
+        if not opcoes_jogadores:
+            print('Não existe opção válida para aplicar o efeito.')
+            super().ativar(estado)
+            return
         # Aguarda escolha do jogador
         while True:
             escolha_jogador = input('Digite o número do jogador que deseja olhar a mão e pegar 1 carta: ')
@@ -450,15 +464,13 @@ class HabilidadeMago(Acao):
             except ValueError:
                 print('Escolha inválida.')
                 continue
-            if not 0 <= escolha_jogador < len(estado.jogadores) - 1:
+            if not 0 <= escolha_jogador < len(opcoes_jogadores) - 1:
                 print('Escolha inválida.')
                 continue
             break
-        if escolha_jogador >= i_jogador_atual:
-            escolha_jogador += 1
         # Mostra opções ao jogador
         print('Mão do jogador escolhido:')
-        for i, carta in enumerate(estado.jogadores[escolha_jogador].cartas_distrito_mao):
+        for i, carta in enumerate(opcoes_jogadores[escolha_jogador].cartas_distrito_mao):
             print(f'{i}: {carta.imprimir_tudo()}')
         # Aguarda escolha do jogador
         while True:
@@ -468,13 +480,13 @@ class HabilidadeMago(Acao):
             except ValueError:
                 print('Escolha inválida.')
                 continue
-            if not 0 <= escolha_carta < len(estado.jogadores[escolha_jogador].cartas_distrito_mao):
+            if not 0 <= escolha_carta < len(opcoes_jogadores[escolha_jogador].cartas_distrito_mao):
                 print('Escolha inválida.')
                 continue
             break
         # Remove carta escolhida da mão do jogador escolhido
-        distrito = estado.jogadores[escolha_jogador].cartas_distrito_mao[escolha_carta]
-        estado.jogadores[escolha_jogador].cartas_distrito_mao.remove(distrito)
+        distrito = opcoes_jogadores[escolha_jogador].cartas_distrito_mao[escolha_carta]
+        opcoes_jogadores[escolha_jogador].cartas_distrito_mao.remove(distrito)
         # Adiciona carta escolhida na mão do jogador atual
         estado.jogador_atual().cartas_distrito_mao.append(distrito)
         # Identifica distritos que podem ser construídos
@@ -719,6 +731,7 @@ class HabilidadeSenhordaGuerraDestruir(Acao):
                         distritos_para_destruir.append((carta, jogador, muralha))
         if len(distritos_para_destruir) == 0:
             print('Não é possível destruir nenhum distrito!')
+            super().ativar(estado)
             return
         # Mostra opções ao jogador
         print(f'0: Não desejo destruir nenhum distrito.')
@@ -736,6 +749,7 @@ class HabilidadeSenhordaGuerraDestruir(Acao):
                 print('Escolha inválida.')
                 continue
             if escolha_destruir == 0:
+                super().ativar(estado)
                 return
             # Paga o custo e destrói distrito escolhido do jogador alvo
             (distrito, jogador, muralha) = distritos_para_destruir[escolha_destruir - 1]
@@ -815,6 +829,7 @@ class Arsenal(Acao):
                         distritos_para_destruir.append((carta, jogador))
         if len(distritos_para_destruir) == 0:
             print('Não é possível destruir nenhum distrito!')
+            super().ativar(estado)
             return
         # Mostra opções ao jogador
         print(f'0: Não desejo destruir nenhum distrito.')
@@ -832,6 +847,7 @@ class Arsenal(Acao):
                 print('Escolha inválida.')
                 continue
             if escolha_destruir == 0:
+                super().ativar(estado)
                 return
             # Paga o custo e destrói distrito escolhido do jogador alvo
             (distrito, jogador) = distritos_para_destruir[escolha_destruir - 1]
