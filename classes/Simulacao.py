@@ -1,8 +1,10 @@
-# Imports
 from random import shuffle
 from classes.model.Acao import *
 from classes.model.Tabuleiro import Tabuleiro
 from classes.model.Jogador import Jogador
+from classes.strategies import Estrategia
+from classes.strategies.EstrategiaManual import EstrategiaManual
+from classes.strategies.EstrategiaTotalmenteAleatoria import EstrategiaTotalmenteAleatoria
 
 
 class Simulacao:
@@ -16,6 +18,8 @@ class Simulacao:
         self.acoes = self.criar_acoes()
         # Primeiro jogador a finalizar cidade (construir 7 ou mais distritos)
         self.jogador_finalizador = None
+        # Estratégias de cada jogador
+        self.estrategias: dict[Jogador, Estrategia] = self.criar_estrategias()
 
     # Cria o estado inicial do tabuleiro
     def criar_estado_inicial(self, num_personagens, automatico) -> Estado:
@@ -52,6 +56,16 @@ class Simulacao:
             nome_jogador = input('Digite o nome do jogador:')
             lista_jogadores.append(Jogador(nome_jogador))
         return lista_jogadores
+
+    # Instância as estratégais para os jogadores
+    def criar_estrategias(self) -> dict[Jogador, Estrategia]:
+        estrategias: dict[Jogador, Estrategia] = dict()
+        for jogador in self.estado.jogadores:
+            if jogador.nome == 'Bot 1':
+                estrategias.update({jogador: EstrategiaTotalmenteAleatoria()})
+            else:
+                estrategias.update({jogador: EstrategiaManual()})
+        return estrategias
 
     # Cria lista de ações (ativas) do jogo
     @staticmethod
@@ -94,25 +108,10 @@ class Simulacao:
             self.estado.ordenar_jogadores_coroado()
             # Fase de escolha de personagens
             for jogador in self.estado.jogadores:
-                i = 0
-                print('\n---------| Personagens |--------')
-                for personagem in self.estado.tabuleiro.baralho_personagens:
-                    print(f'{i}: {personagem}')
-                    i += 1
-                # Aguarda escolha do jogador
-                while True:
-                    escolha_personagem = input(f'\n{jogador.nome}, escolha um personagem disponível: ')
-                    try:
-                        escolha_personagem = int(escolha_personagem)
-                    except ValueError:
-                        print('Escolha inválida.')
-                        continue
-                    if not 0 <= escolha_personagem < len(self.estado.tabuleiro.baralho_personagens):
-                        print('Escolha inválida.')
-                        continue
-                    jogador.personagem = self.estado.tabuleiro.baralho_personagens[escolha_personagem]
-                    self.estado.tabuleiro.baralho_personagens.remove(jogador.personagem)
-                    break
+                print(f'Turno atual: {jogador.nome}')
+                escolha_personagem = self.estrategias[jogador].escolher_personagem(jogador, self.estado)
+                jogador.personagem = self.estado.tabuleiro.baralho_personagens[escolha_personagem]
+                self.estado.tabuleiro.baralho_personagens.remove(jogador.personagem)
             # Reordena os jogadores
             self.estado.ordenar_jogadores_personagem()
             # Fase de ações
@@ -140,24 +139,10 @@ class Simulacao:
                     # Mostra o estado atual
                     print(self.estado)
                     # Mostra o jogador atual
-                    print(f'{jogador.personagem}, {jogador.nome}')
+                    print(f'Turno atual: {jogador.nome}, {jogador.personagem}')
                     # Mostra apenas ações disponíveis segundo regras do jogo
-                    print('Ações disponíveis: ')
                     acoes = self.acoes_disponiveis()
-                    for indexAcao, acao in enumerate(acoes):
-                        print(f'\t{indexAcao}: - {acao.descricao}')
-                    # Aguarda escolha do jogador
-                    while True:
-                        escolha_acao = input('Escolha sua ação: ')
-                        try:
-                            escolha_acao = int(escolha_acao)
-                        except ValueError:
-                            print('Escolha inválida.')
-                            continue
-                        if not 0 <= escolha_acao < len(acoes):
-                            print('Escolha inválida.')
-                            continue
-                        break
+                    escolha_acao = self.estrategias[jogador].escolher_acao(jogador, self.estado, acoes)
                     # Pula uma linha
                     print()
                     # Executa ação escolhida

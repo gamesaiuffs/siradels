@@ -1,5 +1,3 @@
-from typing import List
-
 from classes.model.Estado import Estado
 from classes.enum.TipoDistrito import TipoDistrito
 from classes.enum.TipoAcao import TipoAcao
@@ -129,15 +127,15 @@ class ConstruirDistrito(Acao):
 
     def ativar(self, estado: Estado):
         # Identifica distritos que podem ser construídos
-        distritos_para_construir: List[CartaDistrito] = []
+        distritos_para_construir: list[CartaDistrito] = []
         # Identifica distritos que podem ser construídos pelo Cardeal
-        distritos_para_construir_cardeal: List[(CartaDistrito, Jogador)] = []
+        distritos_para_construir_cardeal: list[(CartaDistrito, Jogador)] = []
         # Identifica distritos que podem ser destruídos para construir a necrópole sem custo
-        distritos_para_construir_necropole: List[(CartaDistrito, CartaDistrito)] = []
+        distritos_para_construir_necropole: list[(CartaDistrito, CartaDistrito)] = []
         # Identifica opções especiais para construir o covil dos ladrões (divisão do custo em ouro e cartas da mão)
-        distritos_para_construir_covil_ladroes: List[(CartaDistrito, int, int)] = []
+        distritos_para_construir_covil_ladroes: list[(CartaDistrito, int, int)] = []
         # Identifica opções de construção ao destruir a Estrutura
-        distritos_para_construir_estrutura: List[CartaDistrito] = []
+        distritos_para_construir_estrutura: list[CartaDistrito] = []
         # Identifica se o jogador construiu a Fábrica (afeta custo dos distritos especiais)
         fabrica = estado.jogador_atual().construiu_distrito('Fábrica')
         # Identifica se o jogador construiu a Estrutura (adiciona opções de construção sem custo)
@@ -369,7 +367,7 @@ class HabilidadeAssassina(Acao):
         # A Assassina não pode afetar o personagem de rank 1 (ele próprio)
         # Não faz sentido escolher um personagem descartado visível
         i = 0
-        opcoes_personagem: List[CartaPersonagem] = []
+        opcoes_personagem: list[CartaPersonagem] = []
         for personagem in estado.tabuleiro.personagens:
             if personagem.rank > 1 and personagem not in estado.tabuleiro.cartas_visiveis:
                 opcoes_personagem.append(personagem)
@@ -410,7 +408,7 @@ class HabilidadeLadrao(Acao):
         # O Ladrão não pode afetar o personagem de rank 1 e 2 (ele próprio)
         # Não faz sentido escolher um personagem descartado visível
         i = 0
-        opcoes_personagem: List[CartaPersonagem] = []
+        opcoes_personagem: list[CartaPersonagem] = []
         for personagem in estado.tabuleiro.personagens:
             if personagem != personagem_assassinado and personagem.rank > 2 and personagem not in estado.tabuleiro.cartas_visiveis:
                 opcoes_personagem.append(personagem)
@@ -447,7 +445,7 @@ class HabilidadeMago(Acao):
         # Mostra opções ao jogador (não pode escolher a si mesmo)
         print('Jogadores:')
         i = 0
-        opcoes_jogadores: List[Jogador] = []
+        opcoes_jogadores: list[Jogador] = []
         for jogador in estado.jogadores:
             if jogador != estado.jogador_atual() and len(jogador.cartas_distrito_mao) > 0:
                 opcoes_jogadores.append(jogador)
@@ -491,13 +489,13 @@ class HabilidadeMago(Acao):
         # Adiciona carta escolhida na mão do jogador atual
         estado.jogador_atual().cartas_distrito_mao.append(distrito)
         # Identifica distritos que podem ser construídos
-        distritos_para_construir: List[CartaDistrito] = []
+        distritos_para_construir: list[CartaDistrito] = []
         # Identifica distritos que podem ser destruídos para construir a necrópole sem custo
-        distritos_para_construir_necropole: List[(CartaDistrito, CartaDistrito)] = []
+        distritos_para_construir_necropole: list[(CartaDistrito, CartaDistrito)] = []
         # Identifica opções especiais para construir o covil dos ladrões (divisão do custo em ouro e cartas da mão)
-        distritos_para_construir_covil_ladroes: List[(CartaDistrito, int, int)] = []
+        distritos_para_construir_covil_ladroes: list[(CartaDistrito, int, int)] = []
         # Identifica opções de construção ao destruir a Estrutura
-        distritos_para_construir_estrutura: List[CartaDistrito] = []
+        distritos_para_construir_estrutura: list[CartaDistrito] = []
         # Identifica se o jogador construiu a Fábrica (afeta custo dos distritos especiais)
         fabrica = estado.jogador_atual().construiu_distrito('Fábrica')
         # Identifica se o jogador construiu a Estrutura (adiciona opções de construção sem custo)
@@ -715,7 +713,7 @@ class HabilidadeSenhordaGuerraDestruir(Acao):
 
     def ativar(self, estado: Estado):
         # Identifica distritos que podem ser destruídos
-        distritos_para_destruir: List[(CartaDistrito, Jogador, int)] = []
+        distritos_para_destruir: list[(CartaDistrito, Jogador, int)] = []
         # É permitido destruir um dos seus próprios distritos
         for jogador in estado.jogadores:
             # Não é possível destruir um distrito de um jogador com 7+ distritos
@@ -819,7 +817,7 @@ class Arsenal(Acao):
 
     def ativar(self, estado: Estado):
         # Identifica distritos que podem ser destruídos
-        distritos_para_destruir: List[(CartaDistrito, Jogador)] = []
+        distritos_para_destruir: list[(CartaDistrito, Jogador)] = []
         # É permitido destruir um dos seus próprios distritos
         for jogador in estado.jogadores:
             # Não é possível destruir um distrito de um jogador com 7+ distritos

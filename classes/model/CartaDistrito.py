@@ -1,4 +1,3 @@
-# Imports
 from classes.enum.TipoDistrito import TipoDistrito
 
 

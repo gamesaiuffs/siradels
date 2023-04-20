@@ -1,8 +1,6 @@
-# Imports
 from classes.model.CartaDistrito import CartaDistrito
 from classes.model.CartaPersonagem import CartaPersonagem
 from classes.enum.TipoAcao import TipoAcao
-from typing import List
 
 
 class Jogador:
@@ -13,9 +11,9 @@ class Jogador:
         self.nome = nome
         self.personagem = CartaPersonagem('Nenhum', 0)
         self.ouro = 2
-        self.cartas_distrito_mao: List[CartaDistrito] = []
-        self.distritos_construidos: List[CartaDistrito] = []
-        self.distritos_museu: List[CartaDistrito] = []
+        self.cartas_distrito_mao: list[CartaDistrito] = []
+        self.distritos_construidos: list[CartaDistrito] = []
+        self.distritos_museu: list[CartaDistrito] = []
         self.rei = False
         self.morto = False
         self.roubado = False

@@ -4,7 +4,6 @@ from classes.model.CartaDistrito import CartaDistrito
 from classes.model.CartaPersonagem import CartaPersonagem
 from random import shuffle
 from more_itertools import sort_together
-from typing import List
 
 
 class Tabuleiro:
@@ -12,11 +11,11 @@ class Tabuleiro:
     def __init__(self, num_personagens: int):
         # Define o número de personagens (8 ou 9)
         self.num_personagens = num_personagens
-        self.cartas_visiveis: List[CartaPersonagem] = []
-        self.cartas_nao_visiveis: List[CartaPersonagem] = []
-        self.baralho_personagens: List[CartaPersonagem] = []
-        self.personagens: List[CartaPersonagem] = []
-        self.baralho_distritos: List[CartaDistrito] = []
+        self.cartas_visiveis: list[CartaPersonagem] = []
+        self.cartas_nao_visiveis: list[CartaPersonagem] = []
+        self.baralho_personagens: list[CartaPersonagem] = []
+        self.personagens: list[CartaPersonagem] = []
+        self.baralho_distritos: list[CartaDistrito] = []
         self.criar_baralho_distritos()
 
     # To String
