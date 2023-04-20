@@ -4,6 +4,7 @@ from classes.enum.TipoAcao import TipoAcao
 from classes.model.CartaDistrito import CartaDistrito
 from classes.model.CartaPersonagem import CartaPersonagem
 from classes.model.Jogador import Jogador
+from classes.strategies.Estrategia import Estrategia
 
 
 class Acao:
@@ -14,7 +15,7 @@ class Acao:
     def __str__(self):
         return f'{self.descricao}'
 
-    def ativar(self, estado: Estado):
+    def ativar(self, estado: Estado, estrategia: Estrategia = None):
         estado.jogador_atual().acoes_realizadas[self.tipo_acao.value] = True
 
 
@@ -22,7 +23,7 @@ class PassarTurno(Acao):
     def __init__(self):
         super().__init__('Passar seu turno.', TipoAcao.PassarTurno)
 
-    def ativar(self, estado: Estado):
+    def ativar(self, estado: Estado, estrategia: Estrategia = None):
         # Efeito passivo do distrito Abrigo para Pobres
         if estado.jogador_atual().ouro == 0:
             if estado.jogador_atual().construiu_distrito('Abrigo para Pobres'):
@@ -31,9 +32,13 @@ class PassarTurno(Acao):
         if len(estado.jogador_atual().cartas_distrito_mao) == 0:
             if estado.jogador_atual().construiu_distrito('Parque'):
                 # Pescar cartas do baralho e adicionar na mão do jogador
-                cartas_compradas = estado.tabuleiro.baralho_distritos[:2]
-                del estado.tabuleiro.baralho_distritos[:2]
-                estado.jogador_atual().cartas_distrito_mao.extend(cartas_compradas)
+                qtd_cartas = len(estado.tabuleiro.baralho_distritos)
+                if qtd_cartas > 2:
+                    qtd_cartas = 2
+                if qtd_cartas > 0:
+                    cartas_compradas = estado.tabuleiro.baralho_distritos[:qtd_cartas]
+                    del estado.tabuleiro.baralho_distritos[:qtd_cartas]
+                    estado.jogador_atual().cartas_distrito_mao.extend(cartas_compradas)
         # Efeito passivo do Alquimista
         if estado.jogador_atual().personagem.nome == 'Alquimista':
             estado.jogador_atual().ouro += estado.jogador_atual().ouro_gasto
@@ -52,7 +57,7 @@ class ColetarOuro(Acao):
     def __init__(self):
         super().__init__('Pegue dois ouros do banco.', TipoAcao.ColetarOuro)
 
-    def ativar(self, estado: Estado):
+    def ativar(self, estado: Estado, estrategia: Estrategia = None):
         # Efeito passivo da carta Mina de Ouro
         if estado.jogador_atual().construiu_distrito('Mina de Ouro'):
             estado.jogador_atual().ouro += 1
@@ -66,7 +71,7 @@ class ColetarCartas(Acao):
     def __init__(self):
         super().__init__('Compre duas cartas do baralho de distritos, escolha uma e descarte a outra.', TipoAcao.ColetarCartas)
 
-    def ativar(self, estado: Estado):
+    def ativar(self, estado: Estado, estrategia: Estrategia = None):
         qtd_cartas = 2
         # Efeito passivo da carta Observatório
         if estado.jogador_atual().construiu_distrito('Observatório'):
@@ -88,35 +93,20 @@ class ColetarCartas(Acao):
             estado.jogador_atual().cartas_distrito_mao.extend(cartas_compradas)
             super().ativar(estado)
             return
-        # Mostra cartas para escolha
-        print(f'0: {cartas_compradas[0].imprimir_tudo()}')
-        print(f'1: {cartas_compradas[1].imprimir_tudo()}')
-        if qtd_cartas == 3:
-            print(f'2: {cartas_compradas[2].imprimir_tudo()}')
-        # Aguarda escolha do jogador
-        while True:
-            escolha_carta = input('Escolha a carta com que deseja ficar: ')
-            try:
-                escolha_carta = int(escolha_carta)
-            except ValueError:
-                print('Escolha inválida.')
-                continue
-            if not 0 <= escolha_carta < qtd_cartas:
-                print('Escolha inválida.')
-                continue
-            # Adicionar na mão do jogador a carta escolhida e descarta cartas que não foram escolhidas
-            if escolha_carta == 0:
-                estado.jogador_atual().cartas_distrito_mao.append(cartas_compradas[0])
-                estado.tabuleiro.baralho_distritos.append(cartas_compradas[1])
-            elif escolha_carta == 1:
-                estado.jogador_atual().cartas_distrito_mao.append(cartas_compradas[1])
-                estado.tabuleiro.baralho_distritos.append(cartas_compradas[0])
-            elif escolha_carta == 2:
-                estado.jogador_atual().cartas_distrito_mao.append(cartas_compradas[2])
-                estado.tabuleiro.baralho_distritos.extend(cartas_compradas[:1])
-            if qtd_cartas == 3 and 0 <= escolha_carta < 2:
-                estado.tabuleiro.baralho_distritos.append(cartas_compradas[2])
-            break
+        # Aplica estratégia do jogador
+        escolha_carta = estrategia.coletar_cartas(estado, cartas_compradas, qtd_cartas)
+        # Adicionar na mão do jogador a carta escolhida e descarta cartas que não foram escolhidas
+        if escolha_carta == 0:
+            estado.jogador_atual().cartas_distrito_mao.append(cartas_compradas[0])
+            estado.tabuleiro.baralho_distritos.append(cartas_compradas[1])
+        elif escolha_carta == 1:
+            estado.jogador_atual().cartas_distrito_mao.append(cartas_compradas[1])
+            estado.tabuleiro.baralho_distritos.append(cartas_compradas[0])
+        elif escolha_carta == 2:
+            estado.jogador_atual().cartas_distrito_mao.append(cartas_compradas[2])
+            estado.tabuleiro.baralho_distritos.extend(cartas_compradas[:1])
+        if qtd_cartas == 3 and 0 <= escolha_carta < 2:
+            estado.tabuleiro.baralho_distritos.append(cartas_compradas[2])
         # Marca flag de ação utilizada
         super().ativar(estado)
 
@@ -125,7 +115,7 @@ class ConstruirDistrito(Acao):
     def __init__(self):
         super().__init__('Construa um distrito em sua cidade.', TipoAcao.ConstruirDistrito)
 
-    def ativar(self, estado: Estado):
+    def ativar(self, estado: Estado, estrategia: Estrategia = None):
         # Identifica distritos que podem ser construídos
         distritos_para_construir: list[CartaDistrito] = []
         # Identifica distritos que podem ser construídos pelo Cardeal
@@ -208,151 +198,102 @@ class ConstruirDistrito(Acao):
             print('Não é possível construir nenhum distrito!')
             super().ativar(estado)
             return
-        # Mostra opções ao jogador
-        print(f'0: Não desejo construir nenhum distrito.')
-        i = 0
-        for carta in distritos_para_construir:
-            i += 1
-            print(f'{i}: {carta.imprimir_tudo()}')
-        for carta, jogador in distritos_para_construir_cardeal:
-            i += 1
-            print(f'{i}: {carta.imprimir_tudo()} - Usar efeito do Cardeal no jogador: {jogador.nome}')
-        for carta, distrito in distritos_para_construir_necropole:
-            i += 1
-            print(f'{i}: {carta.imprimir_tudo()} - Distrito para destruir: {distrito.nome_do_distrito}')
-        for carta, qtd_ouro, qtd_cartas in distritos_para_construir_covil_ladroes:
-            i += 1
-            print(f'{i}: {carta.imprimir_tudo()} - Custo em ouro: {qtd_ouro} - Custo em cartas da mão: {qtd_cartas}')
-        for carta in distritos_para_construir_estrutura:
-            i += 1
-            print(f'{i}: {carta.imprimir_tudo()} - Distrito para destruir: Estrutura')
-        # Aguarda escolha do jogador
-        while True:
-            escolha_construir = input('Digite o número do distrito que deseja construir: ')
-            try:
-                escolha_construir = int(escolha_construir)
-            except ValueError:
-                print('Escolha inválida.')
-                continue
-            if not 0 <= escolha_construir <= len(distritos_para_construir) + len(distritos_para_construir_cardeal) + \
-                    len(distritos_para_construir_necropole) + len(distritos_para_construir_covil_ladroes) + len(distritos_para_construir_estrutura):
-                print('Escolha inválida.')
-                continue
-            # Finaliza ação se jogador decidiu não construir
-            if escolha_construir == 0:
-                super().ativar(estado)
-                return
-            # Construção normal
-            if escolha_construir <= len(distritos_para_construir):
-                distrito = distritos_para_construir[escolha_construir - 1]
-                # Retira distrito construído da mão
-                estado.jogador_atual().cartas_distrito_mao.remove(distrito)
-                # Paga distrito e salva ouro gasto
-                estado.jogador_atual().ouro -= distrito.valor_do_distrito
-                estado.jogador_atual().ouro_gasto += distrito.valor_do_distrito
-                # Fábrica concede 1 de desconto para distritos especiais
-                if fabrica and distrito.tipo_de_distrito == TipoDistrito.Especial:
-                    estado.jogador_atual().ouro += 1
-                    estado.jogador_atual().ouro_gasto -= 1
-            # Construção com efeito passivo do Cardeal
-            elif escolha_construir <= len(distritos_para_construir) + len(distritos_para_construir_cardeal):
-                (distrito, jogador) = distritos_para_construir_cardeal[escolha_construir - len(distritos_para_construir) - 1]
-                # Retira distrito construído da mão
-                estado.jogador_atual().cartas_distrito_mao.remove(distrito)
-                # Paga distrito e salva ouro gasto
-                estado.jogador_atual().ouro -= distrito.valor_do_distrito
-                estado.jogador_atual().ouro_gasto += distrito.valor_do_distrito
-                # Fábrica concede 1 de desconto para distritos especiais
-                if fabrica and distrito.tipo_de_distrito == TipoDistrito.Especial:
-                    estado.jogador_atual().ouro += 1
-                    estado.jogador_atual().ouro_gasto -= 1
-                # Jogador escolhido recebe cartas em troca pelo dinheiro pago
-                for i in range(diferenca):
-                    print(f'Escolha as cartas que trocará pelo ouro recebido do jogador escolhido. Faltam {diferenca - i} cartas.')
-                    for j, carta in enumerate(estado.jogador_atual().cartas_distrito_mao):
-                        print(f'{j}: {carta.imprimir_tudo()}')
-                    while True:
-                        escolha_carta = input('Digite o número do distrito que deseja trocar pelo ouro: ')
-                        try:
-                            escolha_carta = int(escolha_carta)
-                        except ValueError:
-                            print('Escolha inválida.')
-                            continue
-                        if not 0 <= escolha_carta < len(estado.jogador_atual().cartas_distrito_mao):
-                            print('Escolha inválida.')
-                            continue
-                        # Troca carta pelo ouro
-                        carta = estado.jogador_atual().cartas_distrito_mao[escolha_carta]
-                        estado.jogador_atual().ouro += 1
-                        jogador.ouro -= 1
-                        estado.jogador_atual().cartas_distrito_mao.remove(carta)
-                        jogador.cartas_distrito_mao.append(carta)
-                        break
-            # Construção de necrópole sem custo de ouro
-            elif escolha_construir <= len(distritos_para_construir) + len(distritos_para_construir_cardeal) + len(distritos_para_construir_necropole):
-                (distrito, destruido) = distritos_para_construir_necropole[escolha_construir -
-                                                                           len(distritos_para_construir) -
-                                                                           len(distritos_para_construir_cardeal) - 1]
-                # Retira distrito construído da mão
-                estado.jogador_atual().cartas_distrito_mao.remove(distrito)
-                # Destrói distrito escolhido e remove pontos parciais
-                estado.jogador_atual().distritos_construidos.remove(destruido)
-                estado.tabuleiro.baralho_distritos.append(destruido)
-                estado.jogador_atual().pontuacao -= destruido.valor_do_distrito
-            # Construção de covil dos ladrões com custo misto de ouro e cartas
-            elif escolha_construir <= len(distritos_para_construir) + len(distritos_para_construir_cardeal) + len(distritos_para_construir_necropole) + \
-                    len(distritos_para_construir_covil_ladroes):
-                (distrito, qtd_ouro, qtd_cartas) = distritos_para_construir_covil_ladroes[escolha_construir -
-                                                                                          len(distritos_para_construir) -
-                                                                                          len(distritos_para_construir_cardeal) -
-                                                                                          len(distritos_para_construir_necropole) - 1]
-                # Retira distrito construído da mão
-                estado.jogador_atual().cartas_distrito_mao.remove(distrito)
-                # Paga distrito e salva ouro gasto
-                estado.jogador_atual().ouro -= qtd_ouro
-                estado.jogador_atual().ouro_gasto += qtd_ouro
-                # Escolhe carta para pagar o resto do custo
-                for i in range(qtd_cartas):
-                    print(f'Escolha as cartas que usará para pagar o custo. Faltam {qtd_cartas - i} cartas.')
-                    for j, carta in enumerate(estado.jogador_atual().cartas_distrito_mao):
-                        print(f'{j}: {carta.imprimir_tudo()}')
-                    while True:
-                        escolha_carta = input('Digite o número do distrito que deseja descartar: ')
-                        try:
-                            escolha_carta = int(escolha_carta)
-                        except ValueError:
-                            print('Escolha inválida.')
-                            continue
-                        if not 0 <= escolha_carta < len(estado.jogador_atual().cartas_distrito_mao):
-                            print('Escolha inválida.')
-                            continue
-                        # Descarta carta escolhida
-                        carta = estado.jogador_atual().cartas_distrito_mao[escolha_carta]
-                        estado.jogador_atual().cartas_distrito_mao.remove(carta)
-                        estado.tabuleiro.baralho_distritos.append(carta)
-                        break
-            # Construção sem custo destruíndo a Estrutura
-            else:
-                distrito = distritos_para_construir_estrutura[escolha_construir -
-                                                              len(distritos_para_construir) -
-                                                              len(distritos_para_construir_cardeal) -
-                                                              len(distritos_para_construir_necropole) -
-                                                              len(distritos_para_construir_covil_ladroes) - 1]
-                # Retira distrito construído da mão
-                estado.jogador_atual().cartas_distrito_mao.remove(distrito)
-                # Identifica estrutura
-                for destruido in estado.jogador_atual().distritos_construidos:
-                    if destruido.nome_do_distrito == 'Estrutura':
-                        # Destrói estrutura e remove pontos parciais
-                        estado.jogador_atual().distritos_construidos.remove(destruido)
-                        estado.tabuleiro.baralho_distritos.append(destruido)
-                        estado.jogador_atual().pontuacao -= destruido.valor_do_distrito
-                        break
-            # Pontua distrito
-            estado.jogador_atual().pontuacao += distrito.valor_do_distrito
-            # Constrói distrito
-            estado.jogador_atual().distritos_construidos.append(distrito)
-            break
+        # Aplica estratégia do jogador
+        escolha_construir = estrategia.construir_distrito(estado,
+                                                          distritos_para_construir,
+                                                          distritos_para_construir_cardeal,
+                                                          distritos_para_construir_necropole,
+                                                          distritos_para_construir_covil_ladroes,
+                                                          distritos_para_construir_estrutura)
+        # Finaliza ação se jogador decidiu não construir
+        if escolha_construir == 0:
+            super().ativar(estado)
+            return
+        # Construção normal
+        if escolha_construir <= len(distritos_para_construir):
+            distrito = distritos_para_construir[escolha_construir - 1]
+            # Retira distrito construído da mão
+            estado.jogador_atual().cartas_distrito_mao.remove(distrito)
+            # Paga distrito e salva ouro gasto
+            estado.jogador_atual().ouro -= distrito.valor_do_distrito
+            estado.jogador_atual().ouro_gasto += distrito.valor_do_distrito
+            # Fábrica concede 1 de desconto para distritos especiais
+            if fabrica and distrito.tipo_de_distrito == TipoDistrito.Especial:
+                estado.jogador_atual().ouro += 1
+                estado.jogador_atual().ouro_gasto -= 1
+        # Construção com efeito passivo do Cardeal
+        elif escolha_construir <= len(distritos_para_construir) + len(distritos_para_construir_cardeal):
+            (distrito, jogador) = distritos_para_construir_cardeal[escolha_construir - len(distritos_para_construir) - 1]
+            # Retira distrito construído da mão
+            estado.jogador_atual().cartas_distrito_mao.remove(distrito)
+            # Paga distrito e salva ouro gasto
+            estado.jogador_atual().ouro -= distrito.valor_do_distrito
+            estado.jogador_atual().ouro_gasto += distrito.valor_do_distrito
+            # Fábrica concede 1 de desconto para distritos especiais
+            if fabrica and distrito.tipo_de_distrito == TipoDistrito.Especial:
+                estado.jogador_atual().ouro += 1
+                estado.jogador_atual().ouro_gasto -= 1
+            # Jogador escolhido recebe cartas em troca pelo dinheiro pago
+            for i in range(diferenca):
+                # Aplica estratégia do jogador
+                escolha_carta = estrategia.construir_distrito_cardeal(estado, diferenca, i)
+                # Troca carta pelo ouro
+                carta = estado.jogador_atual().cartas_distrito_mao[escolha_carta]
+                estado.jogador_atual().ouro += 1
+                jogador.ouro -= 1
+                estado.jogador_atual().cartas_distrito_mao.remove(carta)
+                jogador.cartas_distrito_mao.append(carta)
+        # Construção de necrópole sem custo de ouro
+        elif escolha_construir <= len(distritos_para_construir) + len(distritos_para_construir_cardeal) + len(distritos_para_construir_necropole):
+            (distrito, destruido) = distritos_para_construir_necropole[escolha_construir -
+                                                                       len(distritos_para_construir) -
+                                                                       len(distritos_para_construir_cardeal) - 1]
+            # Retira distrito construído da mão
+            estado.jogador_atual().cartas_distrito_mao.remove(distrito)
+            # Destrói distrito escolhido e remove pontos parciais
+            estado.jogador_atual().distritos_construidos.remove(destruido)
+            estado.tabuleiro.baralho_distritos.append(destruido)
+            estado.jogador_atual().pontuacao -= destruido.valor_do_distrito
+        # Construção de covil dos ladrões com custo misto de ouro e cartas
+        elif escolha_construir <= len(distritos_para_construir) + len(distritos_para_construir_cardeal) + len(distritos_para_construir_necropole) + \
+                len(distritos_para_construir_covil_ladroes):
+            (distrito, qtd_ouro, qtd_cartas) = distritos_para_construir_covil_ladroes[escolha_construir -
+                                                                                      len(distritos_para_construir) -
+                                                                                      len(distritos_para_construir_cardeal) -
+                                                                                      len(distritos_para_construir_necropole) - 1]
+            # Retira distrito construído da mão
+            estado.jogador_atual().cartas_distrito_mao.remove(distrito)
+            # Paga distrito e salva ouro gasto
+            estado.jogador_atual().ouro -= qtd_ouro
+            estado.jogador_atual().ouro_gasto += qtd_ouro
+            # Escolhe carta para pagar o resto do custo
+            for i in range(qtd_cartas):
+                # Aplica estratégia do jogador
+                escolha_carta = estrategia.construir_distrito_covil_dos_ladroes(estado, qtd_cartas, i)
+                carta = estado.jogador_atual().cartas_distrito_mao[escolha_carta]
+                estado.jogador_atual().cartas_distrito_mao.remove(carta)
+                estado.tabuleiro.baralho_distritos.append(carta)
+        # Construção sem custo destruíndo a Estrutura
+        else:
+            distrito = distritos_para_construir_estrutura[escolha_construir -
+                                                          len(distritos_para_construir) -
+                                                          len(distritos_para_construir_cardeal) -
+                                                          len(distritos_para_construir_necropole) -
+                                                          len(distritos_para_construir_covil_ladroes) - 1]
+            # Retira distrito construído da mão
+            estado.jogador_atual().cartas_distrito_mao.remove(distrito)
+            # Identifica estrutura
+            for destruido in estado.jogador_atual().distritos_construidos:
+                if destruido.nome_do_distrito == 'Estrutura':
+                    # Destrói estrutura e remove pontos parciais
+                    estado.jogador_atual().distritos_construidos.remove(destruido)
+                    estado.tabuleiro.baralho_distritos.append(destruido)
+                    estado.jogador_atual().pontuacao -= destruido.valor_do_distrito
+                    break
+        # Pontua distrito
+        estado.jogador_atual().pontuacao += distrito.valor_do_distrito
+        # Constrói distrito
+        estado.jogador_atual().distritos_construidos.append(distrito)
         # Marca flag de ação utilizada (a construção dos estábulos não conta para o limite de construções do turno)
         if not estado.jogador_atual().distritos_construidos[-1].nome_do_distrito == 'Estábulos':
             super().ativar(estado)
@@ -362,34 +303,20 @@ class HabilidadeAssassina(Acao):
     def __init__(self):
         super().__init__('Assassina: Anuncie um personagem que você deseja assassinar. O personagem assassinado perde o turno.', TipoAcao.HabilidadeAssassina)
 
-    def ativar(self, estado: Estado):
-        # Mostra opções ao jogador
+    def ativar(self, estado: Estado, estrategia: Estrategia = None):
         # A Assassina não pode afetar o personagem de rank 1 (ele próprio)
         # Não faz sentido escolher um personagem descartado visível
-        i = 0
         opcoes_personagem: list[CartaPersonagem] = []
         for personagem in estado.tabuleiro.personagens:
             if personagem.rank > 1 and personagem not in estado.tabuleiro.cartas_visiveis:
                 opcoes_personagem.append(personagem)
-                print(f'{i}: {personagem}')
-                i += 1
-        # Aguarda escolha do jogador
-        while True:
-            escolha_personagem = input(f'Digite o número do personagem que deseja assassinar: ')
-            try:
-                escolha_personagem = int(escolha_personagem)
-            except ValueError:
-                print('Escolha inválida.')
-                continue
-            if not 0 <= escolha_personagem < len(opcoes_personagem):
-                print('Escolha inválida.')
-                continue
-            # Marca flag do efeito da Assassina
-            for jogador in estado.jogadores:
-                if jogador.personagem == opcoes_personagem[escolha_personagem]:
-                    jogador.morto = True
-                    break
-            break
+        # Aplica estratégia do jogador
+        escolha_personagem = estrategia.habilidade_assassina(estado, opcoes_personagem)
+        # Marca flag do efeito da Assassina
+        for jogador in estado.jogadores:
+            if jogador.personagem == opcoes_personagem[escolha_personagem]:
+                jogador.morto = True
+                break
         # Marca flag de ação utilizada
         super().ativar(estado)
 
@@ -399,39 +326,26 @@ class HabilidadeLadrao(Acao):
         super().__init__(
             'Ladrão: Anuncie um personagem que você deseja roubar. O personagem roubado entrega todo seu ouro ao ladrão.', TipoAcao.HabilidadeLadrao)
 
-    def ativar(self, estado: Estado):
+    def ativar(self, estado: Estado, estrategia: Estrategia = None):
         # O Ladrão não pode afetar o personagem morto pela Assassina
         personagem_assassinado = None
         for jogador in estado.jogadores:
             if jogador.morto:
                 personagem_assassinado = jogador.personagem
+                break
         # O Ladrão não pode afetar o personagem de rank 1 e 2 (ele próprio)
         # Não faz sentido escolher um personagem descartado visível
-        i = 0
         opcoes_personagem: list[CartaPersonagem] = []
         for personagem in estado.tabuleiro.personagens:
             if personagem != personagem_assassinado and personagem.rank > 2 and personagem not in estado.tabuleiro.cartas_visiveis:
                 opcoes_personagem.append(personagem)
-                # Mostra opções ao jogador
-                print(f'{i}: {personagem}')
-                i += 1
-        # Aguarda escolha do jogador
-        while True:
-            escolha_personagem = input(f'Digite o número do personagem que deseja roubar: ')
-            try:
-                escolha_personagem = int(escolha_personagem)
-            except ValueError:
-                print('Escolha inválida.')
-                continue
-            if not 0 <= escolha_personagem < len(opcoes_personagem):
-                print('Escolha inválida.')
-                continue
-            # Marca flag do efeito do Ladrão
-            for jogador in estado.jogadores:
-                if jogador.personagem == opcoes_personagem[escolha_personagem]:
-                    jogador.roubado = True
-                    break
-            break
+        # Aplica estratégia do jogador
+        escolha_personagem = estrategia.habilidade_ladrao(estado, opcoes_personagem)
+        # Marca flag do efeito do Ladrão
+        for jogador in estado.jogadores:
+            if jogador.personagem == opcoes_personagem[escolha_personagem]:
+                jogador.roubado = True
+                break
         # Marca flag de ação utilizada
         super().ativar(estado)
 
@@ -441,48 +355,18 @@ class HabilidadeMago(Acao):
         super().__init__(
             'Mago: Olhe a mão de outro jogador e escolha 1 carta. Pague para construí-la imediatamente ou adicione-a à sua mão.', TipoAcao.HabilidadeMago)
 
-    def ativar(self, estado: Estado):
-        # Mostra opções ao jogador (não pode escolher a si mesmo)
-        print('Jogadores:')
-        i = 0
+    def ativar(self, estado: Estado, estrategia: Estrategia = None):
         opcoes_jogadores: list[Jogador] = []
         for jogador in estado.jogadores:
             if jogador != estado.jogador_atual() and len(jogador.cartas_distrito_mao) > 0:
                 opcoes_jogadores.append(jogador)
-                print(f'{i}: {jogador.nome}')
-                i += 1
         if not opcoes_jogadores:
             print('Não existe opção válida para aplicar o efeito.')
             super().ativar(estado)
             return
-        # Aguarda escolha do jogador
-        while True:
-            escolha_jogador = input('Digite o número do jogador que deseja olhar a mão e pegar 1 carta: ')
-            try:
-                escolha_jogador = int(escolha_jogador)
-            except ValueError:
-                print('Escolha inválida.')
-                continue
-            if not 0 <= escolha_jogador < len(opcoes_jogadores) - 1:
-                print('Escolha inválida.')
-                continue
-            break
-        # Mostra opções ao jogador
-        print('Mão do jogador escolhido:')
-        for i, carta in enumerate(opcoes_jogadores[escolha_jogador].cartas_distrito_mao):
-            print(f'{i}: {carta.imprimir_tudo()}')
-        # Aguarda escolha do jogador
-        while True:
-            escolha_carta = input('Digite o número da carta que deseja pegar para construir ou para sua mão: ')
-            try:
-                escolha_carta = int(escolha_carta)
-            except ValueError:
-                print('Escolha inválida.')
-                continue
-            if not 0 <= escolha_carta < len(opcoes_jogadores[escolha_jogador].cartas_distrito_mao):
-                print('Escolha inválida.')
-                continue
-            break
+        # Aplica estratégia do jogador
+        escolha_jogador = estrategia.habilidade_mago_jogador(estado, opcoes_jogadores)
+        escolha_carta = estrategia.habilidade_mago_carta(estado, opcoes_jogadores[escolha_jogador].cartas_distrito_mao)
         # Remove carta escolhida da mão do jogador escolhido
         distrito = opcoes_jogadores[escolha_jogador].cartas_distrito_mao[escolha_carta]
         opcoes_jogadores[escolha_jogador].cartas_distrito_mao.remove(distrito)
@@ -547,108 +431,73 @@ class HabilidadeMago(Acao):
                 len(distritos_para_construir_covil_ladroes) + len(distritos_para_construir_estrutura) == 0 or not permitido:
             print('Não é possível construir o distrito!')
         else:
-            # Mostra opções ao jogador
-            print(f'0: Não desejo construir o distrito.')
-            i = 0
-            for carta in distritos_para_construir:
-                i += 1
-                print(f'{i}: {carta.imprimir_tudo()}')
-            for carta, distrito in distritos_para_construir_necropole:
-                i += 1
-                print(f'{i}: {carta.imprimir_tudo()} - Distrito para destruir: {distrito.nome_do_distrito}')
-            for carta, qtd_ouro, qtd_cartas in distritos_para_construir_covil_ladroes:
-                i += 1
-                print(f'{i}: {carta.imprimir_tudo()} - Custo em ouro: {qtd_ouro} - Custo em cartas da mão: {qtd_cartas}')
-            for carta in distritos_para_construir_estrutura:
-                i += 1
-                print(f'{i}: {carta.imprimir_tudo()} - Distrito para destruir: Estrutura')
-            # Aguarda escolha do jogador
-            while True:
-                escolha_construir = input('Digite o número do distrito que deseja construir: ')
-                try:
-                    escolha_construir = int(escolha_construir)
-                except ValueError:
-                    print('Escolha inválida.')
-                    continue
-                if not 0 <= escolha_construir <= len(distritos_para_construir) + \
-                        len(distritos_para_construir_necropole) + len(distritos_para_construir_covil_ladroes) + len(distritos_para_construir_estrutura):
-                    print('Escolha inválida.')
-                    continue
-                # Finaliza ação se jogador decidiu não construir
-                if escolha_construir == 0:
-                    break
-                # Construção normal
-                if escolha_construir <= len(distritos_para_construir):
-                    distrito = distritos_para_construir[escolha_construir - 1]
-                    # Retira distrito construído da mão
-                    estado.jogador_atual().cartas_distrito_mao.remove(distrito)
-                    # Paga distrito e salva ouro gasto
-                    estado.jogador_atual().ouro -= distrito.valor_do_distrito
-                    estado.jogador_atual().ouro_gasto += distrito.valor_do_distrito
-                    # Fábrica concede 1 de desconto para distritos especiais
-                    if fabrica and distrito.tipo_de_distrito == TipoDistrito.Especial:
-                        estado.jogador_atual().ouro += 1
-                        estado.jogador_atual().ouro_gasto -= 1
-                # Construção de necrópole sem custo de ouro
-                elif escolha_construir <= len(distritos_para_construir) + len(distritos_para_construir_necropole):
-                    (distrito, destruido) = distritos_para_construir_necropole[escolha_construir - len(distritos_para_construir) - 1]
-                    # Retira distrito construído da mão
-                    estado.jogador_atual().cartas_distrito_mao.remove(distrito)
-                    # Destrói distrito escolhido e remove pontos parciais
-                    estado.jogador_atual().distritos_construidos.remove(destruido)
-                    estado.tabuleiro.baralho_distritos.append(destruido)
-                    estado.jogador_atual().pontuacao -= destruido.valor_do_distrito
-                # Construção de covil dos ladrões com custo misto de ouro e cartas
-                elif escolha_construir <= len(distritos_para_construir) + len(distritos_para_construir_necropole) + len(distritos_para_construir_covil_ladroes):
-                    (distrito, qtd_ouro, qtd_cartas) = distritos_para_construir_covil_ladroes[escolha_construir -
-                                                                                              len(distritos_para_construir) -
-                                                                                              len(distritos_para_construir_necropole) - 1]
-                    # Retira distrito construído da mão
-                    estado.jogador_atual().cartas_distrito_mao.remove(distrito)
-                    # Paga distrito e salva ouro gasto
-                    estado.jogador_atual().ouro -= qtd_ouro
-                    estado.jogador_atual().ouro_gasto += qtd_ouro
-                    # Escolhe carta para pagar o resto do custo
-                    for i in range(qtd_cartas):
-                        print(f'Escolha as cartas que usará para pagar o custo. Faltam {qtd_cartas - i} cartas.')
-                        for j, carta in enumerate(estado.jogador_atual().cartas_distrito_mao):
-                            print(f'{j}: {carta.imprimir_tudo()}')
-                        while True:
-                            escolha_carta = input('Digite o número do distrito que deseja descartar: ')
-                            try:
-                                escolha_carta = int(escolha_carta)
-                            except ValueError:
-                                print('Escolha inválida.')
-                                continue
-                            if not 0 <= escolha_carta < len(estado.jogador_atual().cartas_distrito_mao):
-                                print('Escolha inválida.')
-                                continue
-                            # Descarta carta escolhida
-                            carta = estado.jogador_atual().cartas_distrito_mao[escolha_carta]
-                            estado.jogador_atual().cartas_distrito_mao.remove(carta)
-                            estado.tabuleiro.baralho_distritos.append(carta)
-                            break
-                # Construção sem custo destruíndo a Estrutura
-                else:
-                    distrito = distritos_para_construir_estrutura[escolha_construir -
-                                                                  len(distritos_para_construir) -
-                                                                  len(distritos_para_construir_necropole) -
-                                                                  len(distritos_para_construir_covil_ladroes) - 1]
-                    # Retira distrito construído da mão
-                    estado.jogador_atual().cartas_distrito_mao.remove(distrito)
-                    # Identifica estrutura
-                    for destruido in estado.jogador_atual().distritos_construidos:
-                        if destruido.nome_do_distrito == 'Estrutura':
-                            # Destrói estrutura e remove pontos parciais
-                            estado.jogador_atual().distritos_construidos.remove(destruido)
-                            estado.tabuleiro.baralho_distritos.append(destruido)
-                            estado.jogador_atual().pontuacao -= destruido.valor_do_distrito
-                            break
-                # Pontua distrito
-                estado.jogador_atual().pontuacao += distrito.valor_do_distrito
-                # Constrói distrito
-                estado.jogador_atual().distritos_construidos.append(distrito)
-                break
+            # Aplica estratégia do jogador
+            escolha_construir = estrategia.construir_distrito(estado, distritos_para_construir, [],
+                                                              distritos_para_construir_necropole,
+                                                              distritos_para_construir_covil_ladroes,
+                                                              distritos_para_construir_estrutura)
+            if escolha_construir == 0:
+                super().ativar(estado)
+                return
+            # Construção normal
+            elif escolha_construir <= len(distritos_para_construir):
+                distrito = distritos_para_construir[escolha_construir - 1]
+                # Retira distrito construído da mão
+                estado.jogador_atual().cartas_distrito_mao.remove(distrito)
+                # Paga distrito e salva ouro gasto
+                estado.jogador_atual().ouro -= distrito.valor_do_distrito
+                estado.jogador_atual().ouro_gasto += distrito.valor_do_distrito
+                # Fábrica concede 1 de desconto para distritos especiais
+                if fabrica and distrito.tipo_de_distrito == TipoDistrito.Especial:
+                    estado.jogador_atual().ouro += 1
+                    estado.jogador_atual().ouro_gasto -= 1
+            # Construção de necrópole sem custo de ouro
+            elif escolha_construir <= len(distritos_para_construir) + len(distritos_para_construir_necropole):
+                (distrito, destruido) = distritos_para_construir_necropole[escolha_construir - len(distritos_para_construir) - 1]
+                # Retira distrito construído da mão
+                estado.jogador_atual().cartas_distrito_mao.remove(distrito)
+                # Destrói distrito escolhido e remove pontos parciais
+                estado.jogador_atual().distritos_construidos.remove(destruido)
+                estado.tabuleiro.baralho_distritos.append(destruido)
+                estado.jogador_atual().pontuacao -= destruido.valor_do_distrito
+            # Construção de covil dos ladrões com custo misto de ouro e cartas
+            elif escolha_construir <= len(distritos_para_construir) + len(distritos_para_construir_necropole) + len(distritos_para_construir_covil_ladroes):
+                (distrito, qtd_ouro, qtd_cartas) = distritos_para_construir_covil_ladroes[escolha_construir -
+                                                                                          len(distritos_para_construir) -
+                                                                                          len(distritos_para_construir_necropole) - 1]
+                # Retira distrito construído da mão
+                estado.jogador_atual().cartas_distrito_mao.remove(distrito)
+                # Paga distrito e salva ouro gasto
+                estado.jogador_atual().ouro -= qtd_ouro
+                estado.jogador_atual().ouro_gasto += qtd_ouro
+                # Escolhe carta para pagar o resto do custo
+                for i in range(qtd_cartas):
+                    # Aplica estratégia do jogador
+                    escolha_carta = estrategia.construir_distrito_covil_dos_ladroes(estado, qtd_cartas, i)
+                    # Descarta carta escolhida
+                    carta = estado.jogador_atual().cartas_distrito_mao[escolha_carta]
+                    estado.jogador_atual().cartas_distrito_mao.remove(carta)
+                    estado.tabuleiro.baralho_distritos.append(carta)
+            # Construção sem custo destruíndo a Estrutura
+            else:
+                distrito = distritos_para_construir_estrutura[escolha_construir -
+                                                              len(distritos_para_construir) -
+                                                              len(distritos_para_construir_necropole) -
+                                                              len(distritos_para_construir_covil_ladroes) - 1]
+                # Retira distrito construído da mão
+                estado.jogador_atual().cartas_distrito_mao.remove(distrito)
+                # Identifica estrutura
+                for destruido in estado.jogador_atual().distritos_construidos:
+                    if destruido.nome_do_distrito == 'Estrutura':
+                        # Destrói estrutura e remove pontos parciais
+                        estado.jogador_atual().distritos_construidos.remove(destruido)
+                        estado.tabuleiro.baralho_distritos.append(destruido)
+                        estado.jogador_atual().pontuacao -= destruido.valor_do_distrito
+                        break
+            # Pontua distrito
+            estado.jogador_atual().pontuacao += distrito.valor_do_distrito
+            # Constrói distrito
+            estado.jogador_atual().distritos_construidos.append(distrito)
         # Marca flag de ação utilizada
         super().ativar(estado)
 
@@ -657,7 +506,7 @@ class HabilidadeRei(Acao):
     def __init__(self):
         super().__init__('Rei: Ganhe 1 ouro para cada um dos seus distritos NOBRES.', TipoAcao.HabilidadeRei)
 
-    def ativar(self, estado: Estado):
+    def ativar(self, estado: Estado, estrategia: Estrategia = None):
         # Contabiliza distritos nobres para ganhar ouro
         for distrito in estado.jogador_atual().distritos_construidos:
             # O efeito da carta Escola de magia é ser contabilizada como qualquer tipo, portanto também é nobre
@@ -671,11 +520,12 @@ class HabilidadeCardeal(Acao):
     def __init__(self):
         super().__init__('Cardeal: Ganhe 1 carta para cada um dos seus distritos RELIGIOSOS.', TipoAcao.HabilidadeCardeal)
 
-    def ativar(self, estado: Estado):
+    def ativar(self, estado: Estado, estrategia: Estrategia = None):
         # Contabiliza distritos religiosos para ganhar cartas
         for distrito in estado.jogador_atual().distritos_construidos:
             # O efeito da carta Escola de magia é ser contabilizada como qualquer tipo, portanto também é religioso
-            if distrito.tipo_de_distrito == TipoDistrito.Religioso or distrito.nome_do_distrito == 'Escola de Magia':
+            if len(estado.tabuleiro.baralho_distritos) > 0 and \
+                    (distrito.tipo_de_distrito == TipoDistrito.Religioso or distrito.nome_do_distrito == 'Escola de Magia'):
                 estado.jogador_atual().cartas_distrito_mao.append(estado.tabuleiro.baralho_distritos.pop(0))
         # Marca flag de ação utilizada
         super().ativar(estado)
@@ -685,33 +535,27 @@ class HabilidadeNavegadora(Acao):
     def __init__(self):
         super().__init__('Navegadora: Ganhe 4 ouros extras ou 4 cartas extras.', TipoAcao.HabilidadeNavegadora)
 
-    def ativar(self, estado: Estado):
-        # Aguarda escolha do jogador
-        while True:
-            escolha_recurso = input('Qual recurso deseja ganhar? (0 - ouro, 1 - cartas): ')
-            try:
-                escolha_recurso = int(escolha_recurso)
-            except ValueError:
-                print('Escolha inválida.')
-                continue
-            if not 0 <= escolha_recurso <= 1:
-                print('Escolha inválida.')
-                continue
-            if escolha_recurso == 0:
-                estado.jogador_atual().ouro += 4
-            elif escolha_recurso == 1:
-                estado.jogador_atual().cartas_distrito_mao.extend(estado.tabuleiro.baralho_distritos[0:4])
-                del estado.tabuleiro.baralho_distritos[0:4]
-            break
+    def ativar(self, estado: Estado, estrategia: Estrategia = None):
+        # Aplica estratégia do jogador
+        escolha_recurso = estrategia.habilidade_navegadora(estado)
+        if escolha_recurso == 0:
+            estado.jogador_atual().ouro += 4
+        elif escolha_recurso == 1:
+            qtd_cartas = len(estado.tabuleiro.baralho_distritos)
+            if qtd_cartas > 4:
+                qtd_cartas = 4
+            if qtd_cartas > 0:
+                estado.jogador_atual().cartas_distrito_mao.extend(estado.tabuleiro.baralho_distritos[0:qtd_cartas])
+                del estado.tabuleiro.baralho_distritos[0:qtd_cartas]
         # Marca flag de ação utilizada
         super().ativar(estado)
 
 
-class HabilidadeSenhordaGuerraDestruir(Acao):
+class HabilidadeSenhorDaGuerraDestruir(Acao):
     def __init__(self):
         super().__init__('Senhor da Guerra: Destrua 1 distrito, pagando 1 ouro a menos que o custo dele.', TipoAcao.HabilidadeSenhordaGuerraDestruir)
 
-    def ativar(self, estado: Estado):
+    def ativar(self, estado: Estado, estrategia: Estrategia = None):
         # Identifica distritos que podem ser destruídos
         distritos_para_destruir: list[(CartaDistrito, Jogador, int)] = []
         # É permitido destruir um dos seus próprios distritos
@@ -732,40 +576,26 @@ class HabilidadeSenhordaGuerraDestruir(Acao):
             print('Não é possível destruir nenhum distrito!')
             super().ativar(estado)
             return
-        # Mostra opções ao jogador
-        print(f'0: Não desejo destruir nenhum distrito.')
-        for i, (carta, jogador, muralha) in enumerate(distritos_para_destruir):
-            print(f'{i + 1}: {carta.imprimir_tudo()} - Jogador: {jogador.nome}')
-        # Aguarda escolha do jogador
-        while True:
-            escolha_destruir = input('Digite o número do distrito que deseja destruir: ')
-            try:
-                escolha_destruir = int(escolha_destruir)
-            except ValueError:
-                print('Escolha inválida.')
-                continue
-            if not 0 <= escolha_destruir <= len(distritos_para_destruir):
-                print('Escolha inválida.')
-                continue
-            if escolha_destruir == 0:
-                super().ativar(estado)
-                return
-            # Paga o custo e destrói distrito escolhido do jogador alvo
-            (distrito, jogador, muralha) = distritos_para_destruir[escolha_destruir - 1]
-            # Trata caso especial da Muralha (efeito dela não afeta a si mesmo)
-            if distrito.nome_do_distrito == 'Muralha':
-                estado.jogador_atual().ouro -= distrito.valor_do_distrito - 1
-            else:
-                estado.jogador_atual().ouro -= distrito.valor_do_distrito - 1 + muralha
-            jogador.pontuacao -= distrito.valor_do_distrito
-            jogador.distritos_construidos.remove(distrito)
-            estado.tabuleiro.baralho_distritos.append(distrito)
-            # Indentifica se o distrito destruído foi o Museu e aplica efeitos secundários
-            if distrito.nome_do_distrito == 'Museu':
-                jogador.pontuacao -= len(jogador.distritos_museu)
-                estado.tabuleiro.baralho_distritos.extend(jogador.distritos_museu)
-                jogador.distritos_museu = []
-            break
+        # Aplica estratégia do jogador
+        escolha_destruir = estrategia.habilidade_senhor_da_guerra(estado, distritos_para_destruir)
+        if escolha_destruir == 0:
+            super().ativar(estado)
+            return
+        # Paga o custo e destrói distrito escolhido do jogador alvo
+        (distrito, jogador, muralha) = distritos_para_destruir[escolha_destruir - 1]
+        # Trata caso especial da Muralha (efeito dela não afeta a si mesmo)
+        if distrito.nome_do_distrito == 'Muralha':
+            estado.jogador_atual().ouro -= distrito.valor_do_distrito - 1
+        else:
+            estado.jogador_atual().ouro -= distrito.valor_do_distrito - 1 + muralha
+        jogador.pontuacao -= distrito.valor_do_distrito
+        jogador.distritos_construidos.remove(distrito)
+        estado.tabuleiro.baralho_distritos.append(distrito)
+        # Indentifica se o distrito destruído foi o Museu e aplica efeitos secundários
+        if distrito.nome_do_distrito == 'Museu':
+            jogador.pontuacao -= len(jogador.distritos_museu)
+            estado.tabuleiro.baralho_distritos.extend(jogador.distritos_museu)
+            jogador.distritos_museu = []
         # Marca flag de ação utilizada
         super().ativar(estado)
 
@@ -774,7 +604,7 @@ class HabilidadeSenhordaGuerraColetar(Acao):
     def __init__(self):
         super().__init__('Senhor da Guerra: Ganhe 1 ouro para cada um dos seus distritos MILITARES.', TipoAcao.HabilidadeSenhordaGuerraColetar)
 
-    def ativar(self, estado: Estado):
+    def ativar(self, estado: Estado, estrategia: Estrategia = None):
         # Contabiliza distritos militares para ganhar ouro
         for distrito in estado.jogador_atual().distritos_construidos:
             # O efeito da carta Escola de magia é ser contabilizada como qualquer tipo, portanto também é militar
@@ -788,25 +618,13 @@ class Laboratorio(Acao):
     def __init__(self):
         super().__init__('Laboratório: Uma vez por turno, descarte 1 carta da sua mão para ganhar 2 ouros.', TipoAcao.Laboratorio)
 
-    def ativar(self, estado: Estado):
-        # Mostra opções ao jogador
-        for i, carta in enumerate(estado.jogador_atual().cartas_distrito_mao):
-            print(f'{i}: {carta.imprimir_tudo()}')
-        while True:
-            escolha_carta = input('Digite o número do distrito que deseja descartar pelo ouro: ')
-            try:
-                escolha_carta = int(escolha_carta)
-            except ValueError:
-                print('Escolha inválida.')
-                continue
-            if not 0 <= escolha_carta < len(estado.jogador_atual().cartas_distrito_mao):
-                print('Escolha inválida.')
-                continue
-            # Descarta carta pelo ouro
-            carta = estado.jogador_atual().cartas_distrito_mao.pop(escolha_carta)
-            estado.tabuleiro.baralho_distritos.append(carta)
-            estado.jogador_atual().ouro += 2
-            break
+    def ativar(self, estado: Estado, estrategia: Estrategia = None):
+        # Aplica estratégia do jogador
+        escolha_carta = estrategia.laboratorio(estado)
+        # Descarta carta pelo ouro
+        carta = estado.jogador_atual().cartas_distrito_mao.pop(escolha_carta)
+        estado.tabuleiro.baralho_distritos.append(carta)
+        estado.jogador_atual().ouro += 2
         # Marca flag de ação utilizada
         super().ativar(estado)
 
@@ -815,7 +633,7 @@ class Arsenal(Acao):
     def __init__(self):
         super().__init__('Arsenal: No seu turno, destrua o Arsenal para destruir 1 distrito à sua escolha.', TipoAcao.Arsenal)
 
-    def ativar(self, estado: Estado):
+    def ativar(self, estado: Estado, estrategia: Estrategia = None):
         # Identifica distritos que podem ser destruídos
         distritos_para_destruir: list[(CartaDistrito, Jogador)] = []
         # É permitido destruir um dos seus próprios distritos
@@ -830,42 +648,28 @@ class Arsenal(Acao):
             print('Não é possível destruir nenhum distrito!')
             super().ativar(estado)
             return
-        # Mostra opções ao jogador
-        print(f'0: Não desejo destruir nenhum distrito.')
-        for i, (carta, jogador) in enumerate(distritos_para_destruir):
-            print(f'{i + 1}: {carta.imprimir_tudo()} - Jogador: {jogador.nome}')
-        # Aguarda escolha do jogador
-        while True:
-            escolha_destruir = input('Digite o número do distrito que deseja destruir: ')
-            try:
-                escolha_destruir = int(escolha_destruir)
-            except ValueError:
-                print('Escolha inválida.')
-                continue
-            if not 0 < escolha_destruir <= len(distritos_para_destruir):
-                print('Escolha inválida.')
-                continue
-            if escolha_destruir == 0:
-                super().ativar(estado)
-                return
-            # Paga o custo e destrói distrito escolhido do jogador alvo
-            (distrito, jogador) = distritos_para_destruir[escolha_destruir - 1]
-            jogador.pontuacao -= distrito.valor_do_distrito
-            jogador.distritos_construidos.remove(distrito)
-            estado.tabuleiro.baralho_distritos.append(distrito)
-            # Indentifica se o distrito destruído foi o Museu e aplica efeitos secundários
-            if distrito.nome_do_distrito == 'Museu':
-                jogador.pontuacao -= len(jogador.distritos_museu)
-                estado.tabuleiro.baralho_distritos.extend(jogador.distritos_museu)
-                jogador.distritos_museu = []
-            # Identifica e destrói Arsenal
-            for arsenal in estado.jogador_atual().distritos_construidos:
-                if arsenal.nome_do_distrito == 'Arsenal':
-                    estado.jogador_atual().distritos_construidos.remove(arsenal)
-                    estado.tabuleiro.baralho_distritos.append(arsenal)
-                    estado.jogador_atual().pontuacao -= arsenal.valor_do_distrito
-                    break
-            break
+        # Aplica estratégia do jogador
+        escolha_destruir = estrategia.arsenal(estado, distritos_para_destruir)
+        if escolha_destruir == 0:
+            super().ativar(estado)
+            return
+        # Paga o custo e destrói distrito escolhido do jogador alvo
+        (distrito, jogador) = distritos_para_destruir[escolha_destruir - 1]
+        jogador.pontuacao -= distrito.valor_do_distrito
+        jogador.distritos_construidos.remove(distrito)
+        estado.tabuleiro.baralho_distritos.append(distrito)
+        # Indentifica se o distrito destruído foi o Museu e aplica efeitos secundários
+        if distrito.nome_do_distrito == 'Museu':
+            jogador.pontuacao -= len(jogador.distritos_museu)
+            estado.tabuleiro.baralho_distritos.extend(jogador.distritos_museu)
+            jogador.distritos_museu = []
+        # Identifica e destrói Arsenal
+        for arsenal in estado.jogador_atual().distritos_construidos:
+            if arsenal.nome_do_distrito == 'Arsenal':
+                estado.jogador_atual().distritos_construidos.remove(arsenal)
+                estado.tabuleiro.baralho_distritos.append(arsenal)
+                estado.jogador_atual().pontuacao -= arsenal.valor_do_distrito
+                break
         # Marca flag de ação utilizada
         super().ativar(estado)
 
@@ -874,13 +678,17 @@ class Forja(Acao):
     def __init__(self):
         super().__init__('Forja: Uma vez por turno, pague 2 ouros para receber 3 cartas.', TipoAcao.Forja)
 
-    def ativar(self, estado: Estado):
+    def ativar(self, estado: Estado, estrategia: Estrategia = None):
         # Pescar cartas do baralho e adicionar na mão do jogador
-        cartas_compradas = estado.tabuleiro.baralho_distritos[:3]
-        del estado.tabuleiro.baralho_distritos[:3]
-        estado.jogador_atual().cartas_distrito_mao.extend(cartas_compradas)
-        # Paga custo do efeito
-        estado.jogador_atual().ouro -= 2
+        qtd_cartas = len(estado.tabuleiro.baralho_distritos)
+        if qtd_cartas > 3:
+            qtd_cartas = 3
+        if qtd_cartas > 0:
+            cartas_compradas = estado.tabuleiro.baralho_distritos[:qtd_cartas]
+            del estado.tabuleiro.baralho_distritos[:qtd_cartas]
+            estado.jogador_atual().cartas_distrito_mao.extend(cartas_compradas)
+            # Paga custo do efeito
+            estado.jogador_atual().ouro -= 2
         # Marca flag de ação utilizada
         super().ativar(estado)
 
@@ -890,24 +698,12 @@ class Museu(Acao):
         super().__init__('Museu: Uma vez por turno, coloque 1 carta da sua mão, voltada para baixo, sob o museu.'
                          'Ao final da partida, marque 1 ponto extra para cada carta sob o Museu', TipoAcao.Museu)
 
-    def ativar(self, estado: Estado):
-        # Mostra opções ao jogador
-        for i, carta in enumerate(estado.jogador_atual().cartas_distrito_mao):
-            print(f'{i}: {carta.imprimir_tudo()}')
-        while True:
-            escolha_carta = input('Digite o número do distrito que deseja colocar no Museu: ')
-            try:
-                escolha_carta = int(escolha_carta)
-            except ValueError:
-                print('Escolha inválida.')
-                continue
-            if not 0 <= escolha_carta < len(estado.jogador_atual().cartas_distrito_mao):
-                print('Escolha inválida.')
-                continue
-            # Descarta carta e atualiza pontuação parcial
-            carta = estado.jogador_atual().cartas_distrito_mao.pop(escolha_carta)
-            estado.jogador_atual().distritos_museu.append(carta)
-            estado.jogador_atual().pontuacao += 1
-            break
+    def ativar(self, estado: Estado, estrategia: Estrategia = None):
+        # Aplica estratégia do jogador
+        escolha_carta = estrategia.museu(estado)
+        # Descarta carta e atualiza pontuação parcial
+        carta = estado.jogador_atual().cartas_distrito_mao.pop(escolha_carta)
+        estado.jogador_atual().distritos_museu.append(carta)
+        estado.jogador_atual().pontuacao += 1
         # Marca flag de ação utilizada
         super().ativar(estado)
