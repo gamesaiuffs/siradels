@@ -11,6 +11,7 @@ class Estado:
         self.jogadores = jogadores
         self.turno = 0
         self.rodada = 0
+        self.jogador_atual = None
 
     # To String
     def __str__(self):
@@ -34,17 +35,7 @@ class Estado:
         ordenados.extend(self.jogadores[:index_rei])
         self.jogadores = ordenados
 
-    # Reorganiza a lista de jogadores conforme o rank dos seus personagens
-    # Fase de ações
-    def ordenar_jogadores_personagem(self):
-        ordem = [jogador.personagem.rank for jogador in self.jogadores]
-        self.jogadores = sort_together([ordem, self.jogadores])[1]
-
     # Reorganiza a lista de jogadores conforme a sua pontuação final no jogo
     def ordenar_jogadores_pontuacao(self):
         ordem = [jogador.pontuacao_final for jogador in self.jogadores]
         self.jogadores = sort_together([ordem, self.jogadores], reverse=True)[1]
-
-    # Retorna o jogador atual/corrente do turno
-    def jogador_atual(self) -> Jogador:
-        return self.jogadores[self.turno - 1]

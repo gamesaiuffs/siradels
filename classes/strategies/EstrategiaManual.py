@@ -105,7 +105,7 @@ class EstrategiaManual(Estrategia):
     @staticmethod
     def construir_distrito_cardeal(estado: Estado, diferenca: int, i: int) -> int:
         print(f'Escolha as cartas que trocará pelo ouro recebido do jogador escolhido. Faltam {diferenca - i} cartas.')
-        for j, carta in enumerate(estado.jogador_atual().cartas_distrito_mao):
+        for j, carta in enumerate(estado.jogador_atual.cartas_distrito_mao):
             print(f'{j}: {carta.imprimir_tudo()}')
         while True:
             escolha_carta = input('Digite o número do distrito que deseja trocar pelo ouro: ')
@@ -114,7 +114,7 @@ class EstrategiaManual(Estrategia):
             except ValueError:
                 print('Escolha inválida.')
                 continue
-            if not 0 <= escolha_carta < len(estado.jogador_atual().cartas_distrito_mao):
+            if not 0 <= escolha_carta < len(estado.jogador_atual.cartas_distrito_mao):
                 print('Escolha inválida.')
                 continue
             return escolha_carta
@@ -123,7 +123,7 @@ class EstrategiaManual(Estrategia):
     @staticmethod
     def construir_distrito_covil_dos_ladroes(estado: Estado, qtd_cartas: int, i: int) -> int:
         print(f'Escolha as cartas que usará para pagar o custo. Faltam {qtd_cartas - i} cartas.')
-        for j, carta in enumerate(estado.jogador_atual().cartas_distrito_mao):
+        for j, carta in enumerate(estado.jogador_atual.cartas_distrito_mao):
             print(f'{j}: {carta.imprimir_tudo()}')
         while True:
             escolha_carta = input('Digite o número do distrito que deseja descartar: ')
@@ -132,7 +132,7 @@ class EstrategiaManual(Estrategia):
             except ValueError:
                 print('Escolha inválida.')
                 continue
-            if not 0 <= escolha_carta < len(estado.jogador_atual().cartas_distrito_mao):
+            if not 0 <= escolha_carta < len(estado.jogador_atual.cartas_distrito_mao):
                 print('Escolha inválida.')
                 continue
             return escolha_carta
@@ -243,7 +243,7 @@ class EstrategiaManual(Estrategia):
     # Estratégia usada na ação do Laboratório
     @staticmethod
     def laboratorio(estado: Estado) -> int:
-        for i, carta in enumerate(estado.jogador_atual().cartas_distrito_mao):
+        for i, carta in enumerate(estado.jogador_atual.cartas_distrito_mao):
             print(f'{i}: {carta.imprimir_tudo()}')
         while True:
             escolha_carta = input('Digite o número do distrito que deseja descartar pelo ouro: ')
@@ -252,7 +252,7 @@ class EstrategiaManual(Estrategia):
             except ValueError:
                 print('Escolha inválida.')
                 continue
-            if not 0 <= escolha_carta < len(estado.jogador_atual().cartas_distrito_mao):
+            if not 0 <= escolha_carta < len(estado.jogador_atual.cartas_distrito_mao):
                 print('Escolha inválida.')
                 continue
             return escolha_carta
@@ -279,7 +279,7 @@ class EstrategiaManual(Estrategia):
     @staticmethod
     def museu(estado: Estado) -> int:
         # Mostra opções ao jogador
-        for i, carta in enumerate(estado.jogador_atual().cartas_distrito_mao):
+        for i, carta in enumerate(estado.jogador_atual.cartas_distrito_mao):
             print(f'{i}: {carta.imprimir_tudo()}')
         while True:
             escolha_carta = input('Digite o número do distrito que deseja colocar no Museu: ')
@@ -288,7 +288,7 @@ class EstrategiaManual(Estrategia):
             except ValueError:
                 print('Escolha inválida.')
                 continue
-            if not 0 <= escolha_carta < len(estado.jogador_atual().cartas_distrito_mao):
+            if not 0 <= escolha_carta < len(estado.jogador_atual.cartas_distrito_mao):
                 print('Escolha inválida.')
                 continue
             return escolha_carta

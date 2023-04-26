@@ -112,57 +112,62 @@ class Simulacao:
                 escolha_personagem = self.estrategias[jogador].escolher_personagem(self.estado)
                 jogador.personagem = self.estado.tabuleiro.baralho_personagens[escolha_personagem]
                 self.estado.tabuleiro.baralho_personagens.remove(jogador.personagem)
-            # Reordena os jogadores
-            self.estado.ordenar_jogadores_personagem()
             # Fase de ações
-            for jogador in self.estado.jogadores:
-                # Aplica habilidades/efeitos de início de turno
-                # Aplica habilidade passiva do Rei
-                if jogador.personagem.nome == 'Rei':
-                    for antigorei in self.estado.jogadores:
-                        antigorei.rei = False
-                    jogador.rei = True
-                # Aplica habilidade da Assassina
-                if jogador.morto:
-                    jogador.morto = False
-                    self.estado.turno += 1
-                    continue
-                # Aplica habilidade do Ladrão
-                if jogador.roubado:
-                    for ladrao in self.estado.jogadores:
-                        if ladrao.personagem.nome == 'Ladrão':
-                            ladrao.ouro += jogador.ouro
-                            jogador.ouro = 0
-                            break
-                # Laço de turnos do jogo
-                while True:
-                    # Mostra o estado atual
-                    print(self.estado)
-                    # Mostra o jogador atual
-                    print(f'Turno atual: {jogador.nome}, {jogador.personagem}')
-                    # Mostra apenas ações disponíveis segundo regras do jogo
-                    acoes_disponiveis = self.acoes_disponiveis()
-                    escolha_acao = self.estrategias[jogador].escolher_acao(self.estado, acoes_disponiveis)
-                    # Pula uma linha
-                    print()
-                    # Executa ação escolhida
-                    self.acoes[acoes_disponiveis[escolha_acao].value].ativar(self.estado, self.estrategias[jogador])
-                    # Finaliza turno se jogador escolheu a ação de passar o turno
-                    if jogador.acoes_realizadas[TipoAcao.PassarTurno.value]:
+            # Os jogadores seguem a ordem do rank dos seus personagens como ordem de turno
+            for rank in range(1, 9):
+                for jogador in self.estado.jogadores:
+                    if jogador.personagem.rank == rank:
+                        # Marca jogador atual
+                        self.estado.jogador_atual = jogador
+                        # Aplica habilidades/efeitos de início de turno
+                        # Aplica habilidade passiva do Rei
+                        if jogador.personagem.nome == 'Rei':
+                            for antigorei in self.estado.jogadores:
+                                antigorei.rei = False
+                            jogador.rei = True
+                        # Aplica habilidade da Assassina
+                        if jogador.morto:
+                            jogador.morto = False
+                            self.estado.turno += 1
+                            continue
+                        # Aplica habilidade do Ladrão
+                        if jogador.roubado:
+                            for ladrao in self.estado.jogadores:
+                                if ladrao.personagem.nome == 'Ladrão':
+                                    ladrao.ouro += jogador.ouro
+                                    jogador.ouro = 0
+                                    break
+                        # Laço de turnos do jogo
+                        while True:
+                            # Mostra o estado atual
+                            print(self.estado)
+                            # Mostra o jogador atual
+                            print(f'Turno atual: {jogador.nome}, {jogador.personagem}')
+                            # Mostra apenas ações disponíveis segundo regras do jogo
+                            acoes_disponiveis = self.acoes_disponiveis()
+                            escolha_acao = self.estrategias[jogador].escolher_acao(self.estado, acoes_disponiveis)
+                            # Pula uma linha
+                            print()
+                            # Executa ação escolhida
+                            self.acoes[acoes_disponiveis[escolha_acao].value].ativar(self.estado, self.estrategias[jogador])
+                            # Finaliza turno se jogador escolheu a ação de passar o turno
+                            if jogador.acoes_realizadas[TipoAcao.PassarTurno.value]:
+                                break
+                        # Identifica gatilhos de final de jogo
+                        # Identifica se o jogador construiu o Monumento
+                        monumento = False
+                        for construido in jogador.distritos_construidos:
+                            if construido.nome_do_distrito == 'Monumento':
+                                monumento = True
+                                break
+                        # Marca fim de jogo e jogador finalizador (monumento conta como 2 distritos para fins de uma cidade completa)
+                        if len(jogador.distritos_construidos) >= 7 or (len(jogador.distritos_construidos) == 6 and monumento):
+                            jogador.terminou = True
+                            if self.jogador_finalizador is None:
+                                self.jogador_finalizador = jogador
+                            final_jogo = True
+                        # Quebra laço, pois não existem personagens com ranks repetidos
                         break
-                # Identifica gatilhos de final de jogo
-                # Identifica se o jogador construiu o Monumento
-                monumento = False
-                for construido in jogador.distritos_construidos:
-                    if construido.nome_do_distrito == 'Monumento':
-                        monumento = True
-                        break
-                # Marca fim de jogo e jogador finalizador (monumento conta como 2 distritos para fins de uma cidade completa)
-                if len(jogador.distritos_construidos) >= 7 or (len(jogador.distritos_construidos) == 6 and monumento):
-                    jogador.terminou = True
-                    if self.jogador_finalizador is None:
-                        self.jogador_finalizador = jogador
-                    final_jogo = True
         # Rotina de final de jogo
         self.computar_pontuacao_final()
         self.estado.ordenar_jogadores_pontuacao()
@@ -175,47 +180,47 @@ class Simulacao:
     # Retorna apenas as ações disponíveis para o estado atual da simulação
     def acoes_disponiveis(self) -> list[TipoAcao]:
         acoes_disponiveis = []
-        acoes_realizadas = self.estado.jogador_atual().acoes_realizadas
+        acoes_realizadas = self.estado.jogador_atual.acoes_realizadas
         # Deve ter coletado recursos primeiro para poder realizar demais ações no turno
         if acoes_realizadas[TipoAcao.ColetarOuro.value] or acoes_realizadas[TipoAcao.ColetarCartas.value]:
             acoes_disponiveis.append(TipoAcao.PassarTurno)
             # Só pode construir 1 distrito por turno (Navegadora não pode cosntruir distritos no turno)
-            if not acoes_realizadas[TipoAcao.ConstruirDistrito.value] and self.estado.jogador_atual().personagem.nome != 'Navegadora':
+            if not acoes_realizadas[TipoAcao.ConstruirDistrito.value] and self.estado.jogador_atual.personagem.nome != 'Navegadora':
                 acoes_disponiveis.append(TipoAcao.ConstruirDistrito)
             # As habilidades dos personagens só podem ser utilizadas uma única vez
             # O jogador deve possuir a carta do personagem para usar a sua habilidade
-            if not acoes_realizadas[TipoAcao.HabilidadeAssassina.value] and self.estado.jogador_atual().personagem.nome == 'Assassina':
+            if not acoes_realizadas[TipoAcao.HabilidadeAssassina.value] and self.estado.jogador_atual.personagem.nome == 'Assassina':
                 acoes_disponiveis.append(TipoAcao.HabilidadeAssassina)
-            if not acoes_realizadas[TipoAcao.HabilidadeLadrao.value] and self.estado.jogador_atual().personagem.nome == 'Ladrão':
+            if not acoes_realizadas[TipoAcao.HabilidadeLadrao.value] and self.estado.jogador_atual.personagem.nome == 'Ladrão':
                 acoes_disponiveis.append(TipoAcao.HabilidadeLadrao)
-            if not acoes_realizadas[TipoAcao.HabilidadeMago.value] and self.estado.jogador_atual().personagem.nome == 'Mago':
+            if not acoes_realizadas[TipoAcao.HabilidadeMago.value] and self.estado.jogador_atual.personagem.nome == 'Mago':
                 acoes_disponiveis.append(TipoAcao.HabilidadeMago)
-            if not acoes_realizadas[TipoAcao.HabilidadeRei.value] and self.estado.jogador_atual().personagem.nome == 'Rei':
+            if not acoes_realizadas[TipoAcao.HabilidadeRei.value] and self.estado.jogador_atual.personagem.nome == 'Rei':
                 acoes_disponiveis.append(TipoAcao.HabilidadeRei)
-            if not acoes_realizadas[TipoAcao.HabilidadeCardeal.value] and self.estado.jogador_atual().personagem.nome == 'Cardeal':
+            if not acoes_realizadas[TipoAcao.HabilidadeCardeal.value] and self.estado.jogador_atual.personagem.nome == 'Cardeal':
                 acoes_disponiveis.append(TipoAcao.HabilidadeCardeal)
-            if not acoes_realizadas[TipoAcao.HabilidadeNavegadora.value] and self.estado.jogador_atual().personagem.nome == 'Navegadora':
+            if not acoes_realizadas[TipoAcao.HabilidadeNavegadora.value] and self.estado.jogador_atual.personagem.nome == 'Navegadora':
                 acoes_disponiveis.append(TipoAcao.HabilidadeNavegadora)
-            if self.estado.jogador_atual().personagem.nome == 'Senhor da Guerra':
+            if self.estado.jogador_atual.personagem.nome == 'Senhor da Guerra':
                 if not acoes_realizadas[TipoAcao.HabilidadeSenhordaGuerraDestruir.value]:
                     acoes_disponiveis.append(TipoAcao.HabilidadeSenhordaGuerraDestruir)
                 if not acoes_realizadas[TipoAcao.HabilidadeSenhordaGuerraColetar.value]:
                     acoes_disponiveis.append(TipoAcao.HabilidadeSenhordaGuerraColetar)
             # As habilidades dos distritos especiais só podem ser utilizadas uma única vez
             # O jogador deve ter o distrito construído na sua cidade para usar a sua habilidade
-            if not acoes_realizadas[TipoAcao.Laboratorio.value] and self.estado.jogador_atual().construiu_distrito('Laboratório'):
+            if not acoes_realizadas[TipoAcao.Laboratorio.value] and self.estado.jogador_atual.construiu_distrito('Laboratório'):
                 # Deve possuir ao menos 1 carta na mão
-                if len(self.estado.jogador_atual().cartas_distrito_mao) > 0:
+                if len(self.estado.jogador_atual.cartas_distrito_mao) > 0:
                     acoes_disponiveis.append(TipoAcao.Laboratorio)
-            if not acoes_realizadas[TipoAcao.Arsenal.value] and self.estado.jogador_atual().construiu_distrito('Arsenal'):
+            if not acoes_realizadas[TipoAcao.Arsenal.value] and self.estado.jogador_atual.construiu_distrito('Arsenal'):
                 acoes_disponiveis.append(TipoAcao.Arsenal)
-            if not acoes_realizadas[TipoAcao.Forja.value] and self.estado.jogador_atual().construiu_distrito('Forja'):
+            if not acoes_realizadas[TipoAcao.Forja.value] and self.estado.jogador_atual.construiu_distrito('Forja'):
                 # Deve possuir ao menos 2 ouros
-                if self.estado.jogador_atual().ouro >= 2:
+                if self.estado.jogador_atual.ouro >= 2:
                     acoes_disponiveis.append(TipoAcao.Forja)
-            if not acoes_realizadas[TipoAcao.Museu.value] and self.estado.jogador_atual().construiu_distrito('Museu'):
+            if not acoes_realizadas[TipoAcao.Museu.value] and self.estado.jogador_atual.construiu_distrito('Museu'):
                 # Deve possuir ao menos 1 carta na mão
-                if len(self.estado.jogador_atual().cartas_distrito_mao) > 0:
+                if len(self.estado.jogador_atual.cartas_distrito_mao) > 0:
                     acoes_disponiveis.append(TipoAcao.Museu)
         # Só pode coletar recursos uma vez ao turno (coletar ouro ou carta)
         else:

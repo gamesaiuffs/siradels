@@ -39,12 +39,12 @@ class EstrategiaTotalmenteAleatoria(Estrategia):
     # Estratégia usada na ação de construir distritos (efeito Cardeal)
     @staticmethod
     def construir_distrito_cardeal(estado: Estado, diferenca: int, i: int) -> int:
-        return random.randint(0, len(estado.jogador_atual().cartas_distrito_mao) - 1)
+        return random.randint(0, len(estado.jogador_atual.cartas_distrito_mao) - 1)
 
     # Estratégia usada na ação de construir distritos (efeito Covil dos Ladrões)
     @staticmethod
     def construir_distrito_covil_dos_ladroes(estado: Estado, qtd_cartas: int, i: int) -> int:
-        return random.randint(0, len(estado.jogador_atual().cartas_distrito_mao) - 1)
+        return random.randint(0, len(estado.jogador_atual.cartas_distrito_mao) - 1)
 
     # Estratégia usada na habilidade da Assassina
     @staticmethod
@@ -79,7 +79,7 @@ class EstrategiaTotalmenteAleatoria(Estrategia):
     # Estratégia usada na ação do Laboratório
     @staticmethod
     def laboratorio(estado: Estado) -> int:
-        return random.randint(0, len(estado.jogador_atual().cartas_distrito_mao) - 1)
+        return random.randint(0, len(estado.jogador_atual.cartas_distrito_mao) - 1)
 
     # Estratégia usada na ação do Arsenal
     @staticmethod
@@ -89,4 +89,4 @@ class EstrategiaTotalmenteAleatoria(Estrategia):
     # Estratégia usada na ação do Museu
     @staticmethod
     def museu(estado: Estado) -> int:
-        return random.randint(0, len(estado.jogador_atual().cartas_distrito_mao) - 1)
+        return random.randint(0, len(estado.jogador_atual.cartas_distrito_mao) - 1)
