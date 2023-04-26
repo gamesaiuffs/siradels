@@ -61,8 +61,8 @@ class Simulacao:
     def criar_estrategias(self) -> dict[Jogador, Estrategia]:
         estrategias: dict[Jogador, Estrategia] = dict()
         for jogador in self.estado.jogadores:
-            # estrategias.update({jogador: EstrategiaManual()})
-            estrategias.update({jogador: EstrategiaTotalmenteAleatoria()})
+            estrategias.update({jogador: EstrategiaManual()})
+            # estrategias.update({jogador: EstrategiaTotalmenteAleatoria()})
         return estrategias
 
     # Cria lista de ações (ativas) do jogo
@@ -99,6 +99,7 @@ class Simulacao:
         while not final_jogo:
             # Preparação para nova rodada
             self.estado.tabuleiro.cartas_nao_visiveis = []
+            self.estado.tabuleiro.cartas_visiveis = []
             self.estado.tabuleiro.criar_baralho_personagem(self.num_jogadores)
             self.estado.turno = 1
             self.estado.rodada += 1
