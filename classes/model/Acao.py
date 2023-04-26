@@ -132,8 +132,7 @@ class ConstruirDistrito(Acao):
         estrutura = estado.jogador_atual.construiu_distrito('Estrutura')
         # Identifica se o jogador construiu a Pedreira (adiciona opções de construção repetida)
         pedreira = estado.jogador_atual.construiu_distrito('Pedreira')
-        # Identifica se o jogador possui a Necrópole na mão
-        diferenca = 0
+        # Enumera opções de cosntrução
         for carta in estado.jogador_atual.cartas_distrito_mao:
             # O Monumento não pode ser construído se a cidade já possuir 5 ou mais distritos
             if carta.nome_do_distrito == 'Monumento' and len(estado.jogador_atual.distritos_construidos) >= 5:
@@ -224,6 +223,11 @@ class ConstruirDistrito(Acao):
         # Construção com efeito passivo do Cardeal
         elif escolha_construir <= len(distritos_para_construir) + len(distritos_para_construir_cardeal):
             (distrito, jogador) = distritos_para_construir_cardeal[escolha_construir - len(distritos_para_construir) - 1]
+            # Computa diferença a ser paga em cartas
+            diferenca = distrito.valor_do_distrito - estado.jogador_atual.ouro
+            # Fábrica concede 1 de desconto para distritos especiais
+            if fabrica and distrito.tipo_de_distrito == TipoDistrito.Especial:
+                diferenca -= 1
             # Retira distrito construído da mão
             estado.jogador_atual.cartas_distrito_mao.remove(distrito)
             # Paga distrito e salva ouro gasto
