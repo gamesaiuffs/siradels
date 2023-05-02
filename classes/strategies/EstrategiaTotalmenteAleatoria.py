@@ -8,6 +8,8 @@ import random
 
 
 class EstrategiaTotalmenteAleatoria(Estrategia):
+    def __init__(self):
+        super().__init__('Totalmente Aleatória.')
 
     # Estratégia usada na fase de escolha dos personagens
     @staticmethod

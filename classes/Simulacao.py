@@ -3,15 +3,13 @@ from classes.model.Acao import *
 from classes.model.Tabuleiro import Tabuleiro
 from classes.model.Jogador import Jogador
 from classes.strategies import Estrategia
-from classes.strategies.EstrategiaManual import EstrategiaManual
-from classes.strategies.EstrategiaTotalmenteAleatoria import EstrategiaTotalmenteAleatoria
 
 
 class Simulacao:
     # Construtor
-    def __init__(self, num_jogadores: int = 6, num_personagens: int = 8, automatico: bool = True):
+    def __init__(self, estrategias: tuple[Estrategia], num_personagens: int = 8, automatico: bool = True):
         # Define o número de jogadores
-        self.num_jogadores = num_jogadores
+        self.num_jogadores = len(estrategias)
         # Define se a criação dos jogadores: 0 -> Manual ou 1 -> Automática
         self.estado = self.criar_estado_inicial(num_personagens, automatico)
         # Instância as ações do jogo
@@ -19,7 +17,7 @@ class Simulacao:
         # Primeiro jogador a finalizar cidade (construir 7 ou mais distritos)
         self.jogador_finalizador = None
         # Estratégias de cada jogador
-        self.estrategias: dict[Jogador, Estrategia] = self.criar_estrategias()
+        self.estrategias: dict[Jogador, Estrategia] = self.criar_estrategias(estrategias)
 
     # Cria o estado inicial do tabuleiro
     def criar_estado_inicial(self, num_personagens, automatico) -> Estado:
@@ -58,12 +56,12 @@ class Simulacao:
         return lista_jogadores
 
     # Instância as estratégais para os jogadores
-    def criar_estrategias(self) -> dict[Jogador, Estrategia]:
-        estrategias: dict[Jogador, Estrategia] = dict()
-        for jogador in self.estado.jogadores:
-            # estrategias.update({jogador: EstrategiaManual()})
-            estrategias.update({jogador: EstrategiaTotalmenteAleatoria()})
-        return estrategias
+    def criar_estrategias(self, estrategias: tuple[Estrategia]) -> dict[Jogador, Estrategia]:
+        jogador_estrategia: dict[Jogador, Estrategia] = dict()
+        for (jogador, estrategia) in zip(self.estado.jogadores, estrategias):
+            jogador.nome += ' - ' + estrategia.descricao
+            jogador_estrategia.update({jogador: estrategia})
+        return jogador_estrategia
 
     # Cria lista de ações (ativas) do jogo
     @staticmethod

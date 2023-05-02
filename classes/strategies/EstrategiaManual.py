@@ -7,6 +7,8 @@ from classes.model.Estado import Estado
 
 
 class EstrategiaManual(Estrategia):
+    def __init__(self):
+        super().__init__('Manual.')
 
     # Estratégia usada na fase de escolha dos personagens
     @staticmethod
