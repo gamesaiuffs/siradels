@@ -7,7 +7,7 @@ from classes.strategies import Estrategia
 
 class Simulacao:
     # Construtor
-    def __init__(self, estrategias: tuple[Estrategia], num_personagens: int = 8, automatico: bool = True):
+    def __init__(self, estrategias: tuple, num_personagens: int = 8, automatico: bool = True):
         # Define o número de jogadores
         self.num_jogadores = len(estrategias)
         # Define se a criação dos jogadores: 0 -> Manual ou 1 -> Automática
@@ -41,8 +41,7 @@ class Simulacao:
     def criar_jogadores_automatico(self) -> list[Jogador]:
         lista_jogadores = []
         for jogador in range(self.num_jogadores):
-            # Bot 1, Bot 2, ..., Bot N
-            lista_jogadores.append(Jogador(f'Bot {jogador + 1}'))
+            lista_jogadores.append(Jogador(f'Bot'))
         return lista_jogadores
 
     # Cria os jogadores de forma manual
@@ -106,7 +105,7 @@ class Simulacao:
             self.estado.ordenar_jogadores_coroado()
             # Fase de escolha de personagens
             for jogador in self.estado.jogadores:
-                print(f'Turno atual: {jogador.nome}')
+                # print(f'Turno atual: {jogador.nome}')
                 escolha_personagem = self.estrategias[jogador].escolher_personagem(self.estado)
                 jogador.personagem = self.estado.tabuleiro.baralho_personagens[escolha_personagem]
                 self.estado.tabuleiro.baralho_personagens.remove(jogador.personagem)
@@ -138,14 +137,14 @@ class Simulacao:
                         # Laço de turnos do jogo
                         while True:
                             # Mostra o estado atual
-                            print(self.estado)
+                            # print(self.estado)
                             # Mostra o jogador atual
-                            print(f'Turno atual: {jogador.nome}, {jogador.personagem}')
+                            # print(f'Turno atual: {jogador.nome}, {jogador.personagem}')
                             # Mostra apenas ações disponíveis segundo regras do jogo
                             acoes_disponiveis = self.acoes_disponiveis()
                             escolha_acao = self.estrategias[jogador].escolher_acao(self.estado, acoes_disponiveis)
                             # Pula uma linha
-                            print()
+                            # print()
                             # Executa ação escolhida
                             self.acoes[acoes_disponiveis[escolha_acao].value].ativar(self.estado, self.estrategias[jogador])
                             # Finaliza turno se jogador escolheu a ação de passar o turno
@@ -170,7 +169,9 @@ class Simulacao:
         self.computar_pontuacao_final()
         self.estado.ordenar_jogadores_pontuacao()
         # Mostra estado final
-        print(self.estado)
+        # print(self.estado)
+        self.estado.jogadores[0].vencedor = True
+        print()
         for jogador in self.estado.jogadores:
             print(f'{jogador.nome} - Pontuação final: {jogador.pontuacao_final}')
         return self.estado
