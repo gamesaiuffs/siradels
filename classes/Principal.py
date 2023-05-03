@@ -15,7 +15,7 @@ simulacao = Simulacao(estrategias)
 estado_final = simulacao.rodar_simulacao()
 for jogador in estado_final.jogadores:
     resultados[jogador.nome] = int(jogador.vencedor)
-for i in range(99):
+for i in range(10000):
     simulacao = Simulacao(estrategias)
     estado_final = simulacao.rodar_simulacao()
     for jogador in estado_final.jogadores:

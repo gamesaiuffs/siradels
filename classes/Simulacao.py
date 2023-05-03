@@ -173,9 +173,9 @@ class Simulacao:
         # Mostra estado final
         # print(self.estado)
         self.estado.jogadores[0].vencedor = True
-        print()
-        for jogador in self.estado.jogadores:
-            print(f'{jogador.nome} - Pontuação final: {jogador.pontuacao_final}')
+        # print()
+        # for jogador in self.estado.jogadores:
+        #    print(f'{jogador.nome} - Pontuação final: {jogador.pontuacao_final}')
         return self.estado
 
     # Retorna apenas as ações disponíveis para o estado atual da simulação

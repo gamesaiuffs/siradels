@@ -132,7 +132,7 @@ class ConstruirDistrito(Acao):
         estrutura = estado.jogador_atual.construiu_distrito('Estrutura')
         # Identifica se o jogador construiu a Pedreira (adiciona opções de construção repetida)
         pedreira = estado.jogador_atual.construiu_distrito('Pedreira')
-        # Enumera opções de cosntrução
+        # Enumera opções de construção
         for carta in estado.jogador_atual.cartas_distrito_mao:
             # O Monumento não pode ser construído se a cidade já possuir 5 ou mais distritos
             if carta.nome_do_distrito == 'Monumento' and len(estado.jogador_atual.distritos_construidos) >= 5:
@@ -156,7 +156,8 @@ class ConstruirDistrito(Acao):
             # Fábrica concede 1 de desconto para distritos especiais
             elif estado.jogador_atual.personagem.nome == 'Cardeal' and \
                     carta.valor_do_distrito <= len(estado.jogador_atual.cartas_distrito_mao) + estado.jogador_atual.ouro - 1 or \
-                    (fabrica and carta.valor_do_distrito - 1 <= len(estado.jogador_atual.cartas_distrito_mao) + estado.jogador_atual.ouro - 1):
+                    (carta.tipo_de_distrito == TipoDistrito.Especial and fabrica and
+                     carta.valor_do_distrito - 1 <= len(estado.jogador_atual.cartas_distrito_mao) + estado.jogador_atual.ouro - 1):
                 diferenca = carta.valor_do_distrito - estado.jogador_atual.ouro
                 # Fábrica concede 1 de desconto para distritos especiais
                 if fabrica and carta.tipo_de_distrito == TipoDistrito.Especial:
