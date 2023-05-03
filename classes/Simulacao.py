@@ -105,6 +105,8 @@ class Simulacao:
             self.estado.ordenar_jogadores_coroado()
             # Fase de escolha de personagens
             for jogador in self.estado.jogadores:
+                # Marca jogador atual
+                self.estado.jogador_atual = jogador
                 # print(f'Turno atual: {jogador.nome}')
                 escolha_personagem = self.estrategias[jogador].escolher_personagem(self.estado)
                 jogador.personagem = self.estado.tabuleiro.baralho_personagens[escolha_personagem]

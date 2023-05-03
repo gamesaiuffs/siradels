@@ -14,6 +14,8 @@ class EstrategiaBernardo(Estrategia):
     # Estratégia usada na fase de escolha dos personagens
     @staticmethod
     def escolher_personagem(estado: Estado) -> int:
+        return random.randint(0, len(estado.tabuleiro.baralho_personagens) - 1)
+
         jogador = estado.jogador_atual
         personagens = estado.tabuleiro.baralho_personagens[:]
         ouros = [jogador.ouro for jogador in estado.jogadores]
@@ -27,13 +29,13 @@ class EstrategiaBernardo(Estrategia):
 
         if len(personagens) < 4 and (rei := estado.tabuleiro.personagens[0]) in personagens:
             return estado.tabuleiro.baralho_personagens.index(rei)
-        if ouros.find(jogador.ouro) < len(ouros) // 2 and (ladrao := estado.tabuleiro.personagens[2]) in personagens:
-            return estado.tabuleiro.baralho_personagens.index(ladrao)
+        #if ouros.find(jogador.ouro) < len(ouros) // 2 and (ladrao := estado.tabuleiro.personagens[2]) in personagens:
+         #   return estado.tabuleiro.baralho_personagens.index(ladrao)
         if len(distritos) == 0 and (mago := estado.tabuleiro.personagens[3]) in personagens:
             return estado.tabuleiro.baralho_personagens.index(mago)
         if min(custoDistritos) > jogador.ouro and max(lenCartas) >= min(custoDistritos) and (cardeal := estado.tabuleiro.personagens[4]) in personagens:
             return estado.tabuleiro.baralho_personagens.index(cardeal)
-        if max(custoDistritos) == 6 and jogador.ouro >= 6 and (alquimista := estado.tabuleiro.personagens[5]):
+        if max(custoDistritos) == 6 and jogador.ouro >= 6 and (alquimista := estado.tabuleiro.personagens[5]) in personagens:
             return estado.tabuleiro.baralho_personagens.index(alquimista)
         
         return random.randint(0, len(estado.tabuleiro.baralho_personagens) - 1)

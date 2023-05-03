@@ -7,13 +7,15 @@ from classes.model.Jogador import Jogador
 import random
 
 
-class EstrategiaTotalmenteAleatoria(Estrategia):
+class EstrategiaDjonatan(Estrategia):
     def __init__(self):
-        super().__init__('Totalmente Aleatória.')
+        super().__init__('Djonatan.')
 
     # Estratégia usada na fase de escolha dos personagens
     @staticmethod
     def escolher_personagem(estado: Estado) -> int:
+        return random.randint(0, len(estado.tabuleiro.baralho_personagens) - 1)
+
         #define o maior custo
         maior_custo = 0
         for distrito in estado.jogador_atual.cartas_distrito_mao:
@@ -101,6 +103,7 @@ class EstrategiaTotalmenteAleatoria(Estrategia):
     # Estratégia usada na habilidade da Assassina
     @staticmethod
     def habilidade_assassina(estado: Estado, opcoes_personagem: list[CartaPersonagem]) -> int:
+        return random.randint(0, len(opcoes_personagem) - 1)
 
         #mate a navegadora, se não, mate o mago
         if estado.tabuleiro.personagens[6] not in estado.tabuleiro.baralho_personagens:
@@ -113,7 +116,8 @@ class EstrategiaTotalmenteAleatoria(Estrategia):
     # Estratégia usada na habilidade do Ladrão
     @staticmethod
     def habilidade_ladrao(estado: Estado, opcoes_personagem: list[CartaPersonagem]) -> int:
-        
+        return random.randint(0, len(opcoes_personagem) - 1)
+
         #roube o mago, se não tiver mago, roube a arquiteta, se não, roube o senhor da guerra
         if estado.tabuleiro.personagens[2] not in estado.tabuleiro.baralho_personagens:
             return estado.tabuleiro.baralho_personagens.index(estado.tabuleiro.personagens[2])
