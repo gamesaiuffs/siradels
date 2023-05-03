@@ -20,6 +20,7 @@ class Jogador:
         self.ouro_gasto = 0
         self.acoes_realizadas = [False for _ in range(len(TipoAcao))]
         self.terminou = False  # True se o jogador construiu 7 distritos
+        self.vencedor = False
 
     # To String
     def __str__(self) -> str:
