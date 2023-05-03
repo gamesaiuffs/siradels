@@ -78,7 +78,7 @@ class ColetarCartas(Acao):
             qtd_cartas = 3
         # Baralho vazio
         if not estado.tabuleiro.baralho_distritos:
-            print('Baralho vazio!')
+            # print('Baralho vazio!')
             super().ativar(estado)
             return
         # Cartas insuficientes no baralho para pescar
@@ -194,7 +194,7 @@ class ConstruirDistrito(Acao):
                         qtd_cartas -= 1
         if len(distritos_para_construir) + len(distritos_para_construir_cardeal) + len(distritos_para_construir_necropole) + \
                 len(distritos_para_construir_covil_ladroes) + len(distritos_para_construir_estrutura) == 0:
-            print('Não é possível construir nenhum distrito!')
+            # print('Não é possível construir nenhum distrito!')
             super().ativar(estado)
             return
         # Aplica estratégia do jogador
@@ -365,7 +365,7 @@ class HabilidadeMago(Acao):
             if jogador != estado.jogador_atual and len(jogador.cartas_distrito_mao) > 0:
                 opcoes_jogadores.append(jogador)
         if not opcoes_jogadores:
-            print('Não existe opção válida para aplicar o efeito.')
+            # print('Não existe opção válida para aplicar o efeito.')
             super().ativar(estado)
             return
         # Aplica estratégia do jogador
@@ -432,9 +432,7 @@ class HabilidadeMago(Acao):
                     else:
                         qtd_cartas -= 1
         if len(distritos_para_construir) + len(distritos_para_construir_necropole) + \
-                len(distritos_para_construir_covil_ladroes) + len(distritos_para_construir_estrutura) == 0 or not permitido:
-            print('Não é possível construir o distrito!')
-        else:
+                len(distritos_para_construir_covil_ladroes) + len(distritos_para_construir_estrutura) != 0 and permitido:
             # Aplica estratégia do jogador
             escolha_construir = estrategia.construir_distrito(estado, distritos_para_construir, [],
                                                               distritos_para_construir_necropole,
@@ -577,7 +575,7 @@ class HabilidadeSenhorDaGuerraDestruir(Acao):
                     elif not carta.nome_do_distrito == 'Torre de Menagem' and carta.valor_do_distrito - 1 + muralha <= estado.jogador_atual.ouro:
                         distritos_para_destruir.append((carta, jogador, muralha))
         if len(distritos_para_destruir) == 0:
-            print('Não é possível destruir nenhum distrito!')
+            # print('Não é possível destruir nenhum distrito!')
             super().ativar(estado)
             return
         # Aplica estratégia do jogador
@@ -649,7 +647,7 @@ class Arsenal(Acao):
                     if carta.nome_do_distrito != 'Arsenal':
                         distritos_para_destruir.append((carta, jogador))
         if len(distritos_para_destruir) == 0:
-            print('Não é possível destruir nenhum distrito!')
+            # print('Não é possível destruir nenhum distrito!')
             super().ativar(estado)
             return
         # Aplica estratégia do jogador
