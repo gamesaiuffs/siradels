@@ -556,7 +556,7 @@ class HabilidadeNavegadora(Acao):
 
 class HabilidadeSenhorDaGuerraDestruir(Acao):
     def __init__(self):
-        super().__init__('Senhor da Guerra: Destrua 1 distrito, pagando 1 ouro a menos que o custo dele.', TipoAcao.HabilidadeSenhordaGuerraDestruir)
+        super().__init__('Senhor da Guerra: Destrua 1 distrito, pagando 1 ouro a menos que o custo dele.', TipoAcao.HabilidadeSenhorDaGuerraDestruir)
 
     def ativar(self, estado: Estado, estrategia: Estrategia = None):
         # Identifica distritos que podem ser destruídos
@@ -605,7 +605,7 @@ class HabilidadeSenhorDaGuerraDestruir(Acao):
 
 class HabilidadeSenhordaGuerraColetar(Acao):
     def __init__(self):
-        super().__init__('Senhor da Guerra: Ganhe 1 ouro para cada um dos seus distritos MILITARES.', TipoAcao.HabilidadeSenhordaGuerraColetar)
+        super().__init__('Senhor da Guerra: Ganhe 1 ouro para cada um dos seus distritos MILITARES.', TipoAcao.HabilidadeSenhorDaGuerraColetar)
 
     def ativar(self, estado: Estado, estrategia: Estrategia = None):
         # Contabiliza distritos militares para ganhar ouro

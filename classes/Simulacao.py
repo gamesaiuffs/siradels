@@ -203,10 +203,10 @@ class Simulacao:
             if not acoes_realizadas[TipoAcao.HabilidadeNavegadora.value] and self.estado.jogador_atual.personagem.nome == 'Navegadora':
                 acoes_disponiveis.append(TipoAcao.HabilidadeNavegadora)
             if self.estado.jogador_atual.personagem.nome == 'Senhor da Guerra':
-                if not acoes_realizadas[TipoAcao.HabilidadeSenhordaGuerraDestruir.value]:
-                    acoes_disponiveis.append(TipoAcao.HabilidadeSenhordaGuerraDestruir)
-                if not acoes_realizadas[TipoAcao.HabilidadeSenhordaGuerraColetar.value]:
-                    acoes_disponiveis.append(TipoAcao.HabilidadeSenhordaGuerraColetar)
+                if not acoes_realizadas[TipoAcao.HabilidadeSenhorDaGuerraDestruir.value]:
+                    acoes_disponiveis.append(TipoAcao.HabilidadeSenhorDaGuerraDestruir)
+                if not acoes_realizadas[TipoAcao.HabilidadeSenhorDaGuerraColetar.value]:
+                    acoes_disponiveis.append(TipoAcao.HabilidadeSenhorDaGuerraColetar)
             # As habilidades dos distritos especiais só podem ser utilizadas uma única vez
             # O jogador deve ter o distrito construído na sua cidade para usar a sua habilidade
             if not acoes_realizadas[TipoAcao.Laboratorio.value] and self.estado.jogador_atual.construiu_distrito('Laboratório'):

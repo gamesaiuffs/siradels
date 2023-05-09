@@ -1,5 +1,6 @@
 # Imports
 from classes.enum.TipoDistrito import TipoDistrito
+from classes.enum.TipoPersonagem import TipoPersonagem
 from classes.model.CartaDistrito import CartaDistrito
 from classes.model.CartaPersonagem import CartaPersonagem
 from random import shuffle
@@ -40,29 +41,30 @@ class Tabuleiro:
     # Cria baralho com as cartas dos personagens
     # Não foram implementados os demais personagens (necessitará de adaptação para incluí-los)
     @staticmethod
-    def criar_personagens():
-        assassina = CartaPersonagem('Assassina', 1, 'Anuncie um personagem que você deseja assassinar. O personagem assassinado perde o turno')
-        ladrao = CartaPersonagem(
-            'Ladrão', 2, 'Anuncie um personagem que você deseja roubar. Quando o personagem roubado for revelado, você pega todo o ouro dele')
-        mago = CartaPersonagem(
-            'Mago', 3, 'Olhe a mão de outro jogador e escolha 1 carta. Pague para construí-la imediatamente ou adicione-a à sua mão. '
-                       'Você pode construir distritos idênticos.')
-        rei = CartaPersonagem('Rei', 4, 'Pegue a coroa. Ganhe 1 ouro para cada um dos seus distritos NOBRES.')
-        cardeal = CartaPersonagem(
-            'Cardeal', 5, 'Se você não tiver ouro suficiente para construir um distrito, troque suas cartas pelo ouro de outro jogador (1 carta: 1 ouro). '
-                          'Ganhe 1 carta para cada um dos seus distritos RELIGIOSOS.')
-        alquimista = CartaPersonagem(
-            'Alquimista', 6, 'Ao final do seu turno, você pega de volta todo o ouro pago para construir distritos neste turno. '
-                             'Você não pode pagar mais ouro do que tem.')
-        navegadora = CartaPersonagem('Navegadora', 7, 'Ganhe 4 ouros extras ou 4 cartas extras. Você não pode construir distritos.')
-        senhor_guerra = CartaPersonagem(
-            'Senhor da Guerra', 8, 'Destrua 1 distrito, pagando 1 ouro a menos que o custo dele. Ganhe 1 ouro para cada um dos seus distritos MILITARES')
-        return [rei, assassina, ladrao, mago, cardeal, alquimista, navegadora, senhor_guerra]
+    def criar_personagens() -> list[CartaPersonagem]:
+        assassina = CartaPersonagem('Assassina', 1, TipoPersonagem.Assassina,
+                                    'Anuncie um personagem que você deseja assassinar. O personagem assassinado perde o turno')
+        ladrao = CartaPersonagem('Ladrão', 2, TipoPersonagem.Ladrao,
+                                 'Anuncie um personagem que você deseja roubar. Quando o personagem roubado for revelado, você pega todo o ouro dele')
+        mago = CartaPersonagem('Mago', 3, TipoPersonagem.Mago,
+                               'Olhe a mão de outro jogador e escolha 1 carta. Pague para construí-la imediatamente ou adicione-a à sua mão. '
+                               'Você pode construir distritos idênticos.')
+        rei = CartaPersonagem('Rei', 4, TipoPersonagem.Rei, 'Pegue a coroa. Ganhe 1 ouro para cada um dos seus distritos NOBRES.')
+        cardeal = CartaPersonagem('Cardeal', 5, TipoPersonagem.Cardeal,
+                                  'Se você não tiver ouro suficiente para construir um distrito, troque suas cartas pelo ouro de outro jogador (1 carta: 1 ouro). '
+                                  'Ganhe 1 carta para cada um dos seus distritos RELIGIOSOS.')
+        alquimista = CartaPersonagem('Alquimista', 6, TipoPersonagem.Alquimista,
+                                     'Ao final do seu turno, você pega de volta todo o ouro pago para construir distritos neste turno. '
+                                     'Você não pode pagar mais ouro do que tem.')
+        navegadora = CartaPersonagem('Navegadora', 7, TipoPersonagem.Navegadora, 'Ganhe 4 ouros extras ou 4 cartas extras. Você não pode construir distritos.')
+        senhor_guerra = CartaPersonagem('Senhor da Guerra', 8, TipoPersonagem.SenhorDaGuerra,
+                                        'Destrua 1 distrito, pagando 1 ouro a menos que o custo dele. Ganhe 1 ouro para cada um dos seus distritos MILITARES')
+        return [rei, assassina, ladrao, mago, rei, cardeal, alquimista, navegadora, senhor_guerra]
 
     def criar_baralho_personagem(self, num_jogadores):
         mao_jogador = self.personagens[1:]
-        # O rei está sempre no índice 1
-        rei = self.personagens[0]
+        # O rei sempre fica disponível (fora do embaralhamento)
+        rei = self.personagens[TipoPersonagem.Rei.value]
         shuffle(mao_jogador)
         # Regras específicas para o baralho de personagens de acordo com número d ejogadores
         if num_jogadores == 4:
