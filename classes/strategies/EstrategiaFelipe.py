@@ -1,4 +1,5 @@
 from classes.enum.TipoAcao import TipoAcao
+from classes.enum.TipoDistrito import TipoDistrito
 from classes.model.CartaDistrito import CartaDistrito
 from classes.model.CartaPersonagem import CartaPersonagem
 from classes.strategies.Estrategia import Estrategia
@@ -19,18 +20,58 @@ class EstrategiaFelipe(Estrategia):
     # Estratégia usada na fase de escolha das ações no turno
     @staticmethod
     def escolher_acao(estado: Estado, acoes_disponiveis: list[TipoAcao]) -> int:
-        if TipoAcao.ColetarCartas in acoes_disponiveis \
-                or TipoAcao.ColetarOuro in acoes_disponiveis:
-            if len(estado.jogador_atual.cartas_distrito_mao) == 0:
+        if TipoAcao.ColetarCartas in acoes_disponiveis:
+            if len(estado.jogador_atual.cartas_distrito_mao) == 0 or estado.jogador_atual.ouro >= 6:
                 return acoes_disponiveis.index(TipoAcao.ColetarCartas)
-            menor_custo = 9
-            for distrito in estado.jogador_atual.cartas_distrito_mao:
-                if menor_custo > distrito.valor_do_distrito:
-                    menor_custo = distrito.valor_do_distrito
-            if estado.jogador_atual.ouro < menor_custo:
+            else:
                 return acoes_disponiveis.index(TipoAcao.ColetarOuro)
+        if TipoAcao.HabilidadeAssassina in acoes_disponiveis:
+            return acoes_disponiveis.index(TipoAcao.HabilidadeAssassina)
+        if TipoAcao.HabilidadeLadrao in acoes_disponiveis:
+            return acoes_disponiveis.index(TipoAcao.HabilidadeLadrao)
+        if TipoAcao.HabilidadeMago in acoes_disponiveis:
+            return acoes_disponiveis.index(TipoAcao.HabilidadeMago)
+        if TipoAcao.HabilidadeNavegadora in acoes_disponiveis:
+            return acoes_disponiveis.index(TipoAcao.HabilidadeNavegadora)
+        nobre = False
+        religioso = False
+        militar = False
+        for distrito in estado.jogador_atual.distritos_construidos:
+            if distrito.tipo_de_distrito == TipoDistrito.Nobre:
+                nobre = True
+            if distrito.tipo_de_distrito == TipoDistrito.Religioso:
+                religioso = True
+            if distrito.tipo_de_distrito == TipoDistrito.Militar:
+                militar = True
+        if TipoAcao.HabilidadeRei in acoes_disponiveis and nobre:
+            return acoes_disponiveis.index(TipoAcao.HabilidadeRei)
+        if TipoAcao.HabilidadeCardeal in acoes_disponiveis and religioso:
+            return acoes_disponiveis.index(TipoAcao.HabilidadeCardeal)
+        if TipoAcao.HabilidadeSenhorDaGuerraColetar in acoes_disponiveis and militar:
+            return acoes_disponiveis.index(TipoAcao.HabilidadeSenhorDaGuerraColetar)
+        if TipoAcao.Laboratorio in acoes_disponiveis and len(estado.jogador_atual.cartas_distrito_mao) > 2:
+            return acoes_disponiveis.index(TipoAcao.Laboratorio)
+        if TipoAcao.ConstruirDistrito in acoes_disponiveis:
+            return acoes_disponiveis.index(TipoAcao.ConstruirDistrito)
+        if TipoAcao.HabilidadeSenhorDaGuerraDestruir in acoes_disponiveis:
+            return acoes_disponiveis.index(TipoAcao.HabilidadeSenhorDaGuerraDestruir)
+        if TipoAcao.HabilidadeRei in acoes_disponiveis:
+            return acoes_disponiveis.index(TipoAcao.HabilidadeRei)
+        if TipoAcao.HabilidadeCardeal in acoes_disponiveis:
+            return acoes_disponiveis.index(TipoAcao.HabilidadeCardeal)
+        if TipoAcao.HabilidadeSenhorDaGuerraColetar in acoes_disponiveis:
+            return acoes_disponiveis.index(TipoAcao.HabilidadeSenhorDaGuerraColetar)
+        if TipoAcao.Museu in acoes_disponiveis:
+            return acoes_disponiveis.index(TipoAcao.Museu)
+        if TipoAcao.Forja in acoes_disponiveis and len(estado.jogador_atual.cartas_distrito_mao) <= 1:
+            return acoes_disponiveis.index(TipoAcao.Forja)
+        if TipoAcao.Arsenal in acoes_disponiveis:
+            for jogador in estado.jogadores:
+                if jogador != estado.jogador_atual:
+                    for distrito in jogador.distritos_construidos:
+                        if distrito.valor_do_distrito >= 5:
+                            return acoes_disponiveis.index(TipoAcao.Arsenal)
         return random.randint(0, len(acoes_disponiveis) - 1)
-
     # Estratégia usada na ação de coletar cartas
     @staticmethod
     def coletar_cartas(estado: Estado, cartas_compradas: list[CartaDistrito], qtd_cartas: int) -> int:
