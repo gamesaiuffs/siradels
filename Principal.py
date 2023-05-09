@@ -1,4 +1,4 @@
-from Simulacao import Simulacao
+from classes.Simulacao import Simulacao
 from classes.strategies.EstrategiaBernardo import EstrategiaBernardo
 from classes.strategies.EstrategiaDjonatan import EstrategiaDjonatan
 from classes.strategies.EstrategiaFelipe import EstrategiaFelipe
