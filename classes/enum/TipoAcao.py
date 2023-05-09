@@ -44,8 +44,8 @@ class TipoAcao(Enum):
     HabilidadeNavegadora = auto()
     # HabilidadeEstudiosa = auto()
     # Rank 8
-    HabilidadeSenhordaGuerraDestruir = auto()
-    HabilidadeSenhordaGuerraColetar = auto()
+    HabilidadeSenhorDaGuerraDestruir = auto()
+    HabilidadeSenhorDaGuerraColetar = auto()
     # HabilidadeDiplomata = auto()
     # HabilidadeMarechal = auto()
     # Rank 9

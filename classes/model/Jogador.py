@@ -1,3 +1,4 @@
+from classes.enum.TipoPersonagem import TipoPersonagem
 from classes.model.CartaDistrito import CartaDistrito
 from classes.model.CartaPersonagem import CartaPersonagem
 from classes.enum.TipoAcao import TipoAcao
@@ -9,7 +10,7 @@ class Jogador:
         self.pontuacao = 0
         self.pontuacao_final = 0
         self.nome = nome
-        self.personagem = CartaPersonagem('Nenhum', 0)
+        self.personagem = CartaPersonagem('Nenhum', 0, TipoPersonagem.Nenhum)
         self.ouro = 2
         self.cartas_distrito_mao: list[CartaDistrito] = []
         self.distritos_construidos: list[CartaDistrito] = []
