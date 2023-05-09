@@ -19,6 +19,16 @@ class EstrategiaJoao(Estrategia):
     # Estratégia usada na fase de escolha das ações no turno
     @staticmethod
     def escolher_acao(estado: Estado, acoes_disponiveis: list[TipoAcao]) -> int:
+        if TipoAcao.ColetarCartas in acoes_disponiveis \
+                or TipoAcao.ColetarOuro in acoes_disponiveis:
+            if len(estado.jogador_atual.cartas_distrito_mao) == 0:
+                return acoes_disponiveis.index(TipoAcao.ColetarCartas)
+            menor_custo = 9
+            for distrito in estado.jogador_atual.cartas_distrito_mao:
+                if menor_custo > distrito.valor_do_distrito:
+                    menor_custo = distrito.valor_do_distrito
+            if estado.jogador_atual.ouro < menor_custo:
+                return acoes_disponiveis.index(TipoAcao.ColetarOuro)
         return random.randint(0, len(acoes_disponiveis) - 1)
 
     # Estratégia usada na ação de coletar cartas
