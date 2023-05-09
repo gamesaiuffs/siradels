@@ -1,4 +1,5 @@
 from classes.enum.TipoAcao import TipoAcao
+from classes.enum.TipoPersonagem import TipoPersonagem
 from classes.model.CartaDistrito import CartaDistrito
 from classes.model.CartaPersonagem import CartaPersonagem
 from classes.strategies.Estrategia import Estrategia
@@ -30,31 +31,31 @@ class EstrategiaDjonatan(Estrategia):
         #### seleção ###
 
         #se não houver ladrão nem assassino e tiver ouro, priorize o mago, se não tiver mago, priorize a alquimista
-        if estado.tabuleiro.personagens[1] in estado.tabuleiro.cartas_visiveis and estado.tabuleiro.personagens[2] in estado.tabuleiro.cartas_visiveis and estado.jogador_atual.ouro > menor_custo:
-            return estado.tabuleiro.baralho_personagens.index(estado.tabuleiro.personagens[2])
-            if estado.tabuleiro.personagens[2] not in estado.tabuleiro.baralho_personagens:
-                return estado.tabuleiro.baralho_personagens.index(estado.tabuleiro.personagens[5])
+        if estado.tabuleiro.personagens[TipoPersonagem.Assassina] in estado.tabuleiro.cartas_visiveis and estado.tabuleiro.personagens[TipoPersonagem.Ladrao] in estado.tabuleiro.cartas_visiveis and estado.jogador_atual.ouro > menor_custo:
+            return estado.tabuleiro.baralho_personagens.index(estado.tabuleiro.personagens[TipoPersonagem.Mago])
+        if estado.tabuleiro.personagens[TipoPersonagem.Ladrao] not in estado.tabuleiro.baralho_personagens:
+            return estado.tabuleiro.baralho_personagens.index(estado.tabuleiro.personagens[TipoPersonagem.Alquimista])
 
         #se tiver muito ouro, priorizar assassina ou ladrão
         if estado.jogador_atual.ouro >= maior_custo:
-            if estado.tabuleiro.personagens[1] in estado.tabuleiro.baralho_personagens:
-                return estado.tabuleiro.baralho_personagens.index(estado.tabuleiro.personagens[1])
-            elif estado.tabuleiro.personagens[2] in estado.tabuleiro.baralho_personagens:
-                return estado.tabuleiro.baralho_personagens.index(estado.tabuleiro.personagens[2])
+            if estado.tabuleiro.personagens[TipoPersonagem.Assassina] in estado.tabuleiro.baralho_personagens:
+                return estado.tabuleiro.baralho_personagens.index(estado.tabuleiro.personagens[TipoPersonagem.Assassina])
+            elif estado.tabuleiro.personagens[TipoPersonagem.Ladrao] in estado.tabuleiro.baralho_personagens:
+                return estado.tabuleiro.baralho_personagens.index(estado.tabuleiro.personagens[TipoPersonagem.Ladrao])
             else:
                 return random.randint(0, len(estado.tabuleiro.baralho_personagens) - 1)        
         
         #se tiver muita carta, priorizar o cardeal
         if len(estado.jogador_atual.cartas_distrito_mao) >= maior_custo:
-            return estado.tabuleiro.baralho_personagens.index(estado.tabuleiro.personagens[4])
+            return estado.tabuleiro.baralho_personagens.index(estado.tabuleiro.personagens[TipoPersonagem.Cardeal])
 
         #se não tiver nada, priorizar o rei
         if len(estado.jogador_atual.cartas_distrito_mao) == 0 and estado.jogador_atual.ouro < menor_custo:
-            return estado.tabuleiro.baralho_personagens.index(estado.tabuleiro.personagens[0])
+            return estado.tabuleiro.baralho_personagens.index(estado.tabuleiro.personagens[TipoPersonagem.Rei])
         
         #se não houver assassina e não tiver muito ouro, priorize a navegadora
-        if estado.tabuleiro.personagens[1] in estado.tabuleiro.cartas_visiveis and estado.jogador_atual.ouro < maior_custo:
-            return estado.tabuleiro.baralho_personagens.index(estado.tabuleiro.personagens[6])
+        if estado.tabuleiro.personagens[TipoPersonagem.Assassina] in estado.tabuleiro.cartas_visiveis and estado.jogador_atual.ouro < maior_custo:
+            return estado.tabuleiro.baralho_personagens.index(estado.tabuleiro.personagens[TipoPersonagem.Navegadora])
 
         return random.randint(0, len(estado.tabuleiro.baralho_personagens) - 1)
 

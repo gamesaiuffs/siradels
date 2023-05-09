@@ -1,4 +1,5 @@
 from classes.enum.TipoAcao import TipoAcao
+from classes.enum.TipoPersonagem import TipoPersonagem
 from classes.model.CartaDistrito import CartaDistrito
 from classes.model.CartaPersonagem import CartaPersonagem
 from classes.strategies.Estrategia import Estrategia
@@ -27,15 +28,15 @@ class EstrategiaBernardo(Estrategia):
         personagens = sorted(personagens, key=lambda x : x.rank)
         ouros.sort()
 
-        if len(personagens) < 4 and (rei := estado.tabuleiro.personagens[0]) in personagens:
+        if len(personagens) < 4 and (rei := estado.tabuleiro.personagens[TipoPersonagem.Rei]) in personagens:
             return estado.tabuleiro.baralho_personagens.index(rei)
-        #if ouros.find(jogador.ouro) < len(ouros) // 2 and (ladrao := estado.tabuleiro.personagens[2]) in personagens:
+        #if ouros.find(jogador.ouro) < len(ouros) // 2 and (ladrao := estado.tabuleiro.personagens[TipoPersonagem.Ladrao]) in personagens:
          #   return estado.tabuleiro.baralho_personagens.index(ladrao)
-        if len(distritos) == 0 and (mago := estado.tabuleiro.personagens[3]) in personagens:
+        if len(distritos) == 0 and (mago := estado.tabuleiro.personagens[TipoPersonagem.Mago]) in personagens:
             return estado.tabuleiro.baralho_personagens.index(mago)
-        if min(custoDistritos) > jogador.ouro and max(lenCartas) >= min(custoDistritos) and (cardeal := estado.tabuleiro.personagens[4]) in personagens:
+        if min(custoDistritos) > jogador.ouro and max(lenCartas) >= min(custoDistritos) and (cardeal := estado.tabuleiro.personagens[TipoPersonagem.Cardeal]) in personagens:
             return estado.tabuleiro.baralho_personagens.index(cardeal)
-        if max(custoDistritos) == 6 and jogador.ouro >= 6 and (alquimista := estado.tabuleiro.personagens[5]) in personagens:
+        if max(custoDistritos) == 6 and jogador.ouro >= 6 and (alquimista := estado.tabuleiro.personagens[TipoPersonagem.Alquimista]) in personagens:
             return estado.tabuleiro.baralho_personagens.index(alquimista)
         
         return random.randint(0, len(estado.tabuleiro.baralho_personagens) - 1)
