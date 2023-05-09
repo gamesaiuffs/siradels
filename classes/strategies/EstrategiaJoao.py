@@ -23,7 +23,7 @@ class EstrategiaJoao(Estrategia):
                 or TipoAcao.ColetarOuro in acoes_disponiveis:
             if len(estado.jogador_atual.cartas_distrito_mao) == 0:
                 return acoes_disponiveis.index(TipoAcao.ColetarCartas)
-            menor_custo = 9
+            menor_custo = 10
             for distrito in estado.jogador_atual.cartas_distrito_mao:
                 if menor_custo > distrito.valor_do_distrito:
                     menor_custo = distrito.valor_do_distrito
