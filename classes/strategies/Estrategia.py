@@ -9,7 +9,7 @@ from classes.model.Jogador import Jogador
 
 class Estrategia(ABC):
     def __init__(self, descricao: str):
-        self.descricao = descricao
+        self.descricao: str = descricao
 
     # Estratégia usada na fase de escolha dos personagens
     @staticmethod
