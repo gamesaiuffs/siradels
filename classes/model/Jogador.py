@@ -7,21 +7,21 @@ from classes.enum.TipoAcao import TipoAcao
 class Jogador:
     # Construtor
     def __init__(self, nome: str):
-        self.pontuacao = 0
-        self.pontuacao_final = 0
-        self.nome = nome
-        self.personagem = CartaPersonagem('Nenhum', 0, TipoPersonagem.Nenhum)
-        self.ouro = 2
+        self.pontuacao: int = 0
+        self.pontuacao_final: int = 0
+        self.nome: str = nome
+        self.personagem: CartaPersonagem = CartaPersonagem('Nenhum', 0, TipoPersonagem.Nenhum)
+        self.ouro: int = 2
         self.cartas_distrito_mao: list[CartaDistrito] = []
         self.distritos_construidos: list[CartaDistrito] = []
         self.distritos_museu: list[CartaDistrito] = []
-        self.rei = False
-        self.morto = False
-        self.roubado = False
-        self.ouro_gasto = 0
-        self.acoes_realizadas = [False for _ in range(len(TipoAcao))]
-        self.terminou = False  # True se o jogador construiu 7 distritos
-        self.vencedor = False
+        self.rei: bool = False
+        self.morto: bool = False
+        self.roubado: bool = False
+        self.ouro_gasto: int = 0
+        self.acoes_realizadas: list[bool] = [False for _ in range(len(TipoAcao))]
+        self.terminou: bool = False  # True se o jogador construiu 7 distritos
+        self.vencedor: bool = False
 
     # To String
     def __str__(self) -> str:

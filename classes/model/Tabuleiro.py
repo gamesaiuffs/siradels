@@ -11,11 +11,11 @@ class Tabuleiro:
     # Construtor
     def __init__(self, num_personagens: int):
         # Define o número de personagens (8 ou 9)
-        self.num_personagens = num_personagens
+        self.num_personagens: int = num_personagens
         self.cartas_visiveis: list[CartaPersonagem] = []
         self.cartas_nao_visiveis: list[CartaPersonagem] = []
         self.baralho_personagens: list[CartaPersonagem] = []
-        self.personagens = self.criar_personagens()
+        self.personagens: list[CartaPersonagem] = self.criar_personagens()
         self.baralho_distritos: list[CartaDistrito] = []
         self.criar_baralho_distritos()
 

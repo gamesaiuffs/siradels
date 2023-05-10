@@ -23,17 +23,17 @@ class TipoPersonagem(Enum):
     # Rank 5
     # Bispo = auto()
     # Abade = auto()
-    Cardeal = 5
+    Cardeal = 4
     # Rank 6
     # Comerciante = auto()
-    Alquimista = 6
+    Alquimista = 5
     # Mercador = auto()
     # Rank 7
     # Arquiteta = auto()
-    Navegadora = 7
+    Navegadora = 6
     # Estudiosa = auto()
     # Rank 8
-    SenhorDaGuerra = 8
+    SenhorDaGuerra = 7
     # Diplomata = auto()
     # Marechal = auto()
     # Rank 9
