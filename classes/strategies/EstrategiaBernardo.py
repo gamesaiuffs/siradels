@@ -1,4 +1,4 @@
-from classes.enum.TipoAcao import TipoAcao
+from classes.enum.TipoAcao import TipoAcao as Ta
 from classes.enum.TipoPersonagem import TipoPersonagem
 from classes.enum.TipoDistrito import TipoDistrito as Td
 from classes.model.CartaDistrito import CartaDistrito
@@ -17,41 +17,50 @@ class EstrategiaBernardo(Estrategia):
     @staticmethod
     def escolher_personagem(estado: Estado) -> int:
         jogador = estado.jogador_atual
-        personagens = estado.tabuleiro.baralho_personagens[:]
+        personagens = set(estado.tabuleiro.baralho_personagens[:])
         ouros = [jogador.ouro for jogador in estado.jogadores]
         lenCartas = [len(jogador.cartas_distrito_mao) for jogador in estado.jogadores]
         distritos = jogador.cartas_distrito_mao
         distritosContruidos = jogador.distritos_construidos
         custoDistritos = [distrito.valor_do_distrito for distrito in distritos]
         ouros.sort()
-        qntDistritosMilitar = sum(1 if carta.tipo_de_distrito == Td.Militar else 0 for carta in distritosContruidos)
+        qntDistReligioso = len(list(filter(lambda x: x.tipo_de_distrito == Td.Religioso, distritosContruidos)))
+        qntDistMilitar = len(list(filter(lambda x: x.tipo_de_distrito == Td.Militar, distritosContruidos)))
 
-        if len(jogador.cartas_distrito_mao) == 0 and (navegadora := TipoPersonagem.Navegadora) in personagens:
+        if len(jogador.cartas_distrito_mao) == 0 and (navegadora := TipoPersonagem.Navegadora.value) in personagens:
             return estado.tabuleiro.baralho_personagens.index(navegadora)
-        if qntDistritosMilitar >= 2 and (senhorDaGuerra := TipoPersonagem.SenhorDaGuerra) in personagens:
+        if qntDistMilitar >= 2 and (senhorDaGuerra := TipoPersonagem.SenhorDaGuerra.value) in personagens:
             return estado.tabuleiro.baralho_personagens.index(senhorDaGuerra)
-        if len(personagens) < 3 and (rei := TipoPersonagem.Rei) in personagens:
+        if ((custoDistritos and jogador.ouro < min(custoDistritos) <= max(lenCartas)) or qntDistReligioso >= 2) and (cardeal := TipoPersonagem.Cardeal.value) in personagens:
+            return estado.tabuleiro.baralho_personagens.index(cardeal)
+        if len(personagens) < 3 and (rei := TipoPersonagem.Rei.value) in personagens:
             return estado.tabuleiro.baralho_personagens.index(rei)
         # if ouros.find(jogador.ouro) < len(ouros) // 2 and (ladrao := estado.tabuleiro.personagens[TipoPersonagem.Ladrao]) in personagens:
         #   return estado.tabuleiro.baralho_personagens.index(ladrao)
-        if len(distritos) == 0 and (mago := TipoPersonagem.Mago) in personagens:
+        if len(distritos) == 0 and (mago := TipoPersonagem.Mago.value) in personagens:
             return estado.tabuleiro.baralho_personagens.index(mago)
-        if custoDistritos and max(custoDistritos) == 6 and jogador.ouro >= 6 and (alquimista := TipoPersonagem.Alquimista) in personagens:
+        if custoDistritos and max(custoDistritos) == 6 and jogador.ouro >= 6 and (alquimista := TipoPersonagem.Alquimista.value) in personagens:
             return estado.tabuleiro.baralho_personagens.index(alquimista)
-        if custoDistritos and jogador.ouro < min(custoDistritos) <= max(lenCartas) and (cardeal := TipoPersonagem.Cardeal) in personagens:
-            return estado.tabuleiro.baralho_personagens.index(cardeal)
+        
 
         return random.randint(0, len(estado.tabuleiro.baralho_personagens) - 1)
 
     # Estratégia usada na fase de escolha das ações no turno
     @staticmethod
-    def escolher_acao(estado: Estado, acoes_disponiveis: list[TipoAcao]) -> int:
-        index = -1
-        if TipoAcao.HabilidadeSenhorDaGuerraDestruir in acoes_disponiveis:
-            index = acoes_disponiveis.index(TipoAcao.HabilidadeSenhorDaGuerraDestruir)
+    def escolher_acao(estado: Estado, acoes_disponiveis: list[Ta]) -> int:
+        naoFazer = set({Ta.HabilidadeSenhorDaGuerraDestruir})
+        if len(acoes_disponiveis) > 1 and all(acao not in acoes_disponiveis for acao in naoFazer):
+            naoFazer.add(Ta.PassarTurno)
+        
+        if estado.jogador_atual.ouro > 5 and len(estado.jogador_atual.cartas_distrito_mao) == 0 and Ta.ColetarCartas in acoes_disponiveis:
+            return acoes_disponiveis.index(Ta.ColetarCartas)
+        else:
+            naoFazer.add(Ta.ColetarCartas)
+
         acao = random.randint(0, len(acoes_disponiveis) - 1)
-        while acao == index:
+        while acoes_disponiveis[acao] in naoFazer:
             acao = random.randint(0, len(acoes_disponiveis) - 1)
+
         return acao
 
     # Estratégia usada na ação de coletar cartas
@@ -68,10 +77,19 @@ class EstrategiaBernardo(Estrategia):
                            distritos_para_construir_necropole: list[CartaDistrito],
                            distritos_para_construir_covil_ladroes: list[CartaDistrito],
                            distritos_para_construir_estrutura: list[CartaDistrito]) -> int:
-        tamanho_maximo = len(distritos_para_construir) + len(distritos_para_construir_cardeal) + \
-                         len(distritos_para_construir_necropole) + len(distritos_para_construir_covil_ladroes) + len(
-            distritos_para_construir_estrutura)
-        return random.randint(0, tamanho_maximo)
+        todosDistritos = distritos_para_construir + distritos_para_construir_cardeal + \
+                         distritos_para_construir_necropole + distritos_para_construir_covil_ladroes + \
+                            distritos_para_construir_estrutura
+        tamanho_maximo = len(todosDistritos)
+        
+        qntDistritos = dict()
+        for carta in estado.jogador_atual.distritos_construidos:
+            if carta.tipo_de_distrito not in qntDistritos:
+                qntDistritos |= {carta.tipo_de_distrito: 1}
+            else:
+                qntDistritos[carta.tipo_de_distrito] += 1
+
+        return random.randint(1, tamanho_maximo)
 
     # Estratégia usada na ação de construir distritos (efeito Cardeal)
     @staticmethod

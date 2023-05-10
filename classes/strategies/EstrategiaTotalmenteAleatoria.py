@@ -30,9 +30,9 @@ class EstrategiaTotalmenteAleatoria(Estrategia):
     @staticmethod
     def construir_distrito(estado: Estado,
                            distritos_para_construir: list[CartaDistrito],
-                           distritos_para_construir_cardeal: list[CartaDistrito],
-                           distritos_para_construir_necropole: list[CartaDistrito],
-                           distritos_para_construir_covil_ladroes: list[CartaDistrito],
+                           distritos_para_construir_cardeal: list[(CartaDistrito, Jogador)],
+                           distritos_para_construir_necropole: list[(CartaDistrito, CartaDistrito)],
+                           distritos_para_construir_covil_ladroes: list[(CartaDistrito, int, int)],
                            distritos_para_construir_estrutura: list[CartaDistrito]) -> int:
         tamanho_maximo = len(distritos_para_construir) + len(distritos_para_construir_cardeal) + \
                          len(distritos_para_construir_necropole) + len(distritos_para_construir_covil_ladroes) + len(distritos_para_construir_estrutura)

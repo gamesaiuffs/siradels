@@ -9,7 +9,7 @@ from classes.model.Jogador import Jogador
 
 class Estrategia(ABC):
     def __init__(self, descricao: str):
-        self.descricao = descricao
+        self.descricao: str = descricao
 
     # Estratégia usada na fase de escolha dos personagens
     @staticmethod
@@ -34,9 +34,9 @@ class Estrategia(ABC):
     @abstractmethod
     def construir_distrito(estado: Estado,
                            distritos_para_construir: list[CartaDistrito],
-                           distritos_para_construir_cardeal: list[CartaDistrito],
-                           distritos_para_construir_necropole: list[CartaDistrito],
-                           distritos_para_construir_covil_ladroes: list[CartaDistrito],
+                           distritos_para_construir_cardeal: list[(CartaDistrito, Jogador)],
+                           distritos_para_construir_necropole: list[(CartaDistrito, CartaDistrito)],
+                           distritos_para_construir_covil_ladroes: list[(CartaDistrito, int, int)],
                            distritos_para_construir_estrutura: list[CartaDistrito]) -> int:
         pass
 
