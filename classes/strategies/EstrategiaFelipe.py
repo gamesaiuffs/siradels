@@ -81,12 +81,52 @@ class EstrategiaFelipe(Estrategia):
     @staticmethod
     def construir_distrito(estado: Estado,
                            distritos_para_construir: list[CartaDistrito],
-                           distritos_para_construir_cardeal: list[CartaDistrito],
-                           distritos_para_construir_necropole: list[CartaDistrito],
-                           distritos_para_construir_covil_ladroes: list[CartaDistrito],
+                           distritos_para_construir_cardeal: list[(CartaDistrito, Jogador)],
+                           distritos_para_construir_necropole: list[(CartaDistrito, CartaDistrito)],
+                           distritos_para_construir_covil_ladroes: list[(CartaDistrito, int, int)],
                            distritos_para_construir_estrutura: list[CartaDistrito]) -> int:
         tamanho_maximo = len(distritos_para_construir) + len(distritos_para_construir_cardeal) + \
                          len(distritos_para_construir_necropole) + len(distritos_para_construir_covil_ladroes) + len(distritos_para_construir_estrutura)
+        maior_valor_mao = 0
+        for distrito in estado.jogador_atual.cartas_distrito_mao:
+            if distrito.valor_do_distrito > maior_valor_mao:
+                maior_valor_mao = distrito.valor_do_distrito
+        for i, distrito in enumerate(distritos_para_construir_estrutura):
+            if distrito.valor_do_distrito == maior_valor_mao:
+                return len(distritos_para_construir) + \
+                       len(distritos_para_construir_cardeal) + \
+                       len(distritos_para_construir_necropole) + \
+                       len(distritos_para_construir_covil_ladroes) + i + 1
+        menor_valor_construido = 9
+        for distrito in estado.jogador_atual.distritos_construidos:
+            if distrito.valor_do_distrito < menor_valor_construido:
+                menor_valor_construido = distrito.valor_do_distrito
+        for i, (_, distrito) in enumerate(distritos_para_construir_necropole):
+            if distrito.valor_do_distrito == menor_valor_construido:
+                return len(distritos_para_construir) + \
+                       len(distritos_para_construir_cardeal) + i + 1
+        for i, distrito in enumerate(distritos_para_construir):
+            if distrito == maior_valor_mao:
+                return i + 1
+        if len(distritos_para_construir_necropole) > 0:
+            return len(distritos_para_construir) + \
+                   len(distritos_para_construir_cardeal) + 1
+        jogador_mais_ouro = estado.jogador_atual
+        qtd_mais_ouro = 0
+        jogador_mais_carta = estado.jogador_atual
+        qtd_mais_carta = 0
+        for jogador in estado.jogadores:
+            if jogador == estado.jogador_atual:
+                continue
+            if jogador.ouro > qtd_mais_ouro:
+                qtd_mais_ouro = jogador.ouro
+                jogador_mais_ouro = jogador
+            if len(jogador.cartas_distrito_mao) > qtd_mais_carta:
+                qtd_mais_carta = len(jogador.cartas_distrito_mao)
+                jogador_mais_carta = jogador
+        for i, (distrito, jogador) in enumerate(distritos_para_construir_cardeal):
+            if jogador == jogador_mais_carta or jogador == jogador_mais_ouro:
+                return len(distritos_para_construir) + i + 1
         return random.randint(0, tamanho_maximo)
 
     # Estratégia usada na ação de construir distritos (efeito Cardeal)
@@ -112,7 +152,13 @@ class EstrategiaFelipe(Estrategia):
     # Estratégia usada na habilidade do Mago (escolha do jogador alvo)
     @staticmethod
     def habilidade_mago_jogador(estado: Estado, opcoes_jogadores: list[Jogador]) -> int:
-        return random.randint(0, len(opcoes_jogadores) - 1)
+        qtd_carta = 0
+        jogador_alvo = -1
+        for i, jogador in enumerate(opcoes_jogadores):
+            if len(jogador.cartas_distrito_mao) > qtd_carta:
+                qtd_carta = len(jogador.cartas_distrito_mao)
+                jogador_alvo = i
+        return i - 1
 
     # Estratégia usada na habilidade do Mago (escolha da carta da mão)
     @staticmethod
@@ -122,12 +168,31 @@ class EstrategiaFelipe(Estrategia):
     # Estratégia usada na habilidade da Navegadora
     @staticmethod
     def habilidade_navegadora(estado: Estado) -> int:
+        if len(estado.jogador_atual.cartas_distrito_mao) == 0:
+            return 1
+        if estado.jogador_atual.ouro - 2 < len(estado.jogador_atual.cartas_distrito_mao) or \
+           len(estado.jogador_atual.cartas_distrito_mao) > 3:
+            return 0
         return random.randint(0, 1)
 
     # Estratégia usada na habilidade do Senhor da Guerra
     @staticmethod
     def habilidade_senhor_da_guerra(estado: Estado, distritos_para_destruir: list[(CartaDistrito, Jogador, int)]) -> int:
-        return random.randint(0, len(distritos_para_destruir))
+        jogador_mais_pontos = None
+        maior_pontuacao = 0
+        for jogador in estado.jogadores:
+            if jogador == estado.jogador_atual:
+                continue
+            if maior_pontuacao < jogador.pontuacao:
+                maior_pontuacao = jogador.pontuacao
+                jogador_mais_pontos = jogador
+        for i, (distrito, jogador, muralha) in enumerate(distritos_para_destruir):
+            if muralha == 0 and distrito.valor_do_distrito == 1:
+                return i + 1
+        for i, (distrito, jogador, muralha) in enumerate(distritos_para_destruir):
+            if jogador == jogador_mais_pontos:
+                return i + 1
+        return 0
 
     # Estratégia usada na ação do Laboratório
     @staticmethod
