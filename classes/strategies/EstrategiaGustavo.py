@@ -19,16 +19,52 @@ class EstrategiaGustavo(Estrategia):
     # Estratégia usada na fase de escolha das ações no turno
     @staticmethod
     def escolher_acao(estado: Estado, acoes_disponiveis: list[TipoAcao]) -> int:
+        if TipoAcao.ColetarCartas in acoes_disponiveis \
+                or TipoAcao.ColetarOuro in acoes_disponiveis:
+            if len(estado.jogador_atual.cartas_distrito_mao) == 0:
+                return acoes_disponiveis.index(TipoAcao.ColetarCartas)
+            menor_custo = 9
+            for distrito in estado.jogador_atual.cartas_distrito_mao:
+                if menor_custo > distrito.valor_do_distrito:
+                    menor_custo = distrito.valor_do_distrito
+            if estado.jogador_atual.ouro < menor_custo:
+                return acoes_disponiveis.index(TipoAcao.ColetarOuro)
+        if TipoAcao.HabilidadeAssassina in acoes_disponiveis:
+            return acoes_disponiveis.index(TipoAcao.HabilidadeAssassina)
+        if TipoAcao.HabilidadeLadrao in acoes_disponiveis:
+            return acoes_disponiveis.index(TipoAcao.HabilidadeLadrao)
+        if TipoAcao.HabilidadeCardeal in acoes_disponiveis:
+            return acoes_disponiveis.index(TipoAcao.HabilidadeCardeal)
+        if TipoAcao.HabilidadeMago in acoes_disponiveis:
+            return acoes_disponiveis.index(TipoAcao.HabilidadeMago)
+        if TipoAcao.HabilidadeRei in acoes_disponiveis:
+            return acoes_disponiveis.index(TipoAcao.HabilidadeRei)
+        if TipoAcao.HabilidadeNavegadora in acoes_disponiveis:
+            return acoes_disponiveis.index(TipoAcao.HabilidadeNavegadora)
+        if TipoAcao.HabilidadeSenhorDaGuerraColetar in acoes_disponiveis:
+            return acoes_disponiveis.index(TipoAcao.HabilidadeSenhorDaGuerraColetar)
+        if TipoAcao.HabilidadeSenhorDaGuerraDestruir in acoes_disponiveis:
+            return acoes_disponiveis.index(TipoAcao.HabilidadeSenhorDaGuerraDestruir)
+            
         return random.randint(0, len(acoes_disponiveis) - 1)
 
     # Estratégia usada na ação de coletar cartas
     @staticmethod
     def coletar_cartas(estado: Estado, cartas_compradas: list[CartaDistrito], qtd_cartas: int) -> int:
+        maior_carta = ''
+        val_carta = 0
         for i,carta in enumerate(cartas_compradas):
             if estado.jogador_atual.ouro > carta.valor_do_distrito:
-                return i
+                if carta.valor_do_distrito > val_carta:
+                    maior_carta = carta.nome_do_distrito
+                    val_carta = carta.valor_do_distrito
+                else:
+                    continue
             if estado.jogador_atual.ouro < carta.valor_do_distrito:
                 continue
+        for i,carta in enumerate(cartas_compradas):
+            if maior_carta == carta.nome_do_distrito:
+                return i
         return random.randint(0, qtd_cartas - 1)
 
     # Estratégia usada na ação de construir distritos
@@ -56,14 +92,28 @@ class EstrategiaGustavo(Estrategia):
     # Estratégia usada na habilidade da Assassina
     @staticmethod
     def habilidade_assassina(estado: Estado, opcoes_personagem: list[CartaPersonagem]) -> int:
+        alvo = 'Ladrao'
+        alvo2 = 'Mago'
+        for i,carta in enumerate(opcoes_personagem):
+            if carta.nome == alvo:
+                return i
+        for i,carta in enumerate(opcoes_personagem):
+            if carta.nome == alvo2:
+                return i
+    
         return random.randint(0, len(opcoes_personagem) - 1)
 
     # Estratégia usada na habilidade do Ladrão
     @staticmethod
     def habilidade_ladrao(estado: Estado, opcoes_personagem: list[CartaPersonagem]) -> int:
-        #personagem_alvo = 0
-        #for i,carta in enumerate(opcoes_personagem):
-            #if 
+        alvo = 'Navegadora'
+        alvo2 = 'Cardeal'
+        for i,carta in enumerate(opcoes_personagem):
+            if carta.nome == alvo:
+                return i
+        for i,carta in enumerate(opcoes_personagem):
+            if carta.nome == alvo2:
+                return i
 
         return random.randint(0, len(opcoes_personagem) - 1)
 
@@ -75,12 +125,20 @@ class EstrategiaGustavo(Estrategia):
     # Estratégia usada na habilidade do Mago (escolha da carta da mão)
     @staticmethod
     def habilidade_mago_carta(estado: Estado, opcoes_cartas: list[CartaDistrito]) -> int:
+        maior_carta = ''
+        val_carta = 0
+        for i,carta in enumerate(opcoes_cartas):
+            if carta.valor_do_distrito <= estado.jogador_atual.ouro:
+                if carta.valor_do_distrito > val_carta:
+                    maior_carta = carta.nome_do_distrito
+                    val_carta = carta.valor_do_distrito
         return random.randint(0, len(opcoes_cartas) - 1)
 
     # Estratégia usada na habilidade da Navegadora
     @staticmethod
     def habilidade_navegadora(estado: Estado) -> int:
-        return random.randint(0, 1)
+        return 0
+        #return random.randint(0, 1)
 
     # Estratégia usada na habilidade do Senhor da Guerra
     @staticmethod
