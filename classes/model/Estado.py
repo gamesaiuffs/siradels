@@ -7,11 +7,11 @@ from classes.model.Jogador import Jogador
 class Estado:
     # Construtor
     def __init__(self, tabuleiro: Tabuleiro, jogadores: list[Jogador]):
-        self.tabuleiro = tabuleiro
-        self.jogadores = jogadores
-        self.turno = 0
-        self.rodada = 0
-        self.jogador_atual = None
+        self.tabuleiro: Tabuleiro = tabuleiro
+        self.jogadores: list[Jogador] = jogadores
+        self.turno: int = 0
+        self.rodada: int = 0
+        self.jogador_atual: Jogador = None
 
     # To String
     def __str__(self):

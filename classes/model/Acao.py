@@ -9,8 +9,8 @@ from classes.strategies.Estrategia import Estrategia
 
 class Acao:
     def __init__(self, descricao: str, tipo_acao: TipoAcao):
-        self.descricao = descricao
-        self.tipo_acao = tipo_acao
+        self.descricao: str = descricao
+        self.tipo_acao: TipoAcao = tipo_acao
 
     def __str__(self):
         return f'{self.descricao}'
