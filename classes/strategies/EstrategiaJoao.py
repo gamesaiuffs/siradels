@@ -1,11 +1,12 @@
 from classes.enum.TipoAcao import TipoAcao
+from classes.enum.TipoPersonagem import TipoPersonagem
+from classes.enum.TipoDistrito import TipoDistrito as Td
 from classes.model.CartaDistrito import CartaDistrito
 from classes.model.CartaPersonagem import CartaPersonagem
 from classes.strategies.Estrategia import Estrategia
 from classes.model.Estado import Estado
 from classes.model.Jogador import Jogador
 import random
-
 
 class EstrategiaJoao(Estrategia):
     def __init__(self):
@@ -14,6 +15,29 @@ class EstrategiaJoao(Estrategia):
     # Estratégia usada na fase de escolha dos personagens
     @staticmethod
     def escolher_personagem(estado: Estado) -> int:
+        jogador = estado.jogador_atual
+        personagens = estado.tabuleiro.baralho_personagens[:]
+        ouros = [jogador.ouro for jogador in estado.jogadores]
+        lenCartas = [len(jogador.cartas_distrito_mao) for jogador in estado.jogadores]
+        distritos = jogador.cartas_distrito_mao
+        distritosConstruidos = jogador.distritos_construidos
+        custoDistritos = [distrito.valor_do_distrito for distrito in distritos]
+        ouros.sort()
+        qntDistritosMilitar = sum(1 if carta.tipo_de_distrito == Td.Militar else 0 for carta in distritosConstruidos)
+
+        if len(jogador.cartas_distrito_mao) == 0 and (navegadora := TipoPersonagem.Navegadora) in personagens:
+            return estado.tabuleiro.baralho_personagens.index(navegadora)
+        if qntDistritosMilitar >= 2 and (senhorDaGuerra := TipoPersonagem.SenhorDaGuerra) in personagens:
+            return estado.tabuleiro.baralho_personagens.index(senhorDaGuerra)
+        if len(personagens) and (rei := TipoPersonagem.Rei) in personagens:
+            return estado.tabuleiro.baralho_personagens.index(rei)
+        if len(distritos) == 0 and (mago := TipoPersonagem.Mago) in personagens:
+            return estado.tabuleiro.baralho_personagens.index(mago)
+        if custoDistritos and max(custoDistritos) == 6 and (alquimista := TipoPersonagem.Alquimista) in personagens:
+            return estado.tabuleiro.baralho_personagens.index(alquimista)
+        if custoDistritos and jogador.ouro <min(custoDistritos) <max(lenCartas) and (cardeal := TipoPersonagem.Cardeal) in personagens:
+            return estado.tabuleiro.baralho_personagens.index(cardeal)
+
         return random.randint(0, len(estado.tabuleiro.baralho_personagens) - 1)
 
     # Estratégia usada na fase de escolha das ações no turno
@@ -23,7 +47,7 @@ class EstrategiaJoao(Estrategia):
                 or TipoAcao.ColetarOuro in acoes_disponiveis:
             if len(estado.jogador_atual.cartas_distrito_mao) == 0:
                 return acoes_disponiveis.index(TipoAcao.ColetarCartas)
-            menor_custo = 10
+            menor_custo = 9
             for distrito in estado.jogador_atual.cartas_distrito_mao:
                 if menor_custo > distrito.valor_do_distrito:
                     menor_custo = distrito.valor_do_distrito
@@ -68,7 +92,7 @@ class EstrategiaJoao(Estrategia):
     def habilidade_ladrao(estado: Estado, opcoes_personagem: list[CartaPersonagem]) -> int:
         return random.randint(0, len(opcoes_personagem) - 1)
 
-    # Estratégia usada na habilidade do Mago (escolha do jogador alvo)
+    # Estratégia usada na habilidade do Mago (escolha do jogador alvo)'
     @staticmethod
     def habilidade_mago_jogador(estado: Estado, opcoes_jogadores: list[Jogador]) -> int:
         return random.randint(0, len(opcoes_jogadores) - 1)
