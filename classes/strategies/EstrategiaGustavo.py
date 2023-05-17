@@ -1,4 +1,5 @@
 from classes.enum.TipoAcao import TipoAcao
+from classes.enum.TipoPersonagem import TipoPersonagem
 from classes.model.CartaDistrito import CartaDistrito
 from classes.model.CartaPersonagem import CartaPersonagem
 from classes.strategies.Estrategia import Estrategia
@@ -14,6 +15,23 @@ class EstrategiaGustavo(Estrategia):
     # Estratégia usada na fase de escolha dos personagens
     @staticmethod
     def escolher_personagem(estado: Estado) -> int:
+        flag_rei = 0
+        if flag_rei == 1:
+            if estado.jogador_atual.ouro < 3:
+                if estado.tabuleiro.personagens[TipoPersonagem.Navegadora.value] in estado.tabuleiro.baralho_personagens:
+                    return 6
+                elif estado.tabuleiro.personagens[TipoPersonagem.Alquimista.value] in estado.tabuleiro.baralho_personagens:
+                    return 5
+            if len(estado.jogador_atual.cartas_distrito_mao) > 5:
+                if estado.tabuleiro.personagens[TipoPersonagem.Cardeal.value] in estado.tabuleiro.baralho_personagens:
+                    return 4
+            if estado.tabuleiro.personagens[TipoPersonagem.Ladrao.value] in estado.tabuleiro.baralho_personagens:
+                return 2
+            if estado.tabuleiro.personagens[TipoPersonagem.Assassina.value] in estado.tabuleiro.baralho_personagens:
+                return 1
+        elif estado.tabuleiro.personagens[TipoPersonagem.Rei.value] in estado.tabuleiro.baralho_personagens:
+            flag_rei = 1
+            return 0
         return random.randint(0, len(estado.tabuleiro.baralho_personagens) - 1)
 
     # Estratégia usada na fase de escolha das ações no turno
@@ -77,7 +95,15 @@ class EstrategiaGustavo(Estrategia):
                            distritos_para_construir_estrutura: list[CartaDistrito]) -> int:
         tamanho_maximo = len(distritos_para_construir) + len(distritos_para_construir_cardeal) + \
                          len(distritos_para_construir_necropole) + len(distritos_para_construir_covil_ladroes) + len(distritos_para_construir_estrutura)
-        return random.randint(0, tamanho_maximo)
+        maior_valor_distrito = 0
+        for distrito in estado.jogador_atual.cartas_distrito_mao:
+            if distrito.valor_do_distrito > maior_valor_distrito:
+                maior_valor_distrito = distrito.valor_do_distrito
+        for i, distrito in enumerate(distritos_para_construir):
+            if distrito.valor_do_distrito == maior_valor_distrito:
+                return i + 1
+        
+        return random.randint(1, tamanho_maximo)
 
     # Estratégia usada na ação de construir distritos (efeito Cardeal)
     @staticmethod
@@ -92,8 +118,8 @@ class EstrategiaGustavo(Estrategia):
     # Estratégia usada na habilidade da Assassina
     @staticmethod
     def habilidade_assassina(estado: Estado, opcoes_personagem: list[CartaPersonagem]) -> int:
-        alvo = 'Ladrao'
-        alvo2 = 'Mago'
+        alvo = 'Navegadora'
+        alvo2 = 'SenhorDaGuerra'
         for i,carta in enumerate(opcoes_personagem):
             if carta.nome == alvo:
                 return i
@@ -107,7 +133,7 @@ class EstrategiaGustavo(Estrategia):
     @staticmethod
     def habilidade_ladrao(estado: Estado, opcoes_personagem: list[CartaPersonagem]) -> int:
         alvo = 'Navegadora'
-        alvo2 = 'Cardeal'
+        alvo2 = 'Alquimista'
         for i,carta in enumerate(opcoes_personagem):
             if carta.nome == alvo:
                 return i
@@ -120,6 +146,13 @@ class EstrategiaGustavo(Estrategia):
     # Estratégia usada na habilidade do Mago (escolha do jogador alvo)
     @staticmethod
     def habilidade_mago_jogador(estado: Estado, opcoes_jogadores: list[Jogador]) -> int:
+        qtd_carta = 0
+        jogador_alvo = -1
+        for i, jogador in enumerate(opcoes_jogadores):
+            if len(jogador.cartas_distrito_mao) > qtd_carta:
+                qtd_carta = len(jogador.cartas_distrito_mao)
+                jogador_alvo = i
+        return i - 1
         return random.randint(0, len(opcoes_jogadores) - 1)
 
     # Estratégia usada na habilidade do Mago (escolha da carta da mão)
@@ -143,6 +176,9 @@ class EstrategiaGustavo(Estrategia):
     # Estratégia usada na habilidade do Senhor da Guerra
     @staticmethod
     def habilidade_senhor_da_guerra(estado: Estado, distritos_para_destruir: list[(CartaDistrito, Jogador, int)]) -> int:
+        for i, carta in enumerate(distritos_para_destruir):
+            if carta not in estado.jogador_atual.distritos_construidos:
+                return i
         return random.randint(0, len(distritos_para_destruir))
 
     # Estratégia usada na ação do Laboratório
