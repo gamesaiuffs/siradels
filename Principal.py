@@ -4,10 +4,11 @@ from classes.strategies.EstrategiaDjonatan import EstrategiaDjonatan
 from classes.strategies.EstrategiaFelipe import EstrategiaFelipe
 from classes.strategies.EstrategiaGustavo import EstrategiaGustavo
 from classes.strategies.EstrategiaJoao import EstrategiaJoao
+from classes.strategies.EstrategiaAndrei import EstrategiaAndrei
 from classes.strategies.EstrategiaTotalmenteAleatoria import EstrategiaTotalmenteAleatoria
 
 qtd_simulacao = 1000
-estrategias = (EstrategiaTotalmenteAleatoria(),
+estrategias = (EstrategiaAndrei(),
                EstrategiaFelipe(),
                EstrategiaDjonatan(),
                EstrategiaBernardo(),
@@ -28,4 +29,4 @@ print()
 for jogador, resultado in resultados.items():
     (vitoria, pontuacao) = resultado
     pontuacao_media = pontuacao/qtd_simulacao
-    print(f'{jogador} - \tVitórias: {vitoria} - Pontuação Média: {pontuacao_media}')
+    print(f'{jogador} - \tVitórias: {vitoria} - Porcento Vitorias: {vitoria/qtd_simulacao*100:.2f}% - Pontuação Média: {pontuacao_media}')
