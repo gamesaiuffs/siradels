@@ -60,38 +60,39 @@ class EstrategiaDjonatan(Estrategia):
         for distrito in estado.jogador_atual.distritos_construidos:
             if distrito.tipo_de_distrito == 1:
                 militares += 1
+
         #### seleção ###
 
-        #caso critico
+        
+        # caso critico
         for jogador in estado.jogadores:
-            if len(jogador.distritos_construidos) <= 5 and len(jogador.distritos_construidos) > 4:
-                EstrategiaDjonatan.verificar_personagem(estado, 7)
+            if len(jogador.distritos_construidos) >= 5:
+                EstrategiaDjonatan.verificar_personagem(estado, 3)
                 if flag > 0:
-                    estado.tabuleiro.baralho_personagens.index(estado.tabuleiro.personagens[7])  
+                    estado.tabuleiro.baralho_personagens.index(estado.tabuleiro.personagens[3])  
 
         #ideal
         #se não houver ladrão e tiver ouro, priorize a alquimista, se não tiver alquimista, priorize a o mago
-        
         if estado.tabuleiro.personagens[TipoPersonagem.Ladrao.value] in estado.tabuleiro.cartas_visiveis and estado.jogador_atual.ouro >= maior_custo:
-            EstrategiaDjonatan.verificar_personagem(estado, 5)
+            EstrategiaDjonatan.verificar_personagem(estado, 3)
             if flag > 0:
-                return estado.tabuleiro.baralho_personagens.index(estado.tabuleiro.personagens[5])
+                return estado.tabuleiro.baralho_personagens.index(estado.tabuleiro.personagens[3])
             else:
-                EstrategiaDjonatan.verificar_personagem(estado, 3)
+                EstrategiaDjonatan.verificar_personagem(estado, 5)
                 if flag > 0:
-                    return estado.tabuleiro.baralho_personagens.index(estado.tabuleiro.personagens[3])   
+                    return estado.tabuleiro.baralho_personagens.index(estado.tabuleiro.personagens[5]) 
+        
+        # PADR�O
+        EstrategiaDjonatan.verificar_personagem(estado, 6)
+        if flag > 0:
+            estado.tabuleiro.baralho_personagens.index(estado.tabuleiro.personagens[6])  
+                  
         #se tiver muita carta, priorizar o cardeal
         if len(estado.jogador_atual.cartas_distrito_mao) >= maior_custo:
             EstrategiaDjonatan.verificar_personagem(estado, 4)
             if flag > 0:
                 return estado.tabuleiro.baralho_personagens.index(estado.tabuleiro.personagens[4])
-            
-        #se não tiver nada, priorizar a navegadora
-        if len(estado.jogador_atual.cartas_distrito_mao) == 0 and estado.jogador_atual.ouro <= 3:
-            EstrategiaDjonatan.verificar_personagem(estado, 6)
-            if flag > 0:
-                return estado.tabuleiro.baralho_personagens.index(estado.tabuleiro.personagens[6])
-            
+         
         #carry de coleta
         if religiosos >= 2 or nobres >= 2 or militares >= 2:
             if militares > nobres and militares > religiosos:
@@ -115,13 +116,12 @@ class EstrategiaDjonatan(Estrategia):
         EstrategiaDjonatan.verificar_personagem(estado, 1)
         if flag > 0:
             return estado.tabuleiro.baralho_personagens.index(estado.tabuleiro.personagens[1])
-        
         #tente o ladr�o
         EstrategiaDjonatan.verificar_personagem(estado, 2)
         if flag > 0:
             return estado.tabuleiro.baralho_personagens.index(estado.tabuleiro.personagens[2])
         
-        #se n�o der, pegue o rei
+        #tente o rei
         if estado.tabuleiro.personagens[TipoPersonagem.Navegadora.value] not in estado.tabuleiro.baralho_personagens:
             EstrategiaDjonatan.verificar_personagem(estado, 0)
             if flag > 0:
@@ -134,6 +134,8 @@ class EstrategiaDjonatan(Estrategia):
     def escolher_acao(estado: Estado, acoes_disponiveis: list[TipoAcao]) -> int:
         maior_custo = 0
         menor_custo = 10
+        if TipoAcao.HabilidadeNavegadora in acoes_disponiveis:
+            return acoes_disponiveis.index(TipoAcao.HabilidadeNavegadora)
         if TipoAcao.ColetarCartas in acoes_disponiveis \
                 or TipoAcao.ColetarOuro in acoes_disponiveis:
             if len(estado.jogador_atual.cartas_distrito_mao) == 0:
@@ -153,6 +155,8 @@ class EstrategiaDjonatan(Estrategia):
                     menor_custo = distrito.valor_do_distrito  
             if estado.jogador_atual.ouro < menor_custo:
                 return acoes_disponiveis.index(TipoAcao.ColetarOuro)
+            if estado.jogador_atual.ouro > menor_custo and len(estado.jogador_atual.cartas_distrito_mao) > 0:
+                return acoes_disponiveis.index(TipoAcao.ColetarOuro) 
 
         #for�a habilidade de personagem
         if TipoAcao.HabilidadeAssassina in acoes_disponiveis:
@@ -171,31 +175,42 @@ class EstrategiaDjonatan(Estrategia):
             return acoes_disponiveis.index(TipoAcao.HabilidadeSenhorDaGuerraColetar)        
         if TipoAcao.HabilidadeSenhorDaGuerraDestruir in acoes_disponiveis:
             return acoes_disponiveis.index(TipoAcao.HabilidadeSenhorDaGuerraDestruir)
-        if TipoAcao.Museu in acoes_disponiveis:
-            for i, carta in enumerate(estado.jogador_atual.cartas_distrito_mao):
-                if carta in estado.jogador_atual.distritos_construidos:
-                    return acoes_disponiveis.index(TipoAcao.Museu)
-            for i, carta in enumerate(estado.jogador_atual.cartas_distrito_mao):
-                if carta.valor_do_distrito == 1:
-                    return acoes_disponiveis.index(TipoAcao.Museu)
+
+#        if TipoAcao.Museu in acoes_disponiveis:
+#            for carta in enumerate(estado.jogador_atual.cartas_distrito_mao):
+#                if carta in estado.jogador_atual.distritos_construidos:
+#                    return acoes_disponiveis.index(TipoAcao.Museu)
+#            for carta in enumerate(estado.jogador_atual.cartas_distrito_mao):
+#                if carta.valor_do_distrito == 1:
+#                    return acoes_disponiveis.index(TipoAcao.Museu)
+    
+    #    if TipoAcao.Laboratorio in acoes_disponiveis:
+    #        for carta in enumerate(estado.jogador_atual.cartas_distrito_mao):
+    #            if carta in estado.jogador_atual.distritos_construidos:
+    #                return acoes_disponiveis.index(TipoAcao.Laboratorio)
                 
-        #if TipoAcao.Forja in acoes_disponiveis:
-        #    if estado.jogador_atual.cartas_distrito_mao == 0 and estado.jogador_atual.ouro >= 2:
-        #        return acoes_disponiveis.index(TipoAcao.Forja)
-        
-        if TipoAcao.Laboratorio in acoes_disponiveis:
-            for i, carta in enumerate(estado.jogador_atual.cartas_distrito_mao):
-                if carta in estado.jogador_atual.distritos_construidos:
-                    return acoes_disponiveis.index(TipoAcao.Laboratorio)
-        if TipoAcao.Arsenal in acoes_disponiveis:
-            for jogador in estado.jogadores:
-                if jogador != estado.jogador_atual:
-                    for distrito in jogador.distritos_construidos:
-                        if distrito.valor_do_distrito >= 5:
-                            return acoes_disponiveis.index(TipoAcao.Arsenal)
+    #    if TipoAcao.Arsenal in acoes_disponiveis:
+    #        for jogador in estado.jogadores:
+    #            if jogador != estado.jogador_atual:
+    #                for distrito in jogador.distritos_construidos:
+    #                    if distrito.valor_do_distrito >= 5:
+    #                        return acoes_disponiveis.index(TipoAcao.Arsenal)
+                        
         #for�a constru��o de distritos
         if TipoAcao.ConstruirDistrito in acoes_disponiveis:
             return acoes_disponiveis.index(TipoAcao.ConstruirDistrito)
+        
+        if TipoAcao.Laboratorio in acoes_disponiveis:
+            return 0
+
+        if TipoAcao.Forja in acoes_disponiveis:
+            return 0
+        
+        if TipoAcao.Arsenal in acoes_disponiveis:
+            return 0
+        
+        if TipoAcao.Museu in acoes_disponiveis:
+            return 0
 
         return random.randint(0, len(acoes_disponiveis) - 1)
 
@@ -231,10 +246,8 @@ class EstrategiaDjonatan(Estrategia):
         for i, distrito in enumerate(distritos_para_construir):
             if distrito.tipo_de_distrito == 2 or distrito.tipo_de_distrito == 0 and estado.jogador_atual.ouro >= distrito.valor_do_distrito and distrito not in estado.jogador_atual.distritos_construidos:
                 return i
-        try:
-            return random.randint(1, tamanho_maximo)
-        except:
-            return 0
+
+        return random.randint(1, tamanho_maximo)
 
     # Estratégia usada na ação de construir distritos (efeito Cardeal)
     @staticmethod
@@ -336,22 +349,27 @@ class EstrategiaDjonatan(Estrategia):
     # Estratégia usada na habilidade do Senhor da Guerra
     @staticmethod
     def habilidade_senhor_da_guerra(estado: Estado, distritos_para_destruir: list[(CartaDistrito, Jogador, int)]) -> int:
-        finalizador = None
+        jogador_mais_pontos = None
         maior_pontuacao = 0
-        menor_custo = 10
-        idx = 0
-        maior_custo = 0
-        #maior custo parece render melhores resultados
-        for i, (carta, jogador, muralha) in enumerate(distritos_para_destruir):
-            if carta.valor_do_distrito > maior_custo and carta not in estado.jogador_atual.distritos_construidos:
-                maior_custo = carta.valor_do_distrito
-                idx = i
-            return idx
-        #for i, (distrito, jogador, muralha) in enumerate(distritos_para_destruir):
-        #    if distrito.valor_do_distrito < menor_custo:
-        #        menor_custo = distrito.valor_do_distrito
-        #        idx = i
-        #return idx
+    #    for jogador in estado.jogadores:
+    #        if jogador == estado.jogador_atual:
+    #            continue
+    #        if maior_pontuacao < jogador.pontuacao:
+    #            maior_pontuacao = jogador.pontuacao
+    #            jogador_mais_pontos = jogador
+    #    for i, (distrito, jogador, muralha) in enumerate(distritos_para_destruir):
+    #        if muralha == 0 and distrito.valor_do_distrito == 1:
+    #            return i + 1
+    #        if muralha == 0 and distrito.valor_do_distrito == 2:
+    #            return i + 1
+    #        if muralha == 0 and distrito.valor_do_distrito == 3:
+    #            return i + 1
+    #        if muralha == 0 and distrito.valor_do_distrito == 4:
+    #            return i + 1
+    #    for i, (distrito, jogador, muralha) in enumerate(distritos_para_destruir):
+    #        if jogador == jogador_mais_pontos:
+    #            return i + 1
+        return 0
 
     # Estratégia usada na ação do Laboratório
     @staticmethod
@@ -359,7 +377,7 @@ class EstrategiaDjonatan(Estrategia):
         for i, carta in enumerate(estado.jogador_atual.cartas_distrito_mao):
             if carta in estado.jogador_atual.distritos_construidos:
                 return i
-        return random.randint(0, len(estado.jogador_atual.cartas_distrito_mao) - 1)
+        #return random.randint(0, len(estado.jogador_atual.cartas_distrito_mao) - 1)
 
     # Estratégia usada na ação do Arsenal
     @staticmethod
@@ -367,7 +385,7 @@ class EstrategiaDjonatan(Estrategia):
         for i, (carta, jogador) in enumerate(distritos_para_destruir):
             if carta.valor_do_distrito >= 5:
                 return i
-        return random.randint(0, len(distritos_para_destruir))
+        #return random.randint(0, len(distritos_para_destruir))
         
     # Estratégia usada na ação do Museu
     @staticmethod
@@ -378,4 +396,4 @@ class EstrategiaDjonatan(Estrategia):
         for i, carta in enumerate(estado.jogador_atual.cartas_distrito_mao):
             if carta.valor_do_distrito == 1:
                 return i
-        return random.randint(0, len(estado.jogador_atual.cartas_distrito_mao) - 1)
+        #return random.randint(0, len(estado.jogador_atual.cartas_distrito_mao) - 1)
