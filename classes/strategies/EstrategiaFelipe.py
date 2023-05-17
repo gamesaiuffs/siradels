@@ -48,11 +48,11 @@ class EstrategiaFelipe(Estrategia):
             senhor_da_guerra = estado.tabuleiro.baralho_personagens.index(estado.tabuleiro.personagens[TipoPersonagem.SenhorDaGuerra.value])
         except ValueError:
             senhor_da_guerra = -1
-        if assassina != -1 and len(estado.jogador_atual.distritos_construidos) >= 4:
+        if assassina != -1 and len(estado.jogador_atual.distritos_construidos) >= 6:
             return assassina
-        if ladrao != -1 and len(estado.jogador_atual.distritos_construidos) >= 4:
+        if ladrao != -1 and len(estado.jogador_atual.distritos_construidos) >= 0:
             return ladrao
-        if mago != -1 and estado.jogador_atual.ouro >= 3:
+        if mago != -1:
             return mago
         if alquimista != -1 and estado.jogador_atual.ouro >= 3 and len(estado.jogador_atual.cartas_distrito_mao) > 0:
             return alquimista
