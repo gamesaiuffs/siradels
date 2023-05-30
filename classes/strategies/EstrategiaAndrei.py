@@ -88,7 +88,7 @@ class EstrategiaAndrei(Estrategia):
         return cartas_compradas.index(carta_escolhida)
         #return random.randint(0, qtd_cartas - 1)
 
-    # Estratégia usada na ação de construir distritos
+    # Estratégia usada na ação de construir distritos by Felipe (adaptado)
     @staticmethod
     def construir_distrito(estado: Estado,
                            distritos_para_construir: list[CartaDistrito],
@@ -98,7 +98,63 @@ class EstrategiaAndrei(Estrategia):
                            distritos_para_construir_estrutura: list[CartaDistrito]) -> int:
         tamanho_maximo = len(distritos_para_construir) + len(distritos_para_construir_cardeal) + \
                          len(distritos_para_construir_necropole) + len(distritos_para_construir_covil_ladroes) + len(distritos_para_construir_estrutura)
-        return random.randint(0, tamanho_maximo)
+
+        #construir nobre
+        i = 0
+        for distrito in estado.jogador_atual.cartas_distrito_mao:
+            if distrito.tipo_de_distrito == 2:
+                return i
+            i += 1
+            
+        maior_valor_mao = 0
+        for distrito in estado.jogador_atual.cartas_distrito_mao:
+            if distrito.valor_do_distrito > maior_valor_mao:
+                maior_valor_mao = distrito.valor_do_distrito
+                
+        # Estrutura
+        for i, distrito in enumerate(distritos_para_construir_estrutura):
+            if distrito.valor_do_distrito == maior_valor_mao:
+                return len(distritos_para_construir) + \
+                       len(distritos_para_construir_cardeal) + \
+                       len(distritos_para_construir_necropole) + \
+                       len(distritos_para_construir_covil_ladroes) + i + 1
+                       
+        menor_valor_construido = 9
+        for distrito in estado.jogador_atual.distritos_construidos:
+            if distrito.valor_do_distrito < menor_valor_construido:
+                menor_valor_construido = distrito.valor_do_distrito
+        for i, (_, distrito) in enumerate(distritos_para_construir_necropole):
+            if distrito.valor_do_distrito == menor_valor_construido:
+                return len(distritos_para_construir) + \
+                       len(distritos_para_construir_cardeal) + i + 1
+                       
+        for i, distrito in enumerate(distritos_para_construir):
+            if distrito == maior_valor_mao:
+                return i + 1
+            
+        if len(distritos_para_construir_necropole) > 0:
+            return len(distritos_para_construir) + \
+                   len(distritos_para_construir_cardeal) + 1
+                   
+        jogador_mais_ouro = estado.jogador_atual
+        qtd_mais_ouro = 0
+        jogador_mais_carta = estado.jogador_atual
+        qtd_mais_carta = 0
+        for jogador in estado.jogadores:
+            if jogador == estado.jogador_atual:
+                continue
+            if jogador.ouro > qtd_mais_ouro:
+                qtd_mais_ouro = jogador.ouro
+                jogador_mais_ouro = jogador
+            if len(jogador.cartas_distrito_mao) > qtd_mais_carta:
+                qtd_mais_carta = len(jogador.cartas_distrito_mao)
+                jogador_mais_carta = jogador
+        for i, (distrito, jogador) in enumerate(distritos_para_construir_cardeal):
+            if jogador == jogador_mais_carta or jogador == jogador_mais_ouro:
+                return len(distritos_para_construir) + i + 1
+            
+        return random.randint(1, tamanho_maximo)
+
 
     # Estratégia usada na ação de construir distritos (efeito Cardeal)
     @staticmethod
@@ -140,17 +196,41 @@ class EstrategiaAndrei(Estrategia):
     def habilidade_senhor_da_guerra(estado: Estado, distritos_para_destruir: list[(CartaDistrito, Jogador, int)]) -> int:
         return random.randint(0, len(distritos_para_destruir))
 
-    # Estratégia usada na ação do Laboratório
+    # Estratégia usada na ação do Laboratório by Felipe
     @staticmethod
     def laboratorio(estado: Estado) -> int:
-        return random.randint(0, len(estado.jogador_atual.cartas_distrito_mao) - 1)
+        menor_valor = 9
+        distrito_escolhido = -1
+        for i, distrito in enumerate(estado.jogador_atual.cartas_distrito_mao):
+            if distrito.valor_do_distrito < menor_valor:
+                menor_valor = distrito.valor_do_distrito
+                distrito_escolhido = i
+        return distrito_escolhido
 
-    # Estratégia usada na ação do Arsenal
+    # Estratégia usada na ação do Arsenal by Felipe
     @staticmethod
     def arsenal(estado: Estado, distritos_para_destruir: list[(CartaDistrito, Jogador)]) -> int:
-        return random.randint(0, len(distritos_para_destruir))
+        jogador_mais_pontos = estado.jogador_atual
+        for jogador in estado.jogadores:
+            if jogador.pontuacao > jogador_mais_pontos.pontuacao:
+                jogador_mais_pontos = jogador
+        maior_valor = 0
+        distrito_escolhido = -1
+        for i, (distrito, jogador) in enumerate(distritos_para_destruir):
+            if jogador != jogador_mais_pontos:
+                continue
+            if distrito.valor_do_distrito > maior_valor:
+                maior_valor = distrito.valor_do_distrito
+                distrito_escolhido = i
+        return distrito_escolhido
 
-    # Estratégia usada na ação do Museu
+    # Estratégia usada na ação do Museu by Felipe
     @staticmethod
     def museu(estado: Estado) -> int:
-        return random.randint(0, len(estado.jogador_atual.cartas_distrito_mao) - 1)
+        menor_valor = 9
+        distrito_escolhido = -1
+        for i, distrito in enumerate(estado.jogador_atual.cartas_distrito_mao):
+            if menor_valor < distrito.valor_do_distrito:
+                menor_valor = distrito.valor_do_distrito
+                distrito_escolhido = i
+        return distrito_escolhido
