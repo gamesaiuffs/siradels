@@ -100,11 +100,11 @@ class EstrategiaAndrei(Estrategia):
                          len(distritos_para_construir_necropole) + len(distritos_para_construir_covil_ladroes) + len(distritos_para_construir_estrutura)
 
         #construir nobre
-        #i = 0
-        # for distrito in estado.jogador_atual.cartas_distrito_mao:
-        #     if distrito.tipo_de_distrito == 2:
-        #         return i
-        #     i += 1
+        i = 0
+        for distrito in estado.jogador_atual.cartas_distrito_mao:
+            if distrito.tipo_de_distrito == 2:
+                return i
+            i += 1
             
         maior_valor_mao = 0
         for distrito in estado.jogador_atual.cartas_distrito_mao:
