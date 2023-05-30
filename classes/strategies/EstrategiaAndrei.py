@@ -210,19 +210,7 @@ class EstrategiaAndrei(Estrategia):
     # Estratégia usada na ação do Arsenal by Felipe
     @staticmethod
     def arsenal(estado: Estado, distritos_para_destruir: list[(CartaDistrito, Jogador)]) -> int:
-        jogador_mais_pontos = estado.jogador_atual
-        for jogador in estado.jogadores:
-            if jogador.pontuacao > jogador_mais_pontos.pontuacao:
-                jogador_mais_pontos = jogador
-        maior_valor = 0
-        distrito_escolhido = -1
-        for i, (distrito, jogador) in enumerate(distritos_para_destruir):
-            if jogador != jogador_mais_pontos:
-                continue
-            if distrito.valor_do_distrito > maior_valor:
-                maior_valor = distrito.valor_do_distrito
-                distrito_escolhido = i
-        return distrito_escolhido
+        return random.randint(0, len(distritos_para_destruir))
 
     # Estratégia usada na ação do Museu by Felipe
     @staticmethod
