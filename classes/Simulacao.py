@@ -57,6 +57,7 @@ class Simulacao:
     # Instância as estratégais para os jogadores
     def criar_estrategias(self, estrategias: tuple[Estrategia]) -> dict[Jogador, Estrategia]:
         jogador_estrategia: dict[Jogador, Estrategia] = dict()
+        shuffle(self.estado.jogadores)
         for (jogador, estrategia) in zip(self.estado.jogadores, estrategias):
             jogador.nome += ' - ' + estrategia.descricao
             jogador_estrategia.update({jogador: estrategia})
