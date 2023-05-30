@@ -8,12 +8,14 @@ from classes.strategies.EstrategiaAndrei import EstrategiaAndrei
 from classes.strategies.EstrategiaTotalmenteAleatoria import EstrategiaTotalmenteAleatoria
 
 qtd_simulacao = 1000
-estrategias = (EstrategiaAndrei(),
-               EstrategiaFelipe(),
-               EstrategiaDjonatan(),
-               EstrategiaBernardo(),
-               EstrategiaJoao(),
-               EstrategiaGustavo())
+estrategias = [
+EstrategiaFelipe(),
+EstrategiaDjonatan(),
+EstrategiaBernardo(),
+EstrategiaJoao(),
+EstrategiaGustavo(),
+EstrategiaAndrei()
+]
 resultados: dict[str, (int, int)] = dict()
 simulacao = Simulacao(estrategias)
 estado_final = simulacao.rodar_simulacao()
