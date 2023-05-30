@@ -101,10 +101,10 @@ class EstrategiaAndrei(Estrategia):
 
         #construir nobre
         i = 0
-        for distrito in estado.jogador_atual.cartas_distrito_mao:
-            if distrito.tipo_de_distrito == 2:
-                return i
-            i += 1
+        # for distrito in estado.jogador_atual.cartas_distrito_mao:
+        #     if distrito.tipo_de_distrito == 2:
+        #         return i
+        #     i += 1
             
         maior_valor_mao = 0
         for distrito in estado.jogador_atual.cartas_distrito_mao:
