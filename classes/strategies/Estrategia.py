@@ -15,6 +15,25 @@ class Estrategia(ABC):
     @staticmethod
     @abstractmethod
     def escolher_personagem(estado: Estado) -> int:
+        # JAtual
+            # Qtd ouro [0,1,2,3,4,5,>=6] = 56
+            # Qtd carta mão [0,1,2,3,4,>=5] = 48
+            # Carta mão mais cara [1 a 6] = 48
+            # Carta mão mais barata [1 a 6] = 48
+            # Qtd distritos construido [0 a 6] = 56
+            # Qtd distrito construido Militar [0,1,2,>=3] = 32
+            # Qtd distrito construido Religioso [0,1,2,>=3] = 32
+            # Qtd distrito construido Nobre [0,1,2,>=3] = 32
+            # Qtd personagens disponíveis [2,3,4,5,6,7] = 48
+            # Pontuacao [0-3,4-7,8-11,12-15,16-19,20-23,>=24] = 56
+        # JMais
+            # Qtd distrito construido [0 a 6] = 56
+            # Qtd ouro [0,1,2,3,4,5,>=6] = 56
+            # Qtd carta mão [0,1,2,3,4,>=5] = 48
+        # Personagem visivel descartado [1,2,3,5,6,7,8] = 56
+        # Personagem disponivel para escolha [1,2,3,4,5,6,7,8] = 64
+        # Quantidade de jogadores [4,5,6] = 24
+        # Total = 24 + 3*32 + 5*48 + ... = 760
         pass
 
     # Estratégia usada na fase de escolha das ações no turno
