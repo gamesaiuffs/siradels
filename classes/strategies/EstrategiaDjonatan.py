@@ -226,10 +226,10 @@ class EstrategiaDjonatan(Estrategia):
                 return len(distritos_para_construir) + i + 1
        
         #mao  
-        '''
         #estrategia para pontuacao bonus (tipos de distrito)
-        flag = idx = 0
+        idx = 0
         for i, distrito in enumerate(distritos_para_construir):
+            flag = 0
             for carta in estado.jogador_atual.distritos_construidos:
                 if distrito.tipo_de_distrito != carta.tipo_de_distrito:
                     idx = i
@@ -237,15 +237,15 @@ class EstrategiaDjonatan(Estrategia):
                 if distrito.tipo_de_distrito == carta.tipo_de_distrito:
                     flag = 0
             if flag == len(estado.jogador_atual.distritos_construidos):
-                return idx
-        '''
+                return idx + 1
+
 
         for i, distrito in enumerate(distritos_para_construir):
             if distrito.tipo_de_distrito == 4:
-                return i
+                return i + 1
         for i, distrito in enumerate(distritos_para_construir):
             if distrito.tipo_de_distrito == 0:
-                return i
+                return i + 1
         
         return random.randint(1, tamanho_maximo)
 
