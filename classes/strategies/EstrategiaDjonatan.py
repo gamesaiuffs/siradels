@@ -15,6 +15,16 @@ class EstrategiaDjonatan(Estrategia):
     # Estratégia usada na fase de escolha dos personagens
     @staticmethod
     def escolher_personagem(estado: Estado) -> int:
+
+        jogador_mais_ouro = estado.jogador_atual
+        qtd_mais_ouro = 0
+
+        for jogador in estado.jogadores:
+            if jogador == estado.jogador_atual:
+                continue
+            if jogador.ouro > qtd_mais_ouro:
+                qtd_mais_ouro = jogador.ouro
+        
         try:
             assassina = estado.tabuleiro.baralho_personagens.index(estado.tabuleiro.personagens[TipoPersonagem.Assassina.value])
         except ValueError:
@@ -47,16 +57,31 @@ class EstrategiaDjonatan(Estrategia):
             senhor_da_guerra = estado.tabuleiro.baralho_personagens.index(estado.tabuleiro.personagens[TipoPersonagem.SenhorDaGuerra.value])
         except ValueError:
             senhor_da_guerra = -1
+
         if assassina != -1 and len(estado.jogador_atual.distritos_construidos) >= 6:
             return assassina
-        if ladrao != -1 and len(estado.jogador_atual.distritos_construidos) >= 0:
+
+        if mago != -1 and estado.jogador_atual.ouro > 5:
+            return mago
+
+        if cardeal != -1 and len(estado.jogador_atual.cartas_distrito_mao) > 5 and qtd_mais_ouro > 4:
+            return cardeal
+        
+        if ladrao != -1:
             return ladrao
+        
         if mago != -1:
             return mago
+        
+        if navegadora != -1 and len(estado.jogador_atual.cartas_distrito_mao) < 6:
+            return navegadora
+
         if alquimista != -1 and estado.jogador_atual.ouro >= 3 and len(estado.jogador_atual.cartas_distrito_mao) > 0:
             return alquimista
-        if navegadora != -1 and (estado.jogador_atual.ouro == 0 or len(estado.jogador_atual.cartas_distrito_mao) == 0):
-            return navegadora
+
+        if rei != -1:
+            return rei
+
         nobre = 0
         religioso = 0
         militar = 0
@@ -78,6 +103,7 @@ class EstrategiaDjonatan(Estrategia):
     # Estratégia usada na fase de escolha das ações no turno
     @staticmethod
     def escolher_acao(estado: Estado, acoes_disponiveis: list[TipoAcao]) -> int:
+        
         if TipoAcao.HabilidadeNavegadora in acoes_disponiveis:
             return acoes_disponiveis.index(TipoAcao.HabilidadeNavegadora)
         if TipoAcao.ColetarCartas in acoes_disponiveis:
@@ -184,11 +210,43 @@ class EstrategiaDjonatan(Estrategia):
                     return len(distritos_para_construir) + \
                         len(distritos_para_construir_cardeal) + \
                         len(distritos_para_construir_necropole) + i + 1
-        #mao
+        
+        #cardeal
+        jogador_mais_ouro = estado.jogador_atual
+        qtd_mais_ouro = 0
+
+        for jogador in estado.jogadores:
+            if jogador == estado.jogador_atual:
+                continue
+            if jogador.ouro > qtd_mais_ouro:
+                qtd_mais_ouro = jogador.ouro
+                jogador_mais_ouro = jogador
+        for i, (distrito, jogador) in enumerate(distritos_para_construir_cardeal):
+            if jogador == jogador_mais_ouro:
+                return len(distritos_para_construir) + i + 1
+       
+        #mao  
+        '''
+        #estrategia para pontuacao bonus (tipos de distrito)
+        flag = idx = 0
+        for i, distrito in enumerate(distritos_para_construir):
+            for carta in estado.jogador_atual.distritos_construidos:
+                if distrito.tipo_de_distrito != carta.tipo_de_distrito:
+                    idx = i
+                    flag += 1
+                if distrito.tipo_de_distrito == carta.tipo_de_distrito:
+                    flag = 0
+            if flag == len(estado.jogador_atual.distritos_construidos):
+                return idx
+        '''
+
         for i, distrito in enumerate(distritos_para_construir):
             if distrito.tipo_de_distrito == 4:
                 return i
-
+        for i, distrito in enumerate(distritos_para_construir):
+            if distrito.tipo_de_distrito == 0:
+                return i
+        
         return random.randint(1, tamanho_maximo)
 
     # Estratégia usada na ação de construir distritos (efeito Cardeal)
@@ -199,9 +257,16 @@ class EstrategiaDjonatan(Estrategia):
             for i, distrito in enumerate(estado.jogador_atual.cartas_distrito_mao):
                 if distrito in estado.jogador_atual.distritos_construidos:
                     return i
-                if distrito.valor_do_distrito > menor_custo:
+                
+                if distrito.valor_do_distrito > menor_custo and distrito.tipo_de_distrito != 4:
                     menor_custo == distrito.valor_do_distrito
                     idx = i
+                
+                #estrategia para pontuacao bonus (tipos de distrito)
+                #for carta in estado.jogador_atual.distritos_construidos:
+                #    if distrito.tipo_de_distrito == carta.tipo_de_distrito:
+                #        return i
+
             return idx
 
             return random.randint(0, len(estado.jogador_atual.cartas_distrito_mao) - 1)
@@ -223,6 +288,11 @@ class EstrategiaDjonatan(Estrategia):
     # Estratégia usada na habilidade da Assassina
     @staticmethod
     def habilidade_assassina(estado: Estado, opcoes_personagem: list[CartaPersonagem]) -> int:
+        
+        try:
+            ladrao = estado.tabuleiro.baralho_personagens.index(estado.tabuleiro.personagens[TipoPersonagem.Mago.value])
+        except ValueError:
+            ladrao = -1
         try:
             mago = estado.tabuleiro.baralho_personagens.index(estado.tabuleiro.personagens[TipoPersonagem.Mago.value])
         except ValueError:
@@ -243,6 +313,7 @@ class EstrategiaDjonatan(Estrategia):
             senhor_da_guerra = estado.tabuleiro.baralho_personagens.index(estado.tabuleiro.personagens[TipoPersonagem.SenhorDaGuerra.value])
         except ValueError:
             senhor_da_guerra = -1
+
         if senhor_da_guerra != -1:
             return senhor_da_guerra
         if mago != -1:
@@ -360,6 +431,10 @@ class EstrategiaDjonatan(Estrategia):
     # Estratégia usada na habilidade da Navegadora
     @staticmethod
     def habilidade_navegadora(estado: Estado) -> int:
+        
+        return 1
+
+        
         if estado.jogador_atual.cartas_distrito_mao == 0:
             return 1
         else:
