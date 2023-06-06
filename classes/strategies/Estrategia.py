@@ -34,6 +34,10 @@ class Estrategia(ABC):
         # Personagem disponivel para escolha [1,2,3,4,5,6,7,8] = 64
         # Quantidade de jogadores [4,5,6] = 24
         # Total = 24 + 3*32 + 5*48 + ... = 760
+
+        # Simulacao treinar tabelas individualmente versus treinar tudo junto
+        # Adversários totalmente aleatório executando todas ações antes de passar
+        # IA usar mesma estratégia do aleatório para demais ações
         pass
 
     # Estratégia usada na fase de escolha das ações no turno

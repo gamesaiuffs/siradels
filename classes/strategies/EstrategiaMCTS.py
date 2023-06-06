@@ -7,13 +7,14 @@ from classes.model.Jogador import Jogador
 import random
 
 
-class EstrategiaTotalmenteAleatoria(Estrategia):
-    def __init__(self, nome: str):
-        super().__init__(nome)
+class EstrategiaMCTS(Estrategia):
+    def __init__(self):
+        super().__init__('MCTS')
 
     # Estratégia usada na fase de escolha dos personagens
     @staticmethod
     def escolher_personagem(estado: Estado) -> int:
+        # Implementar MCTS
         return random.randint(0, len(estado.tabuleiro.baralho_personagens) - 1)
 
     # Estratégia usada na fase de escolha das ações no turno
