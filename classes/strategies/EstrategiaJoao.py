@@ -58,6 +58,16 @@ class EstrategiaJoao(Estrategia):
     # Estratégia usada na ação de coletar cartas
     @staticmethod
     def coletar_cartas(estado: Estado, cartas_compradas: list[CartaDistrito], qtd_cartas: int) -> int:
+        maior_custo = 0
+        idx = 0
+        for i, carta in enumerate(cartas_compradas):
+            if carta.tipo_de_distrito == 4:
+                return i
+        for i, carta in enumerate(cartas_compradas):
+            if carta.valor_do_distrito > maior_custo and carta not in estado.jogador_atual.distritos_construidos:
+                maior_custo = carta.valor_do_distrito
+                idx = i
+            return idx
         return random.randint(0, qtd_cartas - 1)
 
     # Estratégia usada na ação de construir distritos
@@ -85,8 +95,14 @@ class EstrategiaJoao(Estrategia):
     # Estratégia usada na habilidade da Assassina
     @staticmethod
     def habilidade_assassina(estado: Estado, opcoes_personagem: list[CartaPersonagem]) -> int:
-        return random.randint(0, len(opcoes_personagem) - 1)
-
+        alvo = 'Navegadora'
+        alvo2 = 'SenhorDaGuerra'
+        for i,carta in enumerate(opcoes_personagem):
+            if carta.nome == alvo:
+                return i
+        for i,carta in enumerate(opcoes_personagem):
+            if carta.nome == alvo2:
+                return i
     # Estratégia usada na habilidade do Ladrão
     @staticmethod
     def habilidade_ladrao(estado: Estado, opcoes_personagem: list[CartaPersonagem]) -> int:
@@ -95,11 +111,66 @@ class EstrategiaJoao(Estrategia):
     # Estratégia usada na habilidade do Mago (escolha do jogador alvo)'
     @staticmethod
     def habilidade_mago_jogador(estado: Estado, opcoes_jogadores: list[Jogador]) -> int:
-        return random.randint(0, len(opcoes_jogadores) - 1)
-
+        qtd_carta = -1
+        jogador_alvo = -1
+        for i, jogador in enumerate(opcoes_jogadores):
+            if len(jogador.cartas_distrito_mao) > qtd_carta:
+                qtd_carta = len(jogador.cartas_distrito_mao)
+                jogador_alvo = i
+            if len(jogador.cartas_distrito_mao) == qtd_carta and jogador_alvo != -1:
+                if opcoes_jogadores[jogador_alvo].pontuacao < jogador.pontuacao:
+                    qtd_carta = len(jogador.cartas_distrito_mao)
+                    jogador_alvo = i
+        return jogador_alvo
     # Estratégia usada na habilidade do Mago (escolha da carta da mão)
     @staticmethod
     def habilidade_mago_carta(estado: Estado, opcoes_cartas: list[CartaDistrito]) -> int:
+        especial = 0
+        nobre = 0
+        religioso = 0
+        militar = 0
+        comercial = 0
+        for distrito in estado.jogador_atual.distritos_construidos:
+            if distrito.tipo_de_distrito == 4:
+                especial += 1
+            elif distrito.tipo_de_distrito == 2:
+                nobre += 1
+            elif distrito.tipo_de_distrito == 0:
+                religioso += 1
+            elif distrito.tipo_de_distrito == 1:
+                militar += 1
+            elif distrito.tipo_de_distrito == 3:
+                comercial += 1
+
+        if especial != 0:
+            for i, distrito in enumerate(opcoes_cartas):
+                if distrito.tipo_de_distrito == 4:
+                    return i
+
+        if militar != 0:
+            for i, distrito in enumerate(opcoes_cartas):
+                if distrito.tipo_de_distrito == 1:
+                    if distrito not in estado.jogador_atual.distritos_construidos:
+                        return i
+
+        if nobre != 0:
+            for i, distrito in enumerate(opcoes_cartas):
+                if distrito.tipo_de_distrito == 2:
+                    if distrito not in estado.jogador_atual.distritos_construidos:
+                        return i
+
+        if religioso != 0:
+            for i, distrito in enumerate(opcoes_cartas):
+                if distrito.tipo_de_distrito == 0:
+                    if distrito not in estado.jogador_atual.distritos_construidos:
+                        return i
+
+        if comercial != 0:
+            for i, distrito in enumerate(opcoes_cartas):
+                if distrito.tipo_de_distrito == 3:
+                    if distrito not in estado.jogador_atual.distritos_construidos:
+                        return i
+
         return random.randint(0, len(opcoes_cartas) - 1)
 
     # Estratégia usada na habilidade da Navegadora
@@ -110,8 +181,10 @@ class EstrategiaJoao(Estrategia):
     # Estratégia usada na habilidade do Senhor da Guerra
     @staticmethod
     def habilidade_senhor_da_guerra(estado: Estado, distritos_para_destruir: list[(CartaDistrito, Jogador, int)]) -> int:
+        for i, carta in enumerate(distritos_para_destruir):
+            if carta not in estado.jogador_atual.distritos_construidos:
+                return i
         return random.randint(0, len(distritos_para_destruir))
-
     # Estratégia usada na ação do Laboratório
     @staticmethod
     def laboratorio(estado: Estado) -> int:
