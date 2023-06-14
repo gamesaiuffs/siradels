@@ -85,11 +85,31 @@ class EstrategiaJoao(Estrategia):
     # Estratégia usada na ação de construir distritos (efeito Cardeal)
     @staticmethod
     def construir_distrito_cardeal(estado: Estado, diferenca: int, i: int) -> int:
+        idx = 0
+        menor_custo = 10
+        for i, distrito in enumerate(estado.jogador_atual.cartas_distrito_mao):
+            if distrito in estado.jogador_atual.distritos_construidos:
+                return i
+
+            if distrito.valor_do_distrito > menor_custo and distrito.tipo_de_distrito != 4:
+                menor_custo == distrito.valor_do_distrito
+                idx = i
+
+        return idx
         return random.randint(0, len(estado.jogador_atual.cartas_distrito_mao) - 1)
 
     # Estratégia usada na ação de construir distritos (efeito Covil dos Ladrões)
     @staticmethod
     def construir_distrito_covil_dos_ladroes(estado: Estado, qtd_cartas: int, i: int) -> int:
+        idx = 0
+        menor_custo = 10
+        for i, distrito in enumerate(estado.jogador_atual.cartas_distrito_mao):
+            if distrito in estado.jogador_atual.distritos_construidos:
+                return i
+            if distrito.valor_do_distrito > menor_custo:
+                menor_custo == distrito.valor_do_distrito
+                idx = i
+            return idx
         return random.randint(0, len(estado.jogador_atual.cartas_distrito_mao) - 1)
 
     # Estratégia usada na habilidade da Assassina
@@ -106,6 +126,14 @@ class EstrategiaJoao(Estrategia):
     # Estratégia usada na habilidade do Ladrão
     @staticmethod
     def habilidade_ladrao(estado: Estado, opcoes_personagem: list[CartaPersonagem]) -> int:
+        alvo = 'Navegadora'
+        alvo2 = 'Alquimista'
+        for i, carta in enumerate(opcoes_personagem):
+            if carta.nome == alvo:
+                return i
+        for i, carta in enumerate(opcoes_personagem):
+            if carta.nome == alvo2:
+                return i
         return random.randint(0, len(opcoes_personagem) - 1)
 
     # Estratégia usada na habilidade do Mago (escolha do jogador alvo)'
@@ -188,6 +216,12 @@ class EstrategiaJoao(Estrategia):
     # Estratégia usada na ação do Laboratório
     @staticmethod
     def laboratorio(estado: Estado) -> int:
+        menor_valor = 9
+        distrito_escolhido = -1
+        for i, distrito in enumerate(estado.jogador_atual.cartas_distrito_mao):
+            if distrito.valor_do_distrito < menor_valor:
+                menor_valor = distrito.valor_do_distrito
+                distrito_escolhido = i
         return random.randint(0, len(estado.jogador_atual.cartas_distrito_mao) - 1)
 
     # Estratégia usada na ação do Arsenal
