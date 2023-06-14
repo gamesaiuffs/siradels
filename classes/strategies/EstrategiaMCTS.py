@@ -1,4 +1,6 @@
+import numpy as np
 from classes.enum.TipoAcao import TipoAcao
+from classes.enum.TipoTabelaPersonagem import TipoTabelaPersonagem
 from classes.model.CartaDistrito import CartaDistrito
 from classes.model.CartaPersonagem import CartaPersonagem
 from classes.strategies.Estrategia import Estrategia
@@ -8,13 +10,21 @@ import random
 
 
 class EstrategiaMCTS(Estrategia):
-    def __init__(self):
+    def __init__(self, modelo: list[np.array], modo: TipoTabelaPersonagem):
         super().__init__('MCTS')
+        self.modelo = modelo
+        self.modo = modo
 
     # Estratégia usada na fase de escolha dos personagens
-    @staticmethod
-    def escolher_personagem(estado: Estado) -> int:
-        # Implementar MCTS
+    def escolher_personagem(self, estado: Estado) -> int:
+        # Tabela a ser treinada a partir do TipoTabelaPersonaem
+        tabela = self.modelo[self.modo.value]
+        indice_linha_tabela = estado.converter_estado()[self.modo.value]
+        linha_tabela = tabela[indice_linha_tabela]
+
+
+
+
         return random.randint(0, len(estado.tabuleiro.baralho_personagens) - 1)
 
     # Estratégia usada na fase de escolha das ações no turno
@@ -95,3 +105,5 @@ class EstrategiaMCTS(Estrategia):
     @staticmethod
     def museu(estado: Estado) -> int:
         return random.randint(0, len(estado.jogador_atual.cartas_distrito_mao) - 1)
+
+    def computar_pesos_escolhas(self, linha_tabela: list[int]) -> list[int]:

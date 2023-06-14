@@ -41,7 +41,7 @@ class Estado:
         ordem = [jogador.pontuacao_final for jogador in self.jogadores]
         self.jogadores = sort_together([ordem, self.jogadores], reverse=True)[1]
 
-    def converter_estado(self)->list:
+    def converter_estado(self) -> list:
         estado_vetor = []
         
         # Qtd ouro [0,1,2,3,4,5,>=6] = 56
@@ -61,9 +61,11 @@ class Estado:
         maior_custo = 0
         menor_custo = 10
         for distrito in self.jogador_atual.cartas_distrito_mao:
-            if distrito.valor_do_distrito > maior_custo: #descobre o distrito mais caro da mao
+            # descobre o distrito mais caro da mao
+            if distrito.valor_do_distrito > maior_custo:
                 maior_custo = distrito.valor_do_distrito
-            if distrito.valor_do_distrito < menor_custo: #descobre o distrito mais barato da mao
+            # descobre o distrito mais barato da mao
+            if distrito.valor_do_distrito < menor_custo:
                 menor_custo = distrito.valor_do_distrito
         estado_vetor.append(maior_custo)
         estado_vetor.append(menor_custo)
@@ -96,8 +98,7 @@ class Estado:
             estado_vetor.append(3)
         else:
             estado_vetor.append(militar)
-        
-        
+
         # Qtd personagens disponíveis [2,3,4,5,6,7] = 48
         estado_vetor.append(len(self.tabuleiro.baralho_personagens))
         
@@ -129,7 +130,7 @@ class Estado:
         for jogador in self.jogadores:
             if maior_custo < jogador.ouro:
                 maior_custo = jogador.ouro
-        if maior_custo>= 6:
+        if maior_custo >= 6:
             estado_vetor.append(6)
         else:
             estado_vetor.append(maior_custo)
@@ -139,33 +140,53 @@ class Estado:
         for jogador in self.jogadores:
             if maior_custo < len(jogador.cartas_distrito_mao):
                 maior_custo = len(jogador.cartas_distrito_mao)
-        if maior_custo>= 5:
+        if maior_custo >= 5:
             estado_vetor.append(5)
         else:
             estado_vetor.append(maior_custo)
             
-        # Personagem disponivel para escolha [1,2,3,4,5,6,7,8] = 64
+        # Personagem disponivel para escolha [1,2,3,4,5,6,7,8] = 510*8
+        personagens = 0b0
+        for carta in self.tabuleiro.baralho_personagens:
+            if carta.rank == 1:
+                personagens += 0b1
+            if carta.rank == 2:
+                personagens += 0b10
+            if carta.rank == 3:
+                personagens += 0b100
+            if carta.rank == 4:
+                personagens += 0b1000
+            if carta.rank == 5:
+                personagens += 0b10000
+            if carta.rank == 6:
+                personagens += 0b100000
+            if carta.rank == 7:
+                personagens += 0b1000000
+            if carta.rank == 8:
+                personagens += 0b10000000
+        estado_vetor.append(int(personagens))
+
         # Quantidade de jogadores [4,5,6] = 24
-        
-        # Personagem visivel descartado [1,2,3,5,6,7,8] = 56
+        estado_vetor.append(len(self.jogadores))
+
+        # Personagem visivel descartado [1,2,3,5,6,7,8] = 192(29 preenchidas)*8
         cartas_visiveis = 0b0
         for carta in self.tabuleiro.cartas_visiveis:
             if carta.rank == 1:
-                cartas_visiveis += 0b00000001
+                cartas_visiveis += 0b1
             if carta.rank == 2:
-                cartas_visiveis += 0b00000010
+                cartas_visiveis += 0b10
             if carta.rank == 3:
-                cartas_visiveis += 0b00000100
-            if carta.rank == 4:
-                cartas_visiveis += 0b00001000
+                cartas_visiveis += 0b100
             if carta.rank == 5:
-                cartas_visiveis += 0b00010000
+                cartas_visiveis += 0b1000
             if carta.rank == 6:
-                cartas_visiveis += 0b00100000
+                cartas_visiveis += 0b10000
             if carta.rank == 7:
-                cartas_visiveis += 0b01000000
+                cartas_visiveis += 0b100000
             if carta.rank == 8:
-                cartas_visiveis += 0b10000000
-            
+                cartas_visiveis += 0b1000000
         estado_vetor.append(int(cartas_visiveis))
+
+        return estado_vetor
         
