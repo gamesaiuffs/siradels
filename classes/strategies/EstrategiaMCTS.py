@@ -106,4 +106,14 @@ class EstrategiaMCTS(Estrategia):
     def museu(estado: Estado) -> int:
         return random.randint(0, len(estado.jogador_atual.cartas_distrito_mao) - 1)
 
-    def computar_pesos_escolhas(self, linha_tabela: list[int]) -> list[int]:
+    # Computa divisão proporcional entre vitórias (diretamente) e quantidade de simulações (inversamente)
+    @staticmethod
+    def computar_divisao_proporcional(linha_tabela: list[int], peso_explotacao: float = 1) -> list[float]:
+        qtd_acoes = int(len(linha_tabela)/2)
+        divisao = np.zeros(qtd_acoes)
+        total = 0
+        for i in range(qtd_acoes):
+            divisao[i] = linha_tabela[i] ** peso_explotacao / linha_tabela[i+qtd_acoes]
+            total += divisao[i]
+        return divisao/total
+
