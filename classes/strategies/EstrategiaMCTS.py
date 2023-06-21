@@ -10,9 +10,10 @@ import random
 
 
 class EstrategiaMCTS(Estrategia):
-    def __init__(self, modelo: list[np.array], modo: TipoTabelaPersonagem):
+    def __init__(self, modelo: list[np.array], historico: list[np.array], modo: TipoTabelaPersonagem):
         super().__init__('MCTS')
         self.modelo = modelo
+        self.historico = historico
         self.modo = modo
 
     # Estratégia usada na fase de escolha dos personagens
@@ -21,11 +22,16 @@ class EstrategiaMCTS(Estrategia):
         tabela = self.modelo[self.modo.value]
         indice_linha_tabela = estado.converter_estado()[self.modo.value]
         linha_tabela = tabela[indice_linha_tabela]
-
-
-
-
-        return random.randint(0, len(estado.tabuleiro.baralho_personagens) - 1)
+        personagens_disponiveis = []
+        for personagem in estado.tabuleiro.baralho_personagens:
+            personagens_disponiveis.append(linha_tabela[personagem.rank - 1])
+        for personagem in estado.tabuleiro.baralho_personagens:
+            personagens_disponiveis.append(linha_tabela[personagem.rank - 1 + 8])
+        divisao_proporcional = self.computar_divisao_proporcional(personagens_disponiveis)
+        escolha = random.choices(range(0, len(estado.tabuleiro.baralho_personagens)), divisao_proporcional)[0]
+        self.historico[self.modo.value][indice_linha_tabela][estado.tabuleiro.baralho_personagens[escolha].rank-1] = 1
+        self.historico[self.modo.value][indice_linha_tabela][estado.tabuleiro.baralho_personagens[escolha].rank-1+8] += 1
+        return escolha
 
     # Estratégia usada na fase de escolha das ações no turno
     @staticmethod

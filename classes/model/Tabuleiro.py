@@ -59,7 +59,7 @@ class Tabuleiro:
         navegadora = CartaPersonagem('Navegadora', 7, TipoPersonagem.Navegadora, 'Ganhe 4 ouros extras ou 4 cartas extras. Você não pode construir distritos.')
         senhor_guerra = CartaPersonagem('Senhor da Guerra', 8, TipoPersonagem.SenhorDaGuerra,
                                         'Destrua 1 distrito, pagando 1 ouro a menos que o custo dele. Ganhe 1 ouro para cada um dos seus distritos MILITARES')
-        return [rei, assassina, ladrao, mago, rei, cardeal, alquimista, navegadora, senhor_guerra]
+        return [rei, assassina, ladrao, mago, cardeal, alquimista, navegadora, senhor_guerra]
 
     def criar_baralho_personagem(self, num_jogadores):
         mao_jogador = self.personagens[1:]
