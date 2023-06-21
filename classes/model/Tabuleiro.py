@@ -64,7 +64,7 @@ class Tabuleiro:
     def criar_baralho_personagem(self, num_jogadores):
         mao_jogador = self.personagens[1:]
         # O rei sempre fica disponível (fora do embaralhamento)
-        rei = self.personagens[TipoPersonagem.Rei.value]
+        rei = self.personagens[0]
         shuffle(mao_jogador)
         # Regras específicas para o baralho de personagens de acordo com número d ejogadores
         if num_jogadores == 4:

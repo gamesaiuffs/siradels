@@ -44,20 +44,20 @@ class Estado:
     def converter_estado(self) -> list:
         estado_vetor = []
         
-        # Qtd ouro [0,1,2,3,4,5,>=6] = 56
+        # Qtd ouro [0,1,2,3,4,5,>=6]
         if self.jogador_atual.ouro >= 6:
             estado_vetor.append(6)
         else:
             estado_vetor.append(self.jogador_atual.ouro)
         
-        # Qtd carta mão [0,1,2,3,4,>=5] = 48
+        # Qtd carta mão [0,1,2,3,4,>=5]
         if len(self.jogador_atual.cartas_distrito_mao) >= 5:
             estado_vetor.append(5)
         else:
             estado_vetor.append(len(self.jogador_atual.cartas_distrito_mao))        
         
-        # Carta mão mais cara [1 a 6] = 48
-        # Carta mão mais barata [1 a 6] = 48
+        # Carta mão mais cara [1 a 6]
+        # Carta mão mais barata [1 a 6]
         maior_custo = 0
         menor_custo = 10
         for distrito in self.jogador_atual.cartas_distrito_mao:
@@ -67,15 +67,17 @@ class Estado:
             # descobre o distrito mais barato da mao
             if distrito.valor_do_distrito < menor_custo:
                 menor_custo = distrito.valor_do_distrito
+        if menor_custo == 10:
+            menor_custo = 0
         estado_vetor.append(maior_custo)
         estado_vetor.append(menor_custo)
 
-        # Qtd distritos construido [0 a 6] = 56
+        # Qtd distritos construido [0 a 6]
         estado_vetor.append(len(self.jogador_atual.distritos_construidos))
         
-        # Qtd distrito construido Militar [0,1,2,>=3] = 32
-        # Qtd distrito construido Religioso [0,1,2,>=3] = 32
-        # Qtd distrito construido Nobre [0,1,2,>=3] = 32
+        # Qtd distrito construido Militar [0,1,2,>=3]
+        # Qtd distrito construido Religioso [0,1,2,>=3]
+        # Qtd distrito construido Nobre [0,1,2,>=3]
         nobre = 0
         religioso = 0
         militar = 0
@@ -99,10 +101,10 @@ class Estado:
         else:
             estado_vetor.append(militar)
 
-        # Qtd personagens disponíveis [2,3,4,5,6,7] = 48
+        # Qtd personagens disponíveis [2,3,4,5,6,7]
         estado_vetor.append(len(self.tabuleiro.baralho_personagens))
         
-        # Pontuacao [0-3,4-7,8-11,12-15,16-19,20-23,>=24] = 56
+        # Pontuacao [0-3,4-7,8-11,12-15,16-19,20-23,>=24]
         if self.jogador_atual.pontuacao <= 3:
             estado_vetor.append(0)
         elif self.jogador_atual.pontuacao <= 7:
@@ -118,14 +120,14 @@ class Estado:
         else:
             estado_vetor.append(6)
             
-        # Qtd distrito construido [0 a 6] = 56
+        # Qtd distrito construido [0 a 6]
         maior_custo = 0
         for jogador in self.jogadores:
             if maior_custo < len(jogador.distritos_construidos):
                 maior_custo = len(jogador.distritos_construidos)
         estado_vetor.append(maior_custo)
         
-        # Qtd ouro [0,1,2,3,4,5,>=6] = 56
+        # Qtd ouro [0,1,2,3,4,5,>=6]
         maior_custo = 0
         for jogador in self.jogadores:
             if maior_custo < jogador.ouro:
@@ -135,7 +137,7 @@ class Estado:
         else:
             estado_vetor.append(maior_custo)
         
-        # Qtd carta mão [0,1,2,3,4,>=5] = 48
+        # Qtd carta mão [0,1,2,3,4,>=5]
         maior_custo = 0
         for jogador in self.jogadores:
             if maior_custo < len(jogador.cartas_distrito_mao):
@@ -145,7 +147,7 @@ class Estado:
         else:
             estado_vetor.append(maior_custo)
             
-        # Personagem disponivel para escolha [1,2,3,4,5,6,7,8] = 510*8
+        # Personagem disponivel para escolha
         personagens = 0b0
         for carta in self.tabuleiro.baralho_personagens:
             if carta.rank == 1:
@@ -166,10 +168,10 @@ class Estado:
                 personagens += 0b10000000
         estado_vetor.append(int(personagens))
 
-        # Quantidade de jogadores [4,5,6] = 24
+        # Quantidade de jogadores
         estado_vetor.append(len(self.jogadores))
 
-        # Personagem visivel descartado [1,2,3,5,6,7,8] = 192(29 preenchidas)*8
+        # Personagem visivel descartado
         cartas_visiveis = 0b0
         for carta in self.tabuleiro.cartas_visiveis:
             if carta.rank == 1:
