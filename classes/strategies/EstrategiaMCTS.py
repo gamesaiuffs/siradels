@@ -10,31 +10,50 @@ import random
 
 
 class EstrategiaMCTS(Estrategia):
-    def __init__(self, modelo: list[np.array], historico: list[np.array], modo: TipoTabelaPersonagem):
+    def __init__(self, modelo: list[np.array], historico: list[np.array], modo: TipoTabelaPersonagem, treino: bool = True):
         super().__init__('MCTS')
         self.modelo = modelo
         self.historico = historico
         self.modo = modo
+        self.treino = treino
 
     # Estratégia usada na fase de escolha dos personagens
     def escolher_personagem(self, estado: Estado) -> int:
-        # Tabela a ser treinada a partir do TipoTabelaPersonaem
-        indice_linha_tabela = estado.converter_estado()[self.modo.value]
-        linha_tabela = self.modelo[self.modo.value][indice_linha_tabela]
-        # Deixar apenas colunas das ações disponíveis no estado atual
-        personagens_disponiveis = []
-        for personagem in estado.tabuleiro.baralho_personagens:
-            personagens_disponiveis.append(linha_tabela[personagem.rank - 1])
-        for personagem in estado.tabuleiro.baralho_personagens:
-            personagens_disponiveis.append(linha_tabela[personagem.rank - 1 + 8])
-        # Computar divisão proporcional
-        divisao_proporcional = self.computar_divisao_proporcional(personagens_disponiveis)
-        # Escolher opção seguindo distribuição da divisão
-        escolha = random.choices(range(0, len(estado.tabuleiro.baralho_personagens)), divisao_proporcional)[0]
-        # Salvar histórico das escolhas para acrescentar no modelo após resultado
-        self.historico[self.modo.value][indice_linha_tabela][estado.tabuleiro.baralho_personagens[escolha].rank-1] = 1
-        self.historico[self.modo.value][indice_linha_tabela][estado.tabuleiro.baralho_personagens[escolha].rank-1+8] = 1
-        return escolha
+        if self.treino:
+            # Tabela a ser treinada a partir do TipoTabelaPersonaem
+            indice_linha_tabela = estado.converter_estado()[self.modo.value]
+            linha_tabela = self.modelo[self.modo.value][indice_linha_tabela]
+            # Deixar apenas colunas das ações disponíveis no estado atual
+            personagens_disponiveis = []
+            for personagem in estado.tabuleiro.baralho_personagens:
+                personagens_disponiveis.append(linha_tabela[personagem.rank - 1])
+            for personagem in estado.tabuleiro.baralho_personagens:
+                personagens_disponiveis.append(linha_tabela[personagem.rank - 1 + 8])
+            # Computar divisão proporcional
+            divisao_proporcional = self.computar_divisao_proporcional(np.array(personagens_disponiveis))
+            # Escolher opção seguindo distribuição da divisão
+            escolha = random.choices(range(0, len(estado.tabuleiro.baralho_personagens)), divisao_proporcional)[0]
+            # Salvar histórico das escolhas para acrescentar no modelo após resultado
+            self.historico[self.modo.value][indice_linha_tabela][estado.tabuleiro.baralho_personagens[escolha].rank-1] = 1
+            self.historico[self.modo.value][indice_linha_tabela][estado.tabuleiro.baralho_personagens[escolha].rank-1+8] = 1
+            return escolha
+        else:
+            # Converte estado e monta de consulta a partir de todas as tabelas individuais
+            estado_vetor = estado.converter_estado()
+            tabela_consulta = np.zeros((len(TipoTabelaPersonagem), 16))
+            for i in range(len(TipoTabelaPersonagem)):
+                tabela_consulta[i] = self.modelo[i][estado_vetor[i]]
+            # Deixar apenas colunas das ações disponíveis no estado atual
+            personagens_disponiveis = []
+            for personagem in estado.tabuleiro.baralho_personagens:
+                personagens_disponiveis.append(tabela_consulta[:, personagem.rank - 1])
+            personagens_disponiveis = np.stack(personagens_disponiveis, axis=1)
+            soma_colunas = np.sum(personagens_disponiveis, axis=0)
+            # Computar divisão proporcional com soma das colunas (considera apenas vitórias)
+            divisao_proporcional = self.computar_divisao_proporcional(soma_colunas, 1, True)
+            # Escolher opção seguindo distribuição da divisão
+            escolha = random.choices(range(0, len(estado.tabuleiro.baralho_personagens)), divisao_proporcional)[0]
+            return escolha
 
     # Estratégia usada na fase de escolha das ações no turno
     @staticmethod
@@ -117,12 +136,20 @@ class EstrategiaMCTS(Estrategia):
 
     # Computa divisão proporcional entre vitórias (diretamente) e quantidade de simulações (inversamente)
     @staticmethod
-    def computar_divisao_proporcional(linha_tabela: list[int], peso_explotacao: float = 1) -> list[float]:
-        qtd_acoes = int(len(linha_tabela)/2)
-        divisao = np.zeros(qtd_acoes)
-        total = 0
-        for i in range(qtd_acoes):
-            divisao[i] = linha_tabela[i] ** peso_explotacao / linha_tabela[i+qtd_acoes]
-            total += divisao[i]
+    def computar_divisao_proporcional(linha_tabela: np.ndarray, peso_explotacao: float = 1, apenas_vitorias: bool = False) -> list[float]:
+        if apenas_vitorias:
+            qtd_acoes = len(linha_tabela)
+            divisao = np.zeros(qtd_acoes)
+            total = 0
+            for i in range(qtd_acoes):
+                divisao[i] = linha_tabela[i] ** peso_explotacao
+                total += divisao[i]
+        else:
+            qtd_acoes = int(len(linha_tabela)/2)
+            divisao = np.zeros(qtd_acoes)
+            total = 0
+            for i in range(qtd_acoes):
+                divisao[i] = linha_tabela[i] ** peso_explotacao / linha_tabela[i+qtd_acoes]
+                total += divisao[i]
         return divisao/total
 

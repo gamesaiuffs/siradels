@@ -85,33 +85,38 @@ class Experimento:
             print(qtd_simulacao)
 
     # Terminar método
-    # Aplica o modelo aprendido durante o número de simulações desejado para coletar desmepenho do modelo
-    def aplicar_modelo_mcts(self, qtd_simulacao_maximo: int, qtd_jogadores: int):
-        qtd_acoes = 8
-        modelo = self.inicializar_modelo_mcts(qtd_acoes)
-        qtd_simulacao = 0
+    # Aplica o modelo aprendido durante o número de simulações desejado para coletar o desempenho do modelo
+    def testar_modelo_mcts(self, qtd_simulacao_maximo: int, qtd_jogadores: int):
+        modelo = self.ler_modelo()
+        qtd_simulacao = 1
+        resultados: dict[str, (int, int)] = dict()
+        # Inicializa variáveis para simulações do jogo
+        estrategias = [EstrategiaMCTS(modelo, None, None, False)]
+        for i in range(qtd_jogadores - 1):
+            estrategias.append(EstrategiaTotalmenteAleatoria(str(i + 1)))
+        # Cria simulação
+        simulacao = Simulacao(estrategias)
+        # Executa simulação
+        estado_final = simulacao.rodar_simulacao()
+        for jogador in estado_final.jogadores:
+            resultados[jogador.nome] = (int(jogador.vencedor), jogador.pontuacao_final)
         while qtd_simulacao < qtd_simulacao_maximo:
-            for modo in TipoTabelaPersonagem:
-                qtd_simulacao += 1
-                # Inicializa variáveis para nova simulação do jogo
-                historico = self.inicializar_modelo_mcts(qtd_acoes, 0)
-                estrategias = [EstrategiaMCTS(modelo, historico, modo)]
-                for i in range(qtd_jogadores - 1):
-                    estrategias.append(EstrategiaTotalmenteAleatoria(i + 1))
-                # Cria simulação
-                simulacao = Simulacao(estrategias)
-                # Executa simulação
-                estado_final = simulacao.rodar_simulacao()
-                # Atualizar modelo com vitórias e ações escolhidas
-                for jogador in estado_final.jogadores:
-                    if jogador.nome == 'Bot - MCTS':
-                        if jogador.vencedor:
-                            for tabela, tabela_hist in zip(modelo, historico):
-                                tabela += tabela_hist
-                        else:
-                            metade_tabela = int(modelo[0].shape[1] / 2)
-                            for tabela, tabela_hist in zip(modelo, historico):
-                                tabela[:, metade_tabela:] += tabela_hist[:, metade_tabela:]
+            qtd_simulacao += 1
+            # Cria simulação
+            simulacao = Simulacao(estrategias)
+            # Executa simulação
+            estado_final = simulacao.rodar_simulacao()
+            for jogador in estado_final.jogadores:
+                (vitoria, pontuacao) = resultados[jogador.nome]
+                resultados[jogador.nome] = (int(jogador.vencedor) + vitoria, jogador.pontuacao_final + pontuacao)
+        print()
+        for jogador, resultado in resultados.items():
+            (vitoria, pontuacao) = resultado
+            pontuacao_media = pontuacao / (qtd_simulacao + 1)
+            print(
+                f'{jogador} - \tVitórias: {vitoria} - Porcento Vitorias: {vitoria / (qtd_simulacao + 1) * 100:.2f}% - Pontuação Média: {pontuacao_media}')
+
+
 '''
 
 resultados: dict[str, (int, int)] = dict()

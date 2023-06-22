@@ -1,5 +1,8 @@
 from classes.Experimento import Experimento
 
 experimento = Experimento()
-# Treinar modelo por 5min
-experimento.treinar_modelo_mcts(300)
+# Treinar modelo por 10min
+# experimento.treinar_modelo_mcts(600)
+
+# Testar treino
+experimento.testar_modelo_mcts(10000, 6)
