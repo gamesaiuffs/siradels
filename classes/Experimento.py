@@ -112,9 +112,9 @@ class Experimento:
         print()
         for jogador, resultado in resultados.items():
             (vitoria, pontuacao) = resultado
-            pontuacao_media = pontuacao / (qtd_simulacao + 1)
+            pontuacao_media = pontuacao / qtd_simulacao
             print(
-                f'{jogador} - \tVitórias: {vitoria} - Porcento Vitorias: {vitoria / (qtd_simulacao + 1) * 100:.2f}% - Pontuação Média: {pontuacao_media}')
+                f'{jogador} - \tVitórias: {vitoria} - Porcento Vitorias: {vitoria / qtd_simulacao * 100:.2f}% - Pontuação Média: {pontuacao_media}')
 
 
 '''

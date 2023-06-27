@@ -35,6 +35,7 @@ class EstrategiaMCTS(Estrategia):
             escolha = random.choices(range(0, len(estado.tabuleiro.baralho_personagens)), divisao_proporcional)[0]
             # Salvar histórico das escolhas para acrescentar no modelo após resultado
             self.historico[self.modo.value][indice_linha_tabela][estado.tabuleiro.baralho_personagens[escolha].rank-1] = 1
+            # Define se vamos contabilizar a quantidade de partida (= 1) ou se contaremos quantas vezes a ação foi escolhida na mesma partida (+= 1)
             self.historico[self.modo.value][indice_linha_tabela][estado.tabuleiro.baralho_personagens[escolha].rank-1+8] = 1
             return escolha
         else:
