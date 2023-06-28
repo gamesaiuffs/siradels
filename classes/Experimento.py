@@ -41,14 +41,14 @@ class Experimento:
     @staticmethod
     def salvar_modelo(modelo: list[np.ndarray]):
         for (i, j) in zip(modelo, TipoTabelaPersonagem):
-            np.savetxt('./tabela/' + j.name + '.csv', i, delimiter=',', fmt='%6u')
+            np.savetxt('./classes/tabela/' + j.name + '.csv', i, delimiter=',', fmt='%6u')
 
     # Carrega o modelo a partir dos arquivos CSV
     @staticmethod
     def ler_modelo() -> list[np.ndarray]:
         modelo = []
         for i in TipoTabelaPersonagem:
-            a = np.genfromtxt('./tabela/' + i.name + '.csv', delimiter=',')
+            a = np.genfromtxt('./classes/tabela/' + i.name + '.csv', delimiter=',')
             modelo.append(a)
         return modelo
 
@@ -58,7 +58,7 @@ class Experimento:
         qtd_acoes = 8
         modelo = self.inicializar_modelo_mcts(qtd_acoes)
         qtd_simulacao = 0
-        while time.time() - inicio < tempo_limite:
+        while True:
             for qtd_jogadores in range(4, 7):
                 for modo in TipoTabelaPersonagem:
                     qtd_simulacao += 1
@@ -82,7 +82,7 @@ class Experimento:
                                 for tabela, tabela_hist in zip(modelo, historico):
                                     tabela[:, metade_tabela:] += tabela_hist[:, metade_tabela:]
             self.salvar_modelo(modelo)
-            print(qtd_simulacao)
+            # print(qtd_simulacao)
 
     # Terminar método
     # Aplica o modelo aprendido durante o número de simulações desejado para coletar o desempenho do modelo
@@ -116,6 +116,43 @@ class Experimento:
             print(
                 f'{jogador} - \tVitórias: {vitoria} - Porcento Vitorias: {vitoria / qtd_simulacao * 100:.2f}% - Pontuação Média: {pontuacao_media}')
 
+    # Aplica o modelo aprendido durante o número de simulações desejado para coletar o desempenho do modelo
+    def testar_modelo_gravar(self, qtd_simulacao_maximo: int, qtd_jogadores: int):
+        modelo = self.ler_modelo()
+        qtd_simulacao = 1
+        resultados: dict[str, (int, int)] = dict()
+        # Inicializa variáveis para simulações do jogo
+        estrategias = [EstrategiaMCTS(modelo, None, None, False)]
+        for i in range(qtd_jogadores - 1):
+            estrategias.append(EstrategiaTotalmenteAleatoria(str(i + 1)))
+        # Cria simulação
+        simulacao = Simulacao(estrategias)
+        # Executa simulação
+        estado_final = simulacao.rodar_simulacao()
+        for jogador in estado_final.jogadores:
+            resultados[jogador.nome] = (int(jogador.vencedor), jogador.pontuacao_final)
+        while qtd_simulacao < qtd_simulacao_maximo:
+            qtd_simulacao += 1
+            # Cria simulação
+            simulacao = Simulacao(estrategias)
+            # Executa simulação
+            estado_final = simulacao.rodar_simulacao()
+            for jogador in estado_final.jogadores:
+                (vitoria, pontuacao) = resultados[jogador.nome]
+                resultados[jogador.nome] = (int(jogador.vencedor) + vitoria, jogador.pontuacao_final + pontuacao)
+                
+        print()
+        for jogador, resultado in resultados.items():
+            (vitoria, pontuacao) = resultado
+            pontuacao_media = pontuacao / qtd_simulacao
+            print(
+                f'{jogador} - \tVitórias: {vitoria} - Porcento Vitorias: {vitoria / qtd_simulacao * 100:.2f}% - Pontuação Média: {pontuacao_media}')
+            
+    # Salva o resultado das simulações em arquivos CSV
+    @staticmethod
+    def salvar_resultado(resultados: dict[str, (int, int)] = dict()):
+        for i in resultados:
+            np.savetxt('./classes/resultados/simulacoes.csv', i, delimiter=',', fmt='%6u')
 
 '''
 
