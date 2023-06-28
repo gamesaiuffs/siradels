@@ -62,6 +62,11 @@ class Experimento:
             for qtd_jogadores in range(4, 7):
                 for modo in TipoTabelaPersonagem:
                     qtd_simulacao += 1
+
+                    # Faz um teste premiliminar a cada 300.000 jogos de treino e salva os resultados
+                    if qtd_simulacao % 1000 == 0:
+                        self.testar_modelo_gravar(100, 6, qtd_simulacao)
+
                     # Inicializa variáveis para nova simulação do jogo
                     historico = self.inicializar_modelo_mcts(qtd_acoes, 0)
                     estrategias = [EstrategiaMCTS(modelo, historico, modo)]
@@ -82,7 +87,7 @@ class Experimento:
                                 for tabela, tabela_hist in zip(modelo, historico):
                                     tabela[:, metade_tabela:] += tabela_hist[:, metade_tabela:]
             self.salvar_modelo(modelo)
-            # print(qtd_simulacao)
+            #print(qtd_simulacao)
 
     # Terminar método
     # Aplica o modelo aprendido durante o número de simulações desejado para coletar o desempenho do modelo
@@ -116,8 +121,18 @@ class Experimento:
             print(
                 f'{jogador} - \tVitórias: {vitoria} - Porcento Vitorias: {vitoria / qtd_simulacao * 100:.2f}% - Pontuação Média: {pontuacao_media}')
 
-    # Aplica o modelo aprendido durante o número de simulações desejado para coletar o desempenho do modelo
-    def testar_modelo_gravar(self, qtd_simulacao_maximo: int, qtd_jogadores: int):
+    # Salva o resultado das simulações em arquivos CSV
+    @staticmethod
+    def salvar_resultado(resultados: dict[str, (int, int)], qtd_simulacao_treino, qtd_simulacao_teste):
+        dados = []
+        for jogador, resultado in resultados.items():
+            (vitoria, pontuacao) = resultado
+            pontuacao_media = pontuacao / qtd_simulacao_teste
+            dados.append([str(jogador), vitoria, vitoria / qtd_simulacao_teste, pontuacao_media])
+        np.savetxt('./classes/simulacoes/' + qtd_simulacao_treino + '.csv', np.array(dados), delimiter=',', fmt='%6u')
+
+    # Aplica o modelo aprendido durante o número de simulações desejado para coletar o desempenho do modelo e salva os resultados
+    def testar_modelo_gravar(self, qtd_simulacao_maximo: int, qtd_jogadores: int, qtd_simulacao_treino):
         modelo = self.ler_modelo()
         qtd_simulacao = 1
         resultados: dict[str, (int, int)] = dict()
@@ -140,19 +155,8 @@ class Experimento:
             for jogador in estado_final.jogadores:
                 (vitoria, pontuacao) = resultados[jogador.nome]
                 resultados[jogador.nome] = (int(jogador.vencedor) + vitoria, jogador.pontuacao_final + pontuacao)
-                
-        print()
-        for jogador, resultado in resultados.items():
-            (vitoria, pontuacao) = resultado
-            pontuacao_media = pontuacao / qtd_simulacao
-            print(
-                f'{jogador} - \tVitórias: {vitoria} - Porcento Vitorias: {vitoria / qtd_simulacao * 100:.2f}% - Pontuação Média: {pontuacao_media}')
-            
-    # Salva o resultado das simulações em arquivos CSV
-    @staticmethod
-    def salvar_resultado(resultados: dict[str, (int, int)] = dict()):
-        for i in resultados:
-            np.savetxt('./classes/resultados/simulacoes.csv', i, delimiter=',', fmt='%6u')
+
+        Experimento.salvar_resultado(resultados, qtd_simulacao_treino, qtd_simulacao)
 
 '''
 
