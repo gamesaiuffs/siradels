@@ -61,13 +61,14 @@ class Experimento:
         modelo = self.inicializar_modelo_mcts(qtd_acoes)
         qtd_simulacao = 0
         while True:
+        # while tempo_limite > time.time() - inicio:
             for qtd_jogadores in range(4, 7):
                 for modo in TipoTabelaPersonagem:
                     qtd_simulacao += 1
 
-                    # Faz um teste premiliminar a cada 300.000 jogos de treino e salva os resultados
-                    if qtd_simulacao % 1000 == 0:
-                        self.testar_modelo_gravar(100, 6, qtd_simulacao)
+                    # Faz um teste premiliminar a cada 300.000 (estimado em 1 arquivo por hora) jogos de treino e salva os resultados
+                    if qtd_simulacao % 300000 == 0:
+                        self.testar_modelo_gravar(10000, 6, qtd_simulacao)
 
                     # Inicializa variáveis para nova simulação do jogo
                     historico = self.inicializar_modelo_mcts(qtd_acoes, 0)
@@ -132,8 +133,7 @@ class Experimento:
             pontuacao_media = pontuacao / qtd_simulacao_teste
             dados.append([jogador, vitoria, vitoria / qtd_simulacao_teste, pontuacao_media])
 
-        dado = np.array(dados)
-        #np.savetxt('./classes/simulacoes/' + qtd_simulacao_treino + '.csv', np.array(dados), delimiter=',', fmt='%6u')
+        #np.savetxt('./classes/simulacoes/' + qtd_simulacao_treino + '.csv', np.array(dados), delimiter=',', fmt='%s')
         np.savetxt('./simulacoes/' + str(qtd_simulacao_treino) + '.csv', np.array(dados), delimiter=',', fmt='%s')
 
     # Aplica o modelo aprendido durante o número de simulações desejado para coletar o desempenho do modelo e salva os resultados
