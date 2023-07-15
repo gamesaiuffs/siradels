@@ -143,6 +143,10 @@ class Simulacao:
                             # print(self.estado)
                             # Mostra o jogador atual
                             # print(f'Turno atual: {jogador.nome}, {jogador.personagem}')
+
+                            #aqui
+
+
                             # Mostra apenas ações disponíveis segundo regras do jogo
                             acoes_disponiveis = self.acoes_disponiveis()
                             escolha_acao = self.estrategias[jogador].escolher_acao(self.estado, acoes_disponiveis)

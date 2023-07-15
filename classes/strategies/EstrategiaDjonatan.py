@@ -16,15 +16,20 @@ class EstrategiaDjonatan(Estrategia):
     @staticmethod
     def escolher_personagem(estado: Estado) -> int:
 
-        jogador_mais_ouro = estado.jogador_atual
         qtd_mais_ouro = 0
-
+        qtd_mais_cartas = 0
         for jogador in estado.jogadores:
             if jogador == estado.jogador_atual:
                 continue
             if jogador.ouro > qtd_mais_ouro:
                 qtd_mais_ouro = jogador.ouro
-        
+
+        for jogador in estado.jogadores:
+            if jogador == estado.jogador_atual:
+                continue
+            if len(jogador.cartas_distrito_mao) > qtd_mais_cartas:
+                qtd_mais_cartas = len(jogador.cartas_distrito_mao)
+
         try:
             assassina = estado.tabuleiro.baralho_personagens.index(estado.tabuleiro.personagens[TipoPersonagem.Assassina.value])
         except ValueError:
@@ -61,7 +66,7 @@ class EstrategiaDjonatan(Estrategia):
         if assassina != -1 and len(estado.jogador_atual.distritos_construidos) >= 6:
             return assassina
 
-        if mago != -1 and estado.jogador_atual.ouro > 5:
+        if mago != -1 and estado.jogador_atual.ouro > 5 and qtd_mais_cartas > 2:
             return mago
 
         if cardeal != -1 and len(estado.jogador_atual.cartas_distrito_mao) > 5 and qtd_mais_ouro > 4:
@@ -224,7 +229,7 @@ class EstrategiaDjonatan(Estrategia):
         for i, (distrito, jogador) in enumerate(distritos_para_construir_cardeal):
             if jogador == jogador_mais_ouro:
                 return len(distritos_para_construir) + i + 1
-       
+        
         #mao  
         #estrategia para pontuacao bonus (tipos de distrito)
         idx = 0
@@ -238,8 +243,8 @@ class EstrategiaDjonatan(Estrategia):
                     flag = 0
             if flag == len(estado.jogador_atual.distritos_construidos):
                 return idx + 1
-
-
+        
+        #padrao
         for i, distrito in enumerate(distritos_para_construir):
             if distrito.tipo_de_distrito == 4:
                 return i + 1
@@ -263,9 +268,9 @@ class EstrategiaDjonatan(Estrategia):
                     idx = i
                 
                 #estrategia para pontuacao bonus (tipos de distrito)
-                #for carta in estado.jogador_atual.distritos_construidos:
-                #    if distrito.tipo_de_distrito == carta.tipo_de_distrito:
-                #        return i
+                for carta in estado.jogador_atual.distritos_construidos:
+                    if distrito.tipo_de_distrito == carta.tipo_de_distrito:
+                        return i
 
             return idx
 
@@ -397,11 +402,29 @@ class EstrategiaDjonatan(Estrategia):
             elif distrito.tipo_de_distrito == 3:
                 comercial += 1
                 
+        idx = 0
+        for i, distrito in enumerate(opcoes_cartas):
+            flag = 0
+            for carta in estado.jogador_atual.distritos_construidos:
+                if distrito.tipo_de_distrito != carta.tipo_de_distrito:
+                    idx = i
+                    flag += 1
+                if distrito.tipo_de_distrito == carta.tipo_de_distrito:
+                    flag = 0
+            if flag == len(estado.jogador_atual.distritos_construidos):
+                return idx
+        
         if especial != 0:
             for i, distrito in enumerate(opcoes_cartas):
                 if distrito.tipo_de_distrito == 4:
                     return i
                                 
+        if religioso != 0:
+            for i, distrito in enumerate(opcoes_cartas):
+                if distrito.tipo_de_distrito == 0:
+                    if distrito not in estado.jogador_atual.distritos_construidos:
+                        return i
+                    
         if militar != 0:
             for i, distrito in enumerate(opcoes_cartas):
                 if distrito.tipo_de_distrito == 1:
@@ -414,11 +437,6 @@ class EstrategiaDjonatan(Estrategia):
                     if distrito not in estado.jogador_atual.distritos_construidos:
                         return i
                     
-        if religioso != 0:
-            for i, distrito in enumerate(opcoes_cartas):
-                if distrito.tipo_de_distrito == 0:
-                    if distrito not in estado.jogador_atual.distritos_construidos:
-                        return i
 
         if comercial != 0:
             for i, distrito in enumerate(opcoes_cartas):

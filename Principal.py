@@ -1,8 +1,11 @@
 from classes.Experimento import Experimento
+from classes.ClassificaEstados import ClassificaEstados
 
-experimento = Experimento()
-# Treinar modelo por 10min
-experimento.treinar_modelo_mcts(600)
+salvaEstados = ClassificaEstados()
+
+#salvaEstados.salvar_modelo(salvaEstados.inicializar_estados())
+
+salvaEstados.simula_estados(1)
 
 # Testar treino
 # experimento.testar_modelo_mcts(1000, 4)
