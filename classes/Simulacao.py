@@ -140,7 +140,7 @@ class Simulacao:
                         # Laço de turnos do jogo
                         while True:
                             # Mostra o estado atual
-                            # print(self.estado)
+                            #print(self.estado)
                             # Mostra o jogador atual
                             # print(f'Turno atual: {jogador.nome}, {jogador.personagem}')
 
@@ -176,7 +176,7 @@ class Simulacao:
         self.computar_pontuacao_final()
         self.estado.ordenar_jogadores_pontuacao()
         # Mostra estado final
-        # print(self.estado)
+        #print(self.estado)
         self.estado.jogadores[0].vencedor = True
         # print()
         # for jogador in self.estado.jogadores:

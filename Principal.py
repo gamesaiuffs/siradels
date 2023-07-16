@@ -5,7 +5,7 @@ salvaEstados = ClassificaEstados()
 
 #salvaEstados.salvar_modelo(salvaEstados.inicializar_estados())
 
-salvaEstados.simula_estados(1)
+salvaEstados.simula_estados(10)
 
 # Testar treino
 # experimento.testar_modelo_mcts(1000, 4)
