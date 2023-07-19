@@ -1,5 +1,4 @@
 # -*- coding: utf-8 -*-
-import time
 import numpy as np
 from classes.Simulacao import Simulacao
 from classes.strategies.EstrategiaBernardo import EstrategiaBernardo
@@ -11,58 +10,73 @@ from classes.strategies.EstrategiaAndrei import EstrategiaAndrei
 from classes.strategies.EstrategiaMCTS import EstrategiaMCTS
 from classes.strategies.EstrategiaTotalmenteAleatoria import EstrategiaTotalmenteAleatoria
 from classes.enum.TipoDistrito import TipoDistrito
+from sklearn import tree
+import joblib
 
-class ClassificaEstados:    
+# X = features
+# Y = amostras
 
+# Primeira abordagem: Capturar estados individuais finais e visiveis dos jogadores
+
+# Segunda abordagem: Capturar o estado completo com dados privilegiados do jogador atual 
+# e dados visiveis dos oponentes, rotulos por estado final de vitoria por pontuacao, metodo proba sklearn
+
+# Duvidas: Arvore de classificacao ou arvore de decisao por regressao?
+# Se classificacao: Rotular matrizes inteiras com um array (possivel?) / levar em consideracao diversas outras variaveis (viavel?) / 
+# e utilizar isso em estados intermediarios (novas variaveis: personagens) com o metodo proba de sklearn (eficiente?) 
+
+# Testes: Diferentes profundidades / se regressao diferentes penalidades (media ou quadrado);
+
+# Rotulo de pontuacao para regressao funciona nesse caso? como aplicar?
+ 
+
+class ClassificaEstados:   
 
     @staticmethod
-    def inicializar_estados(num_jogadores: int = 6, valor_inicial: int = 0) -> list[np.ndarray]:
-        
-        """
-        MODELO (índices das linhas):
-        QtdOuro = 0
-        QtdCarta = 1
-        CartaCara = 2
-        CartaBarata = 3
-        Construidos = 4
-        ConstruidosMilitar = 5
-        ConstruidosReligioso = 6
-        ConstruidosNobre = 7
-        ConstruidosEspecial = 8
-        PontuacaoParcial = 9
-        QtdPersonagem = 10
-        PersonagemDisponivel = 11
-        PersonagemDescartado = 12
-        Rotulo = 13
-        #DistanciaDoRei = 13
-        """
+    def treina_modelo(X: np.ndarray, Y: list()):
 
-        # Matriz com estado dos jogadores
-        modelo = [(np.ones((num_jogadores, 14), dtype=np.ndarray)*valor_inicial)]
-        
+        modelo = tree.DecisionTreeClassifier(max_depth=5)
+        modelo.fit(X, Y)
+
+        print(modelo.feature_importances_)
+
+        joblib.dump(modelo, "Modelo Teste")
+
         return modelo
 
+    # Utiliza modelo treinado para obter chance de vitoria
+    @staticmethod
+    def calcula_porcentagem(dados):
+
+        modelo = joblib.load("Modelo Teste")
+
+        estado_teste = [[ 2,  4,  0,  0,  0,  0,  0, 0],[ 19,  10,  5,  1,  1,  1,  2, 0],[ 1,  2,  4,  3,  1,  0,  0, 0],[ 2,  2,  3,  1,  0,  1,  1, 0],[ 0,  2,  2,  0,  1,  0,  0,  0],[ 0,  1,  2,  0,  0,  0,  1,  0]]
+        probabilidade_vitoria = modelo.predict_proba(estado_teste)
+        print(probabilidade_vitoria)  # Probabilidade estimada de vitória
+
+        # Mostra dados extras
+
+        return probabilidade_vitoria 
 
     @staticmethod
-    def salvar_modelo(modelo: list[np.ndarray], num_turnos):
-        for j in modelo:
-            j = j.astype(np.uint32)
-            np.savetxt('./classes/tabela_estado/' + 'jogo' + str(num_turnos) + '.csv', j, delimiter=',', fmt='%6u')
-            #np.savetxt('./tabela/' + j.name + '.csv', i, delimiter=',', fmt='%6u')
+    def salvar_modelo(X: np.ndarray, Y = list()):
+        #j = j.astype(np.uint32)
+        np.savetxt('./classes/tabela_estado/' + 'Jogos' + '.csv', X, delimiter=',', fmt='%6u')
+        #np.savetxt('./tabela/' + j.name + '.csv', i, delimiter=',', fmt='%6u')
+        np.savetxt('./classes/tabela_estado/' + 'Rotulos' + '.csv', Y, delimiter=',', fmt='%6u')
 
     # Inicializa as tabelas e salva os estados parciais do número de partidas
-    def simula_estados(self, qtd_partidas: int):
+    def coleta_estados_finais_publicos(self, qtd_partidas: int):
 
-        num_turnos = 0
         qtd_jogadores = 6
-        modelo = self.inicializar_estados(6)
+        X = [np.empty(8)]
+        Y = list()
         qtd_simulacao = 0
         while qtd_simulacao < qtd_partidas:
             for qtd_jogadores in range(6, 7):       ## ajustar quantidade de jogadores (original: range(4,7))
                 qtd_simulacao += 1
                 
                 # Inicializa variaveis para nova simulacao do jogo
-                historico = self.inicializar_estados(6)
                 estrategias = []
                 
                 for i in range(qtd_jogadores):          # fixo em 6 players
@@ -85,9 +99,7 @@ class ClassificaEstados:
                 # Atualizar modelo com vitorias e acoes escolhidas
                 for jogador in estado_final.jogadores:
                     
-                    ##
-                    carta_cara = 0
-                    carta_barata = 10
+                    # Set de variaveis gerais
                     num_dist_cons = 0
                     nobre = 0
                     religioso = 0
@@ -95,9 +107,9 @@ class ClassificaEstados:
                     especial = 0
                     
                     if jogador.vencedor:
-                        venceu = 1
+                        Y.append(1)
                     else:
-                        venceu = 0
+                        Y.append(0)
 
                     for distrito in jogador.distritos_construidos:
                         if distrito.tipo_de_distrito == TipoDistrito.Nobre:
@@ -109,68 +121,21 @@ class ClassificaEstados:
                         if distrito.tipo_de_distrito == TipoDistrito.Especial:
                             especial += 1
                         num_dist_cons += 1
-                    ##
-                    
-                    # Jogador atual
-                    print(jogador.nome)
-                    if jogador.nome == "Bot - 1":
-                    
-                    # Set de variaveis
+                    # Fim do set
+                     
+                    # Coloca uma nova linha na tabela com o estado visivel do jogador
+                    nova_linha = np.array([jogador.ouro, len(jogador.cartas_distrito_mao), num_dist_cons, militar, religioso, nobre, especial, 0])
+                    X = np.vstack((X, nova_linha))
 
-                        for carta in jogador.cartas_distrito_mao:
-                            # Custo da carta mais cara
-                            if carta.valor_do_distrito > carta_cara:
-                                carta_cara = carta.valor_do_distrito
-                            # Custo da carta mais barata
-                            if carta.valor_do_distrito < carta_barata:
-                                carta_barata = carta.valor_do_distrito
+        #np.set_printoptions(suppress=True)
+        # Formata tabela (inteiros, deleta a primeira linha nula)
+        X = X.astype(int)
+        X = np.delete(X, 0, axis=0)
+        #print(X)
+        #print()
+        #print(Y)
 
-                        # Coleta estados
-                        modelo[0][0, 0] = jogador.ouro
-                        modelo[0][0, 1] = len(jogador.cartas_distrito_mao)
-                        modelo[0][0, 2] = carta_cara        # Ainda sem importancia
-                        modelo[0][0, 3] = carta_barata      # Ainda sem importancia
-                        modelo[0][0, 4] = num_dist_cons
-                        modelo[0][0, 5] = militar
-                        modelo[0][0, 6] = religioso
-                        modelo[0][0, 7] = nobre
-                        modelo[0][0, 8] = especial
-                        modelo[0][0, 9] = jogador.pontuacao
-                        modelo[0][0, 10] = 0
-                        modelo[0][0, 11] = 0
-                        modelo[0][0, 12] = 0
-                        modelo[0][0, 13] = venceu
+        #self.salvar_modelo(X, Y)    
+        self.treina_modelo(X, Y)
+        self.calcula_porcentagem(0)
 
-                        # Resolvido: linha da tabela nula 
-                        i -= 1
-
-                    # Outros jogadores
-                    else:
-
-                        modelo[0][i, 0] = jogador.ouro
-                        modelo[0][i, 1] = len(jogador.cartas_distrito_mao)
-                        modelo[0][i, 2] = 0       # carta_cara (invisivel) inutilizado
-                        modelo[0][i, 3] = 0       # carta_barata (invisivel) inutilizado 
-                        modelo[0][i, 4] = num_dist_cons           
-                        modelo[0][i, 5] = militar
-                        modelo[0][i, 6] = religioso
-                        modelo[0][i, 7] = nobre
-                        modelo[0][i, 8] = especial
-                        modelo[0][i, 9] = jogador.pontuacao
-                        # Estados intermediarios nao implementados
-                        modelo[0][i, 10] = 0              
-                        modelo[0][i, 11] = 0
-                        modelo[0][i, 12] = 0
-                        # Talvez tire
-                        modelo[0][i, 13] = venceu
-
-                    # Controla a entrada de jogadores (linhas) na tabela
-                    if i < 5:
-                        i += 1
-
-                print(modelo)
-                num_turnos += 1
-                self.salvar_modelo(modelo, num_turnos)
-
-        #self.salvar_modelo(modelo)
-        #print(qtd_simulacao)

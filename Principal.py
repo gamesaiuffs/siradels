@@ -5,7 +5,8 @@ salvaEstados = ClassificaEstados()
 
 #salvaEstados.salvar_modelo(salvaEstados.inicializar_estados())
 
-salvaEstados.simula_estados(10)
 
-# Testar treino
-# experimento.testar_modelo_mcts(1000, 4)
+# Cria um arquivo com dados e um com rotulos a partir da quantidade de partidas dos parametros
+salvaEstados.coleta_estados_finais_publicos(50)
+
+#salvaEstados.calcula_porcentagem(0)

@@ -1,0 +1,39 @@
+"""
+# Avaliação de estado individual com dados publicos
+MODELO (índices das linhas):
+QtdOuro = 0
+QtdCarta = 1
+Construidos = 2
+ConstruidosMilitar = 3
+ConstruidosReligioso = 4
+ConstruidosNobre = 5
+ConstruidosEspecial = 6
+PontuacaoParcial = 7
+
+
+
+# Nova abordagem: Captura de multiplos estados  [linha = turno / coluna = variavel do tabuleiro] 
+MODELO:
+qtdOuro = 0
+qtdCarta = 1
+CartaCara = 2
+CartaBarata = 3
+qtdConstruidos = 4
+ConstruidosMilitar = 5
+ConstruidosReligioso = 6
+ConstruidosNobre = 7
+ConstruidosEspecial = 8
+Pontuacao = 9
+QtdPersonagem = 10
+
+qtdOuroP1 = 11
+qtdCartaP1 = 12
+qtdConstruidosP1 = 13
+ConstruidosMilitarP1 = 14
+ConstruidosReligiosoP1 = 15
+ConstruidosNobreP1 = 16
+ConstruidosEspecialP1 = 17
+PontuacaoP1 = 19
+...
+10 + (8*5) = 50 colunas
+"""
