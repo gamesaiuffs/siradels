@@ -1,3 +1,4 @@
+from collections import defaultdict
 from classes.enum.TipoPersonagem import TipoPersonagem
 from classes.model.CartaDistrito import CartaDistrito
 from classes.model.CartaPersonagem import CartaPersonagem
@@ -22,6 +23,7 @@ class Jogador:
         self.acoes_realizadas: list[bool] = [False for _ in range(len(TipoAcao))]
         self.terminou: bool = False  # True se o jogador construiu 7 distritos
         self.vencedor: bool = False
+        self.tem_distrito = defaultdict(int)
 
     # To String
     def __str__(self) -> str:
@@ -42,6 +44,19 @@ class Jogador:
             texto += ', ' + str(distrito)
         return texto
 
+    def construir(self, distrito: CartaDistrito):
+        self.pontuacao += distrito.valor_do_distrito
+
+        self.distritos_construidos.append(distrito)
+        self.tem_distrito[distrito.nome_do_distrito] += 1
+
+    def destruir(self, estado, distrito: CartaDistrito):
+        self.pontuacao -= distrito.valor_do_distrito
+        estado.tabuleiro.baralho_distritos.append(distrito)
+
+        self.distritos_construidos.remove(distrito)
+        self.tem_distrito[distrito.nome_do_distrito] -= 1
+
     @staticmethod
     def imprimir_nomes_distritos(distritos: list[CartaDistrito]) -> str:
         if len(distritos) == 0:
@@ -53,10 +68,11 @@ class Jogador:
         return texto
 
     def construiu_distrito(self, nome: str) -> bool:
-        for carta in self.distritos_construidos:
-            if carta.nome_do_distrito == nome:
-                return True
-        return False
+        return self.tem_distrito[nome] > 0
+        # for carta in self.distritos_construidos:
+        #     if carta.nome_do_distrito == nome:
+        #         return True
+        # return False
 
     def coletou_recursos(self) -> bool:
         return self.acoes_realizadas[TipoAcao.ColetarOuro.value] | self.acoes_realizadas[TipoAcao.ColetarCartas.value]

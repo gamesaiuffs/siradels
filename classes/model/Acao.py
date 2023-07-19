@@ -256,9 +256,7 @@ class ConstruirDistrito(Acao):
             # Retira distrito construído da mão
             estado.jogador_atual.cartas_distrito_mao.remove(distrito)
             # Destrói distrito escolhido e remove pontos parciais
-            estado.jogador_atual.distritos_construidos.remove(destruido)
-            estado.tabuleiro.baralho_distritos.append(destruido)
-            estado.jogador_atual.pontuacao -= destruido.valor_do_distrito
+            estado.jogador_atual.destruir(estado, destruido)
         # Construção de covil dos ladrões com custo misto de ouro e cartas
         elif escolha_construir <= len(distritos_para_construir) + len(distritos_para_construir_cardeal) + len(distritos_para_construir_necropole) + \
                 len(distritos_para_construir_covil_ladroes):
@@ -291,14 +289,10 @@ class ConstruirDistrito(Acao):
             for destruido in estado.jogador_atual.distritos_construidos:
                 if destruido.nome_do_distrito == 'Estrutura':
                     # Destrói estrutura e remove pontos parciais
-                    estado.jogador_atual.distritos_construidos.remove(destruido)
-                    estado.tabuleiro.baralho_distritos.append(destruido)
-                    estado.jogador_atual.pontuacao -= destruido.valor_do_distrito
+                    estado.jogador_atual.destruir(estado, destruido)
                     break
-        # Pontua distrito
-        estado.jogador_atual.pontuacao += distrito.valor_do_distrito
-        # Constrói distrito
-        estado.jogador_atual.distritos_construidos.append(distrito)
+        # Constrói e pontua distrito
+        estado.jogador_atual.construir(distrito)
         # Marca flag de ação utilizada (a construção dos estábulos não conta para o limite de construções do turno)
         if not estado.jogador_atual.distritos_construidos[-1].nome_do_distrito == 'Estábulos':
             super().ativar(estado)
@@ -460,9 +454,7 @@ class HabilidadeMago(Acao):
                 # Retira distrito construído da mão
                 estado.jogador_atual.cartas_distrito_mao.remove(distrito)
                 # Destrói distrito escolhido e remove pontos parciais
-                estado.jogador_atual.distritos_construidos.remove(destruido)
-                estado.tabuleiro.baralho_distritos.append(destruido)
-                estado.jogador_atual.pontuacao -= destruido.valor_do_distrito
+                estado.jogador_atual.destruir(estado, destruido)
             # Construção de covil dos ladrões com custo misto de ouro e cartas
             elif escolha_construir <= len(distritos_para_construir) + len(distritos_para_construir_necropole) + len(distritos_para_construir_covil_ladroes):
                 (distrito, qtd_ouro, qtd_cartas) = distritos_para_construir_covil_ladroes[escolha_construir -
@@ -493,14 +485,10 @@ class HabilidadeMago(Acao):
                 for destruido in estado.jogador_atual.distritos_construidos:
                     if destruido.nome_do_distrito == 'Estrutura':
                         # Destrói estrutura e remove pontos parciais
-                        estado.jogador_atual.distritos_construidos.remove(destruido)
-                        estado.tabuleiro.baralho_distritos.append(destruido)
-                        estado.jogador_atual.pontuacao -= destruido.valor_do_distrito
+                        estado.jogador_atual.destruir(estado, destruido)
                         break
-            # Pontua distrito
-            estado.jogador_atual.pontuacao += distrito.valor_do_distrito
-            # Constrói distrito
-            estado.jogador_atual.distritos_construidos.append(distrito)
+            # Constrói e pontua distrito
+            estado.jogador_atual.construir(distrito)
         # Marca flag de ação utilizada
         super().ativar(estado)
 
@@ -591,9 +579,7 @@ class HabilidadeSenhorDaGuerraDestruir(Acao):
             estado.jogador_atual.ouro -= distrito.valor_do_distrito - 1
         else:
             estado.jogador_atual.ouro -= distrito.valor_do_distrito - 1 + muralha
-        jogador.pontuacao -= distrito.valor_do_distrito
-        jogador.distritos_construidos.remove(distrito)
-        estado.tabuleiro.baralho_distritos.append(distrito)
+        jogador.destruir(estado, distrito)
         # Indentifica se o distrito destruído foi o Museu e aplica efeitos secundários
         if distrito.nome_do_distrito == 'Museu':
             jogador.pontuacao -= len(jogador.distritos_museu)
@@ -658,9 +644,7 @@ class Arsenal(Acao):
             return
         # Paga o custo e destrói distrito escolhido do jogador alvo
         (distrito, jogador) = distritos_para_destruir[escolha_destruir - 1]
-        jogador.pontuacao -= distrito.valor_do_distrito
-        jogador.distritos_construidos.remove(distrito)
-        estado.tabuleiro.baralho_distritos.append(distrito)
+        jogador.destruir(estado, distrito)
         # Indentifica se o distrito destruído foi o Museu e aplica efeitos secundários
         if distrito.nome_do_distrito == 'Museu':
             jogador.pontuacao -= len(jogador.distritos_museu)
@@ -669,9 +653,7 @@ class Arsenal(Acao):
         # Identifica e destrói Arsenal
         for arsenal in estado.jogador_atual.distritos_construidos:
             if arsenal.nome_do_distrito == 'Arsenal':
-                estado.jogador_atual.distritos_construidos.remove(arsenal)
-                estado.tabuleiro.baralho_distritos.append(arsenal)
-                estado.jogador_atual.pontuacao -= arsenal.valor_do_distrito
+                estado.jogador_atual.destruir(estado, arsenal)
                 break
         # Marca flag de ação utilizada
         super().ativar(estado)

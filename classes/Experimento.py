@@ -41,16 +41,16 @@ class Experimento:
     @staticmethod
     def salvar_modelo(modelo: list[np.ndarray]):
         for (i, j) in zip(modelo, TipoTabelaPersonagem):
-            #np.savetxt('./classes/tabela/' + j.name + '.csv', i, delimiter=',', fmt='%6u')
-            np.savetxt('./tabela/' + j.name + '.csv', i, delimiter=',', fmt='%6u')
+            np.savetxt('./classes/tabela/' + j.name + '.csv', i, delimiter=',', fmt='%6u')
+            # np.savetxt('./tabela/' + j.name + '.csv', i, delimiter=',', fmt='%6u')
 
     # Carrega o modelo a partir dos arquivos CSV
     @staticmethod
     def ler_modelo() -> list[np.ndarray]:
         modelo = []
         for i in TipoTabelaPersonagem:
-            #a = np.genfromtxt('./classes/tabela/' + i.name + '.csv', delimiter=',')
-            a = np.genfromtxt('./tabela/' + i.name + '.csv', delimiter=',')
+            a = np.genfromtxt('./classes/tabela/' + i.name + '.csv', delimiter=',')
+            # a = np.genfromtxt('./tabela/' + i.name + '.csv', delimiter=',')
             modelo.append(a)
         return modelo
 
@@ -133,8 +133,8 @@ class Experimento:
             pontuacao_media = pontuacao / qtd_simulacao_teste
             dados.append([jogador, vitoria, vitoria / qtd_simulacao_teste, pontuacao_media])
 
-        #np.savetxt('./classes/simulacoes/' + qtd_simulacao_treino + '.csv', np.array(dados), delimiter=',', fmt='%s')
-        np.savetxt('./simulacoes/' + str(qtd_simulacao_treino) + '.csv', np.array(dados), delimiter=',', fmt='%s')
+        np.savetxt('./classes/simulacoes/' + qtd_simulacao_treino + '.csv', np.array(dados), delimiter=',', fmt='%s')
+        # np.savetxt('./simulacoes/' + str(qtd_simulacao_treino) + '.csv', np.array(dados), delimiter=',', fmt='%s')
 
     # Aplica o modelo aprendido durante o número de simulações desejado para coletar o desempenho do modelo e salva os resultados
     def testar_modelo_gravar(self, qtd_simulacao_maximo: int, qtd_jogadores: int, qtd_simulacao_treino):
