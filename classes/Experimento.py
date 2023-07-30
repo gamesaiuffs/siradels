@@ -14,6 +14,12 @@ from classes.enum.TipoTabelaPersonagem import TipoTabelaPersonagem
 
 class Experimento:
 
+    def __init__(self, vscode: bool):
+        if vscode:
+            self.caminho = './classes'
+        else:
+            self.caminho = '.'
+
     # Cria modelo MCTS (tabelas) preenchidas com um valor inicial
     @staticmethod
     def inicializar_modelo_mcts(qtd_acoes: int, valor_inicial: int = 1) -> list[np.ndarray]:
@@ -38,19 +44,15 @@ class Experimento:
         return modelo
 
     # Salva o modelo em arquivos CSV
-    @staticmethod
-    def salvar_modelo(modelo: list[np.ndarray]):
+    def salvar_modelo(self, modelo: list[np.ndarray]):
         for (i, j) in zip(modelo, TipoTabelaPersonagem):
-            np.savetxt('./classes/tabela/' + j.name + '.csv', i, delimiter=',', fmt='%6u')
-            # np.savetxt('./tabela/' + j.name + '.csv', i, delimiter=',', fmt='%6u')
+            np.savetxt(self.caminho + '/tabela/' + j.name + '.csv', i, delimiter=',', fmt='%6u')
 
     # Carrega o modelo a partir dos arquivos CSV
-    @staticmethod
-    def ler_modelo() -> list[np.ndarray]:
+    def ler_modelo(self) -> list[np.ndarray]:
         modelo = []
         for i in TipoTabelaPersonagem:
-            a = np.genfromtxt('./classes/tabela/' + i.name + '.csv', delimiter=',')
-            # a = np.genfromtxt('./tabela/' + i.name + '.csv', delimiter=',')
+            a = np.genfromtxt(self.caminho + '/tabela/' + i.name + '.csv', delimiter=',')
             modelo.append(a)
         return modelo
 
@@ -60,8 +62,8 @@ class Experimento:
         qtd_acoes = 8
         modelo = self.inicializar_modelo_mcts(qtd_acoes)
         qtd_simulacao = 0
-        while True:
         # while tempo_limite > time.time() - inicio:
+        while True:
             for qtd_jogadores in range(4, 7):
                 for modo in TipoTabelaPersonagem:
                     qtd_simulacao += 1
@@ -90,7 +92,6 @@ class Experimento:
                                 for tabela, tabela_hist in zip(modelo, historico):
                                     tabela[:, metade_tabela:] += tabela_hist[:, metade_tabela:]
             self.salvar_modelo(modelo)
-            #print(qtd_simulacao)
 
     # Terminar método
     # Aplica o modelo aprendido durante o número de simulações desejado para coletar o desempenho do modelo
@@ -125,16 +126,14 @@ class Experimento:
                 f'{jogador} - \tVitórias: {vitoria} - Porcento Vitorias: {vitoria / qtd_simulacao * 100:.2f}% - Pontuação Média: {pontuacao_media}')
 
     # Salva o resultado das simulações em arquivos CSV
-    @staticmethod
-    def salvar_resultado(resultados: dict[str, (int, int)], qtd_simulacao_treino, qtd_simulacao_teste):
+    def salvar_resultado(self, resultados: dict[str, (int, int)], qtd_simulacao_treino, qtd_simulacao_teste):
         dados = []
         for jogador, resultado in resultados.items():
             (vitoria, pontuacao) = resultado
             pontuacao_media = pontuacao / qtd_simulacao_teste
             dados.append([jogador, vitoria, vitoria / qtd_simulacao_teste, pontuacao_media])
 
-        np.savetxt('./classes/simulacoes/' + qtd_simulacao_treino + '.csv', np.array(dados), delimiter=',', fmt='%s')
-        # np.savetxt('./simulacoes/' + str(qtd_simulacao_treino) + '.csv', np.array(dados), delimiter=',', fmt='%s')
+        np.savetxt(self.caminho + '/simulacoes/' + qtd_simulacao_treino + '.csv', np.array(dados), delimiter=',', fmt='%s')
 
     # Aplica o modelo aprendido durante o número de simulações desejado para coletar o desempenho do modelo e salva os resultados
     def testar_modelo_gravar(self, qtd_simulacao_maximo: int, qtd_jogadores: int, qtd_simulacao_treino):
@@ -161,7 +160,7 @@ class Experimento:
                 (vitoria, pontuacao) = resultados[jogador.nome]
                 resultados[jogador.nome] = (int(jogador.vencedor) + vitoria, jogador.pontuacao_final + pontuacao)
 
-        Experimento.salvar_resultado(resultados, qtd_simulacao_treino, qtd_simulacao)
+        self.salvar_resultado(resultados, qtd_simulacao_treino, qtd_simulacao)
 
 '''
 resultados: dict[str, (int, int)] = dict()

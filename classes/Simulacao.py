@@ -7,7 +7,7 @@ from classes.strategies import Estrategia
 
 class Simulacao:
     # Construtor
-    def __init__(self, estrategias: tuple, num_personagens: int = 8, automatico: bool = True):
+    def __init__(self, estrategias: list, num_personagens: int = 8, automatico: bool = True):
         # Define o número de jogadores
         self.num_jogadores: int = len(estrategias)
         # Define se a criação dos jogadores: 0 -> Manual ou 1 -> Automática
