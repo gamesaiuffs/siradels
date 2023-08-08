@@ -1,4 +1,5 @@
 from random import shuffle
+import random
 from classes.model.Acao import *
 from classes.model.Tabuleiro import Tabuleiro
 from classes.model.Jogador import Jogador
@@ -6,7 +7,7 @@ from classes.strategies import Estrategia
 from classes.classifica_estados.ClassificaEstados import ClassificaEstados
 
 
-class Simulacao:
+class SimulacaoColeta:
     # Construtor
     def __init__(self, estrategias: tuple, num_personagens: int = 8, automatico: bool = True):
         # Define o número de jogadores
@@ -94,6 +95,12 @@ class Simulacao:
     # Executa uma simulação do jogo e retorna estado final
     def rodar_simulacao(self) -> Estado:
         final_jogo = False
+        # Coleta de features/rotulos
+        rodada_aleatoria = random.randint(2, 30)     # Coleta estados nesse range
+        coletou = 0
+        jogador_aleatorio_idx = random.randint(0, len(self.estado.jogadores)-1)
+        jogador_aleatorio = self.estado.jogadores[jogador_aleatorio_idx]
+        nome_coleta = jogador_aleatorio.nome
         # Laço de rodadas do jogo
         while not final_jogo:
             # Preparação para nova rodada
@@ -118,6 +125,10 @@ class Simulacao:
             for rank in range(1, 9):
                 for jogador in self.estado.jogadores:
                     if jogador.personagem.rank == rank:
+                        # Coleta de features/rotulos
+                        if coletou == 0 and self.estado.rodada == rodada_aleatoria:
+                            X = ClassificaEstados.coleta_estados_treino(self.estado, rodada_aleatoria, nome_coleta, "", coletou)
+                            coletou = 1
                         # Marca jogador atual
                         self.estado.jogador_atual = jogador
                         # Aplica habilidades/efeitos de início de turno
@@ -143,9 +154,10 @@ class Simulacao:
                             # Mostra o estado atual
                             #print(self.estado)
                             # Mostra o jogador atual
-                            # print(f'Turno atual: {jogador.nome}, {jogador.personagem}')
+                            #print(f'Turno atual: {jogador.nome}, {jogador.personagem}')
                             # Mostra a chance de vitoria
-                            ClassificaEstados.classificar_estado(self.estado, jogador.nome)
+                            #print(ClassificaEstados.classificar_estado(self.estado, jogador.nome))
+
                             # Mostra apenas ações disponíveis segundo regras do jogo
                             acoes_disponiveis = self.acoes_disponiveis()
                             escolha_acao = self.estrategias[jogador].escolher_acao(self.estado, acoes_disponiveis)
@@ -168,6 +180,10 @@ class Simulacao:
                             jogador.terminou = True
                             if self.jogador_finalizador is None:
                                 self.jogador_finalizador = jogador
+                            # Coleta de features/rotulos
+                            if coletou == 1:
+                                Y = ClassificaEstados.coleta_estados_treino(self.estado, 0, nome_coleta, self.jogador_finalizador.nome, coletou)
+                            #print(Y)
                             final_jogo = True
                         # Quebra laço, pois não existem personagens com ranks repetidos
                         break
@@ -180,7 +196,11 @@ class Simulacao:
         # print()
         # for jogador in self.estado.jogadores:
         #    print(f'{jogador.nome} - Pontuação final: {jogador.pontuacao_final}')
-        return self.estado
+        # Coleta de features/rotulos
+        try:
+            return X, Y
+        except:
+            return self.estado
 
     # Retorna apenas as ações disponíveis para o estado atual da simulação
     def acoes_disponiveis(self) -> list[TipoAcao]:
