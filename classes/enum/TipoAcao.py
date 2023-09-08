@@ -24,24 +24,25 @@ class TipoAcao(Enum):
     # HabilidadeEspiao = auto()
     # HabilidadeChantagista = auto()
     # Rank 3
-    # HabilidadeIlusionista = auto()
-    HabilidadeMago = auto()
+    HabilidadeIlusionistaTrocar = auto()
+    HabilidadeIlusionistaDescartar = auto()
+    # HabilidadeMago = auto()
     # HabilidadeVidente = auto()
     # Rank 4
     HabilidadeRei = auto()
     # HabilidadeImperador = auto()
     # HabilidadePatricio = auto()
     # Rank 5
-    # HabilidadeBispo = auto()
+    HabilidadeBispo = auto()
     # HabilidadeAbade = auto()
-    HabilidadeCardeal = auto()
+    # HabilidadeCardeal = auto()
     # Rank 6
-    # HabilidadeComerciante = auto()
-    # HabilidadeAlquimista = auto() implementado - habilidade passiva somente
+    HabilidadeComerciante = auto()
+    # HabilidadeAlquimista = auto()
     # HabilidadeMercador = auto()
     # Rank 7
     # HabilidadeArquiteta = auto()
-    HabilidadeNavegadora = auto()
+    # HabilidadeNavegadora = auto()
     # HabilidadeEstudiosa = auto()
     # Rank 8
     HabilidadeSenhorDaGuerraDestruir = auto()
@@ -55,6 +56,6 @@ class TipoAcao(Enum):
 
     # Distritos Especiais
     Laboratorio = auto()
-    Arsenal = auto()
+    # Arsenal = auto()
     Forja = auto()
-    Museu = auto()
+    # Museu = auto()

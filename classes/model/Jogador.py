@@ -15,11 +15,10 @@ class Jogador:
         self.ouro: int = 2
         self.cartas_distrito_mao: list[CartaDistrito] = []
         self.distritos_construidos: list[CartaDistrito] = []
-        self.distritos_museu: list[CartaDistrito] = []
         self.rei: bool = False
         self.morto: bool = False
         self.roubado: bool = False
-        self.ouro_gasto: int = 0
+        self.qtd_construido_turno: int = 0
         self.acoes_realizadas: list[bool] = [False for _ in range(len(TipoAcao))]
         self.terminou: bool = False  # True se o jogador construiu 7 distritos
         self.vencedor: bool = False
@@ -46,14 +45,13 @@ class Jogador:
 
     def construir(self, distrito: CartaDistrito):
         self.pontuacao += distrito.valor_do_distrito
-
         self.distritos_construidos.append(distrito)
         self.tem_distrito[distrito.nome_do_distrito] += 1
+        self.qtd_construido_turno += 1
 
     def destruir(self, estado, distrito: CartaDistrito):
         self.pontuacao -= distrito.valor_do_distrito
         estado.tabuleiro.baralho_distritos.append(distrito)
-
         self.distritos_construidos.remove(distrito)
         self.tem_distrito[distrito.nome_do_distrito] -= 1
 
@@ -69,11 +67,7 @@ class Jogador:
 
     def construiu_distrito(self, nome: str) -> bool:
         return self.tem_distrito[nome] > 0
-        # for carta in self.distritos_construidos:
-        #     if carta.nome_do_distrito == nome:
-        #         return True
-        # return False
 
     def coletou_recursos(self) -> bool:
-        return self.acoes_realizadas[TipoAcao.ColetarOuro.value] | self.acoes_realizadas[TipoAcao.ColetarCartas.value]
+        return self.acoes_realizadas[TipoAcao.ColetarOuro.value] or self.acoes_realizadas[TipoAcao.ColetarCartas.value]
     
