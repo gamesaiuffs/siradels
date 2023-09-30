@@ -1,43 +1,39 @@
-from enum import Enum, auto
+from enum import Enum
 
 
 class TipoAcao(Enum):
-
-    def _generate_next_value_(name: str, start: int, count: int, last_values: list[int]) -> int:
-        return count
-
     # Final de turno
-    PassarTurno = auto()
+    PassarTurno = 0
 
     # Ações básicas
-    ColetarOuro = auto()
-    ColetarCartas = auto()
-    ConstruirDistrito = auto()
+    ColetarOuro = 1
+    ColetarCartas = 2
+    ConstruirDistrito = 3
 
     # Ações de personagem
     # Rank 1
-    HabilidadeAssassina = auto()
+    HabilidadeAssassina = 4
     # HabilidadeBruxa = auto()
     # HabilidadeMagistrado = auto()
     # Rank 2
-    HabilidadeLadrao = auto()
+    HabilidadeLadrao = 5
     # HabilidadeEspiao = auto()
     # HabilidadeChantagista = auto()
     # Rank 3
-    HabilidadeIlusionistaTrocar = auto()
-    HabilidadeIlusionistaDescartar = auto()
+    HabilidadeIlusionistaTrocar = 6
+    HabilidadeIlusionistaDescartar = 7
     # HabilidadeMago = auto()
     # HabilidadeVidente = auto()
     # Rank 4
-    HabilidadeRei = auto()
+    HabilidadeRei = 8
     # HabilidadeImperador = auto()
     # HabilidadePatricio = auto()
     # Rank 5
-    HabilidadeBispo = auto()
+    HabilidadeBispo = 9
     # HabilidadeAbade = auto()
     # HabilidadeCardeal = auto()
     # Rank 6
-    HabilidadeComerciante = auto()
+    HabilidadeComerciante = 10
     # HabilidadeAlquimista = auto()
     # HabilidadeMercador = auto()
     # Rank 7
@@ -45,8 +41,8 @@ class TipoAcao(Enum):
     # HabilidadeNavegadora = auto()
     # HabilidadeEstudiosa = auto()
     # Rank 8
-    HabilidadeSenhorDaGuerraDestruir = auto()
-    HabilidadeSenhorDaGuerraColetar = auto()
+    HabilidadeSenhorDaGuerraDestruir = 11
+    HabilidadeSenhorDaGuerraColetar = 12
     # HabilidadeDiplomata = auto()
     # HabilidadeMarechal = auto()
     # Rank 9
@@ -55,7 +51,7 @@ class TipoAcao(Enum):
     # HabilidadeColetorDeImpostos = auto()
 
     # Distritos Especiais
-    Laboratorio = auto()
+    Laboratorio = 13
     # Arsenal = auto()
-    Forja = auto()
+    Forja = 14
     # Museu = auto()
