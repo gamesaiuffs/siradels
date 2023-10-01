@@ -18,103 +18,222 @@ class EstrategiaMCTS(Estrategia):
         self.modo = modo
         self.treino = treino
 
-    # Estratégia usada na fase de escolha dos personagens
-    def escolher_personagem(self, estado: Estado) -> int:
+    def modelo_mcts_escolha(self, qtd_opcoes: int, opcoes_disponiveis: np.ndarray) -> int:
         if self.treino:
-            # Tabela a ser treinada a partir do TipoTabelaPersonaem
-            indice_linha_tabela = estado.converter_estado()[self.modo.idx]
-            linha_tabela = self.modelos_mcts[TipoModeloAcao.EscolherPersonagem.idx][self.modo.idx][indice_linha_tabela]
-            # Deixar apenas colunas das ações disponíveis no estado atual
-            personagens_disponiveis = []
-            for personagem in estado.tabuleiro.baralho_personagens:
-                personagens_disponiveis.append(linha_tabela[personagem.rank - 1])
-            for personagem in estado.tabuleiro.baralho_personagens:
-                personagens_disponiveis.append(linha_tabela[personagem.rank - 1 + 8])
             # Computar divisão proporcional
-            divisao_proporcional = self.computar_divisao_proporcional(np.array(personagens_disponiveis))
+            divisao_proporcional = self.computar_divisao_proporcional(np.array(opcoes_disponiveis))
             # Escolher opção seguindo distribuição da divisão
-            escolha = random.choices(range(0, len(estado.tabuleiro.baralho_personagens)), divisao_proporcional)[0]
-            # Salvar histórico das escolhas para acrescentar no modelo após resultado
-            self.modelos_historico[TipoModeloAcao.EscolherPersonagem.idx][self.modo.idx][indice_linha_tabela][estado.tabuleiro.baralho_personagens[escolha].rank-1] = 1
-            # Define se vamos contabilizar a quantidade de partida (= 1) ou se contaremos quantas vezes a ação foi escolhida na mesma partida (+= 1)
-            self.modelos_historico[TipoModeloAcao.EscolherPersonagem.idx][self.modo.idx][indice_linha_tabela][estado.tabuleiro.baralho_personagens[escolha].rank-1+8] = 1
+            escolha = random.choices(range(0, qtd_opcoes), divisao_proporcional)[0]
             return escolha
         else:
-            # Converte estado e monta de consulta a partir de todas as tabelas individuais
-            estado_vetor = estado.converter_estado()
-            tabela_consulta = np.zeros((len(TipoTabela), 16))
-            for i in range(len(TipoTabela)):
-                tabela_consulta[i] = self.modelos_mcts[TipoModeloAcao.EscolherPersonagem.idx][i][estado_vetor[i]]
-            # Deixar apenas colunas das ações disponíveis no estado atual
-            personagens_disponiveis = []
-            for personagem in estado.tabuleiro.baralho_personagens:
-                personagens_disponiveis.append(tabela_consulta[:, personagem.rank - 1])
-            personagens_disponiveis = np.stack(personagens_disponiveis, axis=1)
-            soma_colunas = np.sum(personagens_disponiveis, axis=0)
+            soma_colunas = np.sum(opcoes_disponiveis, axis=0)
             # Computar divisão proporcional com soma das colunas (considera apenas vitórias)
             divisao_proporcional = self.computar_divisao_proporcional(soma_colunas, 1, True)
             # Escolher opção seguindo distribuição da divisão
-            escolha = random.choices(range(0, len(estado.tabuleiro.baralho_personagens)), divisao_proporcional)[0]
+            escolha = random.choices(range(0, qtd_opcoes), divisao_proporcional)[0]
             return escolha
 
+    # Estratégia usada na fase de escolha dos personagens
+    def escolher_personagem(self, estado: Estado) -> int:
+        tipo_modelo_acao = TipoModeloAcao.EscolherPersonagem
+        if self.treino:
+            # Tabela a ser treinada
+            indice_linha_tabela = estado.converter_estado()[self.modo.idx]
+            linha_tabela = self.modelos_mcts[tipo_modelo_acao.idx][self.modo.idx][indice_linha_tabela]
+            # Deixar apenas colunas das ações disponíveis no estado atual
+            opcoes_disponiveis = []
+            for personagem in estado.tabuleiro.baralho_personagens:
+                opcoes_disponiveis.append(linha_tabela[personagem.rank - 1])
+            for personagem in estado.tabuleiro.baralho_personagens:
+                opcoes_disponiveis.append(linha_tabela[personagem.rank - 1 + tipo_modelo_acao.tamanho])
+            # Aplica modelo MCTS para escolha das opções dentre as opções disponíveis
+            escolha = self.modelo_mcts_escolha(len(estado.tabuleiro.baralho_personagens), np.array(opcoes_disponiveis))
+            # Salvar histórico das escolhas para acrescentar no modelo após resultado
+            self.modelos_historico[tipo_modelo_acao.idx][self.modo.idx][indice_linha_tabela][estado.tabuleiro.baralho_personagens[escolha].rank-1] = 1
+            # Define se vamos contabilizar a quantidade de partida (= 1) ou se contaremos quantas vezes a ação foi escolhida na mesma partida (+= 1)
+            self.modelos_historico[tipo_modelo_acao.idx][self.modo.idx][indice_linha_tabela][estado.tabuleiro.baralho_personagens[escolha].rank-1 + tipo_modelo_acao.tamanho] = 1
+            return escolha
+        else:
+            # Converte estado e monta a consulta a partir de todas as tabelas individuais
+            estado_vetor = estado.converter_estado()
+            tabela_consulta = np.zeros((len(TipoTabela), tipo_modelo_acao.tamanho * 2))
+            for i in range(len(TipoTabela)):
+                tabela_consulta[i] = self.modelos_mcts[tipo_modelo_acao.idx][i][estado_vetor[i]]
+            # Deixar apenas colunas das ações disponíveis no estado atual
+            opcoes_disponiveis = []
+            for personagem in estado.tabuleiro.baralho_personagens:
+                opcoes_disponiveis.append(tabela_consulta[:, personagem.rank - 1])
+            opcoes_disponiveis = np.stack(opcoes_disponiveis, axis=1)
+            return self.modelo_mcts_escolha(len(estado.tabuleiro.baralho_personagens), opcoes_disponiveis)
+
     # Estratégia usada na fase de escolha das ações no turno
-    @staticmethod
-    def escolher_acao(estado: Estado, acoes_disponiveis: list[TipoAcao]) -> int:
-        if len(acoes_disponiveis) > 1:
-            return random.randint(1, len(acoes_disponiveis) - 1)
-        return 0
+    def escolher_acao(self, estado: Estado, acoes_disponiveis: list[TipoAcao]) -> int:
+        tipo_modelo_acao = TipoModeloAcao.EscolherAcao
+        if self.treino:
+            # Tabela a ser treinada
+            indice_linha_tabela = estado.converter_estado()[self.modo.idx]
+            linha_tabela = self.modelos_mcts[tipo_modelo_acao.idx][self.modo.idx][indice_linha_tabela]
+            # Deixar apenas colunas das ações disponíveis no estado atual
+            opcoes_disponiveis = []
+            for acao in acoes_disponiveis:
+                opcoes_disponiveis.append(linha_tabela[acao.value])
+            for acao in acoes_disponiveis:
+                opcoes_disponiveis.append(linha_tabela[acao.value + tipo_modelo_acao.tamanho])
+            # Aplica modelo MCTS para escolha das opções dentre as opções disponíveis
+            escolha = self.modelo_mcts_escolha(len(acoes_disponiveis), np.array(opcoes_disponiveis))
+            # Salvar histórico das escolhas para acrescentar no modelo após resultado
+            self.modelos_historico[tipo_modelo_acao.idx][self.modo.idx][indice_linha_tabela][acoes_disponiveis[escolha].value] = 1
+            # Define se vamos contabilizar a quantidade de partida (= 1) ou se contaremos quantas vezes a ação foi escolhida na mesma partida (+= 1)
+            self.modelos_historico[tipo_modelo_acao.idx][self.modo.idx][indice_linha_tabela][acoes_disponiveis[escolha].value + tipo_modelo_acao.tamanho] = 1
+            return escolha
+        else:
+            # Converte estado e monta a consulta a partir de todas as tabelas individuais
+            estado_vetor = estado.converter_estado()
+            tabela_consulta = np.zeros((len(TipoTabela), tipo_modelo_acao.tamanho * 2))
+            for i in range(len(TipoTabela)):
+                tabela_consulta[i] = self.modelos_mcts[tipo_modelo_acao.idx][i][estado_vetor[i]]
+            # Deixar apenas colunas das ações disponíveis no estado atual
+            opcoes_disponiveis = []
+            for acao in acoes_disponiveis:
+                opcoes_disponiveis.append(tabela_consulta[:, acao.value])
+            opcoes_disponiveis = np.stack(opcoes_disponiveis, axis=1)
+            return self.modelo_mcts_escolha(len(acoes_disponiveis), opcoes_disponiveis)
 
     # Estratégia usada na ação de coletar cartas
-    @staticmethod
-    def coletar_cartas(estado: Estado, cartas_compradas: list[CartaDistrito], qtd_cartas: int) -> int:
-        return random.randint(0, qtd_cartas - 1)
+    def coletar_cartas(self, estado: Estado, cartas_compradas: list[CartaDistrito], qtd_cartas: int) -> int:
+        tipo_modelo_acao = TipoModeloAcao.ColetarCartas
+        if self.treino:
+            # Tabela a ser treinada
+            indice_linha_tabela = estado.converter_estado()[self.modo.idx]
+            linha_tabela = self.modelos_mcts[tipo_modelo_acao.idx][self.modo.idx][indice_linha_tabela]
+            # Deixar apenas colunas das ações disponíveis no estado atual
+            opcoes_disponiveis = []
+            for carta in cartas_compradas:
+                opcoes_disponiveis.append(linha_tabela[carta.idx])
+            for carta in cartas_compradas:
+                opcoes_disponiveis.append(linha_tabela[carta.idx + tipo_modelo_acao.tamanho])
+            # Aplica modelo MCTS para escolha das opções dentre as opções disponíveis
+            escolha = self.modelo_mcts_escolha(len(cartas_compradas), np.array(opcoes_disponiveis))
+            # Salvar histórico das escolhas para acrescentar no modelo após resultado
+            self.modelos_historico[tipo_modelo_acao.idx][self.modo.idx][indice_linha_tabela][cartas_compradas[escolha].idx] = 1
+            # Define se vamos contabilizar a quantidade de partida (= 1) ou se contaremos quantas vezes a ação foi escolhida na mesma partida (+= 1)
+            self.modelos_historico[tipo_modelo_acao.idx][self.modo.idx][indice_linha_tabela][cartas_compradas[escolha].idx + tipo_modelo_acao.tamanho] = 1
+            return escolha
+        else:
+            # Converte estado e monta a consulta a partir de todas as tabelas individuais
+            estado_vetor = estado.converter_estado()
+            tabela_consulta = np.zeros((len(TipoTabela), tipo_modelo_acao.tamanho * 2))
+            for i in range(len(TipoTabela)):
+                tabela_consulta[i] = self.modelos_mcts[tipo_modelo_acao.idx][i][estado_vetor[i]]
+            # Deixar apenas colunas das ações disponíveis no estado atual
+            opcoes_disponiveis = []
+            for carta in cartas_compradas:
+                opcoes_disponiveis.append(tabela_consulta[:, carta.idx])
+            opcoes_disponiveis = np.stack(opcoes_disponiveis, axis=1)
+            return self.modelo_mcts_escolha(len(cartas_compradas), opcoes_disponiveis)
 
     # Estratégia usada na ação de construir distritos
-    @staticmethod
-    def construir_distrito(estado: Estado,
+    def construir_distrito(self, estado: Estado,
                            distritos_para_construir: list[CartaDistrito],
                            distritos_para_construir_covil_ladroes: list[(CartaDistrito, int, int)]) -> int:
-        tamanho_maximo = len(distritos_para_construir) + len(distritos_para_construir_covil_ladroes)
-        return random.randint(1, tamanho_maximo)
+        tipo_modelo_acao = TipoModeloAcao.ConstruirDistrito
+        tem_opcoes_covil = 0
+        if len(distritos_para_construir_covil_ladroes) > 0:
+            tem_opcoes_covil = 1
+        if self.treino:
+            # Tabela a ser treinada
+            indice_linha_tabela = estado.converter_estado()[self.modo.idx]
+            linha_tabela = self.modelos_mcts[tipo_modelo_acao.idx][self.modo.idx][indice_linha_tabela]
+            # Deixar apenas colunas das ações disponíveis no estado atual
+            opcoes_disponiveis = []
+            for carta in distritos_para_construir:
+                opcoes_disponiveis.append(linha_tabela[carta.idx])
+            if tem_opcoes_covil:
+                opcoes_disponiveis.append(linha_tabela[tipo_modelo_acao.tamanho - 1])
+            for carta in distritos_para_construir:
+                opcoes_disponiveis.append(linha_tabela[carta.idx + tipo_modelo_acao.tamanho])
+            if tem_opcoes_covil:
+                opcoes_disponiveis.append(linha_tabela[tipo_modelo_acao.tamanho - 1 + tipo_modelo_acao.tamanho])
+            # Aplica modelo MCTS para escolha das opções dentre as opções disponíveis
+            escolha = self.modelo_mcts_escolha(len(distritos_para_construir) + tem_opcoes_covil, np.array(opcoes_disponiveis))
+            # Escolheu contruir com habilidade do covil - será escolhido uma opção aleatória das disponíveis dentro dessa opção
+            if escolha == len(distritos_para_construir):
+                escolha = random.randint(0, len(distritos_para_construir_covil_ladroes) - 1) + len(distritos_para_construir)
+                # Salvar histórico das escolhas para acrescentar no modelo após resultado
+                self.modelos_historico[tipo_modelo_acao.idx][self.modo.idx][indice_linha_tabela][tipo_modelo_acao.tamanho - 1] = 1
+                # Define se vamos contabilizar a quantidade de partida (= 1) ou se contaremos quantas vezes a ação foi escolhida na mesma partida (+= 1)
+                self.modelos_historico[tipo_modelo_acao.idx][self.modo.idx][indice_linha_tabela][tipo_modelo_acao.tamanho - 1 + tipo_modelo_acao.tamanho] = 1
+            else:
+                # Salvar histórico das escolhas para acrescentar no modelo após resultado
+                self.modelos_historico[tipo_modelo_acao.idx][self.modo.idx][indice_linha_tabela][distritos_para_construir[escolha].idx] = 1
+                # Define se vamos contabilizar a quantidade de partida (= 1) ou se contaremos quantas vezes a ação foi escolhida na mesma partida (+= 1)
+                self.modelos_historico[tipo_modelo_acao.idx][self.modo.idx][indice_linha_tabela][distritos_para_construir[escolha].idx + tipo_modelo_acao.tamanho] = 1
+            return escolha
+        else:
+            # Converte estado e monta a consulta a partir de todas as tabelas individuais
+            estado_vetor = estado.converter_estado()
+            tabela_consulta = np.zeros((len(TipoTabela), tipo_modelo_acao.tamanho * 2))
+            for i in range(len(TipoTabela)):
+                tabela_consulta[i] = self.modelos_mcts[tipo_modelo_acao.idx][i][estado_vetor[i]]
+            # Deixar apenas colunas das ações disponíveis no estado atual
+            opcoes_disponiveis = []
+            for carta in distritos_para_construir:
+                opcoes_disponiveis.append(tabela_consulta[:, carta.idx])
+            if tem_opcoes_covil:
+                opcoes_disponiveis.append(tabela_consulta[:, tipo_modelo_acao.tamanho - 1])
+            opcoes_disponiveis = np.stack(opcoes_disponiveis, axis=1)
+            escolha = self.modelo_mcts_escolha(len(distritos_para_construir) + tem_opcoes_covil, opcoes_disponiveis)
+            # Escolheu contruir com habilidade do covil - será escolhido uma opção aleatória das disponíveis dentro dessa opção
+            if escolha == len(distritos_para_construir):
+                escolha = random.randint(0, len(distritos_para_construir_covil_ladroes) - 1) + len(distritos_para_construir)
+            return escolha
 
     # Estratégia usada na ação de construir distritos (efeito Covil dos Ladrões)
-    @staticmethod
-    def construir_distrito_covil_dos_ladroes(estado: Estado, qtd_cartas: int, i: int) -> int:
+    def construir_distrito_covil_dos_ladroes(self, estado: Estado, qtd_cartas: int, i: int) -> int:
+        tipo_modelo_acao = TipoModeloAcao.ConstruirDistritoCovilDosLadroes
+
         return random.randint(0, len(estado.jogador_atual.cartas_distrito_mao) - 1)
 
     # Estratégia usada na habilidade da Assassina
-    @staticmethod
-    def habilidade_assassina(estado: Estado, opcoes_personagem: list[CartaPersonagem]) -> int:
+    def habilidade_assassina(self, estado: Estado, opcoes_personagem: list[CartaPersonagem]) -> int:
+        tipo_modelo_acao = TipoModeloAcao.HabilidadeAssassina
+
         return random.randint(0, len(opcoes_personagem) - 1)
 
     # Estratégia usada na habilidade do Ladrão
-    @staticmethod
-    def habilidade_ladrao(estado: Estado, opcoes_personagem: list[CartaPersonagem]) -> int:
+    def habilidade_ladrao(self, estado: Estado, opcoes_personagem: list[CartaPersonagem]) -> int:
+        tipo_modelo_acao = TipoModeloAcao.HabilidadeLadrao
+
         return random.randint(0, len(opcoes_personagem) - 1)
 
     # Estratégia usada na habilidade da Ilusionista (escolha do jogador alvo)
-    @staticmethod
-    def habilidade_ilusionista_trocar(estado: Estado, opcoes_jogadores: list[Jogador]) -> int:
+    def habilidade_ilusionista_trocar(self, estado: Estado, opcoes_jogadores: list[Jogador]) -> int:
+        tipo_modelo_acao = TipoModeloAcao.HabilidadeIlusionistaTrocar
+
         return random.randint(0, len(opcoes_jogadores) - 1)
 
     # Estratégia usada na habilidade da Ilusionista (escolha de quantas cartas serão descartadas)
-    @staticmethod
-    def habilidade_ilusionista_descartar_qtd_cartas(estado: Estado, qtd_maxima: int) -> int:
+    def habilidade_ilusionista_descartar_qtd_cartas(self, estado: Estado, qtd_maxima: int) -> int:
+        tipo_modelo_acao = TipoModeloAcao.HabilidadeIlusionistaDescartarQtdCartas
+
         return random.randint(1, qtd_maxima)
 
     # Estratégia usada na habilidade da Ilusionista (escolha de qual carta descartar)
-    @staticmethod
-    def habilidade_ilusionista_descartar_carta(estado: Estado, qtd_cartas: int, i: int) -> int:
+    def habilidade_ilusionista_descartar_carta(self, estado: Estado, qtd_cartas: int, i: int) -> int:
+        tipo_modelo_acao = TipoModeloAcao.HabilidadeIlusionistaDescartarCarta
+
         return random.randint(0, len(estado.jogador_atual.cartas_distrito_mao) - 1)
 
     # Estratégia usada na habilidade do Senhor da Guerra
-    @staticmethod
-    def habilidade_senhor_da_guerra_destruir(estado: Estado, distritos_para_destruir: list[(CartaDistrito, Jogador)]) -> int:
+    def habilidade_senhor_da_guerra_destruir(self, estado: Estado, distritos_para_destruir: list[(CartaDistrito, Jogador)]) -> int:
+        tipo_modelo_acao = TipoModeloAcao.HabilidadeSenhorDaGuerraDestruir
+
         return random.randint(0, len(distritos_para_destruir))
 
     # Estratégia usada na ação do Laboratório
-    @staticmethod
-    def laboratorio(estado: Estado) -> int:
+    def laboratorio(self, estado: Estado) -> int:
+        tipo_modelo_acao = TipoModeloAcao.Laboratorio
+
         return random.randint(0, len(estado.jogador_atual.cartas_distrito_mao) - 1)
 
     # Computa divisão proporcional entre vitórias (diretamente) e quantidade de simulações (inversamente)
