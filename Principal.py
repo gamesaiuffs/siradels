@@ -12,8 +12,8 @@ startTime = time.time()
 # Testar com jogadores totalmente aleatórios
 #experimento.testar_simulacao(False, 10000, 5)
 
-# Treinar modelo por 1min
-#experimento.treinar_modelo_mcts(60)
+# Treinar modelo por 10min
+experimento.treinar_modelo_mcts(600)
 
 # Testar treino contra jogadores totalmente aleatórios
 experimento.testar_modelo_mcts(10000, 5)
