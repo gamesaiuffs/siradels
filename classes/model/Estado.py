@@ -72,8 +72,11 @@ class Estado:
         estado_vetor.append(maior_custo)
         estado_vetor.append(menor_custo)
 
-        # Qtd distritos construido [0 a 7]
-        estado_vetor.append(len(self.jogador_atual.distritos_construidos))
+        # Qtd distritos construido [0 a 7+]
+        if len(self.jogador_atual.distritos_construidos) > 7:
+            estado_vetor.append(7)
+        else:
+            estado_vetor.append(len(self.jogador_atual.distritos_construidos))
         
         # Qtd distrito construido Militar [0,1,2,>=3]
         # Qtd distrito construido Religioso [0,1,2,>=3]
@@ -129,12 +132,15 @@ class Estado:
         else:
             estado_vetor.append(6)
             
-        # Qtd distrito construido [0 a 7]
+        # Qtd distrito construido [0 a 7+]
         qtd_distritos = 0
         for jogador in self.jogadores:
             if qtd_distritos < len(jogador.distritos_construidos):
                 qtd_distritos = len(jogador.distritos_construidos)
-        estado_vetor.append(qtd_distritos)
+        if qtd_distritos > 7:
+            estado_vetor.append(7)
+        else:
+            estado_vetor.append(qtd_distritos)
         
         # Qtd ouro [0,1,2,3,4,5,>=6]
         maior_custo = 0
