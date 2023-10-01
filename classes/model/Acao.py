@@ -131,13 +131,9 @@ class ConstruirDistrito(Acao):
             return
         # Aplica estratégia do jogador
         escolha_construir = estrategia.construir_distrito(estado, distritos_para_construir, distritos_para_construir_covil_ladroes)
-        # Finaliza ação se jogador decidiu não construir
-        if escolha_construir == 0:
-            super().ativar(estado)
-            return
         # Construção normal
-        if escolha_construir <= len(distritos_para_construir):
-            distrito = distritos_para_construir[escolha_construir - 1]
+        if escolha_construir < len(distritos_para_construir):
+            distrito = distritos_para_construir[escolha_construir]
             # Retira distrito construído da mão
             estado.jogador_atual.cartas_distrito_mao.remove(distrito)
             # Paga distrito
@@ -147,7 +143,7 @@ class ConstruirDistrito(Acao):
                 estado.jogador_atual.ouro += 1
         # Construção de covil dos ladrões com custo misto de ouro e cartas
         else:
-            (distrito, qtd_ouro, qtd_cartas) = distritos_para_construir_covil_ladroes[escolha_construir - len(distritos_para_construir) - 1]
+            (distrito, qtd_ouro, qtd_cartas) = distritos_para_construir_covil_ladroes[escolha_construir - len(distritos_para_construir)]
             # Retira distrito construído da mão
             estado.jogador_atual.cartas_distrito_mao.remove(distrito)
             # Paga distrito

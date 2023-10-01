@@ -33,7 +33,7 @@ class EstrategiaTotalmenteAleatoria(Estrategia):
     def construir_distrito(estado: Estado, distritos_para_construir: list[CartaDistrito],
                            distritos_para_construir_covil_ladroes: list[(CartaDistrito, int, int)]) -> int:
         tamanho_maximo = len(distritos_para_construir) + len(distritos_para_construir_covil_ladroes)
-        return random.randint(1, tamanho_maximo)
+        return random.randint(0, tamanho_maximo - 1)
 
     # Estratégia usada na ação de construir distritos (efeito Covil dos Ladrões)
     @staticmethod

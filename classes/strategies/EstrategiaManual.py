@@ -69,14 +69,13 @@ class EstrategiaManual(Estrategia):
     @staticmethod
     def construir_distrito(estado: Estado, distritos_para_construir: list[CartaDistrito],
                            distritos_para_construir_covil_ladroes: list[(CartaDistrito, int, int)]) -> int:
-        print(f'0: Não desejo construir nenhum distrito.')
         i = 0
         for carta in distritos_para_construir:
-            i += 1
             print(f'{i}: {carta.imprimir_tudo()}')
-        for carta, qtd_ouro, qtd_cartas in distritos_para_construir_covil_ladroes:
             i += 1
+        for carta, qtd_ouro, qtd_cartas in distritos_para_construir_covil_ladroes:
             print(f'{i}: {carta.imprimir_tudo()} - Custo em ouro: {qtd_ouro} - Custo em cartas da mão: {qtd_cartas}')
+            i += 1
         while True:
             escolha_construir = input('Digite o número do distrito que deseja construir: ')
             try:
@@ -84,7 +83,7 @@ class EstrategiaManual(Estrategia):
             except ValueError:
                 print('Escolha inválida.')
                 continue
-            if not 0 <= escolha_construir <= len(distritos_para_construir) + len(distritos_para_construir_covil_ladroes):
+            if not 0 <= escolha_construir <= len(distritos_para_construir) + len(distritos_para_construir_covil_ladroes) - 1:
                 print('Escolha inválida.')
                 continue
             return escolha_construir
