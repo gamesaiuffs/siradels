@@ -28,7 +28,7 @@ class Experimento:
     def salvar_modelos(self, modelos_mcts: list[list[np.ndarray]]):
         for (modelo, tipo_modelo) in zip(modelos_mcts, TipoModeloAcao):
             for (i, tipo_tabela) in zip(modelo, TipoTabela):
-                np.savetxt(self.caminho + '/modelos_mcts/' + tipo_modelo.name + '/' + tipo_tabela.name + '.csv', i, delimiter=',', fmt='%6u')
+                np.savetxt(self.caminho + '/modelos_mcts/' + tipo_modelo.name + '/' + tipo_tabela.name + '.csv', i, delimiter=',', fmt='%7u')
 
     # Carrega os modelos a partir dos arquivos CSV
     def ler_modelos(self) -> list[list[np.ndarray]]:

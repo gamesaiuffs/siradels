@@ -50,7 +50,6 @@ class EstrategiaMCTS(Estrategia):
             escolha = self.modelo_mcts_escolha(len(estado.tabuleiro.baralho_personagens), np.array(opcoes_disponiveis))
             # Salvar histórico das escolhas para acrescentar no modelo após resultado
             self.modelos_historico[tipo_modelo_acao.idx][self.modo.idx][indice_linha_tabela][estado.tabuleiro.baralho_personagens[escolha].rank-1] = 1
-            # Define se vamos contabilizar a quantidade de partida (= 1) ou se contaremos quantas vezes a ação foi escolhida na mesma partida (+= 1)
             self.modelos_historico[tipo_modelo_acao.idx][self.modo.idx][indice_linha_tabela][estado.tabuleiro.baralho_personagens[escolha].rank-1 + tipo_modelo_acao.tamanho] = 1
             return escolha
         else:
@@ -83,7 +82,6 @@ class EstrategiaMCTS(Estrategia):
             escolha = self.modelo_mcts_escolha(len(acoes_disponiveis), np.array(opcoes_disponiveis))
             # Salvar histórico das escolhas para acrescentar no modelo após resultado
             self.modelos_historico[tipo_modelo_acao.idx][self.modo.idx][indice_linha_tabela][acoes_disponiveis[escolha].value] = 1
-            # Define se vamos contabilizar a quantidade de partida (= 1) ou se contaremos quantas vezes a ação foi escolhida na mesma partida (+= 1)
             self.modelos_historico[tipo_modelo_acao.idx][self.modo.idx][indice_linha_tabela][acoes_disponiveis[escolha].value + tipo_modelo_acao.tamanho] = 1
             return escolha
         else:
@@ -116,7 +114,6 @@ class EstrategiaMCTS(Estrategia):
             escolha = self.modelo_mcts_escolha(len(cartas_compradas), np.array(opcoes_disponiveis))
             # Salvar histórico das escolhas para acrescentar no modelo após resultado
             self.modelos_historico[tipo_modelo_acao.idx][self.modo.idx][indice_linha_tabela][cartas_compradas[escolha].idx] = 1
-            # Define se vamos contabilizar a quantidade de partida (= 1) ou se contaremos quantas vezes a ação foi escolhida na mesma partida (+= 1)
             self.modelos_historico[tipo_modelo_acao.idx][self.modo.idx][indice_linha_tabela][cartas_compradas[escolha].idx + tipo_modelo_acao.tamanho] = 1
             return escolha
         else:
@@ -161,12 +158,10 @@ class EstrategiaMCTS(Estrategia):
                 escolha = random.randint(0, len(distritos_para_construir_covil_ladroes) - 1) + len(distritos_para_construir)
                 # Salvar histórico das escolhas para acrescentar no modelo após resultado
                 self.modelos_historico[tipo_modelo_acao.idx][self.modo.idx][indice_linha_tabela][tipo_modelo_acao.tamanho - 1] = 1
-                # Define se vamos contabilizar a quantidade de partida (= 1) ou se contaremos quantas vezes a ação foi escolhida na mesma partida (+= 1)
                 self.modelos_historico[tipo_modelo_acao.idx][self.modo.idx][indice_linha_tabela][tipo_modelo_acao.tamanho - 1 + tipo_modelo_acao.tamanho] = 1
             else:
                 # Salvar histórico das escolhas para acrescentar no modelo após resultado
                 self.modelos_historico[tipo_modelo_acao.idx][self.modo.idx][indice_linha_tabela][distritos_para_construir[escolha].idx] = 1
-                # Define se vamos contabilizar a quantidade de partida (= 1) ou se contaremos quantas vezes a ação foi escolhida na mesma partida (+= 1)
                 self.modelos_historico[tipo_modelo_acao.idx][self.modo.idx][indice_linha_tabela][distritos_para_construir[escolha].idx + tipo_modelo_acao.tamanho] = 1
             return escolha
         else:
@@ -205,7 +200,6 @@ class EstrategiaMCTS(Estrategia):
             escolha = self.modelo_mcts_escolha(len(estado.jogador_atual.cartas_distrito_mao), np.array(opcoes_disponiveis))
             # Salvar histórico das escolhas para acrescentar no modelo após resultado
             self.modelos_historico[tipo_modelo_acao.idx][self.modo.idx][indice_linha_tabela][estado.jogador_atual.cartas_distrito_mao[escolha].idx] = 1
-            # Define se vamos contabilizar a quantidade de partida (= 1) ou se contaremos quantas vezes a ação foi escolhida na mesma partida (+= 1)
             self.modelos_historico[tipo_modelo_acao.idx][self.modo.idx][indice_linha_tabela][estado.jogador_atual.cartas_distrito_mao[escolha].idx + tipo_modelo_acao.tamanho] = 1
             return escolha
         else:
@@ -238,7 +232,6 @@ class EstrategiaMCTS(Estrategia):
             escolha = self.modelo_mcts_escolha(len(opcoes_personagem), np.array(opcoes_disponiveis))
             # Salvar histórico das escolhas para acrescentar no modelo após resultado
             self.modelos_historico[tipo_modelo_acao.idx][self.modo.idx][indice_linha_tabela][opcoes_personagem[escolha].rank-1] = 1
-            # Define se vamos contabilizar a quantidade de partida (= 1) ou se contaremos quantas vezes a ação foi escolhida na mesma partida (+= 1)
             self.modelos_historico[tipo_modelo_acao.idx][self.modo.idx][indice_linha_tabela][opcoes_personagem[escolha].rank-1 + tipo_modelo_acao.tamanho] = 1
             return escolha
         else:
@@ -271,7 +264,6 @@ class EstrategiaMCTS(Estrategia):
             escolha = self.modelo_mcts_escolha(len(opcoes_personagem), np.array(opcoes_disponiveis))
             # Salvar histórico das escolhas para acrescentar no modelo após resultado
             self.modelos_historico[tipo_modelo_acao.idx][self.modo.idx][indice_linha_tabela][opcoes_personagem[escolha].rank-1] = 1
-            # Define se vamos contabilizar a quantidade de partida (= 1) ou se contaremos quantas vezes a ação foi escolhida na mesma partida (+= 1)
             self.modelos_historico[tipo_modelo_acao.idx][self.modo.idx][indice_linha_tabela][opcoes_personagem[escolha].rank-1 + tipo_modelo_acao.tamanho] = 1
             return escolha
         else:
@@ -311,7 +303,6 @@ class EstrategiaMCTS(Estrategia):
             escolha = self.modelo_mcts_escolha(2, np.array(opcoes_disponiveis))
             # Salvar histórico das escolhas para acrescentar no modelo após resultado
             self.modelos_historico[tipo_modelo_acao.idx][self.modo.idx][indice_linha_tabela][escolha] = 1
-            # Define se vamos contabilizar a quantidade de partida (= 1) ou se contaremos quantas vezes a ação foi escolhida na mesma partida (+= 1)
             self.modelos_historico[tipo_modelo_acao.idx][self.modo.idx][indice_linha_tabela][escolha + tipo_modelo_acao.tamanho] = 1
             return escolha
         else:
@@ -346,7 +337,6 @@ class EstrategiaMCTS(Estrategia):
             escolha = self.modelo_mcts_escolha(qtd_maxima, np.array(opcoes_disponiveis))
             # Salvar histórico das escolhas para acrescentar no modelo após resultado
             self.modelos_historico[tipo_modelo_acao.idx][self.modo.idx][indice_linha_tabela][escolha-1] = 1
-            # Define se vamos contabilizar a quantidade de partida (= 1) ou se contaremos quantas vezes a ação foi escolhida na mesma partida (+= 1)
             self.modelos_historico[tipo_modelo_acao.idx][self.modo.idx][indice_linha_tabela][escolha-1 + tipo_modelo_acao.tamanho] = 1
             return escolha
         else:
@@ -379,7 +369,6 @@ class EstrategiaMCTS(Estrategia):
             escolha = self.modelo_mcts_escolha(len(estado.jogador_atual.cartas_distrito_mao), np.array(opcoes_disponiveis))
             # Salvar histórico das escolhas para acrescentar no modelo após resultado
             self.modelos_historico[tipo_modelo_acao.idx][self.modo.idx][indice_linha_tabela][estado.jogador_atual.cartas_distrito_mao[escolha].idx] = 1
-            # Define se vamos contabilizar a quantidade de partida (= 1) ou se contaremos quantas vezes a ação foi escolhida na mesma partida (+= 1)
             self.modelos_historico[tipo_modelo_acao.idx][self.modo.idx][indice_linha_tabela][estado.jogador_atual.cartas_distrito_mao[escolha].idx + tipo_modelo_acao.tamanho] = 1
             return escolha
         else:
@@ -412,7 +401,6 @@ class EstrategiaMCTS(Estrategia):
             escolha = self.modelo_mcts_escolha(len(distritos_para_destruir), np.array(opcoes_disponiveis))
             # Salvar histórico das escolhas para acrescentar no modelo após resultado
             self.modelos_historico[tipo_modelo_acao.idx][self.modo.idx][indice_linha_tabela][distritos_para_destruir[escolha][0].idx] = 1
-            # Define se vamos contabilizar a quantidade de partida (= 1) ou se contaremos quantas vezes a ação foi escolhida na mesma partida (+= 1)
             self.modelos_historico[tipo_modelo_acao.idx][self.modo.idx][indice_linha_tabela][distritos_para_destruir[escolha][0].idx + tipo_modelo_acao.tamanho] = 1
             return escolha
         else:
@@ -445,7 +433,6 @@ class EstrategiaMCTS(Estrategia):
             escolha = self.modelo_mcts_escolha(len(estado.jogador_atual.cartas_distrito_mao), np.array(opcoes_disponiveis))
             # Salvar histórico das escolhas para acrescentar no modelo após resultado
             self.modelos_historico[tipo_modelo_acao.idx][self.modo.idx][indice_linha_tabela][estado.jogador_atual.cartas_distrito_mao[escolha].idx] = 1
-            # Define se vamos contabilizar a quantidade de partida (= 1) ou se contaremos quantas vezes a ação foi escolhida na mesma partida (+= 1)
             self.modelos_historico[tipo_modelo_acao.idx][self.modo.idx][indice_linha_tabela][estado.jogador_atual.cartas_distrito_mao[escolha].idx + tipo_modelo_acao.tamanho] = 1
             return escolha
         else:
