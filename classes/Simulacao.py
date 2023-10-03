@@ -8,7 +8,7 @@ from classes.classifica_estados.ClassificaEstados import ClassificaEstados
 
 class Simulacao:
     # Construtor
-    def __init__(self, estrategias: tuple, num_personagens: int = 8, automatico: bool = True):
+    def __init__(self, estrategias: list, num_personagens: int = 8, automatico: bool = True):
         # Define o número de jogadores
         self.num_jogadores: int = len(estrategias)
         # Define se a criação dos jogadores: 0 -> Manual ou 1 -> Automática
@@ -19,6 +19,8 @@ class Simulacao:
         self.jogador_finalizador: Jogador = None
         # Estratégias de cada jogador
         self.estrategias: dict[Jogador, Estrategia] = self.criar_estrategias(estrategias)
+        # Criação automática de jogadores
+        self.automatico = automatico
 
     # Cria o estado inicial do tabuleiro
     def criar_estado_inicial(self, num_personagens, automatico) -> Estado:
@@ -74,21 +76,21 @@ class Simulacao:
                  # Ações de personagem Rank 2
                  HabilidadeLadrao(),
                  # Ações de personagem Rank 3
-                 HabilidadeMago(),
+                 HabilidadeIlusionistaTrocar(), HabilidadeIlusionistaDescartar(),
                  # Ações de personagem Rank 4
                  HabilidadeRei(),
                  # Ações de personagem Rank 5
-                 HabilidadeCardeal(),
+                 HabilidadeBispo(),
                  # Ações de personagem Rank 6
-                 # Nenhuma
+                 HabilidadeComerciante(),
                  # Ações de personagem Rank 7
-                 HabilidadeNavegadora(),
+                 # Habilidade passiva
                  # Ações de personagem Rank 8
                  HabilidadeSenhorDaGuerraDestruir(), HabilidadeSenhordaGuerraColetar(),
                  # Ações de personagem Rank 9
                  # Nenhuma
                  # Ações de distritos especiais
-                 Laboratorio(), Arsenal(), Forja(), Museu()]
+                 Laboratorio(), Forja()]
         return acoes
 
     # Executa uma simulação do jogo e retorna estado final
@@ -138,33 +140,38 @@ class Simulacao:
                                     ladrao.ouro += jogador.ouro
                                     jogador.ouro = 0
                                     break
+                        # Aplica habilidade passiva do Comerciante
+                        if jogador.personagem.nome == 'Comerciante':
+                            jogador.ouro += 1
+                        # Aplica habilidade passiva da Arquiteta
+                        if jogador.personagem.nome == 'Arquiteta' and not self.estado.tabuleiro.baralho_distritos:
+                            qtd_cartas = 2
+                            # Cartas insuficientes no baralho para pescar
+                            if len(self.estado.tabuleiro.baralho_distritos) < qtd_cartas:
+                                qtd_cartas = len(self.estado.tabuleiro.baralho_distritos)
+                            # Pescar cartas do baralho
+                            cartas_compradas = self.estado.tabuleiro.baralho_distritos[:qtd_cartas]
+                            del self.estado.tabuleiro.baralho_distritos[:qtd_cartas]
+                            self.estado.jogador_atual.cartas_distrito_mao.extend(cartas_compradas)
                         # Laço de turnos do jogo
                         while True:
-                            # Mostra o estado atual
-                            #print(self.estado)
-                            # Mostra o jogador atual
-                            # print(f'Turno atual: {jogador.nome}, {jogador.personagem}')
-                            # Mostra a chance de vitoria
-                            ClassificaEstados.classificar_estado(self.estado, jogador.nome)
+                            # Mostra estado e jogador atual caso a simulação esteja no modo manual
+                            if not self.automatico:
+                                print(self.estado)
+                                print(f'Turno atual: {jogador.nome}, {jogador.personagem}')
+                                # Mostra a chance de vitoria
+                                ClassificaEstados.classificar_estado(self.estado, jogador.nome)
                             # Mostra apenas ações disponíveis segundo regras do jogo
                             acoes_disponiveis = self.acoes_disponiveis()
                             escolha_acao = self.estrategias[jogador].escolher_acao(self.estado, acoes_disponiveis)
-                            # Pula uma linha
-                            # print()
                             # Executa ação escolhida
                             self.acoes[acoes_disponiveis[escolha_acao].value].ativar(self.estado, self.estrategias[jogador])
                             # Finaliza turno se jogador escolheu a ação de passar o turno
                             if jogador.acoes_realizadas[TipoAcao.PassarTurno.value]:
                                 break
                         # Identifica gatilhos de final de jogo
-                        # Identifica se o jogador construiu o Monumento
-                        monumento = False
-                        for construido in jogador.distritos_construidos:
-                            if construido.nome_do_distrito == 'Monumento':
-                                monumento = True
-                                break
                         # Marca fim de jogo e jogador finalizador (monumento conta como 2 distritos para fins de uma cidade completa)
-                        if len(jogador.distritos_construidos) >= 7 or (len(jogador.distritos_construidos) == 6 and monumento):
+                        if len(jogador.distritos_construidos) >= 7:
                             jogador.terminou = True
                             if self.jogador_finalizador is None:
                                 self.jogador_finalizador = jogador
@@ -174,12 +181,13 @@ class Simulacao:
         # Rotina de final de jogo
         self.computar_pontuacao_final()
         self.estado.ordenar_jogadores_pontuacao()
-        # Mostra estado final
-        #print(self.estado)
         self.estado.jogadores[0].vencedor = True
-        # print()
-        # for jogador in self.estado.jogadores:
-        #    print(f'{jogador.nome} - Pontuação final: {jogador.pontuacao_final}')
+        # Mostra estado final
+        if not self.automatico:
+            print(self.estado)
+            print()
+            for jogador in self.estado.jogadores:
+                print(f'{jogador.nome} - Pontuação final: {jogador.pontuacao_final}')
         return self.estado
 
     # Retorna apenas as ações disponíveis para o estado atual da simulação
@@ -189,8 +197,8 @@ class Simulacao:
         # Deve ter coletado recursos primeiro para poder realizar demais ações no turno
         if acoes_realizadas[TipoAcao.ColetarOuro.value] or acoes_realizadas[TipoAcao.ColetarCartas.value]:
             acoes_disponiveis.append(TipoAcao.PassarTurno)
-            # Só pode construir 1 distrito por turno (Navegadora não pode cosntruir distritos no turno)
-            if not acoes_realizadas[TipoAcao.ConstruirDistrito.value] and self.estado.jogador_atual.personagem.nome != 'Navegadora':
+            # Ação de construir distrito
+            if not acoes_realizadas[TipoAcao.ConstruirDistrito.value]:
                 acoes_disponiveis.append(TipoAcao.ConstruirDistrito)
             # As habilidades dos personagens só podem ser utilizadas uma única vez
             # O jogador deve possuir a carta do personagem para usar a sua habilidade
@@ -198,14 +206,16 @@ class Simulacao:
                 acoes_disponiveis.append(TipoAcao.HabilidadeAssassina)
             if not acoes_realizadas[TipoAcao.HabilidadeLadrao.value] and self.estado.jogador_atual.personagem.nome == 'Ladrão':
                 acoes_disponiveis.append(TipoAcao.HabilidadeLadrao)
-            if not acoes_realizadas[TipoAcao.HabilidadeMago.value] and self.estado.jogador_atual.personagem.nome == 'Mago':
-                acoes_disponiveis.append(TipoAcao.HabilidadeMago)
+            if self.estado.jogador_atual.personagem.nome == 'Ilusionista':
+                if not acoes_realizadas[TipoAcao.HabilidadeIlusionistaTrocar.value] and not acoes_realizadas[TipoAcao.HabilidadeIlusionistaDescartar.value]:
+                    acoes_disponiveis.append(TipoAcao.HabilidadeIlusionistaTrocar)
+                    acoes_disponiveis.append(TipoAcao.HabilidadeIlusionistaDescartar)
             if not acoes_realizadas[TipoAcao.HabilidadeRei.value] and self.estado.jogador_atual.personagem.nome == 'Rei':
                 acoes_disponiveis.append(TipoAcao.HabilidadeRei)
-            if not acoes_realizadas[TipoAcao.HabilidadeCardeal.value] and self.estado.jogador_atual.personagem.nome == 'Cardeal':
-                acoes_disponiveis.append(TipoAcao.HabilidadeCardeal)
-            if not acoes_realizadas[TipoAcao.HabilidadeNavegadora.value] and self.estado.jogador_atual.personagem.nome == 'Navegadora':
-                acoes_disponiveis.append(TipoAcao.HabilidadeNavegadora)
+            if not acoes_realizadas[TipoAcao.HabilidadeBispo.value] and self.estado.jogador_atual.personagem.nome == 'Bispo':
+                acoes_disponiveis.append(TipoAcao.HabilidadeBispo)
+            if not acoes_realizadas[TipoAcao.HabilidadeComerciante.value] and self.estado.jogador_atual.personagem.nome == 'Comerciante':
+                acoes_disponiveis.append(TipoAcao.HabilidadeComerciante)
             if self.estado.jogador_atual.personagem.nome == 'Senhor da Guerra':
                 if not acoes_realizadas[TipoAcao.HabilidadeSenhorDaGuerraDestruir.value]:
                     acoes_disponiveis.append(TipoAcao.HabilidadeSenhorDaGuerraDestruir)
@@ -214,19 +224,9 @@ class Simulacao:
             # As habilidades dos distritos especiais só podem ser utilizadas uma única vez
             # O jogador deve ter o distrito construído na sua cidade para usar a sua habilidade
             if not acoes_realizadas[TipoAcao.Laboratorio.value] and self.estado.jogador_atual.construiu_distrito('Laboratório'):
-                # Deve possuir ao menos 1 carta na mão
-                if len(self.estado.jogador_atual.cartas_distrito_mao) > 0:
-                    acoes_disponiveis.append(TipoAcao.Laboratorio)
-            if not acoes_realizadas[TipoAcao.Arsenal.value] and self.estado.jogador_atual.construiu_distrito('Arsenal'):
-                acoes_disponiveis.append(TipoAcao.Arsenal)
+                acoes_disponiveis.append(TipoAcao.Laboratorio)
             if not acoes_realizadas[TipoAcao.Forja.value] and self.estado.jogador_atual.construiu_distrito('Forja'):
-                # Deve possuir ao menos 2 ouros
-                if self.estado.jogador_atual.ouro >= 2:
-                    acoes_disponiveis.append(TipoAcao.Forja)
-            if not acoes_realizadas[TipoAcao.Museu.value] and self.estado.jogador_atual.construiu_distrito('Museu'):
-                # Deve possuir ao menos 1 carta na mão
-                if len(self.estado.jogador_atual.cartas_distrito_mao) > 0:
-                    acoes_disponiveis.append(TipoAcao.Museu)
+                acoes_disponiveis.append(TipoAcao.Forja)
         # Só pode coletar recursos uma vez ao turno (coletar ouro ou carta)
         else:
             acoes_disponiveis.append(TipoAcao.ColetarOuro)
@@ -242,7 +242,7 @@ class Simulacao:
             texto += ', ' + str(distrito)
         return texto
 
-    # Computa a pontuaçào final de cada jogador para definir vencedor
+    # Computa a pontuação final de cada jogador para definir vencedor
     def computar_pontuacao_final(self):
         for jogador in self.estado.jogadores:
             # Contabiliza pontuação parcial
@@ -274,20 +274,10 @@ class Simulacao:
             elif jogador.terminou:
                 jogador.pontuacao_final += 2
             # Pontos extras dos distritos ESPECIAIS
-            # Cofre Secreto (Ao final da partida, revele o Cofre Secreto da sua mão para marcar 3 pontos extras)
-            for distrito in jogador.cartas_distrito_mao:
-                if distrito.nome_do_distrito == 'Cofre Secreto':
-                    jogador.pontuacao_final += 3
-                    break
             for distrito_construido in jogador.distritos_construidos:
                 # Estátua (Se você tiver a coroa no final da partida, marque 5 pontos extras)
                 if distrito_construido.nome_do_distrito == 'Estátua' and jogador.rei:
                     jogador.pontuacao_final += 5
-                # Basílica (Ao final da partida, marque 1 ponto extra para cada distrito especial na sua cidade que tenha um número ímpar como custo)
-                if distrito_construido.nome_do_distrito == 'Basílica':
-                    for especial_impar in jogador.distritos_construidos:
-                        if especial_impar.tipo_de_distrito == TipoDistrito.Especial and especial_impar.valor_do_distrito % 2 == 1:
-                            jogador.pontuacao_final += 1
                 # Poço dos Desejos (Ao final da partida, marque 1 ponto extra para cada distrito ESPECIAL na sua cidade)
                 if distrito_construido.nome_do_distrito == 'Poço dos Desejos':
                     jogador.pontuacao_final += contador_tipos[4]
@@ -300,21 +290,9 @@ class Simulacao:
                 # Portão do Dragão (Ao final da partida, marque 2 pontos extras)
                 if distrito_construido.nome_do_distrito == 'Portão do Dragão':
                     jogador.pontuacao_final += 2
-                # Capitólio (Se tiver pelo menos 3 distritos do mesmo tipo no final da partida, marque 3 pontos extras)
-                pontuou_capitolio = False
-                if distrito_construido.nome_do_distrito == 'Capitólio':
-                    for qtd_tipo in contador_tipos:
-                        if qtd_tipo >= 3:
-                            jogador.pontuacao_final += 3
-                            pontuou_capitolio = True
-                            break
-                # Torre de Marfim (Se a Torre de Marfim for o único distrito ESPECIAL na sua cidade ao final da partida, marque 5 pontos extras)
-                if distrito_construido.nome_do_distrito == 'Torre de Marfim':
-                    if contador_tipos[4] == 1:
-                        jogador.pontuacao_final += 5
                 # Bairro Assombrado (Ao final da partida, o Bairro Assombrado vale como 1 tipo de distrito à sua escolha)
                 if distrito_construido.nome_do_distrito == 'Bairro Assombrado':
-                    melhor_pontuacao = 0
+                    ponto_potencial = 0
                     # Identifica se falta somente 1 tipo de distrito e tem mais de um distrito especial
                     if contador_tipos[4] > 1 and \
                             ((contador_tipos[0] == 0 and contador_tipos[1] * contador_tipos[2] * contador_tipos[3] != 0) or
@@ -325,29 +303,4 @@ class Simulacao:
                         # perde 1 ponto caso também tenha poço dos desejos
                         if jogador.construiu_distrito('Poço dos Desejos'):
                             ponto_potencial -= 1
-                        # perde 3 pontos caso pontuou capitólio com exatamente 3 distritos especiais
-                        if jogador.construiu_distrito('Capitólio') and \
-                                contador_tipos[4] == 3 and contador_tipos[0] < 3 and contador_tipos[1] < 3 and contador_tipos[2] < 3 and contador_tipos[3] < 3:
-                            ponto_potencial -= 3
-                        # ganha 5 pontos caso tenha torre de marfim como único distrito especial
-                        if jogador.construiu_distrito('Torre de Marfim') and contador_tipos[4] == 2:
-                            ponto_potencial += 5
-                        if ponto_potencial > 0:
-                            melhor_pontuacao = ponto_potencial
-                    # Transformar bairro assombrado para pontuar capitólio
-                    if jogador.construiu_distrito('Capitólio') and not pontuou_capitolio and \
-                            (contador_tipos[0] == 2 or contador_tipos[1] == 2 or contador_tipos[2] == 2 or contador_tipos[3] == 2):
-                        ponto_potencial = 3
-                        # perde 1 ponto caso também tenha poço dos desejos
-                        if jogador.construiu_distrito('Poço dos Desejos'):
-                            ponto_potencial -= 1
-                        # ganha 5 pontos caso tenha torre de marfim como único distrito especial
-                        if jogador.construiu_distrito('Torre de Marfim') and contador_tipos[4] == 2:
-                            ponto_potencial += 5
-                        if melhor_pontuacao < ponto_potencial:
-                            melhor_pontuacao = ponto_potencial
-                    # Transformar bairro assombrado para pontuar torre de marfim
-                    if jogador.construiu_distrito('Torre de Marfim') and contador_tipos[4] == 2:
-                        if melhor_pontuacao < 5:
-                            melhor_pontuacao = 5
-                    jogador.pontuacao_final += melhor_pontuacao
+                    jogador.pontuacao_final += ponto_potencial
