@@ -6,7 +6,9 @@ from classes.enum.TipoTabela import TipoTabela
 from classes.strategies.Estrategia import Estrategia
 from classes.strategies.EstrategiaMCTS import EstrategiaMCTS
 from classes.strategies.EstrategiaTotalmenteAleatoria import EstrategiaTotalmenteAleatoria
-
+from classes.strategies.EstrategiaAllin import EstrategiaAllin
+from classes.enum.TipoTabela import TipoTabela
+from classes.enum.TipoModeloAcao import TipoModeloAcao
 
 class Experimento:
 
