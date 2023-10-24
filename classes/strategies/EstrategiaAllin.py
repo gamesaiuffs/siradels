@@ -38,13 +38,18 @@ class EstrategiaAllin(Estrategia):
     @staticmethod
     def escolher_acao(estado: Estado, acoes_disponiveis: list[TipoAcao]) -> int:
         
-        # Coleta ouro 9 de 10 vezes
-        if acoes_disponiveis[0] == TipoAcao.ColetarOuro:
-            if random.randint(0,9) == 0:
-                return 1
-            else:
-                return 0
-        
+        # for index, acao in enumerate(acoes_disponiveis):
+        #     if acao == TipoAcao.ColetarOuro:
+        #         print(acao)
+        #         if not random.randint(0,9) == 0:
+        #             print(index)
+        #             return index
+        #         else:
+        #             for index_2, acao_2 in enumerate(acoes_disponiveis):
+        #                 if acao_2 == TipoAcao.ColetarCartas:
+        #                     print(index_2)
+        #                     return index_2
+                        
         if len(acoes_disponiveis) > 1:
             return random.randint(1, len(acoes_disponiveis) - 1)
         return 0
@@ -62,7 +67,6 @@ class EstrategiaAllin(Estrategia):
         # Constroi sempre o distrito de maior valor. A função max encontra o distrito mais valioso enquanto a enumarate gera as tuplas com os indices de cada
         if distritos_para_construir:
             maior_index = max(enumerate(distritos_para_construir), key=lambda x: x[1].valor_do_distrito)[0]
-            print(maior_index)
             return maior_index
     
         # Aqui nao seria -2?

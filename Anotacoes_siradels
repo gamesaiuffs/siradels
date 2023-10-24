@@ -1,0 +1,35 @@
+Bug identificado: É possível construir distritos duas vezes seguidas
+
+Como iniciar um jogo com estratégias variadas
+
+Estrategia Build: Verificar se o covil dos ladroes não buga a implementação
+
+Corrigir a estratégia GOLD
+
+TREINADO COM ALLIN
+Bot - MCTS -    Vitórias: 5959 - Porcento Vitorias: 59.59% - Pontuação Média: 19.3341
+Bot - 3 -       Vitórias: 999 - Porcento Vitorias: 9.99% - Pontuação Média: 7.9187
+Bot - 2 -       Vitórias: 974 - Porcento Vitorias: 9.74% - Pontuação Média: 7.9828
+Bot - 4 -       Vitórias: 979 - Porcento Vitorias: 9.79% - Pontuação Média: 7.9152
+Bot - 1 -       Vitórias: 1089 - Porcento Vitorias: 10.89% - Pontuação Média: 8.1366
+
+TREINADO TOTALMENTE ALEATORIO
+Bot - MCTS -    Vitórias: 6021 - Porcento Vitorias: 60.21% - Pontuação Média: 19.3656
+Bot - 2 -       Vitórias: 974 - Porcento Vitorias: 9.74% - Pontuação Média: 7.8825
+Bot - 3 -       Vitórias: 994 - Porcento Vitorias: 9.94% - Pontuação Média: 7.8821
+Bot - 4 -       Vitórias: 1026 - Porcento Vitorias: 10.26% - Pontuação Média: 7.9571
+Bot - 1 -       Vitórias: 985 - Porcento Vitorias: 9.85% - Pontuação Média: 7.8703
+
+TREINADO COM MCTS
+Bot - MCTS -    Vitórias: 5648 - Porcento Vitorias: 56.48% - Pontuação Média: 18.8721
+Bot - 4 -       Vitórias: 1073 - Porcento Vitorias: 10.73% - Pontuação Média: 8.1287
+Bot - 1 -       Vitórias: 1097 - Porcento Vitorias: 10.97% - Pontuação Média: 8.1658
+Bot - 2 -       Vitórias: 1091 - Porcento Vitorias: 10.91% - Pontuação Média: 8.2028
+Bot - 3 -       Vitórias: 1091 - Porcento Vitorias: 10.91% - Pontuação Média: 8.1734
+Como o treino depende da execução do MCTS ele ficou extremamente lento e não foi suficiente para popular as tabelas completamente.
+
+Duvidas:
+Como o MCTS atua quando as tabelas estão vazias?
+Os inimigos MCTS recebem tabelas atualizadas a cada partida ou continuam com a mesma desde o inicio do treino?
+A improvisação para treinar o MCTS utilizando ele mesmo como inimigo tem algum problema claro? Procurei instanciar o MCTS utilizado no teste de modelo, porém como não é um trecho desenvolvido com o intuito de ser utilizado assim imagino que possa ter concequencias. Sinceramente fiquei surpreso que compilou sem problemas.
+
