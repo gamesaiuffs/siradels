@@ -21,7 +21,7 @@ class EstrategiaGold(Estrategia):
     def escolher_acao(estado: Estado, acoes_disponiveis: list[TipoAcao]) -> int:
         
         # Coleta ouro 9 de 10 vezes
-        if acoes_disponiveis[0] == TipoAcao.ColetarOuro:
+        if TipoAcao.ColetarOuro in acoes_disponiveis:
             if random.randint(0,9) == 0:
                 return 1
             else:

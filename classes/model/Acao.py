@@ -230,8 +230,14 @@ class HabilidadeIlusionistaTrocar(Acao):
             return
         # Aplica efeito troca de mão com outro jogador
         escolha_jogador = estrategia.habilidade_ilusionista_trocar(estado, opcoes_jogadores)
-        estado.jogador_atual.cartas_distrito_mao, opcoes_jogadores[escolha_jogador].cartas_distrito_mao \
+        try:
+            estado.jogador_atual.cartas_distrito_mao, opcoes_jogadores[escolha_jogador].cartas_distrito_mao \
             = opcoes_jogadores[escolha_jogador].cartas_distrito_mao, estado.jogador_atual.cartas_distrito_mao
+        except IndexError:
+            print(estrategia)
+            print(escolha_jogador)
+            print(opcoes_jogadores)
+            print(opcoes_jogadores[escolha_jogador])
         # Marca flag de ação utilizada
         super().ativar(estado)
 

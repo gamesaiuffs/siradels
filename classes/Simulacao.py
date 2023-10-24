@@ -93,6 +93,8 @@ class Simulacao:
 
     # Executa uma simulação do jogo e retorna estado final
     def rodar_simulacao(self) -> Estado:
+        # self.estrategias INSTANCIAR O MCTS AQUI A CADA SIMULAÇÃO
+
         final_jogo = False
         # Laço de rodadas do jogo
         while not final_jogo:
@@ -162,7 +164,9 @@ class Simulacao:
                             acoes_disponiveis = self.acoes_disponiveis()
                             escolha_acao = self.estrategias[jogador].escolher_acao(self.estado, acoes_disponiveis)
                             # Executa ação escolhida
+
                             self.acoes[acoes_disponiveis[escolha_acao].value].ativar(self.estado, self.estrategias[jogador])
+
                             # Finaliza turno se jogador escolheu a ação de passar o turno
                             if jogador.acoes_realizadas[TipoAcao.PassarTurno.value]:
                                 break
