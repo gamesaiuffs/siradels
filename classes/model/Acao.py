@@ -27,8 +27,8 @@ class PassarTurno(Acao):
         # Otimiza a chamada do jogador atual
         jogador = estado.jogador_atual
         # Limpa flags de controle e ações realizadas
-        jogador.roubado, jogador.construiu = False, 0
         jogador.acoes_realizadas = [False for _ in range(len(TipoAcao))]
+        jogador.qtd_construido_turno = 0
         # Marca flag de ação utilizada
         super().ativar(estado)
         # Turno deve ser o último a ser atualizado, pois, afeta ponteiro para jogador atual

@@ -134,6 +134,7 @@ class Simulacao:
                             continue
                         # Aplica habilidade do Ladrão
                         if jogador.roubado:
+                            jogador.roubado = False
                             for ladrao in self.estado.jogadores:
                                 if ladrao.personagem.nome == 'Ladrão':
                                     ladrao.ouro += jogador.ouro

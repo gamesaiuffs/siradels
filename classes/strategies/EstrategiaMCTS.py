@@ -281,18 +281,18 @@ class EstrategiaMCTS(Estrategia):
 
     # Estratégia usada na habilidade da Ilusionista (escolha do jogador alvo)
     def habilidade_ilusionista_trocar(self, estado: Estado, opcoes_jogadores: list[Jogador]) -> int:
+        # Abstrai jogador com maior pontuacao e jogador com mais cartas
+        jogador_cartas = jogador_pontos = opcoes_jogadores[0]
+        for jogador in opcoes_jogadores:
+            if len(jogador.cartas_distrito_mao) > len(jogador_cartas.cartas_distrito_mao):
+                jogador_cartas = jogador
+            if jogador.pontuacao > jogador_pontos.pontuacao:
+                jogador_pontos = jogador
         tipo_modelo_acao = TipoModeloAcao.HabilidadeIlusionistaTrocar
         if self.treino:
             # Tabela a ser treinada
             indice_linha_tabela = estado.converter_estado()[self.modo.idx]
             linha_tabela = self.modelos_mcts[tipo_modelo_acao.idx][self.modo.idx][indice_linha_tabela]
-            # Abstrai jogador com maior pontuacao e jogador ocm mais cartas
-            jogador_cartas = jogador_pontos = opcoes_jogadores[0]
-            for jogador in opcoes_jogadores:
-                if len(jogador.cartas_distrito_mao) > len(jogador_cartas.cartas_distrito_mao):
-                    jogador_cartas = jogador
-                if jogador.pontuacao > jogador_pontos.pontuacao:
-                    jogador_pontos = jogador
             # (0 - escolher jogador com mais cartas, 1 - escolher jogador com mais pontos dentre os que tem cartas na mão)
             opcoes_disponiveis = []
             for opcao in range(2):
@@ -304,7 +304,6 @@ class EstrategiaMCTS(Estrategia):
             # Salvar histórico das escolhas para acrescentar no modelo após resultado
             self.modelos_historico[tipo_modelo_acao.idx][self.modo.idx][indice_linha_tabela][escolha] = 1
             self.modelos_historico[tipo_modelo_acao.idx][self.modo.idx][indice_linha_tabela][escolha + tipo_modelo_acao.tamanho] = 1
-            return escolha
         else:
             # Converte estado e monta a consulta a partir de todas as tabelas individuais
             estado_vetor = estado.converter_estado()
@@ -316,7 +315,11 @@ class EstrategiaMCTS(Estrategia):
             for opcao in range(2):
                 opcoes_disponiveis.append(tabela_consulta[:, opcao])
             opcoes_disponiveis = np.stack(opcoes_disponiveis, axis=1)
-            return self.modelo_mcts_escolha(2, opcoes_disponiveis)
+            escolha = self.modelo_mcts_escolha(2, opcoes_disponiveis)
+        if escolha == 0:
+            return opcoes_jogadores.index(jogador_cartas)
+        else:
+            return opcoes_jogadores.index(jogador_pontos)
 
     # Estratégia usada na habilidade da Ilusionista (escolha de quantas cartas serão descartadas)
     def habilidade_ilusionista_descartar_qtd_cartas(self, estado: Estado, qtd_maxima: int) -> int:
