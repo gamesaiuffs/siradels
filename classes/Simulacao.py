@@ -183,6 +183,7 @@ class Simulacao:
         self.estado.ordenar_jogadores_pontuacao()
         self.estado.jogadores[0].vencedor = True
         # Mostra estado final
+        #print(self.estado)
         if not self.automatico:
             print(self.estado)
             print()
