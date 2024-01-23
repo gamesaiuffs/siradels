@@ -140,15 +140,33 @@ class SimulacaoColeta:
                             continue
                         # Aplica habilidade do Ladrão
                         if jogador.roubado:
+                            jogador.roubado = False
                             for ladrao in self.estado.jogadores:
                                 if ladrao.personagem.nome == 'Ladrão':
                                     ladrao.ouro += jogador.ouro
                                     jogador.ouro = 0
                                     break
+                        # Aplica habilidade passiva do Comerciante
+                        if jogador.personagem.nome == 'Comerciante':
+                            jogador.ouro += 1
+                        # Aplica habilidade passiva da Arquiteta
+                        if jogador.personagem.nome == 'Arquiteta' and not self.estado.tabuleiro.baralho_distritos:
+                            qtd_cartas = 2
+                            # Cartas insuficientes no baralho para pescar
+                            if len(self.estado.tabuleiro.baralho_distritos) < qtd_cartas:
+                                qtd_cartas = len(self.estado.tabuleiro.baralho_distritos)
+                            # Pescar cartas do baralho
+                            cartas_compradas = self.estado.tabuleiro.baralho_distritos[:qtd_cartas]
+                            del self.estado.tabuleiro.baralho_distritos[:qtd_cartas]
+                            self.estado.jogador_atual.cartas_distrito_mao.extend(cartas_compradas)
                         # Laço de turnos do jogo
                         while True:
                             # Mostra o estado atual
-                            print(self.estado)
+                            #print(self.estado)
+                            # Mostra estado e jogador atual caso a simulação esteja no modo manual
+                            if not self.automatico:
+                                print(self.estado)
+                                print(f'Turno atual: {jogador.nome}, {jogador.personagem}')
                             # Mostra o jogador atual
                             #print(f'Turno atual: {jogador.nome}, {jogador.personagem}')
                             
@@ -194,9 +212,12 @@ class SimulacaoColeta:
         #print(self.estado)
         self.estado.jogadores[0].vencedor = True
         # print()
-        # for jogador in self.estado.jogadores:
-        #    print(f'{jogador.nome} - Pontuação final: {jogador.pontuacao_final}')
-        # Coleta de features/rotulos
+        # Mostra estado final
+        if not self.automatico:
+            print(self.estado)
+            print()
+            for jogador in self.estado.jogadores:
+                print(f'{jogador.nome} - Pontuação final: {jogador.pontuacao_final}')
         
         return X, Y, self.estado.rodada
 

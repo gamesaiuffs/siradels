@@ -5,7 +5,6 @@ from classes.model.Jogador import Jogador
 from classes.strategies import Estrategia
 from classes.classifica_estados.ClassificaEstados import ClassificaEstados
 
-
 class Simulacao:
     # Construtor
     def __init__(self, estrategias: list, num_personagens: int = 8, automatico: bool = True):
@@ -135,6 +134,7 @@ class Simulacao:
                             continue
                         # Aplica habilidade do Ladrão
                         if jogador.roubado:
+                            jogador.roubado = False
                             for ladrao in self.estado.jogadores:
                                 if ladrao.personagem.nome == 'Ladrão':
                                     ladrao.ouro += jogador.ouro
@@ -159,8 +159,10 @@ class Simulacao:
                             if not self.automatico:
                                 print(self.estado)
                                 print(f'Turno atual: {jogador.nome}, {jogador.personagem}')
-                                # Mostra a chance de vitoria
-                                ClassificaEstados.classificar_estado(self.estado, jogador.nome)
+                            
+                            # Mostra a chance de vitoria
+                            ClassificaEstados.classificar_estado(self.estado, jogador.nome)
+
                             # Mostra apenas ações disponíveis segundo regras do jogo
                             acoes_disponiveis = self.acoes_disponiveis()
                             escolha_acao = self.estrategias[jogador].escolher_acao(self.estado, acoes_disponiveis)
@@ -183,7 +185,6 @@ class Simulacao:
         self.estado.ordenar_jogadores_pontuacao()
         self.estado.jogadores[0].vencedor = True
         # Mostra estado final
-        #print(self.estado)
         if not self.automatico:
             print(self.estado)
             print()
