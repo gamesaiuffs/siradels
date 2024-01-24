@@ -27,17 +27,11 @@ for i in range(5):          # fixo em 5 players
 #simulacao.rodar_simulacao()
 
 #(qtd_pts, n_features)
-ColetaEstados.simula_estados(50, 11)
+#ColetaEstados.simula_estados(500, 11)
 
-#X, Y = ClassificaEstados.ler_resultados()
+#ClassificaEstados.treinar_modelo(X_train, Y_train, "Modelo Teste 2", 5)
 
-#X_train, X_test, y_train, y_test = train_test_split(X, Y, test_size=0.33, random_state=42)
-
-# ClassificaEstados.treinar_modelo("Modelo Teste 2", X_train, Y_train, 5)
-
-#ClassificaEstados.testar_modelo(y_train, y_test)
-
-#ClassificaEstados.modelo_info()
+ClassificaEstados.modelo_info()
 
 #simulacao.rodar_simulacao()
 

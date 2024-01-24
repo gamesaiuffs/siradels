@@ -13,7 +13,9 @@ from classes.strategies.EstrategiaTotalmenteAleatoria import EstrategiaTotalment
 from classes.enum.TipoDistrito import TipoDistrito
 from sklearn import tree
 from sklearn.tree import DecisionTreeClassifier, export_text, plot_tree
+from sklearn.model_selection import train_test_split
 from sklearn.metrics import f1_score
+from sklearn.metrics import accuracy_score
 import matplotlib.pyplot as plt
 import joblib
 
@@ -33,6 +35,10 @@ import joblib
 
 # Rotulo de pontuacao para regressao funciona nesse caso? como aplicar?
  
+
+# Eficiência do primeiro modelo funcional:
+# F1_Score: 63.11% (Macro), 82.12% (Micro)
+# Acccuracy: 82.12%
 
 class ClassificaEstados:   
     
@@ -81,38 +87,57 @@ class ClassificaEstados:
         return
     
     @staticmethod
-    def testar_modelo(Y_train: list(), Y_test: list()):
+    def testar_modelo(X_test: np.ndarray, Y_test: list()):
+        
+        # Carrega modelo
+        modelo = joblib.load("Modelo Teste 2")
+        
+        Y_pred = modelo.predict(X_test)
 
-        # Normalize para n�mero de acertos
-#        f1_score(Y_train, Y_test, average='macro')
-        resultado = f1_score([0, 0, 0], [0, 0, 0], average='macro')
-        print(resultado)
-        return
-    
+        microf1 = f1_score(Y_pred, Y_test, average='micro')*100
+        microf1 = round(microf1, 2)
+
+        macrof1 = f1_score(Y_pred, Y_test, average='macro')*100
+        macrof1 = round(macrof1, 2)
+        
+        accuracy = accuracy_score(Y_pred, Y_test)*100
+        accuracy = round(accuracy, 2)
+
+        print(f"Accuracy: {accuracy}%")
+        print(f"F1 Score - Micro: {microf1}%")
+        print(f"F1 Score - Macro: {macrof1}%")
+        return 
+        
     # Mostra informacoes do modelo
     @staticmethod
     def modelo_info():
 
-        modelo = joblib.load("Modelo Teste")
+        modelo = joblib.load("Modelo Teste 2")
 
         # [jogador.ouro, len(jogador.cartas_distrito_mao), num_dist_cons, jogador.personagem.rank]
-        '''
+        
         nomes_das_caracteristicas = [
-    "Ouro (JA)", "Cartas na Mão (JA)", "Distritos Construídos(JA)", "Rank do Personagem(JA)",
-    "Ouro (JMP)", "Cartas na Mão (JMP)", "Distritos Construídos (JMP)", "Rank do Personagem (JMP)",
+        "Ouro (JA)", "Cartas na Mão (JA)", "Distritos Construídos (JA)", "Custo Construidos (JA)", "Custo Mão (JA)", "Rank do Personagem(JA)",
+        "Ouro (JMP)", "Cartas na Mão (JMP)", "Distritos Construídos (JMP)", "Custo Construidos (JA)", "Rank do Personagem (JMP)",
 ]
-        '''
-        #tree_rules = export_text(modelo, feature_names= nomes_das_caracteristicas)
-        # Mostra a estrutura da �rvore de decis�o no terminal
-        #print(tree_rules)
+        tree_rules = export_text(modelo, feature_names= nomes_das_caracteristicas)
+        # Mostra a estrutura da árvore de decisão no terminal
+        print("Estrutura final da árvore: ")
+        print(tree_rules)
         # Mostra as importancia de cada variavel do estado
+        print("Feature importances: ")
         print(modelo.feature_importances_)
-        # Mostra a profundidade da �rvore
-        print(modelo.get_depth())
-        # Mostra o n�mero de n�s
-        print(modelo.tree_.node_count)
-        # Mostra o n�mero de folhas
-        print(modelo.get_n_leaves())
+        # Mostra a profundidade da árvore
+        print()
+        print("Profundidade: ", modelo.get_depth())
+        # Mostra o número de nós
+        print("Número de Nós: ", modelo.tree_.node_count)
+        # Mostra o número de folhas
+        print("Número de Folhas: ", modelo.get_n_leaves())
+        # Mostra a precisão atual do modelo
+        X, Y = ClassificaEstados.ler_resultados()
+        X_train, X_test, Y_train, Y_test = train_test_split(X, Y, test_size=0.33, random_state=42)
+        ClassificaEstados.testar_modelo(X_test, Y_test)
     
         # Mostra a estrutura visual da �rvore
         plt.figure(figsize=(24, 18))
@@ -207,7 +232,7 @@ class ClassificaEstados:
     def calcula_porcentagem(dados):
 
         # Carrega modelo
-        modelo = joblib.load("Modelo Teste")
+        modelo = joblib.load("Modelo Teste 2")
 
         # Calcula probabilidade de vitoria
         probabilidade_vitoria = modelo.predict_proba(dados)

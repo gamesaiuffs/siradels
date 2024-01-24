@@ -161,7 +161,7 @@ class Simulacao:
                                 print(f'Turno atual: {jogador.nome}, {jogador.personagem}')
                             
                             # Mostra a chance de vitoria
-                            ClassificaEstados.classificar_estado(self.estado, jogador.nome)
+                            X = ClassificaEstados.coleta_features(self.estado, jogador.nome, 0, X)
 
                             # Mostra apenas ações disponíveis segundo regras do jogo
                             acoes_disponiveis = self.acoes_disponiveis()
