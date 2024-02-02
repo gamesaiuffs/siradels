@@ -15,40 +15,20 @@ from sklearn import tree
 from sklearn.tree import DecisionTreeClassifier, export_text, plot_tree
 from sklearn.model_selection import train_test_split
 from sklearn.metrics import f1_score
+from sklearn.metrics import confusion_matrix, ConfusionMatrixDisplay
 from sklearn.metrics import accuracy_score
 import matplotlib.pyplot as plt
 import joblib
 
-# X = features
-# Y = rotulos
-
-# Primeira abordagem: Capturar estados individuais finais e visiveis dos jogadores
-
-# Segunda abordagem: Capturar o estado completo com dados privilegiados do jogador atual 
-# e dados visiveis dos oponentes, rotulos por estado final de vitoria por pontuacao, metodo proba sklearn
-
-# Duvidas: Arvore de classificacao ou arvore de decisao por regressao?
-# Se classificacao: Rotular matrizes inteiras com um array (possivel?) / levar em consid eracao diversas outras variaveis (viavel?) / 
-# e utilizar isso em estados intermediarios (novas variaveis: personagens) com o metodo proba de sklearn (eficiente?) 
-
-# Testes: Diferentes profundidades / se regressao diferentes penalidades (media ou quadrado);
-
-# Rotulo de pontuacao para regressao funciona nesse caso? como aplicar?
- 
-
-# Eficiência do primeiro modelo funcional:
-# F1_Score: 63.11% (Macro), 82.12% (Micro)
-# Acccuracy: 82.12%
-
 class ClassificaEstados:   
     
     @staticmethod
-    def salvar_resultados(X: np.ndarray, Y = list()):
+    def salvar_resultados(X: np.ndarray, Y: list(), jogos: str, rotulos: str):
         #j = j.astype(np.uint32)
         
-        np.savetxt('./classes/tabela_estado/' + 'Jogos 2' + '.csv', X, delimiter=',', fmt='%s')   # Features
+        np.savetxt('./classes/tabela_estado/' + jogos + '.csv', X, delimiter=',', fmt='%s')   # Features
         #np.savetxt('./tabela_estado/' + j.name + '.csv', i, delimiter=',', fmt='%6u')
-        np.savetxt('./classes/tabela_estado/' + 'Rotulos 2' + '.csv', Y, delimiter=',', fmt='%6u')    # Rotulos
+        np.savetxt('./classes/tabela_estado/' + rotulos + '.csv', Y, delimiter=',', fmt='%6u')    # Rotulos
         #np.savetxt('./tabela_estado/' + 'Rotulos' + '.csv', Y, delimiter=',', fmt='%6u')
         # Caminho do arquivo CSV
         '''
@@ -64,10 +44,10 @@ class ClassificaEstados:
         '''
 
     @staticmethod
-    def ler_resultados() -> list[np.ndarray]:
-        X = np.genfromtxt('./classes/tabela_estado/' + 'Jogos 2' + '.csv', delimiter=',')
+    def ler_resultados(jogos: str, rotulos: str) -> list[np.ndarray]:
+        X = np.genfromtxt('./classes/tabela_estado/' + jogos + '.csv', delimiter=',')
         #jogos = np.genfromtxt('./tabela_estado/' + i.name + '.csv', delimiter=',')
-        Y = np.genfromtxt('./classes/tabela_estado/' + 'Rotulos 2' + '.csv', delimiter=',') 
+        Y = np.genfromtxt('./classes/tabela_estado/' + rotulos + '.csv', delimiter=',') 
         #rotulos = np.genfromtxt('./tabela_estado/' + 'Rotulos' + '.csv', delimiter=',') 
         #X = jogos
         #Y = rotulos
@@ -75,10 +55,12 @@ class ClassificaEstados:
     
 
     @staticmethod
-    def treinar_modelo(X_train: np.ndarray, Y_train: list(), nome, profundidade : int = 1):
+    def treinar_modelo(jogos: str, rotulos: str, nome: str, profundidade : int = 1):
+
+        X_train, Y_train = ClassificaEstados.ler_resultados(jogos, rotulos)
 
         # Definir parametros
-        modelo = tree.DecisionTreeClassifier(max_depth=profundidade)
+        modelo = tree.DecisionTreeClassifier()
         modelo.fit(X_train, Y_train)
 
         # Salva o modelo
@@ -87,32 +69,38 @@ class ClassificaEstados:
         return
     
     @staticmethod
-    def testar_modelo(X_test: np.ndarray, Y_test: list()):
-        
-        # Carrega modelo
-        modelo = joblib.load("Modelo Teste 2")
-        
-        Y_pred = modelo.predict(X_test)
+    def undersampling(jogos_in: str, rotulos_in: str, jogos_out: str, rotulos_out: str):
 
-        microf1 = f1_score(Y_pred, Y_test, average='micro')*100
-        microf1 = round(microf1, 2)
+        idx_remover = []
+        X, Y = ClassificaEstados.ler_resultados(jogos_in, rotulos_in)
+        wins = np.sum(Y == 1)
+        loses = np.sum(Y == 0)
+        print("Wins: ", wins)
+        print("Loses: ", loses)
 
-        macrof1 = f1_score(Y_pred, Y_test, average='macro')*100
-        macrof1 = round(macrof1, 2)
-        
-        accuracy = accuracy_score(Y_pred, Y_test)*100
-        accuracy = round(accuracy, 2)
+        for indice, linha in enumerate(reversed(Y)):
+            if linha == 0 and loses > wins:
+                idx_remover.append(len(Y) - 1 - indice)
+                loses = loses - 1
+                print("Iterações restantes: ", loses-wins)
 
-        print(f"Accuracy: {accuracy}%")
-        print(f"F1 Score - Micro: {microf1}%")
-        print(f"F1 Score - Macro: {macrof1}%")
-        return 
+        X = np.delete(X, idx_remover, axis=0)
+        Y = np.delete(Y, idx_remover, axis=0)
+
+        wins = np.sum(Y == 1)
+        loses = np.sum(Y == 0)
+        print("Wins: ", wins)
+        print("Loses: ", loses)
+
+        ClassificaEstados.salvar_resultados(X, Y, jogos_out, rotulos_out)
+   
+        return
         
     # Mostra informacoes do modelo
     @staticmethod
-    def modelo_info():
+    def modelo_info(jogos: str, rotulos: str, model: str):
 
-        modelo = joblib.load("Modelo Teste 2")
+        modelo = joblib.load(model)
 
         # [jogador.ouro, len(jogador.cartas_distrito_mao), num_dist_cons, jogador.personagem.rank]
         
@@ -134,19 +122,40 @@ class ClassificaEstados:
         print("Número de Nós: ", modelo.tree_.node_count)
         # Mostra o número de folhas
         print("Número de Folhas: ", modelo.get_n_leaves())
-        # Mostra a precisão atual do modelo
-        X, Y = ClassificaEstados.ler_resultados()
+
+        # TESTES DO MODELO
+
+        X, Y = ClassificaEstados.ler_resultados(jogos, rotulos)
+
         X_train, X_test, Y_train, Y_test = train_test_split(X, Y, test_size=0.33, random_state=42)
-        ClassificaEstados.testar_modelo(X_test, Y_test)
-    
+
+        # Y_pred: Rótulos que o modelo previu para os testes
+        # Y_test: Rótulos reais dos testes
+        Y_pred = modelo.predict(X_test)
+
+        macrof1 = f1_score(Y_pred, Y_test, average='macro')*100
+        macrof1 = round(macrof1, 2)
+
+        # Accuracy tem mesmo valor que F1_score: Micro        
+        accuracy = accuracy_score(Y_pred, Y_test)*100
+        accuracy = round(accuracy, 2)
+
+        matriz_confusao = confusion_matrix(Y_pred, Y_test)
+        #disp = ConfusionMatrixDisplay(confusion_matrix=matriz_confusao, display_labels=nomes_das_caracteristicas)
+
+        print(f"Accuracy: {accuracy}%")
+        print(f"F1 Score - Macro: {macrof1}%")
+        print("Matriz de confusão: ")
+        print(matriz_confusao)
+
         # Mostra a estrutura visual da �rvore
         plt.figure(figsize=(24, 18))
         plot_tree(modelo, class_names=["Derrota", "Vitória"], filled=True)
         plt.show()    
 
     def coleta_features(estado, nome_observado, coleta, X):
-        estado_jogador_atual, estado_outro_jogador, estado_outros_jogadores, estado_tabuleiro = [], [], [], []
-        nobre, religioso, militar, comercial, especial = 0, 0, 0, 0, 0
+        estado_jogador_atual, estado_outro_jogador = [], []
+        tipos_distrito = []
         num_dist_cons_JA, num_dist_cons_JMP = 0, 0
         ja_custo_mao, ja_custo_construido, jmp_custo_construido = 0, 0, 0
 
@@ -214,7 +223,6 @@ class ClassificaEstados:
         #print("Pontuação parcial dele: ", ja.pontuacao)
         #print("Jogador mais forte da rodada: " + jmp.nome)
         #print("Pontuação parcial dele: ", jmp.pontuacao)
-        
 
         if coleta == 1:
             return X
@@ -229,16 +237,17 @@ class ClassificaEstados:
 
     # Utiliza modelo treinado para obter chance de vitoria
     @staticmethod
-    def calcula_porcentagem(dados):
+    def calcula_porcentagem(dados, model: str):
 
         # Carrega modelo
-        modelo = joblib.load("Modelo Teste 2")
+        modelo = joblib.load(model)
 
         # Calcula probabilidade de vitoria
         probabilidade_vitoria = modelo.predict_proba(dados)
 
         #probabilidade_vitoria = f"Probabilidade de vitoria: {probabilidade_vitoria[0] * 100}%"
 
+        # MODIFICAR (proba win e lose não são complementares, testar média)
         probabilidade_vitoria = f"Probabilidade de vitoria: {probabilidade_vitoria[0][1] * 100}%"
 
         print(probabilidade_vitoria)  # Probabilidade estimada de vit�ria

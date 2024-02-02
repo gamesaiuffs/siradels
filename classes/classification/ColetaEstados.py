@@ -1,6 +1,6 @@
-from classes.classifica_estados.ClassificaEstados import ClassificaEstados
+from classes.classification.ClassificaEstados import ClassificaEstados
 from classes.Simulacao import Simulacao
-from classes.classifica_estados.SimulacaoColeta import SimulacaoColeta
+from classes.classification.SimulacaoColeta import SimulacaoColeta
 from classes.strategies.EstrategiaTotalmenteAleatoria import EstrategiaTotalmenteAleatoria
 import numpy as np
 import random
@@ -8,7 +8,7 @@ import random
 
 class ColetaEstados:
     @staticmethod
-    def simula_estados(qtd_partidas: int, n_features: int):
+    def coleta_amostras(qtd_partidas: int, n_features: int, jogos: str, rotulos: str):
         X_inicial = [np.zeros(n_features)]
         X = X_inicial
         Y = []
@@ -47,6 +47,5 @@ class ColetaEstados:
                     Y.append(Y_coleta)
         # Remove primeira linha nula
         X = np.delete(X, 0, axis=0)
-        ClassificaEstados.salvar_resultados(X, Y)
+        ClassificaEstados.salvar_resultados(X, Y, jogos, rotulos)
         #ClassificaEstados.treinar_modelo(X, Y)
-        #ColetaEstadosFinais.calcula_porcentagem(0)

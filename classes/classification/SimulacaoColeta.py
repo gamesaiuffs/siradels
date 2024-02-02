@@ -3,7 +3,7 @@ from classes.model.Acao import *
 from classes.model.Tabuleiro import Tabuleiro
 from classes.model.Jogador import Jogador
 from classes.strategies import Estrategia
-from classes.classifica_estados.ClassificaEstados import ClassificaEstados
+from classes.classification.ClassificaEstados import ClassificaEstados
 import random
 import numpy as np
 

@@ -1,6 +1,6 @@
 from classes.Experimento import Experimento
-from classes.classifica_estados.ClassificaEstados import ClassificaEstados
-from classes.classifica_estados.ColetaEstados import ColetaEstados
+from classes.classification.ClassificaEstados import ClassificaEstados
+from classes.classification.ColetaEstados import ColetaEstados
 from classes.Simulacao import Simulacao
 from classes.strategies.EstrategiaTotalmenteAleatoria import EstrategiaTotalmenteAleatoria
 from sklearn.model_selection import train_test_split
@@ -18,20 +18,24 @@ estrategias.append(EstrategiaFelipe())
 estrategias.append(EstrategiaGustavo())
 estrategias.append(EstrategiaJoao())
 '''
-
+'''
 for i in range(5):          # fixo em 5 players
    estrategias.append(EstrategiaTotalmenteAleatoria(str(i+1)))
-
 # Cria simulacao
-#simulacao = Simulacao(estrategias, 8, True)
-#simulacao.rodar_simulacao()
+simulacao = Simulacao(estrategias, 8, True)
+'''
 
-#(qtd_pts, n_features)
-#ColetaEstados.simula_estados(500, 11)
+#(qtd_pts, n_features, nome_jogos, nome_rotulos)
+#ColetaEstados.coleta_amostras(50000, 11, "Jogos 2", "Rótulos 2")
 
-#ClassificaEstados.treinar_modelo(X_train, Y_train, "Modelo Teste 2", 5)
+#(jogos, rotulos, novo_modelo, profundidade)
+#ClassificaEstados.treinar_modelo("Jogos 2 Balanceados", "Rotulos 2 Balanceados", "Balanceado 2", 5)
 
-ClassificaEstados.modelo_info()
+#(jogos, rotulos, nome_modelo)
+ClassificaEstados.modelo_info("Jogos 2", "Rótulos 2", "Modelo Teste 2")
+
+#(jogos_entrada, rotulos_entrada, jogos_saida, rotulos_saida)
+#ClassificaEstados.undersampling("Jogos 2", "Rótulos 2", "Jogos 2 Balanceados", "Rotulos 2 Balanceados")
 
 #simulacao.rodar_simulacao()
 
