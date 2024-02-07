@@ -28,11 +28,11 @@ simulacao = Simulacao(estrategias, 8, True)
 #(qtd_pts, n_features, nome_jogos, nome_rotulos)
 #ColetaEstados.coleta_amostras(50000, 11, "Jogos 2", "Rótulos 2")
 
-#(jogos, rotulos, novo_modelo, profundidade)
-#ClassificaEstados.treinar_modelo("Jogos 2 Balanceados", "Rotulos 2 Balanceados", "Balanceado 2", 5)
+#(jogos, rotulos, nome_modelo, criterion, profundidade)
+#ClassificaEstados.treinar_modelo("Jogos", "Rótulos", "Gini Model", "gini", 10)
 
 #(jogos, rotulos, nome_modelo)
-ClassificaEstados.modelo_info("Jogos 2", "Rótulos 2", "Modelo Teste 2")
+ClassificaEstados.modelo_info("Jogos", "Rótulos", "Log Model")
 
 #(jogos_entrada, rotulos_entrada, jogos_saida, rotulos_saida)
 #ClassificaEstados.undersampling("Jogos 2", "Rótulos 2", "Jogos 2 Balanceados", "Rotulos 2 Balanceados")

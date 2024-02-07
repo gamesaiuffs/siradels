@@ -51,20 +51,25 @@ class ClassificaEstados:
         #rotulos = np.genfromtxt('./tabela_estado/' + 'Rotulos' + '.csv', delimiter=',') 
         #X = jogos
         #Y = rotulos
-        return X, Y
+
+        X_train, X_test, Y_train, Y_test = train_test_split(X, Y, test_size=0.33, random_state=42)
+
+        return X_train, X_test, Y_train, Y_test
     
 
     @staticmethod
-    def treinar_modelo(jogos: str, rotulos: str, nome: str, profundidade : int = 1):
+    def treinar_modelo(jogos: str, rotulos: str, nome: str, criterion: str, profundidade : int = 1):
 
-        X_train, Y_train = ClassificaEstados.ler_resultados(jogos, rotulos)
+        X_train, X_test, Y_train, Y_test = ClassificaEstados.ler_resultados(jogos, rotulos)
 
         # Definir parametros
-        modelo = tree.DecisionTreeClassifier()
+        modelo = tree.DecisionTreeClassifier(criterion=criterion, max_depth=profundidade)
         modelo.fit(X_train, Y_train)
 
         # Salva o modelo
         joblib.dump(modelo, nome)
+
+        print("Modelo treinado com sucesso!")
 
         return
     
@@ -72,7 +77,9 @@ class ClassificaEstados:
     def undersampling(jogos_in: str, rotulos_in: str, jogos_out: str, rotulos_out: str):
 
         idx_remover = []
-        X, Y = ClassificaEstados.ler_resultados(jogos_in, rotulos_in)
+        X_train, X_test, Y_train, Y_test = ClassificaEstados.ler_resultados(jogos_in, rotulos_in)
+        X = np.concatenate((X_train, X_test), axis=0)
+        Y = np.concatenate((Y_train, Y_test), axis=0)
         wins = np.sum(Y == 1)
         loses = np.sum(Y == 0)
         print("Wins: ", wins)
@@ -117,6 +124,7 @@ class ClassificaEstados:
         print(modelo.feature_importances_)
         # Mostra a profundidade da árvore
         print()
+        print(f"Modelo Analisado: {model}")
         print("Profundidade: ", modelo.get_depth())
         # Mostra o número de nós
         print("Número de Nós: ", modelo.tree_.node_count)
@@ -125,26 +133,28 @@ class ClassificaEstados:
 
         # TESTES DO MODELO
 
-        X, Y = ClassificaEstados.ler_resultados(jogos, rotulos)
-
-        X_train, X_test, Y_train, Y_test = train_test_split(X, Y, test_size=0.33, random_state=42)
+        X_train, X_test, Y_train, Y_test = ClassificaEstados.ler_resultados(jogos, rotulos)
 
         # Y_pred: Rótulos que o modelo previu para os testes
         # Y_test: Rótulos reais dos testes
         Y_pred = modelo.predict(X_test)
 
         macrof1 = f1_score(Y_pred, Y_test, average='macro')*100
-        macrof1 = round(macrof1, 2)
-
         # Accuracy tem mesmo valor que F1_score: Micro        
         accuracy = accuracy_score(Y_pred, Y_test)*100
-        accuracy = round(accuracy, 2)
-
         matriz_confusao = confusion_matrix(Y_pred, Y_test)
         #disp = ConfusionMatrixDisplay(confusion_matrix=matriz_confusao, display_labels=nomes_das_caracteristicas)
 
-        print(f"Accuracy: {accuracy}%")
-        print(f"F1 Score - Macro: {macrof1}%")
+        TP = matriz_confusao[0, 0]
+        FP = matriz_confusao[0, 1]
+        FN = matriz_confusao[1, 0]
+        precision = TP / (TP + FP)
+        recall = TP / (TP + FN)
+
+        print(f"Accuracy: {round(accuracy, 2)}%")
+        print(f"F1 Score - Macro: {round(macrof1, 2)}%")
+        print(f"Precisão: {round(precision, 2)*100}%")
+        print(f"Recall: {round(recall, 2)*100}%")
         print("Matriz de confusão: ")
         print(matriz_confusao)
 
