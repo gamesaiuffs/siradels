@@ -163,7 +163,7 @@ class ClassificaEstados:
         plot_tree(modelo, class_names=["Derrota", "Vitória"], filled=True)
         plt.show()    
 
-    def coleta_features(estado, nome_observado, coleta, X):
+    def coleta_features(estado, nome_observado, coleta, X, model):
         estado_jogador_atual, estado_outro_jogador = [], []
         tipos_distrito = []
         num_dist_cons_JA, num_dist_cons_JMP = 0, 0
@@ -212,7 +212,7 @@ class ClassificaEstados:
         # [pontuação, ouro, n_dist_mao, n_dist_const, custo_medio_const, custo_medio_mao, rank_person]
         #
         # OBS: vetores JA e JMP são assimétricos 
-        # Nº total de features: 
+        # Nº total de features atual: 11 
         #
         # Ideias de Features:
         # Custo médio da mão, Custo médio dos distritos construídos, contador unico de tipos, ranking do personagem
@@ -220,14 +220,9 @@ class ClassificaEstados:
 
         estado_jogador_atual = [ja.ouro, len(ja.cartas_distrito_mao), len(ja.distritos_construidos), ja_custo_construido, ja_custo_mao, ja.personagem.rank]
         estado_outro_jogador = [jmp.ouro, len(jmp.cartas_distrito_mao), len(jmp.distritos_construidos), jmp_custo_construido, jmp.personagem.rank]
-        
 
-        #estado_outros_jogadores.extend(estado_outro_jogador) # Caso coloque todos os jogadores
-
-        # Coloca uma nova linha na tabela com o estado visivel do jogador
+        # concatena os vetores
         x_coleta = estado_jogador_atual + estado_outro_jogador
-        
-        X = np.vstack((X, x_coleta))
         
         #print("Jogador escolhido: ", nome_observado)
         #print("Pontuação parcial dele: ", ja.pontuacao)
@@ -235,31 +230,22 @@ class ClassificaEstados:
         #print("Pontuação parcial dele: ", jmp.pontuacao)
 
         if coleta == 1:
+            X = np.vstack((X, x_coleta))
             return X
         else:
-            return ClassificaEstados.calcula_porcentagem(X)
-        
-    @staticmethod
-    def coleta_rotulos_treino(nome_observado, nome_vencedor):
-        if nome_vencedor != "":              
-            Y = 1 if nome_observado == nome_vencedor else 0
-            return Y
+            return ClassificaEstados.calcula_porcentagem(x_coleta, model)
 
     # Utiliza modelo treinado para obter chance de vitoria
     @staticmethod
     def calcula_porcentagem(dados, model: str):
-
         # Carrega modelo
         modelo = joblib.load(model)
+        dados = [dados]
 
-        # Calcula probabilidade de vitoria
+        # Calcula probabilidade de vitória
         probabilidade_vitoria = modelo.predict_proba(dados)
-
-        #probabilidade_vitoria = f"Probabilidade de vitoria: {probabilidade_vitoria[0] * 100}%"
-
-        # MODIFICAR (proba win e lose não são complementares, testar média)
         probabilidade_vitoria = f"Probabilidade de vitoria: {probabilidade_vitoria[0][1] * 100}%"
 
-        print(probabilidade_vitoria)  # Probabilidade estimada de vit�ria
+        print(probabilidade_vitoria)  # Probabilidade estimada de vitória
 
-        return probabilidade_vitoria 
+        return 

@@ -93,7 +93,7 @@ class Simulacao:
         return acoes
 
     # Executa uma simulação do jogo e retorna estado final
-    def rodar_simulacao(self) -> Estado:
+    def rodar_simulacao(self, X, model) -> Estado:
         final_jogo = False
         # Laço de rodadas do jogo
         while not final_jogo:
@@ -161,7 +161,7 @@ class Simulacao:
                                 print(f'Turno atual: {jogador.nome}, {jogador.personagem}')
                             
                             # Mostra a chance de vitoria
-                            X = ClassificaEstados.coleta_features(self.estado, jogador.nome, 0, X)
+                            X = ClassificaEstados.coleta_features(self.estado, jogador.nome, 0, X, model)
 
                             # Mostra apenas ações disponíveis segundo regras do jogo
                             acoes_disponiveis = self.acoes_disponiveis()
