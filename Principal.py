@@ -34,10 +34,10 @@ modelo = "Log Model"
 #ClassificaEstados.treinar_modelo("Jogos US", "Rótulos US", "Log Model US", "log_loss", 10)
 
 #(jogos, rotulos, nome_modelo)
-#ClassificaEstados.modelo_info("Jogos", "Rótulos", "Log Model")
+ClassificaEstados.modelo_info("Jogos", "Rótulos", "Log Model")
 
 #ClassificaEstados.plot_tree("Exibição 2")
-ClassificaEstados.plot_learning_curve(jogos, rotulos, modelo)
+#ClassificaEstados.plot_learning_curve(jogos, rotulos, modelo)
 
 #(jogos_entrada, rotulos_entrada, jogos_saida, rotulos_saida)
 #ClassificaEstados.undersampling("Jogos 2", "Rótulos 2", "Jogos 2 Balanceados", "Rotulos 2 Balanceados")

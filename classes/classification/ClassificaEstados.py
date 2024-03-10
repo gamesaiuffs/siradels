@@ -11,12 +11,9 @@ from classes.strategies.EstrategiaAndrei import EstrategiaAndrei
 from classes.strategies.EstrategiaMCTS import EstrategiaMCTS
 from classes.strategies.EstrategiaTotalmenteAleatoria import EstrategiaTotalmenteAleatoria
 from classes.enum.TipoDistrito import TipoDistrito
-from sklearn import tree
 from sklearn.tree import DecisionTreeClassifier, export_text, plot_tree
 from sklearn.model_selection import train_test_split
-from sklearn.metrics import f1_score, make_scorer
-from sklearn.metrics import confusion_matrix, ConfusionMatrixDisplay
-from sklearn.metrics import accuracy_score
+from sklearn.metrics import f1_score, precision_score, recall_score, roc_auc_score, make_scorer, accuracy_score, confusion_matrix, log_loss, ConfusionMatrixDisplay
 from sklearn.model_selection import learning_curve
 import matplotlib.pyplot as plt
 import joblib
@@ -25,7 +22,7 @@ class ClassificaEstados:
     
     # Salva resultados das amostras
     @staticmethod
-    def salvar_resultados(X: np.ndarray, Y: list(), jogos: str, rotulos: str):
+    def salvar_resultados(X: np.ndarray, Y: list, jogos: str, rotulos: str):
         #j = j.astype(np.uint32)
         
         np.savetxt('./classes/classification/samples/' + jogos + '.csv', X, delimiter=',', fmt='%s')   # Features
@@ -67,7 +64,7 @@ class ClassificaEstados:
         X_train, X_test, Y_train, Y_test = ClassificaEstados.ler_resultados(jogos, rotulos)
 
         # Definir parametros
-        modelo = tree.DecisionTreeClassifier(criterion=criterion, max_depth=profundidade)
+        modelo = DecisionTreeClassifier(criterion=criterion, max_depth=profundidade)
         modelo.fit(X_train, Y_train)
 
         # Salva o modelo
@@ -144,22 +141,24 @@ class ClassificaEstados:
         # Y_test: Rótulos reais dos testes
         Y_pred = modelo.predict(X_test)
 
-        macrof1 = f1_score(Y_pred, Y_test, average='macro')*100
+        macrof1 = f1_score(y_true=Y_test, y_pred=Y_pred, average='macro')*100
         # Accuracy tem mesmo valor que F1_score: Micro        
-        accuracy = accuracy_score(Y_pred, Y_test)*100
-        matriz_confusao = confusion_matrix(Y_pred, Y_test)
+        accuracy = accuracy_score(y_true=Y_test, y_pred=Y_pred)*100
+        log = log_loss(y_true=Y_test, y_pred=Y_pred)
+        matriz_confusao = confusion_matrix(y_true=Y_test, y_pred=Y_pred )
+        precision = precision_score(y_true=Y_test, y_pred=Y_pred) * 100
+        recall = recall_score(y_true=Y_test, y_pred=Y_pred) * 100
+        auc = roc_auc_score(y_true=Y_test, y_score=Y_pred, ) * 100
+
+        # Plotar matriz confusão 
         #disp = ConfusionMatrixDisplay(confusion_matrix=matriz_confusao, display_labels=nomes_das_caracteristicas)
 
-        TP = matriz_confusao[0, 0]
-        FP = matriz_confusao[0, 1]
-        FN = matriz_confusao[1, 0]
-        precision = TP / (TP + FP)
-        recall = TP / (TP + FN)
-
         print(f"Accuracy: {round(accuracy, 2)}%")
+        print(f"AUC: {round(auc, 2)}%")
+        print(f"Log Loss: {round(log, 2)}")
         print(f"F1 Score - Macro: {round(macrof1, 2)}%")
-        print(f"Precisão: {round(precision, 2)*100}%")
-        print(f"Recall: {round(recall, 2)*100}%")
+        print(f"Precisão: {round(precision, 2)}%")
+        print(f"Recall: {round(recall, 2)}%")
         print("Matriz de confusão: ")
         print(matriz_confusao)
 
