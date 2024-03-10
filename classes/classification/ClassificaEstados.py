@@ -14,21 +14,23 @@ from classes.enum.TipoDistrito import TipoDistrito
 from sklearn import tree
 from sklearn.tree import DecisionTreeClassifier, export_text, plot_tree
 from sklearn.model_selection import train_test_split
-from sklearn.metrics import f1_score
+from sklearn.metrics import f1_score, make_scorer
 from sklearn.metrics import confusion_matrix, ConfusionMatrixDisplay
 from sklearn.metrics import accuracy_score
+from sklearn.model_selection import learning_curve
 import matplotlib.pyplot as plt
 import joblib
 
 class ClassificaEstados:   
     
+    # Salva resultados das amostras
     @staticmethod
     def salvar_resultados(X: np.ndarray, Y: list(), jogos: str, rotulos: str):
         #j = j.astype(np.uint32)
         
-        np.savetxt('./classes/tabela_estado/' + jogos + '.csv', X, delimiter=',', fmt='%s')   # Features
+        np.savetxt('./classes/classification/samples/' + jogos + '.csv', X, delimiter=',', fmt='%s')   # Features
         #np.savetxt('./tabela_estado/' + j.name + '.csv', i, delimiter=',', fmt='%6u')
-        np.savetxt('./classes/tabela_estado/' + rotulos + '.csv', Y, delimiter=',', fmt='%6u')    # Rotulos
+        np.savetxt('./classes/classification/samples/' + rotulos + '.csv', Y, delimiter=',', fmt='%6u')    # Rotulos
         #np.savetxt('./tabela_estado/' + 'Rotulos' + '.csv', Y, delimiter=',', fmt='%6u')
         # Caminho do arquivo CSV
         '''
@@ -42,12 +44,14 @@ class ClassificaEstados:
             # Adiciona os novos dados ao final do arquivo
             escritor_csv.writerows(novos_dados)
         '''
+        return
 
+    # Ler amostras salvas
     @staticmethod
     def ler_resultados(jogos: str, rotulos: str) -> list[np.ndarray]:
-        X = np.genfromtxt('./classes/tabela_estado/' + jogos + '.csv', delimiter=',')
+        X = np.genfromtxt('./classes/classification/samples/' + jogos + '.csv', delimiter=',')
         #jogos = np.genfromtxt('./tabela_estado/' + i.name + '.csv', delimiter=',')
-        Y = np.genfromtxt('./classes/tabela_estado/' + rotulos + '.csv', delimiter=',') 
+        Y = np.genfromtxt('./classes/classification/samples/' + rotulos + '.csv', delimiter=',') 
         #rotulos = np.genfromtxt('./tabela_estado/' + 'Rotulos' + '.csv', delimiter=',') 
         #X = jogos
         #Y = rotulos
@@ -56,7 +60,7 @@ class ClassificaEstados:
 
         return X_train, X_test, Y_train, Y_test
     
-
+    # Treina o modelo
     @staticmethod
     def treinar_modelo(jogos: str, rotulos: str, nome: str, criterion: str, profundidade : int = 1):
 
@@ -67,12 +71,13 @@ class ClassificaEstados:
         modelo.fit(X_train, Y_train)
 
         # Salva o modelo
-        joblib.dump(modelo, nome)
+        joblib.dump(modelo, f'./classes/classification/models/{nome}')
 
         print("Modelo treinado com sucesso!")
 
-        return
+        return 
     
+    # Equilibra as amostras em relação as features
     @staticmethod
     def undersampling(jogos_in: str, rotulos_in: str, jogos_out: str, rotulos_out: str):
 
@@ -107,7 +112,7 @@ class ClassificaEstados:
     @staticmethod
     def modelo_info(jogos: str, rotulos: str, model: str):
 
-        modelo = joblib.load(model)
+        modelo = joblib.load(f'./classes/classification/models/{model}')
 
         # [jogador.ouro, len(jogador.cartas_distrito_mao), num_dist_cons, jogador.personagem.rank]
         
@@ -158,12 +163,59 @@ class ClassificaEstados:
         print("Matriz de confusão: ")
         print(matriz_confusao)
 
-        # Mostra a estrutura visual da �rvore
-        plt.figure(figsize=(24, 18))
-        plot_tree(modelo, class_names=["Derrota", "Vitória"], filled=True)
-        plt.show()    
+        # Mostra a curva de aprendizado
+        #ClassificaEstados.plot_learning_curve(X_train, Y_train, modelo)
 
-    def coleta_features(estado, nome_observado, coleta, X, model):
+        # Mostra a estrutura visual da árvore
+        #ClassificaEstados.plot_tree(model, nomes_das_caracteristicas)
+
+        return
+
+    # Plota árvore
+    @staticmethod
+    def plot_tree(model_name, f_names):
+
+        modelo = joblib.load(f'./classes/classification/models/{model_name}')
+
+        plt.figure(figsize=(10, 5))
+        plot_tree(modelo, feature_names=f_names, class_names=["Lose", "Win"], filled=True)
+        plt.show()   
+        return
+
+    # Plota curva de aprendizado
+    @staticmethod
+    def plot_learning_curve(jogos: str, rotulos: str, model_name: str):
+
+        model = joblib.load(f'./classes/classification/models/{model_name}')
+
+        X_train, X_test, Y_train, Y_test = ClassificaEstados.ler_resultados(jogos, rotulos)
+
+        f1_macro_scorer = make_scorer(f1_score, average='macro')
+
+        train_sizes, train_scores, test_scores = learning_curve(model, X_train, Y_train, cv=5, scoring=f1_macro_scorer, n_jobs=-1)
+
+        # Calculando as médias e desvios padrão das pontuações
+        train_scores_mean = np.mean(train_scores, axis=1)
+        train_scores_std = np.std(train_scores, axis=1)
+        test_scores_mean = np.mean(test_scores, axis=1)
+        test_scores_std = np.std(test_scores, axis=1)
+
+        # Plotando a curva de aprendizado
+        plt.figure(figsize=(10, 7))
+        plt.fill_between(train_sizes, train_scores_mean - train_scores_std, train_scores_mean + train_scores_std, alpha=0.1, color="blue")
+        plt.fill_between(train_sizes, test_scores_mean - test_scores_std, test_scores_mean + test_scores_std, alpha=0.1, color="orange")
+        plt.plot(train_sizes, train_scores_mean, 'o-', color="blue", label="Score de Treinamento")
+        plt.plot(train_sizes, test_scores_mean, 'o-', color="orange", label="Score de Teste")
+        plt.title("Curva de Aprendizado da Árvore de Decisão")
+        plt.xlabel("Tamanho do Conjunto de Treinamento")
+        plt.ylabel("F1 Score Macro")
+        plt.legend(loc="best")
+        plt.show()
+        
+        return
+
+    @staticmethod
+    def coleta_features(estado, nome_observado, coleta, X, model_name):
         estado_jogador_atual, estado_outro_jogador = [], []
         tipos_distrito = []
         num_dist_cons_JA, num_dist_cons_JMP = 0, 0
@@ -233,19 +285,19 @@ class ClassificaEstados:
             X = np.vstack((X, x_coleta))
             return X
         else:
-            return ClassificaEstados.calcula_porcentagem(x_coleta, model)
+            return ClassificaEstados.calcula_porcentagem(x_coleta, model_name)
 
     # Utiliza modelo treinado para obter chance de vitoria
     @staticmethod
-    def calcula_porcentagem(dados, model: str):
+    def calcula_porcentagem(data, model_name: str):
         # Carrega modelo
-        modelo = joblib.load(model)
-        dados = [dados]
+        model = joblib.load(model_name)
+        data_vec = [data]
 
         # Calcula probabilidade de vitória
-        probabilidade_vitoria = modelo.predict_proba(dados)
-        probabilidade_vitoria = f"Probabilidade de vitoria: {probabilidade_vitoria[0][1] * 100}%"
+        win_probability = model.predict_proba(data_vec)
+        win_probability = f"Probabilidade de vitoria: {win_probability[0][1] * 100}%"
 
-        print(probabilidade_vitoria)  # Probabilidade estimada de vitória
+        print(win_probability)  # Probabilidade estimada de vitória
 
         return 

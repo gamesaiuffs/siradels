@@ -4,8 +4,6 @@ from classes.classification.ColetaEstados import ColetaEstados
 from classes.Simulacao import Simulacao
 from classes.strategies.EstrategiaTotalmenteAleatoria import EstrategiaTotalmenteAleatoria
 from sklearn.model_selection import train_test_split
-import time
-import numpy as np
 vscode = True
 
 estrategias = []
@@ -20,27 +18,30 @@ estrategias.append(EstrategiaGustavo())
 estrategias.append(EstrategiaJoao())
 '''
 
-for i in range(5):          # fixo em 5 players
-   estrategias.append(EstrategiaTotalmenteAleatoria(str(i+1)))
-# Cria simulacao
-simulacao = Simulacao(estrategias, 8, True)
+jogos = "Jogos"
+rotulos = "Rótulos" 
+modelo = "Log Model"
 
-X = [np.zeros(11)]
+#for i in range(5):          # fixo em 5 players
+#   estrategias.append(EstrategiaTotalmenteAleatoria(str(i+1)))
+# Cria simulacao
+#simulacao = Simulacao(estrategias, 8, True)
 
 #(qtd_pts, n_features, nome_jogos, nome_rotulos)
 #ColetaEstados.coleta_amostras(50000, 11, "Jogos 2", "Rótulos 2")
 
 #(jogos, rotulos, nome_modelo, criterion, profundidade)
-#ClassificaEstados.treinar_modelo("Jogos", "Rótulos", "Log Model 2", "log_loss", 10)
+#ClassificaEstados.treinar_modelo("Jogos US", "Rótulos US", "Log Model US", "log_loss", 10)
 
 #(jogos, rotulos, nome_modelo)
-#ClassificaEstados.modelo_info("Jogos", "Rótulos", "Log Model 2")
+#ClassificaEstados.modelo_info("Jogos", "Rótulos", "Log Model")
 
-#ClassificaEstados.plot("Log Model 2", "Log Loss")
+#ClassificaEstados.plot_tree("Exibição 2")
+ClassificaEstados.plot_learning_curve(jogos, rotulos, modelo)
 
 #(jogos_entrada, rotulos_entrada, jogos_saida, rotulos_saida)
 #ClassificaEstados.undersampling("Jogos 2", "Rótulos 2", "Jogos 2 Balanceados", "Rotulos 2 Balanceados")
-simulacao.rodar_simulacao(X=X, model="Log Model")
+#simulacao.rodar_simulacao(X=0, model="Log Model")
 
 '''
 # Flag que modifica caminhos para salvar/ler arquivos dependendo da IDE utilizada
