@@ -1,21 +1,24 @@
 from classes.Experimento import Experimento
 import time
+from classes.strategies.EstrategiaFelipe import EstrategiaFelipe
+from classes.strategies.EstrategiaMCTS import EstrategiaMCTS
+from classes.strategies.EstrategiaTotalmenteAleatoria import EstrategiaTotalmenteAleatoria
 
 # Flag que modifica caminhos para salvar/ler arquivos dependendo da IDE utilizada
 vscode = False
-experimento = Experimento(vscode)
+if vscode:
+    caminho = './classes'
+else:  # PyCharm
+    caminho = '.'
+
+experimento = Experimento(caminho)
 startTime = time.time()
 
-# Testar com jogadores manuais
-#experimento.testar_simulacao(True, 1, 5)
+# Treinar modelo por 10min = 600s
+#experimento.treinar_modelo_mcts(600)
 
-# Testar com jogadores totalmente aleatórios
-#experimento.testar_simulacao(False, 10000, 5)
-
-# Treinar modelo por 10min
-experimento.treinar_modelo_mcts(600)
-
-# Testar treino contra jogadores totalmente aleatórios
-experimento.testar_modelo_mcts(10000, 5)
+# Testar treino contra outras estratégias
+estrategias = [EstrategiaTotalmenteAleatoria('Bot 1'), EstrategiaTotalmenteAleatoria('Bot 2'), EstrategiaTotalmenteAleatoria('Bot 3'), EstrategiaTotalmenteAleatoria('Bot 4'), EstrategiaMCTS(caminho)]
+Experimento.testar_estrategias(estrategias)
 
 print(f"Tempo da simulação = {(time.time() - startTime):.2f}s")

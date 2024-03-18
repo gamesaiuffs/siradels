@@ -1,4 +1,7 @@
 import numpy as np
+import random
+
+
 from classes.enum.TipoAcao import TipoAcao
 from classes.enum.TipoTabela import TipoTabela
 from classes.enum.TipoModeloAcao import TipoModeloAcao
@@ -7,16 +10,55 @@ from classes.model.CartaPersonagem import CartaPersonagem
 from classes.strategies.Estrategia import Estrategia
 from classes.model.Estado import Estado
 from classes.model.Jogador import Jogador
-import random
 
 
 class EstrategiaMCTS(Estrategia):
-    def __init__(self, modelos_mcts: list[list[np.array]], modelos_historico: list[list[np.array]], modo: TipoTabela, treino: bool = True):
-        super().__init__('MCTS')
-        self.modelos_mcts = modelos_mcts
-        self.modelos_historico = modelos_historico
-        self.modo = modo
-        self.treino = treino
+    def __init__(self, caminho_modelo: str, tipo_treino: int = 2, nome: str = 'MCTS'):
+        super().__init__(nome)
+        # Caminho inicial dos arquivos do modelo
+        self.caminho_modelo = caminho_modelo
+        # 0 - treino zerado, 1 - treino continuado a partir de modelo pré-existente, 2 - apenas teste
+        self.tipo_treino = tipo_treino
+        self.treino = self.tipo_treino < 2
+        self.modelos_mcts = []
+        self.modelos_historico = []
+        if self.tipo_treino == 0:
+            for tipo_modelo in TipoModeloAcao:
+                self.modelos_mcts.append(self.inicializar_modelo_mcts(tipo_modelo.tamanho))
+        else:
+            self.modelos_mcts = self.ler_modelos()
+        self.tipo_tabela = None
+
+    # Carrega os modelos a partir dos arquivos CSV
+    def ler_modelos(self) -> list[list[np.ndarray]]:
+        modelos_mcts = []
+        for tipo_modelo in TipoModeloAcao:
+            modelo = []
+            for tipo_tabela in TipoTabela:
+                a = np.genfromtxt(self.caminho_modelo + '/modelos_mcts/' + tipo_modelo.name + '/' + tipo_tabela.name + '.csv', delimiter=',')
+                modelo.append(a)
+            modelos_mcts.append(modelo)
+        return modelos_mcts
+
+    # Cria modelo MCTS (tabelas) preenchidas com um valor inicial
+    @staticmethod
+    def inicializar_modelo_mcts(qtd_acoes: int, valor_inicial: int = 1) -> list[np.ndarray]:
+        modelo = []
+        for tabela in TipoTabela:
+            modelo.append(np.ones((tabela.tamanho, qtd_acoes * 2)) * valor_inicial)
+        return modelo
+
+    # Reinicia dados do histórico
+    def iniciar_historico(self):
+        self.modelos_historico = []
+        for tipo_modelo in TipoModeloAcao:
+            self.modelos_historico.append(self.inicializar_modelo_mcts(tipo_modelo.tamanho, 0))
+
+    # Salva os modelos em arquivos CSV
+    def salvar_modelos(self):
+        for (modelo, tipo_modelo) in zip(self.modelos_mcts, TipoModeloAcao):
+            for (i, tipo_tabela) in zip(modelo, TipoTabela):
+                    np.savetxt(self.caminho_modelo + '/modelos_mcts/' + tipo_modelo.name + '/' + tipo_tabela.name + '.csv', i, delimiter=',', fmt='%7u')
 
     def modelo_mcts_escolha(self, qtd_opcoes: int, opcoes_disponiveis: np.ndarray) -> int:
         if self.treino:
@@ -38,8 +80,8 @@ class EstrategiaMCTS(Estrategia):
         tipo_modelo_acao = TipoModeloAcao.EscolherPersonagem
         if self.treino:
             # Tabela a ser treinada
-            indice_linha_tabela = estado.converter_estado()[self.modo.idx]
-            linha_tabela = self.modelos_mcts[tipo_modelo_acao.idx][self.modo.idx][indice_linha_tabela]
+            indice_linha_tabela = estado.converter_estado()[self.tipo_tabela.idx]
+            linha_tabela = self.modelos_mcts[tipo_modelo_acao.idx][self.tipo_tabela.idx][indice_linha_tabela]
             # Deixar apenas colunas das ações disponíveis no estado atual
             opcoes_disponiveis = []
             for personagem in estado.tabuleiro.baralho_personagens:
@@ -49,8 +91,8 @@ class EstrategiaMCTS(Estrategia):
             # Aplica modelo MCTS para escolha das opções dentre as opções disponíveis
             escolha = self.modelo_mcts_escolha(len(estado.tabuleiro.baralho_personagens), np.array(opcoes_disponiveis))
             # Salvar histórico das escolhas para acrescentar no modelo após resultado
-            self.modelos_historico[tipo_modelo_acao.idx][self.modo.idx][indice_linha_tabela][estado.tabuleiro.baralho_personagens[escolha].rank-1] = 1
-            self.modelos_historico[tipo_modelo_acao.idx][self.modo.idx][indice_linha_tabela][estado.tabuleiro.baralho_personagens[escolha].rank-1 + tipo_modelo_acao.tamanho] = 1
+            self.modelos_historico[tipo_modelo_acao.idx][self.tipo_tabela.idx][indice_linha_tabela][estado.tabuleiro.baralho_personagens[escolha].rank-1] = 1
+            self.modelos_historico[tipo_modelo_acao.idx][self.tipo_tabela.idx][indice_linha_tabela][estado.tabuleiro.baralho_personagens[escolha].rank-1 + tipo_modelo_acao.tamanho] = 1
             return escolha
         else:
             # Converte estado e monta a consulta a partir de todas as tabelas individuais
@@ -70,8 +112,8 @@ class EstrategiaMCTS(Estrategia):
         tipo_modelo_acao = TipoModeloAcao.EscolherAcao
         if self.treino:
             # Tabela a ser treinada
-            indice_linha_tabela = estado.converter_estado()[self.modo.idx]
-            linha_tabela = self.modelos_mcts[tipo_modelo_acao.idx][self.modo.idx][indice_linha_tabela]
+            indice_linha_tabela = estado.converter_estado()[self.tipo_tabela.idx]
+            linha_tabela = self.modelos_mcts[tipo_modelo_acao.idx][self.tipo_tabela.idx][indice_linha_tabela]
             # Deixar apenas colunas das ações disponíveis no estado atual
             opcoes_disponiveis = []
             for acao in acoes_disponiveis:
@@ -81,8 +123,8 @@ class EstrategiaMCTS(Estrategia):
             # Aplica modelo MCTS para escolha das opções dentre as opções disponíveis
             escolha = self.modelo_mcts_escolha(len(acoes_disponiveis), np.array(opcoes_disponiveis))
             # Salvar histórico das escolhas para acrescentar no modelo após resultado
-            self.modelos_historico[tipo_modelo_acao.idx][self.modo.idx][indice_linha_tabela][acoes_disponiveis[escolha].value] = 1
-            self.modelos_historico[tipo_modelo_acao.idx][self.modo.idx][indice_linha_tabela][acoes_disponiveis[escolha].value + tipo_modelo_acao.tamanho] = 1
+            self.modelos_historico[tipo_modelo_acao.idx][self.tipo_tabela.idx][indice_linha_tabela][acoes_disponiveis[escolha].value] = 1
+            self.modelos_historico[tipo_modelo_acao.idx][self.tipo_tabela.idx][indice_linha_tabela][acoes_disponiveis[escolha].value + tipo_modelo_acao.tamanho] = 1
             return escolha
         else:
             # Converte estado e monta a consulta a partir de todas as tabelas individuais
@@ -102,8 +144,8 @@ class EstrategiaMCTS(Estrategia):
         tipo_modelo_acao = TipoModeloAcao.ColetarCartas
         if self.treino:
             # Tabela a ser treinada
-            indice_linha_tabela = estado.converter_estado()[self.modo.idx]
-            linha_tabela = self.modelos_mcts[tipo_modelo_acao.idx][self.modo.idx][indice_linha_tabela]
+            indice_linha_tabela = estado.converter_estado()[self.tipo_tabela.idx]
+            linha_tabela = self.modelos_mcts[tipo_modelo_acao.idx][self.tipo_tabela.idx][indice_linha_tabela]
             # Deixar apenas colunas das ações disponíveis no estado atual
             opcoes_disponiveis = []
             for carta in cartas_compradas:
@@ -113,8 +155,8 @@ class EstrategiaMCTS(Estrategia):
             # Aplica modelo MCTS para escolha das opções dentre as opções disponíveis
             escolha = self.modelo_mcts_escolha(len(cartas_compradas), np.array(opcoes_disponiveis))
             # Salvar histórico das escolhas para acrescentar no modelo após resultado
-            self.modelos_historico[tipo_modelo_acao.idx][self.modo.idx][indice_linha_tabela][cartas_compradas[escolha].idx] = 1
-            self.modelos_historico[tipo_modelo_acao.idx][self.modo.idx][indice_linha_tabela][cartas_compradas[escolha].idx + tipo_modelo_acao.tamanho] = 1
+            self.modelos_historico[tipo_modelo_acao.idx][self.tipo_tabela.idx][indice_linha_tabela][cartas_compradas[escolha].idx] = 1
+            self.modelos_historico[tipo_modelo_acao.idx][self.tipo_tabela.idx][indice_linha_tabela][cartas_compradas[escolha].idx + tipo_modelo_acao.tamanho] = 1
             return escolha
         else:
             # Converte estado e monta a consulta a partir de todas as tabelas individuais
@@ -139,8 +181,8 @@ class EstrategiaMCTS(Estrategia):
             tem_opcoes_covil = 1
         if self.treino:
             # Tabela a ser treinada
-            indice_linha_tabela = estado.converter_estado()[self.modo.idx]
-            linha_tabela = self.modelos_mcts[tipo_modelo_acao.idx][self.modo.idx][indice_linha_tabela]
+            indice_linha_tabela = estado.converter_estado()[self.tipo_tabela.idx]
+            linha_tabela = self.modelos_mcts[tipo_modelo_acao.idx][self.tipo_tabela.idx][indice_linha_tabela]
             # Deixar apenas colunas das ações disponíveis no estado atual
             opcoes_disponiveis = []
             for carta in distritos_para_construir:
@@ -157,12 +199,12 @@ class EstrategiaMCTS(Estrategia):
             if escolha == len(distritos_para_construir):
                 escolha = random.randint(0, len(distritos_para_construir_covil_ladroes) - 1) + len(distritos_para_construir)
                 # Salvar histórico das escolhas para acrescentar no modelo após resultado
-                self.modelos_historico[tipo_modelo_acao.idx][self.modo.idx][indice_linha_tabela][tipo_modelo_acao.tamanho - 1] = 1
-                self.modelos_historico[tipo_modelo_acao.idx][self.modo.idx][indice_linha_tabela][tipo_modelo_acao.tamanho - 1 + tipo_modelo_acao.tamanho] = 1
+                self.modelos_historico[tipo_modelo_acao.idx][self.tipo_tabela.idx][indice_linha_tabela][tipo_modelo_acao.tamanho - 1] = 1
+                self.modelos_historico[tipo_modelo_acao.idx][self.tipo_tabela.idx][indice_linha_tabela][tipo_modelo_acao.tamanho - 1 + tipo_modelo_acao.tamanho] = 1
             else:
                 # Salvar histórico das escolhas para acrescentar no modelo após resultado
-                self.modelos_historico[tipo_modelo_acao.idx][self.modo.idx][indice_linha_tabela][distritos_para_construir[escolha].idx] = 1
-                self.modelos_historico[tipo_modelo_acao.idx][self.modo.idx][indice_linha_tabela][distritos_para_construir[escolha].idx + tipo_modelo_acao.tamanho] = 1
+                self.modelos_historico[tipo_modelo_acao.idx][self.tipo_tabela.idx][indice_linha_tabela][distritos_para_construir[escolha].idx] = 1
+                self.modelos_historico[tipo_modelo_acao.idx][self.tipo_tabela.idx][indice_linha_tabela][distritos_para_construir[escolha].idx + tipo_modelo_acao.tamanho] = 1
             return escolha
         else:
             # Converte estado e monta a consulta a partir de todas as tabelas individuais
@@ -188,8 +230,8 @@ class EstrategiaMCTS(Estrategia):
         tipo_modelo_acao = TipoModeloAcao.ConstruirDistritoCovilDosLadroes
         if self.treino:
             # Tabela a ser treinada
-            indice_linha_tabela = estado.converter_estado()[self.modo.idx]
-            linha_tabela = self.modelos_mcts[tipo_modelo_acao.idx][self.modo.idx][indice_linha_tabela]
+            indice_linha_tabela = estado.converter_estado()[self.tipo_tabela.idx]
+            linha_tabela = self.modelos_mcts[tipo_modelo_acao.idx][self.tipo_tabela.idx][indice_linha_tabela]
             # Deixar apenas colunas das ações disponíveis no estado atual
             opcoes_disponiveis = []
             for carta in estado.jogador_atual.cartas_distrito_mao:
@@ -199,8 +241,8 @@ class EstrategiaMCTS(Estrategia):
             # Aplica modelo MCTS para escolha das opções dentre as opções disponíveis
             escolha = self.modelo_mcts_escolha(len(estado.jogador_atual.cartas_distrito_mao), np.array(opcoes_disponiveis))
             # Salvar histórico das escolhas para acrescentar no modelo após resultado
-            self.modelos_historico[tipo_modelo_acao.idx][self.modo.idx][indice_linha_tabela][estado.jogador_atual.cartas_distrito_mao[escolha].idx] = 1
-            self.modelos_historico[tipo_modelo_acao.idx][self.modo.idx][indice_linha_tabela][estado.jogador_atual.cartas_distrito_mao[escolha].idx + tipo_modelo_acao.tamanho] = 1
+            self.modelos_historico[tipo_modelo_acao.idx][self.tipo_tabela.idx][indice_linha_tabela][estado.jogador_atual.cartas_distrito_mao[escolha].idx] = 1
+            self.modelos_historico[tipo_modelo_acao.idx][self.tipo_tabela.idx][indice_linha_tabela][estado.jogador_atual.cartas_distrito_mao[escolha].idx + tipo_modelo_acao.tamanho] = 1
             return escolha
         else:
             # Converte estado e monta a consulta a partir de todas as tabelas individuais
@@ -220,8 +262,8 @@ class EstrategiaMCTS(Estrategia):
         tipo_modelo_acao = TipoModeloAcao.HabilidadeAssassina
         if self.treino:
             # Tabela a ser treinada
-            indice_linha_tabela = estado.converter_estado()[self.modo.idx]
-            linha_tabela = self.modelos_mcts[tipo_modelo_acao.idx][self.modo.idx][indice_linha_tabela]
+            indice_linha_tabela = estado.converter_estado()[self.tipo_tabela.idx]
+            linha_tabela = self.modelos_mcts[tipo_modelo_acao.idx][self.tipo_tabela.idx][indice_linha_tabela]
             # Deixar apenas colunas das ações disponíveis no estado atual
             opcoes_disponiveis = []
             for personagem in opcoes_personagem:
@@ -231,8 +273,8 @@ class EstrategiaMCTS(Estrategia):
             # Aplica modelo MCTS para escolha das opções dentre as opções disponíveis
             escolha = self.modelo_mcts_escolha(len(opcoes_personagem), np.array(opcoes_disponiveis))
             # Salvar histórico das escolhas para acrescentar no modelo após resultado
-            self.modelos_historico[tipo_modelo_acao.idx][self.modo.idx][indice_linha_tabela][opcoes_personagem[escolha].rank-1] = 1
-            self.modelos_historico[tipo_modelo_acao.idx][self.modo.idx][indice_linha_tabela][opcoes_personagem[escolha].rank-1 + tipo_modelo_acao.tamanho] = 1
+            self.modelos_historico[tipo_modelo_acao.idx][self.tipo_tabela.idx][indice_linha_tabela][opcoes_personagem[escolha].rank-1] = 1
+            self.modelos_historico[tipo_modelo_acao.idx][self.tipo_tabela.idx][indice_linha_tabela][opcoes_personagem[escolha].rank-1 + tipo_modelo_acao.tamanho] = 1
             return escolha
         else:
             # Converte estado e monta a consulta a partir de todas as tabelas individuais
@@ -252,8 +294,8 @@ class EstrategiaMCTS(Estrategia):
         tipo_modelo_acao = TipoModeloAcao.HabilidadeLadrao
         if self.treino:
             # Tabela a ser treinada
-            indice_linha_tabela = estado.converter_estado()[self.modo.idx]
-            linha_tabela = self.modelos_mcts[tipo_modelo_acao.idx][self.modo.idx][indice_linha_tabela]
+            indice_linha_tabela = estado.converter_estado()[self.tipo_tabela.idx]
+            linha_tabela = self.modelos_mcts[tipo_modelo_acao.idx][self.tipo_tabela.idx][indice_linha_tabela]
             # Deixar apenas colunas das ações disponíveis no estado atual
             opcoes_disponiveis = []
             for personagem in opcoes_personagem:
@@ -263,8 +305,8 @@ class EstrategiaMCTS(Estrategia):
             # Aplica modelo MCTS para escolha das opções dentre as opções disponíveis
             escolha = self.modelo_mcts_escolha(len(opcoes_personagem), np.array(opcoes_disponiveis))
             # Salvar histórico das escolhas para acrescentar no modelo após resultado
-            self.modelos_historico[tipo_modelo_acao.idx][self.modo.idx][indice_linha_tabela][opcoes_personagem[escolha].rank-1] = 1
-            self.modelos_historico[tipo_modelo_acao.idx][self.modo.idx][indice_linha_tabela][opcoes_personagem[escolha].rank-1 + tipo_modelo_acao.tamanho] = 1
+            self.modelos_historico[tipo_modelo_acao.idx][self.tipo_tabela.idx][indice_linha_tabela][opcoes_personagem[escolha].rank-1] = 1
+            self.modelos_historico[tipo_modelo_acao.idx][self.tipo_tabela.idx][indice_linha_tabela][opcoes_personagem[escolha].rank-1 + tipo_modelo_acao.tamanho] = 1
             return escolha
         else:
             # Converte estado e monta a consulta a partir de todas as tabelas individuais
@@ -291,8 +333,8 @@ class EstrategiaMCTS(Estrategia):
         tipo_modelo_acao = TipoModeloAcao.HabilidadeIlusionistaTrocar
         if self.treino:
             # Tabela a ser treinada
-            indice_linha_tabela = estado.converter_estado()[self.modo.idx]
-            linha_tabela = self.modelos_mcts[tipo_modelo_acao.idx][self.modo.idx][indice_linha_tabela]
+            indice_linha_tabela = estado.converter_estado()[self.tipo_tabela.idx]
+            linha_tabela = self.modelos_mcts[tipo_modelo_acao.idx][self.tipo_tabela.idx][indice_linha_tabela]
             # (0 - escolher jogador com mais cartas, 1 - escolher jogador com mais pontos dentre os que tem cartas na mão)
             opcoes_disponiveis = []
             for opcao in range(2):
@@ -302,8 +344,8 @@ class EstrategiaMCTS(Estrategia):
             # Aplica modelo MCTS para escolha das opções dentre as opções disponíveis
             escolha = self.modelo_mcts_escolha(2, np.array(opcoes_disponiveis))
             # Salvar histórico das escolhas para acrescentar no modelo após resultado
-            self.modelos_historico[tipo_modelo_acao.idx][self.modo.idx][indice_linha_tabela][escolha] = 1
-            self.modelos_historico[tipo_modelo_acao.idx][self.modo.idx][indice_linha_tabela][escolha + tipo_modelo_acao.tamanho] = 1
+            self.modelos_historico[tipo_modelo_acao.idx][self.tipo_tabela.idx][indice_linha_tabela][escolha] = 1
+            self.modelos_historico[tipo_modelo_acao.idx][self.tipo_tabela.idx][indice_linha_tabela][escolha + tipo_modelo_acao.tamanho] = 1
         else:
             # Converte estado e monta a consulta a partir de todas as tabelas individuais
             estado_vetor = estado.converter_estado()
@@ -328,8 +370,8 @@ class EstrategiaMCTS(Estrategia):
             qtd_maxima = 4
         if self.treino:
             # Tabela a ser treinada
-            indice_linha_tabela = estado.converter_estado()[self.modo.idx]
-            linha_tabela = self.modelos_mcts[tipo_modelo_acao.idx][self.modo.idx][indice_linha_tabela]
+            indice_linha_tabela = estado.converter_estado()[self.tipo_tabela.idx]
+            linha_tabela = self.modelos_mcts[tipo_modelo_acao.idx][self.tipo_tabela.idx][indice_linha_tabela]
             # Deixar apenas colunas das ações disponíveis no estado atual
             opcoes_disponiveis = []
             for qtd in range(1, qtd_maxima + 1):
@@ -339,8 +381,8 @@ class EstrategiaMCTS(Estrategia):
             # Aplica modelo MCTS para escolha das opções dentre as opções disponíveis
             escolha = self.modelo_mcts_escolha(qtd_maxima, np.array(opcoes_disponiveis))
             # Salvar histórico das escolhas para acrescentar no modelo após resultado
-            self.modelos_historico[tipo_modelo_acao.idx][self.modo.idx][indice_linha_tabela][escolha-1] = 1
-            self.modelos_historico[tipo_modelo_acao.idx][self.modo.idx][indice_linha_tabela][escolha-1 + tipo_modelo_acao.tamanho] = 1
+            self.modelos_historico[tipo_modelo_acao.idx][self.tipo_tabela.idx][indice_linha_tabela][escolha-1] = 1
+            self.modelos_historico[tipo_modelo_acao.idx][self.tipo_tabela.idx][indice_linha_tabela][escolha-1 + tipo_modelo_acao.tamanho] = 1
             return escolha
         else:
             # Converte estado e monta a consulta a partir de todas as tabelas individuais
@@ -360,8 +402,8 @@ class EstrategiaMCTS(Estrategia):
         tipo_modelo_acao = TipoModeloAcao.HabilidadeIlusionistaDescartarCarta
         if self.treino:
             # Tabela a ser treinada
-            indice_linha_tabela = estado.converter_estado()[self.modo.idx]
-            linha_tabela = self.modelos_mcts[tipo_modelo_acao.idx][self.modo.idx][indice_linha_tabela]
+            indice_linha_tabela = estado.converter_estado()[self.tipo_tabela.idx]
+            linha_tabela = self.modelos_mcts[tipo_modelo_acao.idx][self.tipo_tabela.idx][indice_linha_tabela]
             # Deixar apenas colunas das ações disponíveis no estado atual
             opcoes_disponiveis = []
             for carta in estado.jogador_atual.cartas_distrito_mao:
@@ -371,8 +413,8 @@ class EstrategiaMCTS(Estrategia):
             # Aplica modelo MCTS para escolha das opções dentre as opções disponíveis
             escolha = self.modelo_mcts_escolha(len(estado.jogador_atual.cartas_distrito_mao), np.array(opcoes_disponiveis))
             # Salvar histórico das escolhas para acrescentar no modelo após resultado
-            self.modelos_historico[tipo_modelo_acao.idx][self.modo.idx][indice_linha_tabela][estado.jogador_atual.cartas_distrito_mao[escolha].idx] = 1
-            self.modelos_historico[tipo_modelo_acao.idx][self.modo.idx][indice_linha_tabela][estado.jogador_atual.cartas_distrito_mao[escolha].idx + tipo_modelo_acao.tamanho] = 1
+            self.modelos_historico[tipo_modelo_acao.idx][self.tipo_tabela.idx][indice_linha_tabela][estado.jogador_atual.cartas_distrito_mao[escolha].idx] = 1
+            self.modelos_historico[tipo_modelo_acao.idx][self.tipo_tabela.idx][indice_linha_tabela][estado.jogador_atual.cartas_distrito_mao[escolha].idx + tipo_modelo_acao.tamanho] = 1
             return escolha
         else:
             # Converte estado e monta a consulta a partir de todas as tabelas individuais
@@ -392,8 +434,8 @@ class EstrategiaMCTS(Estrategia):
         tipo_modelo_acao = TipoModeloAcao.HabilidadeSenhorDaGuerraDestruir
         if self.treino:
             # Tabela a ser treinada
-            indice_linha_tabela = estado.converter_estado()[self.modo.idx]
-            linha_tabela = self.modelos_mcts[tipo_modelo_acao.idx][self.modo.idx][indice_linha_tabela]
+            indice_linha_tabela = estado.converter_estado()[self.tipo_tabela.idx]
+            linha_tabela = self.modelos_mcts[tipo_modelo_acao.idx][self.tipo_tabela.idx][indice_linha_tabela]
             # Deixar apenas colunas das ações disponíveis no estado atual
             opcoes_disponiveis = []
             for (carta, _) in distritos_para_destruir:
@@ -403,8 +445,8 @@ class EstrategiaMCTS(Estrategia):
             # Aplica modelo MCTS para escolha das opções dentre as opções disponíveis
             escolha = self.modelo_mcts_escolha(len(distritos_para_destruir), np.array(opcoes_disponiveis))
             # Salvar histórico das escolhas para acrescentar no modelo após resultado
-            self.modelos_historico[tipo_modelo_acao.idx][self.modo.idx][indice_linha_tabela][distritos_para_destruir[escolha][0].idx] = 1
-            self.modelos_historico[tipo_modelo_acao.idx][self.modo.idx][indice_linha_tabela][distritos_para_destruir[escolha][0].idx + tipo_modelo_acao.tamanho] = 1
+            self.modelos_historico[tipo_modelo_acao.idx][self.tipo_tabela.idx][indice_linha_tabela][distritos_para_destruir[escolha][0].idx] = 1
+            self.modelos_historico[tipo_modelo_acao.idx][self.tipo_tabela.idx][indice_linha_tabela][distritos_para_destruir[escolha][0].idx + tipo_modelo_acao.tamanho] = 1
             return escolha
         else:
             # Converte estado e monta a consulta a partir de todas as tabelas individuais
@@ -424,8 +466,8 @@ class EstrategiaMCTS(Estrategia):
         tipo_modelo_acao = TipoModeloAcao.Laboratorio
         if self.treino:
             # Tabela a ser treinada
-            indice_linha_tabela = estado.converter_estado()[self.modo.idx]
-            linha_tabela = self.modelos_mcts[tipo_modelo_acao.idx][self.modo.idx][indice_linha_tabela]
+            indice_linha_tabela = estado.converter_estado()[self.tipo_tabela.idx]
+            linha_tabela = self.modelos_mcts[tipo_modelo_acao.idx][self.tipo_tabela.idx][indice_linha_tabela]
             # Deixar apenas colunas das ações disponíveis no estado atual
             opcoes_disponiveis = []
             for carta in estado.jogador_atual.cartas_distrito_mao:
@@ -435,8 +477,8 @@ class EstrategiaMCTS(Estrategia):
             # Aplica modelo MCTS para escolha das opções dentre as opções disponíveis
             escolha = self.modelo_mcts_escolha(len(estado.jogador_atual.cartas_distrito_mao), np.array(opcoes_disponiveis))
             # Salvar histórico das escolhas para acrescentar no modelo após resultado
-            self.modelos_historico[tipo_modelo_acao.idx][self.modo.idx][indice_linha_tabela][estado.jogador_atual.cartas_distrito_mao[escolha].idx] = 1
-            self.modelos_historico[tipo_modelo_acao.idx][self.modo.idx][indice_linha_tabela][estado.jogador_atual.cartas_distrito_mao[escolha].idx + tipo_modelo_acao.tamanho] = 1
+            self.modelos_historico[tipo_modelo_acao.idx][self.tipo_tabela.idx][indice_linha_tabela][estado.jogador_atual.cartas_distrito_mao[escolha].idx] = 1
+            self.modelos_historico[tipo_modelo_acao.idx][self.tipo_tabela.idx][indice_linha_tabela][estado.jogador_atual.cartas_distrito_mao[escolha].idx + tipo_modelo_acao.tamanho] = 1
             return escolha
         else:
             # Converte estado e monta a consulta a partir de todas as tabelas individuais
