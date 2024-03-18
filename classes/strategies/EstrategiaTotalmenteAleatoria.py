@@ -8,7 +8,7 @@ import random
 
 
 class EstrategiaTotalmenteAleatoria(Estrategia):
-    def __init__(self, nome: str):
+    def __init__(self, nome: str = 'Bot Random'):
         super().__init__(nome)
 
     # Estratégia usada na fase de escolha dos personagens

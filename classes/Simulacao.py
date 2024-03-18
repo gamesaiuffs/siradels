@@ -7,19 +7,18 @@ from classes.strategies import Estrategia
 
 class Simulacao:
     # Construtor
-    def __init__(self, estrategias: list, num_personagens: int = 8, automatico: bool = True):
+    def __init__(self, estrategias: list[Estrategia], num_personagens: int = 8, automatico: bool = True):
         # Define o número de jogadores
-        self.num_jogadores: int = len(estrategias)
-        # Define se a criação dos jogadores: 0 -> Manual ou 1 -> Automática
-        self.estado: Estado = self.criar_estado_inicial(num_personagens, automatico)
-        # Instância as ações do jogo
-        self.acoes: list[Acao] = self.criar_acoes()
-        # Primeiro jogador a finalizar cidade (construir 7 ou mais distritos)
-        self.jogador_finalizador: Jogador = None
-        # Estratégias de cada jogador
-        self.estrategias: dict[Jogador, Estrategia] = self.criar_estrategias(estrategias)
-        # Criação automática de jogadores
+        self.num_jogadores = len(estrategias)
+        # Define se a criação dos jogadores
         self.automatico = automatico
+        self.estado = self.criar_estado_inicial(num_personagens, automatico)
+        # Instância as ações do jogo
+        self.acoes = self.criar_acoes()
+        # Primeiro jogador a finalizar cidade (construir 7 ou mais distritos)
+        self.jogador_finalizador = None
+        # Estratégias de cada jogador
+        self.estrategias = self.criar_estrategias(estrategias)
 
     # Cria o estado inicial do tabuleiro
     def criar_estado_inicial(self, num_personagens, automatico) -> Estado:
