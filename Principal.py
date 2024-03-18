@@ -21,4 +21,5 @@ startTime = time.time()
 estrategias = [EstrategiaTotalmenteAleatoria('Bot 1'), EstrategiaTotalmenteAleatoria('Bot 2'), EstrategiaTotalmenteAleatoria('Bot 3'), EstrategiaTotalmenteAleatoria('Bot 4'), EstrategiaMCTS(caminho)]
 Experimento.testar_estrategias(estrategias)
 
+
 print(f"Tempo da simulação = {(time.time() - startTime):.2f}s")
