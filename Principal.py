@@ -18,7 +18,7 @@ startTime = time.time()
 #experimento.treinar_modelo_mcts(600)
 
 # Testar treino contra outras estratégias
-estrategias = [EstrategiaTotalmenteAleatoria('Bot 1'), EstrategiaTotalmenteAleatoria('Bot 2'), EstrategiaTotalmenteAleatoria('Bot 3'), EstrategiaTotalmenteAleatoria('Bot 4'), EstrategiaMCTS(caminho)]
+estrategias = [EstrategiaTotalmenteAleatoria('Bot 1'), EstrategiaTotalmenteAleatoria('Bot 2'), EstrategiaTotalmenteAleatoria('Bot 3'), EstrategiaTotalmenteAleatoria('Bot 4'), EstrategiaTotalmenteAleatoria('Bot 5')]
 Experimento.testar_estrategias(estrategias)
 
 
