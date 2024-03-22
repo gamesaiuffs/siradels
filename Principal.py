@@ -3,6 +3,7 @@ import time
 from classes.strategies.EstrategiaFelipe import EstrategiaFelipe
 from classes.strategies.EstrategiaMCTS import EstrategiaMCTS
 from classes.strategies.EstrategiaTotalmenteAleatoria import EstrategiaTotalmenteAleatoria
+from classes.strategies.EstrategiaEduardo import EstrategiaEduardo
 
 # Flag que modifica caminhos para salvar/ler arquivos dependendo da IDE utilizada
 vscode = False
@@ -18,7 +19,7 @@ startTime = time.time()
 #experimento.treinar_modelo_mcts(600)
 
 # Testar treino contra outras estratégias
-estrategias = [EstrategiaTotalmenteAleatoria('Bot 1'), EstrategiaTotalmenteAleatoria('Bot 2'), EstrategiaTotalmenteAleatoria('Bot 3'), EstrategiaTotalmenteAleatoria('Bot 4'), EstrategiaTotalmenteAleatoria('Bot 5')]
+estrategias = [EstrategiaTotalmenteAleatoria('Bot 1'), EstrategiaTotalmenteAleatoria('Bot 2'), EstrategiaTotalmenteAleatoria('Bot 3'), EstrategiaTotalmenteAleatoria('Bot 4'), EstrategiaEduardo()]
 Experimento.testar_estrategias(estrategias)
 
 
