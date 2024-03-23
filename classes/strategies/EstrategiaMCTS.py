@@ -16,18 +16,18 @@ class EstrategiaMCTS(Estrategia):
     def __init__(self, caminho_modelo: str, tipo_treino: int = 2, nome: str = 'MCTS'):
         super().__init__(nome)
         # Caminho inicial dos arquivos do modelo
-        self.caminho_modelo = caminho_modelo
+        self.caminho_modelo: str = caminho_modelo
         # 0 - treino zerado, 1 - treino continuado a partir de modelo pré-existente, 2 - apenas teste
-        self.tipo_treino = tipo_treino
-        self.treino = self.tipo_treino < 2
-        self.modelos_mcts = []
-        self.modelos_historico = []
+        self.tipo_treino: int = tipo_treino
+        self.treino: bool = self.tipo_treino < 2
+        self.modelos_mcts: list[list[np.ndarray]] = []
+        self.modelos_historico: list[np.ndarray] = []
         if self.tipo_treino == 0:
             for tipo_modelo in TipoModeloAcao:
                 self.modelos_mcts.append(self.inicializar_modelo_mcts(tipo_modelo.tamanho))
         else:
             self.modelos_mcts = self.ler_modelos()
-        self.tipo_tabela = None
+        self.tipo_tabela: TipoTabela | None = None
 
     # Carrega os modelos a partir dos arquivos CSV
     def ler_modelos(self) -> list[list[np.ndarray]]:

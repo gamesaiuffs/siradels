@@ -12,7 +12,7 @@ class Estado:
         self.jogadores: list[Jogador] = jogadores
         self.turno: int = 0
         self.rodada: int = 0
-        self.jogador_atual: Jogador = None
+        self.jogador_atual: Jogador | None = None
 
     # To String
     def __str__(self):

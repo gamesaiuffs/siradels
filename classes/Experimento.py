@@ -11,7 +11,7 @@ from classes.strategies.EstrategiaTotalmenteAleatoria import EstrategiaTotalment
 class Experimento:
 
     def __init__(self, caminho: str):
-        self.caminho = caminho
+        self.caminho: str = caminho
 
     @staticmethod
     def testar_estrategias(estrategias: list[Estrategia], qtd_simulacao_maximo: int = 1000):
