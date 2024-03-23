@@ -175,8 +175,6 @@ class EstrategiaFelipe(Estrategia):
                 return i
         return random.randint(0, tamanho_maximo - 1)
 
-# Rever a partir daqui
-
     # Estratégia usada na ação de construir distritos (efeito Covil dos Ladrões)
     @staticmethod
     def construir_distrito_covil_dos_ladroes(estado: Estado, qtd_cartas: int, i: int) -> int:
@@ -185,133 +183,67 @@ class EstrategiaFelipe(Estrategia):
     # Estratégia usada na habilidade da Assassina
     @staticmethod
     def habilidade_assassina(estado: Estado, opcoes_personagem: list[CartaPersonagem]) -> int:
-        try:
-            mago = estado.tabuleiro.baralho_personagens.index(estado.tabuleiro.personagens[TipoPersonagem.Mago.value])
-        except ValueError:
-            mago = -1
-        try:
-            rei = estado.tabuleiro.baralho_personagens.index(estado.tabuleiro.personagens[TipoPersonagem.Rei.value])
-        except ValueError:
-            rei = -1
-        try:
-            cardeal = estado.tabuleiro.baralho_personagens.index(estado.tabuleiro.personagens[TipoPersonagem.Cardeal.value])
-        except ValueError:
-            cardeal = -1
-        try:
-            alquimista = estado.tabuleiro.baralho_personagens.index(estado.tabuleiro.personagens[TipoPersonagem.Alquimista.value])
-        except ValueError:
-            alquimista = -1
-        try:
-            navegadora = estado.tabuleiro.baralho_personagens.index(estado.tabuleiro.personagens[TipoPersonagem.Navegadora.value])
-        except ValueError:
-            navegadora = -1
-        try:
-            senhor_da_guerra = estado.tabuleiro.baralho_personagens.index(estado.tabuleiro.personagens[TipoPersonagem.SenhorDaGuerra.value])
-        except ValueError:
-            senhor_da_guerra = -1
-        if senhor_da_guerra != -1:
-            return senhor_da_guerra
-        if alquimista != -1:
-            return alquimista
-        if mago != -1:
-            return mago
-        if navegadora != -1:
-            return navegadora
-        if cardeal != -1:
-            return cardeal
-        if rei != -1:
-            return rei
-        return random.randint(0, len(opcoes_personagem) - 1)
+        # Retira opções de personagens descartados
+        opcoes = []
+        for personagem in opcoes_personagem:
+            if personagem not in estado.tabuleiro.cartas_visiveis:
+                opcoes.append(personagem)
+        return random.randint(0, len(opcoes) - 1)
 
     # Estratégia usada na habilidade do Ladrão
     @staticmethod
     def habilidade_ladrao(estado: Estado, opcoes_personagem: list[CartaPersonagem]) -> int:
-        try:
-            mago = estado.tabuleiro.baralho_personagens.index(estado.tabuleiro.personagens[TipoPersonagem.Mago.value])
-        except ValueError:
-            mago = -1
-        try:
-            rei = estado.tabuleiro.baralho_personagens.index(estado.tabuleiro.personagens[TipoPersonagem.Rei.value])
-        except ValueError:
-            rei = -1
-        try:
-            cardeal = estado.tabuleiro.baralho_personagens.index(estado.tabuleiro.personagens[TipoPersonagem.Cardeal.value])
-        except ValueError:
-            cardeal = -1
-        try:
-            alquimista = estado.tabuleiro.baralho_personagens.index(estado.tabuleiro.personagens[TipoPersonagem.Alquimista.value])
-        except ValueError:
-            alquimista = -1
-        try:
-            senhor_da_guerra = estado.tabuleiro.baralho_personagens.index(estado.tabuleiro.personagens[TipoPersonagem.SenhorDaGuerra.value])
-        except ValueError:
-            senhor_da_guerra = -1
-        if alquimista != -1:
-            return alquimista
-        if mago != -1:
-            return mago
-        if senhor_da_guerra != -1:
-            return senhor_da_guerra
-        if cardeal != -1:
-            return cardeal
-        if rei != -1:
-            return rei
-        return random.randint(0, len(opcoes_personagem) - 1)
+        # Retira opções de personagens descartados
+        opcoes = []
+        for personagem in opcoes_personagem:
+            if personagem not in estado.tabuleiro.cartas_visiveis:
+                opcoes.append(personagem)
+        return random.randint(0, len(opcoes) - 1)
+
+    # Estratégia usada na habilidade da Ilusionista (escolha do jogador alvo)
+    @staticmethod
+    def habilidade_ilusionista_trocar(estado: Estado, opcoes_jogadores: list[Jogador]) -> int:
+        return random.randint(0, len(opcoes_jogadores) - 1)
+
+    # Estratégia usada na habilidade da Ilusionista (escolha de quantas cartas serão descartadas)
+    @staticmethod
+    def habilidade_ilusionista_descartar_qtd_cartas(estado: Estado, qtd_maxima: int) -> int:
+        return random.randint(1, qtd_maxima)
+
+    # Estratégia usada na habilidade da Ilusionista (escolha de qual carta descartar)
+    @staticmethod
+    def habilidade_ilusionista_descartar_carta(estado: Estado, qtd_cartas: int, i: int) -> int:
+        return random.randint(0, len(estado.jogador_atual.cartas_distrito_mao) - 1)
 
     # Estratégia usada na habilidade do Senhor da Guerra
     @staticmethod
-    def habilidade_senhor_da_guerra(estado: Estado, distritos_para_destruir: list[(CartaDistrito, Jogador, int)]) -> int:
-        jogador_mais_pontos = None
+    def habilidade_senhor_da_guerra_destruir(estado: Estado, distritos_para_destruir: list[(CartaDistrito, Jogador)]) -> int:
+        # Destrói o distrito de menor custo, em caso de empate escolhe o jogador com maior pontuação parcial
+        distrito_mais_barato = 9
+        jogadores_aux = []
+        for i, (distrito, jogador) in enumerate(distritos_para_destruir):
+            if jogador != estado.jogador_atual:
+                if distrito.valor_do_distrito < distrito_mais_barato:
+                    distrito_mais_barato = distrito.valor_do_distrito
+                    jogadores_aux.clear()
+                if distrito.valor_do_distrito <= distrito_mais_barato:
+                    jogadores_aux.append((i, jogador))
         maior_pontuacao = 0
-        for jogador in estado.jogadores:
-            if jogador == estado.jogador_atual:
-                continue
+        idx = 0
+        for i, jogador in jogadores_aux:
             if maior_pontuacao < jogador.pontuacao:
                 maior_pontuacao = jogador.pontuacao
-                jogador_mais_pontos = jogador
-        for i, (distrito, jogador, muralha) in enumerate(distritos_para_destruir):
-            if muralha == 0 and distrito.valor_do_distrito == 1:
-                return i + 1
-        for i, (distrito, jogador, muralha) in enumerate(distritos_para_destruir):
-            if jogador == jogador_mais_pontos:
-                return i + 1
-        return 0
+                idx = i
+        return idx
 
     # Estratégia usada na ação do Laboratório
     @staticmethod
     def laboratorio(estado: Estado) -> int:
+        # Descarta o distrito de menor valor da mão
         menor_valor = 9
-        distrito_escolhido = -1
+        distrito_escolhido = 0
         for i, distrito in enumerate(estado.jogador_atual.cartas_distrito_mao):
             if distrito.valor_do_distrito < menor_valor:
-                menor_valor = distrito.valor_do_distrito
-                distrito_escolhido = i
-        return distrito_escolhido
-
-    # Estratégia usada na ação do Arsenal
-    @staticmethod
-    def arsenal(estado: Estado, distritos_para_destruir: list[(CartaDistrito, Jogador)]) -> int:
-        jogador_mais_pontos = estado.jogador_atual
-        for jogador in estado.jogadores:
-            if jogador.pontuacao > jogador_mais_pontos.pontuacao:
-                jogador_mais_pontos = jogador
-        maior_valor = 0
-        distrito_escolhido = -1
-        for i, (distrito, jogador) in enumerate(distritos_para_destruir):
-            if jogador != jogador_mais_pontos:
-                continue
-            if distrito.valor_do_distrito > maior_valor:
-                maior_valor = distrito.valor_do_distrito
-                distrito_escolhido = i
-        return distrito_escolhido
-
-    # Estratégia usada na ação do Museu
-    @staticmethod
-    def museu(estado: Estado) -> int:
-        menor_valor = 9
-        distrito_escolhido = -1
-        for i, distrito in enumerate(estado.jogador_atual.cartas_distrito_mao):
-            if menor_valor < distrito.valor_do_distrito:
                 menor_valor = distrito.valor_do_distrito
                 distrito_escolhido = i
         return distrito_escolhido
