@@ -15,6 +15,7 @@ from classes.model.Jogador import Jogador
 import random
 import math
 
+
 class EstrategiaLuis(Estrategia):
     def __init__(self, descricao: str):
         self.descricao: str = descricao
@@ -23,11 +24,14 @@ class EstrategiaLuis(Estrategia):
     @staticmethod
     def escolher_personagem(estado: Estado) -> int:
         def decisao():
-            try:
-                maior_confianca = max(lista_personagens.items(), key=lambda item: item[0])[0]
-                return lista_personagens[maior_confianca]
-            except ValueError:
-                return random.randint(0, len(estado.tabuleiro.baralho_personagens) - 1)
+            # Ação final da tomada de ação selecionando a carta mais benéfica
+            maior_confianca = max(lista_personagens.items(), key=lambda item: item[0])
+            for index, carta in enumerate(estado.tabuleiro.baralho_personagens):
+                nome = carta.nome
+                if nome == maior_confianca[0]:
+                    return index
+                else:
+                    return random.randint(0, len(estado.tabuleiro.baralho_personagens) - 1)
 
         # --- Declaração de variáveis gerais
         jogador = estado.jogador_atual
@@ -38,27 +42,53 @@ class EstrategiaLuis(Estrategia):
         # Personagens
         lista_personagens = {}
         for personagem in personagens:
-                id = personagem.tipo_personagem.value
-                nivel_confianca = 0
-                lista_personagens[id] = nivel_confianca
+            id = personagem.tipo_personagem.name
+            nivel_confianca = 0
+            lista_personagens[id] = nivel_confianca
         ids_personagens_disponiveis = lista_personagens.keys()
 
-        # Ação final da tomada de ação selecionando a carta mais benéfica
-
-        # Se o mercante está disponível, pegue-o.
-        if estado.jogador_atual.cartas_distrito_mao == 0 and TipoPersonagem.Ilusionista.value in ids_personagens_disponiveis:
-            lista_personagens[TipoPersonagem.Ilusionista.value] += 3
-        if TipoPersonagem.Comerciante.value in ids_personagens_disponiveis:
+        # Se não houver cartas, aumenta a chance de pegar o ilusionista
+        if estado.jogador_atual.cartas_distrito_mao == 0 and TipoPersonagem.Ilusionista.name in ids_personagens_disponiveis:
+            lista_personagens[TipoPersonagem.Ilusionista.name] += random.randint(1, 3)
+        # Se o Comerciante estiver disponível [...]
+        if TipoPersonagem.Comerciante.name in ids_personagens_disponiveis:
             # Aumenta a probabilidade da ação ser benéfica
-            lista_personagens[TipoPersonagem.Comerciante.value] += 3
-        # Se alguém tem dinheiro e o ladrão estiver disponivel, aumente o score do Ladrão em 1
-        if (any(jogador.ouro for jogador in estado.jogadores) >= 2) and TipoPersonagem.Ladrao.value in ids_personagens_disponiveis:
-            lista_personagens[TipoPersonagem.Ladrao.value] += 1
+            lista_personagens[TipoPersonagem.Comerciante.name] += random.randint(2, 5)
+            if estado.jogador_atual.ouro < 7:
+                lista_personagens[TipoPersonagem.Comerciante.name] += random.randint(2, 5)
+        if TipoPersonagem.Arquiteta.name in ids_personagens_disponiveis:
+            lista_personagens[TipoPersonagem.Arquiteta.name] += random.randint(2, 5)
+        if TipoPersonagem.Rei.name in ids_personagens_disponiveis:
+            lista_personagens[TipoPersonagem.Rei.name] += random.randint(1, 4)
+        # Se alguém tem dinheiro e o jog está com pouco e o ladrão estiver disponivel
+        if (any(jogador.ouro for jogador in
+                estado.jogadores) >= 2) and (estado.jogador_atual.ouro <= 1) and (
+                TipoPersonagem.Ladrao.name in ids_personagens_disponiveis):
+            lista_personagens[TipoPersonagem.Ladrao.name] += random.randint(1, 3)
+
+        if len(estado.jogador_atual.distritos_construidos) > 5 and (
+                TipoPersonagem.Bispo.name in ids_personagens_disponiveis):
+            lista_personagens[TipoPersonagem.Bispo.name] += random.randint(1, 3)
 
 
-        return decisao()
 
+        # Análise dos inimigos
+        for inimigo in estado.jogadores:
 
+            if len(inimigo.distritos_construidos) and (
+                    TipoPersonagem.SenhorDaGuerra.name in ids_personagens_disponiveis):
+                lista_personagens[TipoPersonagem.SenhorDaGuerra.name] -= 1
+                if inimigo.pontuacao > jogador.pontuacao * 2:
+                    lista_personagens[TipoPersonagem.SenhorDaGuerra.name] += 2
+            # Se o inimigo tiver um assassino ou um ladrão, jogue defensivamente
+            if inimigo.personagem.tipo_personagem.Assassina or jogador.personagem.tipo_personagem.Ladrao:
+                if TipoPersonagem.Comerciante.name in ids_personagens_disponiveis:
+                    lista_personagens[TipoPersonagem.Comerciante.name] -= random.randint(3, 5)
+                if TipoPersonagem.Arquiteta.name in ids_personagens_disponiveis:
+                    lista_personagens[TipoPersonagem.Arquiteta.name] -= random.randint(3, 5)
+                if TipoPersonagem.Rei.name in ids_personagens_disponiveis:
+                    lista_personagens[TipoPersonagem.Rei.name] -= random.randint(2, 5)
+            return decisao()
 
     # Estratégia usada na fase de escolha das ações no turno
     @staticmethod
@@ -111,7 +141,8 @@ class EstrategiaLuis(Estrategia):
 
     # Estratégia usada na habilidade do Senhor da Guerra
     @staticmethod
-    def habilidade_senhor_da_guerra_destruir(estado: Estado, distritos_para_destruir: list[(CartaDistrito, Jogador)]) -> int:
+    def habilidade_senhor_da_guerra_destruir(estado: Estado,
+                                             distritos_para_destruir: list[(CartaDistrito, Jogador)]) -> int:
         return random.randint(0, len(distritos_para_destruir))
 
     # Estratégia usada na ação do Laboratório
