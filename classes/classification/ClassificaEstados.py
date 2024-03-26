@@ -124,15 +124,15 @@ class ClassificaEstados:
     
     # Mostra informacoes do modelo
     @staticmethod
-    def modelo_info(jogos: str, rotulos: str, model: str):
+    def modelo_info(model: str):
 
         modelo = joblib.load(f'./classes/classification/models/{model}')
 
         # [jogador.ouro, len(jogador.cartas_distrito_mao), num_dist_cons, jogador.personagem.rank]
         
         nomes_das_caracteristicas = [
-        "Ouro (JA)", "Cartas na Mão (JA)", "Distritos Construídos (JA)", "Custo Construidos (JA)", "Custo Mão (JA)", "Rank do Personagem(JA)",
-        "Ouro (JMP)", "Cartas na Mão (JMP)", "Distritos Construídos (JMP)", "Custo Construidos (JA)", "Rank do Personagem (JMP)",
+        "Gold (AC)", "Cards in Hand (AC)", "Distritos Construídos (AC)", "Custo Construidos (AC)", "Custo Mão (AC)", "Rank do Personagem(AC)",
+        "Gold (MVP)", "Cards in Hand (MVP)", "Distritos Construídos (MVP)", "Custo Construidos (MVP)", "Rank do Personagem (MVP)",
 ]
         tree_rules = export_text(modelo, feature_names= nomes_das_caracteristicas)
         # Mostra a estrutura da árvore de decisão no terminal
@@ -149,8 +149,16 @@ class ClassificaEstados:
         print("Número de Nós: ", modelo.tree_.node_count)
         # Mostra o número de folhas
         print("Número de Folhas: ", modelo.get_n_leaves())
+        
+        # Plotar matriz confusão 
+        #disp = ConfusionMatrixDisplay(confusion_matrix=matriz_confusao, display_labels=nomes_das_caracteristicas)
 
-        # TESTES DO MODELO
+        return
+    
+    # Testa modelo
+    @staticmethod
+    def testar_modelo(jogos: str, rotulos: str, model: str):
+        modelo = joblib.load(f'./classes/classification/models/{model}')
 
         X_train, X_test, Y_train, Y_test = ClassificaEstados.ler_resultados(jogos, rotulos)
 
@@ -170,9 +178,6 @@ class ClassificaEstados:
 
         auc = roc_auc_score(y_true=Y_test, y_score=Y_pred, ) * 100
 
-        # Plotar matriz confusão 
-        #disp = ConfusionMatrixDisplay(confusion_matrix=matriz_confusao, display_labels=nomes_das_caracteristicas)
-
         print(f"Accuracy: {round(accuracy, 2)}%")
         print(f"AUC: {round(auc, 2)}%")
         print(f"Log Loss: {round(log, 2)}")
@@ -183,12 +188,6 @@ class ClassificaEstados:
         print(f"Recall Macro: {round(recallm, 2)}%")
         print("Matriz de confusão: ")
         print(matriz_confusao)
-
-        # Mostra a curva de aprendizado
-        #ClassificaEstados.plot_learning_curve(X_train, Y_train, modelo)
-
-        # Mostra a estrutura visual da árvore
-        #ClassificaEstados.plot_tree(model, nomes_das_caracteristicas)
 
         return
 
@@ -225,8 +224,8 @@ class ClassificaEstados:
         recall_scores = []
         for size in train_sizes:
             y_pred = model.predict(X_train[:size])
-            precision_scores.append(precision_score(Y_train[:size], y_pred, average='macro'))
-            recall_scores.append(recall_score(Y_train[:size], y_pred, average='macro'))
+            precision_scores.append(precision_score(Y_train[:size], y_pred))
+            recall_scores.append(recall_score(Y_train[:size], y_pred))
 
         # Plotando a curva de aprendizado
         plt.figure(figsize=(10, 7))
