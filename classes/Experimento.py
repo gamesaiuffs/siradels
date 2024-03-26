@@ -42,15 +42,14 @@ class Experimento:
                 f'{jogador} - \tVitórias: {vitoria} - Porcento Vitorias: {vitoria / qtd_simulacao * 100:.2f}% - Pontuação Média: {pontuacao_media}')
 
     # Inicializa o treinamento do modelo do zero e treina durante o tempo limite em segundos
-    def treinar_modelo_mcts(self, tempo_limite: int):
-        inicio = time.time()
-        # Fixado quantidade de jogadores em 5
-        qtd_jogadores = 5
+    def treinar_modelo_mcts(self, estrategias: list[Estrategia], qtd_simulacao_maximo: int = 1000):
+        qtd_simulacao = 0
         mcts = EstrategiaMCTS(self.caminho, 0)
-        estrategias = [mcts]
-        for i in range(qtd_jogadores - 1):
-            estrategias.append(EstrategiaTotalmenteAleatoria(str(i + 1)))
-        while tempo_limite > time.time() - inicio:
+        estrategias.append(mcts)
+        while qtd_simulacao < qtd_simulacao_maximo:
+            qtd_simulacao += 1
+            if qtd_simulacao % 100 == 0:
+                print(qtd_simulacao)
             for tipo_tabela in TipoTabela:
                 # Treinamento individual por tipo de tabela
                 mcts.tipo_tabela = tipo_tabela
