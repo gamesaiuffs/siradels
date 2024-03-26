@@ -4,6 +4,7 @@ from classes.model.Tabuleiro import Tabuleiro
 from classes.model.Jogador import Jogador
 from classes.strategies import Estrategia
 from classes.classification.ClassificaEstados import ClassificaEstados
+from more_itertools import sort_together
 import random
 import numpy as np
 
@@ -95,7 +96,7 @@ class SimulacaoColeta:
         return acoes
 
     # Rodar simula��o
-    def rodar_simulacao(self, X) -> Estado:
+    def rodar_simulacao(self, X, nome_modelo) -> Estado:
         final_jogo = False
         jogador_aleatorio_idx = random.randint(0, len(self.estado.jogadores)-1)
         jogador_observado = self.estado.jogadores[jogador_aleatorio_idx].nome
@@ -162,6 +163,7 @@ class SimulacaoColeta:
                         # Laço de turnos do jogo
                         while True:
                             # Mostra o estado atual
+                            
                             #print(self.estado)
                             # Mostra estado e jogador atual caso a simulação esteja no modo manual
                             if not self.automatico:
@@ -198,12 +200,11 @@ class SimulacaoColeta:
 
                             # Coleta de rotulos
                             Y = ClassificaEstados.coleta_rotulos_treino(jogador_observado, self.jogador_finalizador.nome)
-                            #print(Y)
                             final_jogo = True
                         # Quebra laço, pois não existem personagens com ranks repetidos
                         break
-            # Coleta amostra    
-            X = ClassificaEstados.coleta_features(self.estado, jogador_observado, 1, X)
+            # Coleta amostra 
+            X = ClassificaEstados.coleta_features(self.estado.jogadores, jogador_observado, 1, X, nome_modelo)
             
         # Rotina de final de jogo
         self.computar_pontuacao_final()

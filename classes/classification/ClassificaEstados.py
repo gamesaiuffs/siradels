@@ -12,9 +12,10 @@ from classes.strategies.EstrategiaMCTS import EstrategiaMCTS
 from classes.strategies.EstrategiaTotalmenteAleatoria import EstrategiaTotalmenteAleatoria
 from classes.enum.TipoDistrito import TipoDistrito
 from sklearn.tree import DecisionTreeClassifier, export_text, plot_tree
-from sklearn.model_selection import train_test_split
+from sklearn.model_selection import train_test_split, cross_val_score
 from sklearn.metrics import f1_score, precision_score, recall_score, roc_auc_score, make_scorer, accuracy_score, confusion_matrix, log_loss, ConfusionMatrixDisplay
 from sklearn.model_selection import learning_curve
+from sklearn.model_selection import StratifiedGroupKFold
 import matplotlib.pyplot as plt
 import joblib
 
@@ -104,7 +105,23 @@ class ClassificaEstados:
         ClassificaEstados.salvar_resultados(X, Y, jogos_out, rotulos_out)
    
         return
-        
+    
+    @staticmethod
+    def sgkf(X, y):
+        sgkf = StratifiedGroupKFold(n_splits=3)
+
+        # Faça a divisão dos dados
+        for train_index, test_index in sgkf.split(X, y, groups):
+            X_train, X_test = X[train_index], X[test_index]
+            y_train, y_test = y[train_index], y[test_index]
+            groups_train, groups_test = groups[train_index], groups[test_index]
+   
+        groups = np.array([1, 1, 2, 2, 3]) 
+        f1_macro_scorer = make_scorer(f1_score, average='macro')
+        scores = cross_val_score(estimator=f1_macro_scorer)
+
+        return X_test, y_test 
+    
     # Mostra informacoes do modelo
     @staticmethod
     def modelo_info(jogos: str, rotulos: str, model: str):
@@ -146,8 +163,11 @@ class ClassificaEstados:
         accuracy = accuracy_score(y_true=Y_test, y_pred=Y_pred)*100
         log = log_loss(y_true=Y_test, y_pred=Y_pred)
         matriz_confusao = confusion_matrix(y_true=Y_test, y_pred=Y_pred )
-        precision = precision_score(y_true=Y_test, y_pred=Y_pred) * 100
-        recall = recall_score(y_true=Y_test, y_pred=Y_pred) * 100
+        precisiong = precision_score(y_true=Y_test, y_pred=Y_pred) * 100
+        recallg = recall_score(y_true=Y_test, y_pred=Y_pred) * 100
+        precisionm = precision_score(y_true=Y_test, y_pred=Y_pred, average='macro') * 100
+        recallm = recall_score(y_true=Y_test, y_pred=Y_pred, average='macro') * 100
+
         auc = roc_auc_score(y_true=Y_test, y_score=Y_pred, ) * 100
 
         # Plotar matriz confusão 
@@ -157,8 +177,10 @@ class ClassificaEstados:
         print(f"AUC: {round(auc, 2)}%")
         print(f"Log Loss: {round(log, 2)}")
         print(f"F1 Score - Macro: {round(macrof1, 2)}%")
-        print(f"Precisão: {round(precision, 2)}%")
-        print(f"Recall: {round(recall, 2)}%")
+        print(f"Precisão Geral: {round(precisiong, 2)}%")
+        print(f"Recall Geral: {round(recallg, 2)}%")
+        print(f"Precisão Macro: {round(precisionm, 2)}%")
+        print(f"Recall Macro: {round(recallm, 2)}%")
         print("Matriz de confusão: ")
         print(matriz_confusao)
 
@@ -199,10 +221,19 @@ class ClassificaEstados:
         test_scores_mean = np.mean(test_scores, axis=1)
         test_scores_std = np.std(test_scores, axis=1)
 
+        precision_scores = []
+        recall_scores = []
+        for size in train_sizes:
+            y_pred = model.predict(X_train[:size])
+            precision_scores.append(precision_score(Y_train[:size], y_pred, average='macro'))
+            recall_scores.append(recall_score(Y_train[:size], y_pred, average='macro'))
+
         # Plotando a curva de aprendizado
         plt.figure(figsize=(10, 7))
         plt.fill_between(train_sizes, train_scores_mean - train_scores_std, train_scores_mean + train_scores_std, alpha=0.1, color="blue")
         plt.fill_between(train_sizes, test_scores_mean - test_scores_std, test_scores_mean + test_scores_std, alpha=0.1, color="orange")
+        plt.plot(train_sizes, precision_scores, 'o-', color="green", label="Precisão")
+        plt.plot(train_sizes, recall_scores, 'o-', color="red", label="Recall")
         plt.plot(train_sizes, train_scores_mean, 'o-', color="blue", label="Score de Treinamento")
         plt.plot(train_sizes, test_scores_mean, 'o-', color="orange", label="Score de Teste")
         plt.title("Curva de Aprendizado da Árvore de Decisão")
@@ -214,24 +245,24 @@ class ClassificaEstados:
         return
 
     @staticmethod
-    def coleta_features(estado, nome_observado, coleta, X, model_name):
+    def coleta_features(jogadores, nome_observado, coleta, X, model_name):
         estado_jogador_atual, estado_outro_jogador = [], []
         tipos_distrito = []
         num_dist_cons_JA, num_dist_cons_JMP = 0, 0
         ja_custo_mao, ja_custo_construido, jmp_custo_construido = 0, 0, 0
 
         # Ordena por pontuação parcial crescente
-        ordem = [jogador.pontuacao for jogador in estado.jogadores]
-        estado.jogadores = sort_together([ordem, estado.jogadores])[1]
+        ordem = [jogador.pontuacao for jogador in jogadores]
+        jogadores = sort_together([ordem, jogadores])[1]
 
         # Verifica se o jogador observado é o com maior pontuação (para não duplicar)
-        i = 4 if estado.jogadores[4].nome != nome_observado else 3
+        i = 4 if jogadores[4].nome != nome_observado else 3
 
         # JMP (jogador com maior pontuação)
-        jmp = estado.jogadores[i]
+        jmp = jogadores[i]
         
         # JA (jogador atual)
-        for jogador in estado.jogadores:
+        for jogador in jogadores:
             if jogador.nome == nome_observado:
                ja = jogador 
         
@@ -286,6 +317,12 @@ class ClassificaEstados:
         else:
             return ClassificaEstados.calcula_porcentagem(x_coleta, model_name)
 
+    @staticmethod
+    def coleta_rotulos_treino(nome_observado, nome_vencedor):
+        if nome_vencedor != "":              
+            Y = 1 if nome_observado == nome_vencedor else 0
+            return Y
+
     # Utiliza modelo treinado para obter chance de vitoria
     @staticmethod
     def calcula_porcentagem(data, model_name: str):
@@ -295,7 +332,7 @@ class ClassificaEstados:
 
         # Calcula probabilidade de vitória
         win_probability = model.predict_proba(data_vec)
-        win_probability = f"Probabilidade de vitoria: {win_probability[0][1] * 100}%"
+        win_probability = f"Probabilidade estimada de vitoria: {win_probability[0][1] * 100}%"
 
         print(win_probability)  # Probabilidade estimada de vitória
 

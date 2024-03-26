@@ -8,7 +8,7 @@ import random
 
 class ColetaEstados:
     @staticmethod
-    def coleta_amostras(qtd_partidas: int, n_features: int, jogos: str, rotulos: str):
+    def coleta_amostras(qtd_partidas: int, n_features: int, jogos: str, rotulos: str, nome_modelo: str):
         X_inicial = [np.zeros(n_features)]
         X = X_inicial
         Y = []
@@ -36,8 +36,8 @@ class ColetaEstados:
                 # Cria simulacao
                 simulacao = SimulacaoColeta(estrategias)
                 # Executa simulacao
-                X_coleta, Y_coleta, n_rodada = simulacao.rodar_simulacao(X_inicial)
-                print(n_rodada)
+                X_coleta, Y_coleta, n_rodada = simulacao.rodar_simulacao(X_inicial, nome_modelo)
+                #print(qtd_partidas-qtd_simulacao)
                 # Remove primeira linha nula
                 X_coleta = np.delete(X_coleta, 0, axis=0)
                 # Empilha linhas na matriz
