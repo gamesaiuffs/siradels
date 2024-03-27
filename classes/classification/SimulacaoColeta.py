@@ -163,8 +163,7 @@ class SimulacaoColeta:
                         # Laço de turnos do jogo
                         while True:
                             # Mostra o estado atual
-                            
-                            #print(self.estado)
+                            print(self.estado)
                             # Mostra estado e jogador atual caso a simulação esteja no modo manual
                             if not self.automatico:
                                 print(self.estado)

@@ -250,10 +250,15 @@ class ClassificaEstados:
 
     @staticmethod
     def coleta_features(jogadores, nome_observado, coleta, X, model_name):
-        estado_jogador_atual, estado_outro_jogador =  [], []                                            # Conta tipos de distritos na mão e construídos
-        num_dist_cons_JA, num_dist_cons_JMP, ja_custo_mao, ja_custo_construido, jmp_custo_construido, ja_tipos_mao, jmp_tipos_board, ja_tipo_board = 0, 0, 0, 0, 0, 0, 0, 0
+        # Inicializa vetores
+        estado_jogador_atual, estado_outro_jogador, ja_tipos_mao_v, ja_tipos_board_v, jmp_tipos_board_v =  [], [], [0, 0, 0, 0, 0], [0, 0, 0, 0, 0], [0, 0, 0, 0, 0]                                             
+        # Conta tipos de distritos na mão e construídos
+        ja_custo_mao, ja_custo_construido, jmp_custo_construido = 0, 0, 0 
+        ja_tipos_mao, jmp_tipos_board, ja_tipos_board = 0, 0, 0
+        ja_especiais_mao, ja_especiais_board, jmp_especiais_board = 0, 0, 0
         # Conta custos de distritos da mão do JA, separando em baixo valor e alto valor (Não aumenta muito a complexidade e espaço e ainda da os valores)
-        custo123, custo456 = 0, 0
+        ja_custo123_mao, ja_custo456_mao, ja_custo123_board = 0, 0, 0 
+        ja_custo456_board, jmp_custo123_board, jmp_custo456_board = 0, 0, 0
 
         # Ordena por pontuação parcial crescente
         ordem = [jogador.pontuacao for jogador in jogadores]
@@ -270,29 +275,115 @@ class ClassificaEstados:
             if jogador.nome == nome_observado:
                ja = jogador 
         
-        '''
-        #contador de tipos de distritos
-        for jogador in estado.jogadores:
-            for distrito in jogador.distritos_construidos:
-                if distrito.tipo_de_distrito == TipoDistrito.Nobre:
-                    nobre += 1
-                if distrito.tipo_de_distrito == TipoDistrito.Religioso:
-                    religioso += 1
-                if distrito.tipo_de_distrito == TipoDistrito.Militar:
-                    militar += 1
-                if distrito.tipo_de_distrito == TipoDistrito.Especial:
-                    especial += 1
-        '''
-            
-        # Média do custo de distritos construídos
+        # Coleta tipos variados em vetores booleanos
+        for jogador in jogadores:
+            # Jogador atual (JA)
+            if jogador.nome == nome_observado:
+                # Itera sob seus distritos (mão e contruídos)
+                for distrito in jogador.cartas_distrito_mao:
+                    if distrito.tipo_de_distrito == TipoDistrito.Nobre:
+                        ja_tipos_mao_v[0] = 1
+                    if distrito.tipo_de_distrito == TipoDistrito.Religioso:
+                        ja_tipos_mao_v[1] = 1
+                    if distrito.tipo_de_distrito == TipoDistrito.Militar:
+                        ja_tipos_mao_v[2] = 1
+                    if distrito.tipo_de_distrito == TipoDistrito.Comercial:
+                        ja_tipos_mao_v[3] = 1
+                    if distrito.tipo_de_distrito == TipoDistrito.Especial:
+                        ja_tipos_mao_v[4] = 1
+                        ja_especiais_mao += 1
+
+                for distrito in jogador.distritos_construidos:
+                    if distrito.tipo_de_distrito == TipoDistrito.Nobre:
+                        ja_tipos_board_v[0] = 1
+                    if distrito.tipo_de_distrito == TipoDistrito.Religioso:
+                        ja_tipos_board_v[1] = 1
+                    if distrito.tipo_de_distrito == TipoDistrito.Militar:
+                        ja_tipos_board_v[2] = 1
+                    if distrito.tipo_de_distrito == TipoDistrito.Comercial:
+                        ja_tipos_board_v[3] = 1 
+                    if distrito.tipo_de_distrito == TipoDistrito.Especial:
+                        ja_tipos_board_v[4] = 1
+                        ja_especiais_board += 1
+
+            # Jogador com mais pontos (JMP)
+            elif jogador.nome == jmp.nome:
+                # Itera sob seus distritos (mão e contruídos)
+                for distrito in jogador.distritos_construidos:
+                    if distrito.tipo_de_distrito == TipoDistrito.Nobre:
+                        jmp_tipos_board_v[0] = 1
+                    if distrito.tipo_de_distrito == TipoDistrito.Religioso:
+                        jmp_tipos_board_v[1] = 1
+                    if distrito.tipo_de_distrito == TipoDistrito.Militar:
+                        jmp_tipos_board_v[2] = 1
+                    if distrito.tipo_de_distrito == TipoDistrito.Comercial:
+                        jmp_tipos_board_v[3] = 1
+                    if distrito.tipo_de_distrito == TipoDistrito.Especial:
+                        jmp_tipos_board_v[4] = 1
+                        ja_especiais_board += 1
+
+        # Computa vetores booleanos
+        for i in jmp_tipos_board_v:
+            if ja_tipos_mao_v[i] == 1:
+                ja_tipos_mao += 1
+        for i in jmp_tipos_board_v:
+            if jmp_tipos_board_v[i] == 1:
+                ja_tipos_board += 1
+        for i in jmp_tipos_board_v:
+            if jmp_tipos_board_v[i] == 1:
+                jmp_tipos_board += 1
+
+        # Custo total de distritos construídos
         for distrito in ja.distritos_construidos:
+
+            # Separa em baixo e alto custo
+            if distrito.valor_do_distrito <= 3:
+                ja_custo123_board += 1 
+            else:
+                ja_custo456_board += 1
+
+            # Contabiliza o total para média
             ja_custo_construido += distrito.valor_do_distrito
+
+        # Total do custo de distritos na mão
+        for distrito in ja.cartas_distrito_mao:
+             # Separa em baixo e alto custo           
+            if distrito.valor_do_distrito <= 3:
+                ja_custo123_board += 1 
+            else:
+                ja_custo456_board += 1
+
+            # Contabiliza o total para média
+            ja_custo_mao += distrito.valor_do_distrito
+
         for distrito in jmp.distritos_construidos:
+
+            # Separa em baixo e alto custo
+            if distrito.valor_do_distrito <= 3:
+                ja_custo123_board += 1 
+            else:
+                ja_custo456_board += 1
+
+            # Contabiliza o total para média
             jmp_custo_construido += distrito.valor_do_distrito
         
-        # Média do custo de distritos na mão
-        for distrito in ja.cartas_distrito_mao:
-            ja_custo_mao += distrito.valor_do_distrito
+
+        # Média dos valores (diminui range de valores)
+        try:
+            ja_custo_mao = round(ja_custo_mao / len(ja.cartas_distrito_mao), 2) 
+        except:
+            ja_custo_mao = 0
+        try:
+            ja_custo_construido = round(ja_custo_construido / len(ja.distritos_construidos), 2) 
+        except:
+            ja_custo_construido = 0
+        try:
+            jmp_custo_construido = round(jmp_custo_construido / len(jmp.distritos_construidos), 2)
+        except:
+            jmp_custo_construido = 0
+
+
+        print(ja.nome, jmp.nome, ja_custo_mao, ja.distritos_construidos)
 
         # Features selecionados
         # [pontuação, ouro, n_dist_mao, n_dist_const, custo_medio_const, custo_medio_mao, rank_person]
@@ -303,11 +394,11 @@ class ClassificaEstados:
         # Ideias de Features:
         # Custo médio da mão, Custo médio dos distritos construídos, contador unico de tipos, ranking do personagem
         
+        # Cria o vetor dos dois jogadores
+        estado_jogador_atual = [ja.ouro, len(ja.cartas_distrito_mao), len(ja.distritos_construidos), ja_custo_construido, ja_custo_mao, ja_tipos_board, ja_tipos_mao, ja_custo123_board, ja_custo456_board, ja_custo123_mao, ja_custo456_mao, ja_especiais_mao, ja_especiais_board, ja.personagem.rank]
+        estado_outro_jogador = [jmp.ouro, len(jmp.cartas_distrito_mao), len(jmp.distritos_construidos), jmp_custo_construido, jmp_tipos_board, jmp_custo123_board, jmp_custo456_board, jmp_especiais_board, jmp.personagem.rank]
 
-        estado_jogador_atual = [ja.ouro, len(ja.cartas_distrito_mao), len(ja.distritos_construidos), ja_custo_construido, ja_custo_mao, ja.personagem.rank]
-        estado_outro_jogador = [jmp.ouro, len(jmp.cartas_distrito_mao), len(jmp.distritos_construidos), jmp_custo_construido, jmp.personagem.rank]
-
-        # concatena os vetores
+        # Concatena os vetores em um vetor estado de amostra
         x_coleta = estado_jogador_atual + estado_outro_jogador
         
         #print("Jogador escolhido: ", nome_observado)
@@ -315,6 +406,7 @@ class ClassificaEstados:
         #print("Jogador mais forte da rodada: " + jmp.nome)
         #print("Pontuação parcial dele: ", jmp.pontuacao)
 
+        # Retorna o vetor se está coletando, se não, manda para avaliação 
         if coleta == 1:
             X = np.vstack((X, x_coleta))
             return X
