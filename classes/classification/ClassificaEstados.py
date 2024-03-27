@@ -129,10 +129,15 @@ class ClassificaEstados:
         modelo = joblib.load(f'./classes/classification/models/{model}')
 
         # [jogador.ouro, len(jogador.cartas_distrito_mao), num_dist_cons, jogador.personagem.rank]
-        
+        # ADD: tipos_construidos (AC), tipos 
         nomes_das_caracteristicas = [
-        "Gold (AC)", "Cards in Hand (AC)", "Distritos Construídos (AC)", "Custo Construidos (AC)", "Custo Mão (AC)", "Rank do Personagem(AC)",
-        "Gold (MVP)", "Cards in Hand (MVP)", "Distritos Construídos (MVP)", "Custo Construidos (MVP)", "Rank do Personagem (MVP)",
+
+        # AP features
+        "Gold Amount (AP)", "Number of cards in Hand (AP)", "Number of constructed Districts (AP)", "Cost of citadel (AP)", "Cost of Hand (AP)", "Character Rank (AP)",
+
+        # MVP features
+        "Gold Amount (MVP)", "Number of Cards in Hand (MVP)", "Number of constructed Districts (MVP)", "Cost of citadel (MVP)", "Character Rank (MVP)",
+
 ]
         tree_rules = export_text(modelo, feature_names= nomes_das_caracteristicas)
         # Mostra a estrutura da árvore de decisão no terminal
@@ -245,10 +250,10 @@ class ClassificaEstados:
 
     @staticmethod
     def coleta_features(jogadores, nome_observado, coleta, X, model_name):
-        estado_jogador_atual, estado_outro_jogador = [], []
-        tipos_distrito = []
-        num_dist_cons_JA, num_dist_cons_JMP = 0, 0
-        ja_custo_mao, ja_custo_construido, jmp_custo_construido = 0, 0, 0
+        estado_jogador_atual, estado_outro_jogador =  [], []                                            # Conta tipos de distritos na mão e construídos
+        num_dist_cons_JA, num_dist_cons_JMP, ja_custo_mao, ja_custo_construido, jmp_custo_construido, ja_tipos_mao, jmp_tipos_board, ja_tipo_board = 0, 0, 0, 0, 0, 0, 0, 0
+        # Conta custos de distritos da mão do JA, separando em baixo valor e alto valor (Não aumenta muito a complexidade e espaço e ainda da os valores)
+        custo123, custo456 = 0, 0
 
         # Ordena por pontuação parcial crescente
         ordem = [jogador.pontuacao for jogador in jogadores]
