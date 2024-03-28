@@ -130,6 +130,7 @@ class ClassificaEstados:
 
         # [jogador.ouro, len(jogador.cartas_distrito_mao), num_dist_cons, jogador.personagem.rank]
         # ADD: tipos_construidos (AC), tipos 
+        '''        
         nomes_das_caracteristicas = [
 
         # AP features
@@ -140,9 +141,11 @@ class ClassificaEstados:
 
 ]
         tree_rules = export_text(modelo, feature_names= nomes_das_caracteristicas)
+
+        '''        
         # Mostra a estrutura da árvore de decisão no terminal
         print("Estrutura final da árvore: ")
-        print(tree_rules)
+        #print(tree_rules)
         # Mostra as importancia de cada variavel do estado
         print("Feature importances: ")
         print(modelo.feature_importances_)
@@ -229,15 +232,15 @@ class ClassificaEstados:
         recall_scores = []
         for size in train_sizes:
             y_pred = model.predict(X_train[:size])
-            precision_scores.append(precision_score(Y_train[:size], y_pred))
-            recall_scores.append(recall_score(Y_train[:size], y_pred))
+            precision_scores.append(precision_score(Y_train[:size], y_pred, average='macro'))
+            recall_scores.append(recall_score(Y_train[:size], y_pred, average='macro'))
 
         # Plotando a curva de aprendizado
         plt.figure(figsize=(10, 7))
         plt.fill_between(train_sizes, train_scores_mean - train_scores_std, train_scores_mean + train_scores_std, alpha=0.1, color="blue")
         plt.fill_between(train_sizes, test_scores_mean - test_scores_std, test_scores_mean + test_scores_std, alpha=0.1, color="orange")
-        plt.plot(train_sizes, precision_scores, 'o-', color="green", label="Precisão")
-        plt.plot(train_sizes, recall_scores, 'o-', color="red", label="Recall")
+        #plt.plot(train_sizes, precision_scores, 'o-', color="green", label="Precisão")
+        #plt.plot(train_sizes, recall_scores, 'o-', color="red", label="Recall")
         plt.plot(train_sizes, train_scores_mean, 'o-', color="blue", label="Score de Treinamento")
         plt.plot(train_sizes, test_scores_mean, 'o-', color="orange", label="Score de Teste")
         plt.title("Curva de Aprendizado da Árvore de Decisão")
@@ -320,7 +323,7 @@ class ClassificaEstados:
                         jmp_tipos_board_v[3] = 1
                     if distrito.tipo_de_distrito == TipoDistrito.Especial:
                         jmp_tipos_board_v[4] = 1
-                        ja_especiais_board += 1
+                        jmp_especiais_board += 1
 
         # Computa vetores booleanos
         for i in jmp_tipos_board_v:
@@ -349,9 +352,9 @@ class ClassificaEstados:
         for distrito in ja.cartas_distrito_mao:
              # Separa em baixo e alto custo           
             if distrito.valor_do_distrito <= 3:
-                ja_custo123_board += 1 
+                ja_custo123_mao += 1 
             else:
-                ja_custo456_board += 1
+                ja_custo456_mao += 1
 
             # Contabiliza o total para média
             ja_custo_mao += distrito.valor_do_distrito
@@ -360,9 +363,9 @@ class ClassificaEstados:
 
             # Separa em baixo e alto custo
             if distrito.valor_do_distrito <= 3:
-                ja_custo123_board += 1 
+                jmp_custo123_board += 1 
             else:
-                ja_custo456_board += 1
+                jmp_custo456_board += 1
 
             # Contabiliza o total para média
             jmp_custo_construido += distrito.valor_do_distrito
@@ -383,7 +386,7 @@ class ClassificaEstados:
             jmp_custo_construido = 0
 
 
-        print(ja.nome, jmp.nome, ja_custo_mao, ja.distritos_construidos)
+        #print(ja.nome, jmp.nome, ja_custo_mao, ja.distritos_construidos)
 
         # Features selecionados
         # [pontuação, ouro, n_dist_mao, n_dist_const, custo_medio_const, custo_medio_mao, rank_person]

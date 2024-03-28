@@ -20,10 +20,10 @@ estrategias.append(EstrategiaJoao())
 
 n_features = 23
 
-n_amostras = 1
-jogos = "Jogos F"
-rotulos = "Rótulos F" 
-modelo = "Model 25k"
+n_amostras = 4000
+jogos = "Jogos 4k"
+rotulos = "Rótulos 4k" 
+modelo = "Model 4k"
 #jogos = "Jogos 25k"
 #rotulos = "Rótulos 25k" 
 #modelo = "Model 25k"
@@ -34,14 +34,14 @@ simulacao = Simulacao(estrategias, 8, True)
 '''
 
 #(qtd_pts, n_features, nome_jogos, nome_rotulos, nome_modelo)
-ColetaEstados.coleta_amostras(n_amostras, n_features, jogos, rotulos, modelo)
+#ColetaEstados.coleta_amostras(n_amostras, n_features, jogos, rotulos, modelo)
 
 #(jogos, rotulos, nome_modelo, criterion, profundidade)
-#ClassificaEstados.treinar_modelo(jogos, rotulos, modelo, "log_loss", 10)
+ClassificaEstados.treinar_modelo(jogos, rotulos, modelo, "log_loss", 20)
 
 #(jogos, rotulos, nome_modelo)
-#ClassificaEstados.modelo_info(modelo)
-#ClassificaEstados.testar_modelo(jogos, rotulos, modelo)
+ClassificaEstados.modelo_info(modelo)
+ClassificaEstados.testar_modelo(jogos, rotulos, modelo)
 
 #ClassificaEstados.plot_tree(modelo)
 #ClassificaEstados.plot_learning_curve(jogos, rotulos, modelo)
