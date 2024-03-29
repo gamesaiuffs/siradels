@@ -3,7 +3,17 @@ from classes.model.Acao import *
 from classes.model.Tabuleiro import Tabuleiro
 from classes.model.Jogador import Jogador
 from classes.strategies import Estrategia
+DEBUG = False
+DEBUG_TIME = False
+import time
+def debugTime():
+    if DEBUG_TIME:
+        time.sleep(5)
 
+
+def debug(message: str):
+    if (DEBUG):
+        print(message)
 
 class Simulacao:
     # Construtor
@@ -167,6 +177,8 @@ class Simulacao:
                             if jogador.acoes_realizadas[TipoAcao.PassarTurno.value]:
                                 break
                         # Identifica gatilhos de final de jogo
+
+
                         # Marca fim de jogo e jogador finalizador (monumento conta como 2 distritos para fins de uma cidade completa)
                         if len(jogador.distritos_construidos) >= 7:
                             jogador.terminou = True
@@ -175,14 +187,26 @@ class Simulacao:
                             final_jogo = True
                         # Quebra laço, pois não existem personagens com ranks repetidos
                         break
+            # debug("---------------------------------| Status Partida |--------------------------------------")
+            # # for posicao, personagem in enumerate(estado.tabuleiro.baralho_personagens):
+            # #     if personagem.nome in preferencia_personagem:
+            # #         print(f"Estratégia: Farming\t\tPersonagem: {personagem.nome}")
+            # #         return posicao
+            # debug(f"rodada: {self.estado.rodada}\t\tturno: {self.estado.turno}")
+            # debug(f"Ouro: ")
+            # for jogador in self.estado.jogadores:
+            #     debug(f"{jogador.nome}\t\t\touro: {jogador.ouro}\tpontos: {jogador.pontuacao} distritos_na_mão: {len(jogador.cartas_distrito_mao)}")
+            #     for dist in jogador.distritos_construidos:
+            #         debug(f"\t\tDistrito: {dist.nome_do_distrito}\t\tValor:{dist.valor_do_distrito}\t\tTipo: {dist.tipo_de_distrito.value}")
+            # debug("------------------------------------------------------------------------------------------------ ")
+
+
         # Rotina de final de jogo
         self.computar_pontuacao_final()
         self.estado.ordenar_jogadores_pontuacao()
         self.estado.jogadores[0].vencedor = True
         # Mostra estado final
         if not self.automatico:
-            print(self.estado)
-            print()
             for jogador in self.estado.jogadores:
                 print(f'{jogador.nome} - Pontuação final: {jogador.pontuacao_final}')
         return self.estado

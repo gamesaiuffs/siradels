@@ -1,3 +1,5 @@
+import time
+
 from classes.enum.TipoAcao import TipoAcao
 from classes.model.CartaDistrito import CartaDistrito
 from classes.model.CartaPersonagem import CartaPersonagem
@@ -6,6 +8,20 @@ from classes.model.Estado import Estado
 from classes.model.Jogador import Jogador
 import random
 from enum import Enum
+
+DEBUG = False
+DEBUG_TIME = False
+
+def debugTime():
+    if DEBUG_TIME:
+        time.sleep(5)
+
+
+def debug(message: str):
+    if (DEBUG):
+        print(message)
+
+
 
 class Estrategias(Enum):
     Ofensiva = 0,   # se alguém estiver à frente
@@ -51,14 +67,24 @@ class Estrategias(Enum):
 # usar o estado para recalcular a estratégia e retorná-la - a função da classe estratégia fica responsável por escolher a ação
 def calcularEstrategiaGeral(estado: Estado):
     # estratégia inicial
-    if estado.rodada == 0:
-        return Estrategias.Farming.value[0]
+    debug("---------------------------------------| Escolha de estratégia |-------------------------------- ")
+    debug(f"rodada: {estado.rodada}\t\tturno: {estado.turno}")
+    debug(f"Ouro: ")
+    for jogador in estado.jogadores:
+        debug(f"{jogador.nome}\t\t\touro: {jogador.ouro}\tpontos: {jogador.pontuacao}")
+    debug("------------------------------------------------------------------------------------------------ ")
+    
 
-
-    # estratégia geral
-    else:
-        return Estrategias.BonusFimJogo.value[0]
-
+    # if estado.rodada == 1:
+    #     return Estrategias.Farming.value[0]
+    #
+    # # se: vários distritos comerciais na conta -> farming
+    #
+    #
+    # # estratégia geral
+    # else:
+    #     return Estrategias.BonusFimJogo.value[0]
+    return Estrategias.Farming.value[0]
 
 
 class EstrategiaEduardo(Estrategia):
@@ -77,14 +103,137 @@ class EstrategiaEduardo(Estrategia):
     # Estratégia usada na fase de escolha dos personagens
     @staticmethod
     def escolher_personagem(estado: Estado) -> int:
-        # return random.randint(0, len(estado.tabuleiro.baralho_personagens) - 1)
-        preferencia_farming = ["Comerciante", "Rei", "Bispo", "Senhor da Guerra"]
+        estrategia = calcularEstrategiaGeral(estado)
+        # debug("---------------------------------------| Escolha de personagem |-------------------------------- ")
 
+        # encontra o jogador
+        index_jogador = -1
+        for index, jog in enumerate(estado.jogadores):
+            # print(jog.nome)
+            if jog.nome == 'Bot - Eduardo':
+                index_jogador = index
+
+        if index_jogador == -1:
+            print("ERRO----------------------------------------------------------------------------------------")
+            time.sleep(150)
+
+
+
+        # estratégia de farming
+        if estrategia == Estrategias.Farming.value[0]:
+
+            # verificar distritos construídos
+                # - rel, mil, nob, com, (-esp)
+            # qtd_distritos_cada_tipo = [0, 0, 0, 0, 0]
+            # print("---------------------------- debug calculo distritos ----------------------------------")
+            # print(f"Distritos construídos: {estado.jogadores[index_jogador].distritos_construidos}")
+            qtd_distritos_cada_tipo = {
+                "0": 0,
+                "1": 0,
+                "2": 0,
+                "3": 0,
+                "4": 0
+            }
+
+            # print("Dict inicial: ", qtd_distritos_cada_tipo)
+
+            # mapear quantos distritos de cada tipo foram construídos
+            for dist in estado.jogadores[index_jogador].distritos_construidos:
+                # print("dist add: ", dist.nome_do_distrito)
+                qtd_distritos_cada_tipo[str(dist.tipo_de_distrito.value)] += 1
+
+            # print("Dict mapeado: ", qtd_distritos_cada_tipo)
+
+            qtd_distritos_cada_tipo = dict(sorted(qtd_distritos_cada_tipo.items(), key=lambda item: item[1], reverse=True))
+            # print("Dict mapeado ordenado: ", qtd_distritos_cada_tipo)
+            #
+            # print("---------------------------- /debug calculo distritos ----------------------------------")
+
+            # print("Essa linha aqui: ", qtd_distritos_cada_tipo)
+            # time.sleep(3)
+
+            # criar lista de preferência de escolha de personagem
+            lista_preferencia_personagens = []
+            for chave, valor in qtd_distritos_cada_tipo.items():
+                if chave == '0': lista_preferencia_personagens.append("Bispo")
+                elif chave == '1': lista_preferencia_personagens.append("Senhor da Guerra")
+                elif chave == '2': lista_preferencia_personagens.append("Rei")
+                elif chave == '3': lista_preferencia_personagens.append("Comerciante")
+
+            # print("Lista de preferências: ", lista_preferencia_personagens)
+
+
+            # Religioso = 0
+            # Militar = 1
+            # Nobre = 2
+            # Comercial = 3
+            # Especial = 4
+
+            # escolher o menor indice possível da lista de personagens
+
+            # print("------------------------- Escolha de personagem ---------------------------------------------")
+            for nome_personagem in lista_preferencia_personagens:
+                for posicao, escolha_personagem in enumerate(estado.tabuleiro.baralho_personagens):
+                    # print(posicao, escolha_personagem.nome, nome_personagem)
+                    if escolha_personagem.nome == nome_personagem:
+                        # print(f"Personagem escolhido pela preferência: {escolha_personagem.nome}")
+                        # time.sleep(3)
+                        return posicao
+            # print("------------------------- Fim Escolha de personagem ---------------------------------------------")
+
+
+            # print("Estratégia - farming\t\tPersonagem: aleatório")
+            return random.randint(0, len(estado.tabuleiro.baralho_personagens) - 1)
+
+        # sem estratégia
+        else:
+            # print("Estratégia - nenhuma\t\tPersonagem: aleatório")
+            return random.randint(0, len(estado.tabuleiro.baralho_personagens) - 1)
 
     # Estratégia usada na fase de escolha das ações no turno
     @staticmethod
     def escolher_acao(estado: Estado, acoes_disponiveis: list[TipoAcao]) -> int:
+        index_jogador = -1
+        for index, jog in enumerate(estado.jogadores):
+            # print(jog.nome)
+            if jog.nome == 'Bot - Eduardo':
+                index_jogador = index
+
+        if index_jogador == -1:
+            print("ERRO----------------------------------------------------------------------------------------")
+            time.sleep(150)
+
+
         if len(acoes_disponiveis) > 1:
+
+            # if TipoAcao.ColetarOuro in acoes_disponiveis:
+            #     if random.randint(0, 9) == 0:
+            #         return 1
+            #     else:
+            #         return 0
+
+
+
+            for index_acao, acao in enumerate(acoes_disponiveis):
+                #codigo de coleta de ouro / carta antigo (90% vitória)
+                if acao.value == 1 and estado.jogadores[index_jogador].ouro <= 2:
+                    return index_acao # coletar ouro
+                if acao.value == 2 and len(estado.jogadores[index_jogador].cartas_distrito_mao) < 2:
+                    return index_acao # comprar carta
+
+                # < 3 - valor testado - pg 3 documento de notas
+                # if acao.value == 1 and estado.jogadores[index_jogador].ouro < 3:
+                #     return 0 # coletar ouro
+                #
+                # else:
+                #     return 1   # coletar carta
+
+
+                if acao.value == TipoAcao.ConstruirDistrito:
+                    return index_acao # construir distrito
+
+
+
             return random.randint(1, len(acoes_disponiveis) - 1)
         return 0
 
@@ -142,6 +291,3 @@ class EstrategiaEduardo(Estrategia):
     @staticmethod
     def laboratorio(estado: Estado) -> int:
         return random.randint(0, len(estado.jogador_atual.cartas_distrito_mao) - 1)
-
-
-EstrategiaEduardo()

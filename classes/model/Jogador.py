@@ -52,6 +52,7 @@ class Jogador:
     def destruir(self, estado, distrito: CartaDistrito):
         self.pontuacao -= distrito.valor_do_distrito
         estado.tabuleiro.baralho_distritos.append(distrito)
+        # print(f"------------------Distritos construídos (Jogador.py): {self.distritos_construidos}")
         self.distritos_construidos.remove(distrito)
         self.tem_distrito[distrito.nome_do_distrito] -= 1
 

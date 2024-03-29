@@ -5,12 +5,12 @@ from classes.strategies.Estrategia import Estrategia
 from classes.model.Estado import Estado
 from classes.model.Jogador import Jogador
 import random
-import time
 
 
-class EstrategiaTotalmenteAleatoria(Estrategia):
-    def __init__(self, nome: str = 'Bot Random'):
-        super().__init__(nome)
+# Baseada no artigo de G. Groeneweg. A heurística consiste em coletar ouro 9 de 10 vezes
+class EstrategiaGold(Estrategia):
+    def __init__(self, nome):
+        super().__init__(descricao=nome)
 
     # Estratégia usada na fase de escolha dos personagens
     @staticmethod
@@ -20,6 +20,14 @@ class EstrategiaTotalmenteAleatoria(Estrategia):
     # Estratégia usada na fase de escolha das ações no turno
     @staticmethod
     def escolher_acao(estado: Estado, acoes_disponiveis: list[TipoAcao]) -> int:
+
+        # Coleta ouro 9 de 10 vezes
+        if TipoAcao.ColetarOuro in acoes_disponiveis:
+            if random.randint(0, 9) == 0:
+                return 1
+            else:
+                return 0
+
         if len(acoes_disponiveis) > 1:
             return random.randint(1, len(acoes_disponiveis) - 1)
         return 0
@@ -68,9 +76,9 @@ class EstrategiaTotalmenteAleatoria(Estrategia):
 
     # Estratégia usada na habilidade do Senhor da Guerra
     @staticmethod
-    def habilidade_senhor_da_guerra_destruir(estado: Estado, distritos_para_destruir: list[(CartaDistrito, Jogador)]) -> int:
-        escolha = random.randint(0, len(distritos_para_destruir))
-        return escolha
+    def habilidade_senhor_da_guerra_destruir(estado: Estado,
+                                             distritos_para_destruir: list[(CartaDistrito, Jogador)]) -> int:
+        return random.randint(0, len(distritos_para_destruir))
 
     # Estratégia usada na ação do Laboratório
     @staticmethod
