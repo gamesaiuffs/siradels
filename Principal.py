@@ -22,8 +22,8 @@ startTime = time.time()
 # Testar treino contra outras estratégias
 estrategias_gold = [EstrategiaGold('Bot 1'), EstrategiaGold('Bot 2'), EstrategiaGold('Bot 3'), EstrategiaGold('Bot 4'), EstrategiaEduardo()]
 
-estrategias_aleatorio = [EstrategiaTotalmenteAleatoria('Bot 1'), EstrategiaTotalmenteAleatoria('Bot 2'), EstrategiaTotalmenteAleatoria('Bot 3'), EstrategiaTotalmenteAleatoria('Bot 4'), EstrategiaEduardo()]
-Experimento.testar_estrategias(estrategias_gold)
+estrategias_aleatorio = [EstrategiaTotalmenteAleatoria('Bot 1'), EstrategiaTotalmenteAleatoria('Bot 2'), EstrategiaManual('Bot 3'), EstrategiaTotalmenteAleatoria('Bot 4'), EstrategiaEduardo()]
+Experimento.testar_estrategias(estrategias_aleatorio)
 
 
 print(f"Tempo da simulação = {(time.time() - startTime):.2f}s")
