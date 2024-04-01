@@ -9,7 +9,7 @@ from classes.model.Jogador import Jogador
 import random
 from enum import Enum
 
-DEBUG = True
+DEBUG = False
 DEBUG_TIME = False
 
 def debugTime():
@@ -45,9 +45,11 @@ class Estrategias(Enum):
     Farming = 3    # adotar no início
         # foco - geração de renda passiva
             # distritos variádos
+            # ou
+            # focar em um tipo
 
 
-        # foco - escolher personagem com bonus de renda
+        # foco - escolher personagem com bonus de renda - feito
             # rei
             # comerciante
             # bispo
@@ -57,6 +59,19 @@ class Estrategias(Enum):
             # escola de magia - mantém cartas compradas
             # laboratório - troca 1 carta por 2 ouros
             # pedreira - construír distritos iguais
+
+        # Ordem de preferência de tipos de distritos
+            # especial = 4
+            # comercial = 3
+            # nobre = 2
+            # militar(1), religioso(0)
+
+
+    Religioso = 0
+    Militar = 1
+    Nobre = 2
+    Comercial = 3
+    Especial = 4
 
     BonusFimJogo = 4   # adotar se estiver à frente no jogo
         # foco - distritos variádos
@@ -73,17 +88,7 @@ def calcularEstrategiaGeral(estado: Estado):
     for jogador in estado.jogadores:
         debug(f"{jogador.nome}\t\t\touro: {jogador.ouro}\tpontos: {jogador.pontuacao}")
     debug("------------------------------------------------------------------------------------------------ ")
-    
 
-    # if estado.rodada == 1:
-    #     return Estrategias.Farming.value[0]
-    #
-    # # se: vários distritos comerciais na conta -> farming
-    #
-    #
-    # # estratégia geral
-    # else:
-    #     return Estrategias.BonusFimJogo.value[0]
     return Estrategias.Farming.value
 
 
@@ -123,10 +128,6 @@ class EstrategiaEduardo(Estrategia):
         if estrategia == Estrategias.Farming.value:
 
             # verificar distritos construídos
-                # - rel, mil, nob, com, (-esp)
-            # qtd_distritos_cada_tipo = [0, 0, 0, 0, 0]
-            # print("---------------------------- debug calculo distritos ----------------------------------")
-            # print(f"Distritos construídos: {estado.jogadores[index_jogador].distritos_construidos}")
             qtd_distritos_cada_tipo = {
                 "0": 0,
                 "1": 0,
@@ -135,22 +136,12 @@ class EstrategiaEduardo(Estrategia):
                 "4": 0
             }
 
-            # print("Dict inicial: ", qtd_distritos_cada_tipo)
-
             # mapear quantos distritos de cada tipo foram construídos
             for dist in estado.jogadores[index_jogador].distritos_construidos:
-                # print("dist add: ", dist.nome_do_distrito)
                 qtd_distritos_cada_tipo[str(dist.tipo_de_distrito.value)] += 1
 
-            # print("Dict mapeado: ", qtd_distritos_cada_tipo)
-
+            # ordenar dicionário por número de distritos construídos de cada tipo
             qtd_distritos_cada_tipo = dict(sorted(qtd_distritos_cada_tipo.items(), key=lambda item: item[1], reverse=True))
-            # print("Dict mapeado ordenado: ", qtd_distritos_cada_tipo)
-            #
-            # print("---------------------------- /debug calculo distritos ----------------------------------")
-
-            # print("Essa linha aqui: ", qtd_distritos_cada_tipo)
-            # time.sleep(3)
 
             # criar lista de preferência de escolha de personagem
             lista_preferencia_personagens = []
@@ -160,9 +151,6 @@ class EstrategiaEduardo(Estrategia):
                 elif chave == '2': lista_preferencia_personagens.append("Rei")
                 elif chave == '3': lista_preferencia_personagens.append("Comerciante")
 
-            # print("Lista de preferências: ", lista_preferencia_personagens)
-
-
             # Religioso = 0
             # Militar = 1
             # Nobre = 2
@@ -170,20 +158,14 @@ class EstrategiaEduardo(Estrategia):
             # Especial = 4
 
             # escolher o menor indice possível da lista de personagens
-
-            # print("------------------------- Escolha de personagem ---------------------------------------------")
             for nome_personagem in lista_preferencia_personagens:
                 for posicao, escolha_personagem in enumerate(estado.tabuleiro.baralho_personagens):
-                    # print(posicao, escolha_personagem.nome, nome_personagem)
                     if escolha_personagem.nome == nome_personagem:
                         debug(f"Personagem escolhido pela preferência: {escolha_personagem.nome}")
-                        # time.sleep(3)
                         return posicao
-            # print("------------------------- Fim Escolha de personagem ---------------------------------------------")
 
 
             debug("Estratégia - farming\t\tPersonagem: aleatório")
-
             return random.randint(0, len(estado.tabuleiro.baralho_personagens) - 1)
 
         # sem estratégia
@@ -207,31 +189,7 @@ class EstrategiaEduardo(Estrategia):
 
         if len(acoes_disponiveis) > 1:
 
-            # if TipoAcao.ColetarOuro in acoes_disponiveis:
-            #     if random.randint(0, 9) == 0:
-            #         return 1
-            #     else:
-            #         return 0
-
-
-
-            # for index_acao, acao in enumerate(acoes_disponiveis):
-            #     # #codigo de coleta de ouro / carta antigo (90% vitória)
-            #     # if acao.value == TipoAcao.ColetarOuro.value and estado.jogadores[index_jogador].ouro <= 2:
-            #     #     debug("Ação escolhida: Coletar ouro")
-            #     #     return index_acao # coletar ouro
-            #     # if acao.value == TipoAcao.ColetarCartas.value and len(estado.jogadores[index_jogador].cartas_distrito_mao) < 2:
-            #     #     debug("Ação escolhida: Coletar cartas")
-            #     #     return index_acao # comprar carta
-            #
-            #     # codigo de coleta de ouro / carta novo
-            #     if acao.value == TipoAcao.ColetarCartas.value and len(estado.jogadores[index_jogador].cartas_distrito_mao) < 4:
-            #         debug("Ação escolhida: Coletar cartas")
-            #         return TipoAcao.ColetarCartas.value  # comprar carta
-            #     else:
-            #         debug("Ação escolhida: Coletar ouro")
-            #         return TipoAcao.ColetarOuro.value  # coletar ouro
-
+            # decisão de cartas ou ouro
             if len(acoes_disponiveis) == 2 and acoes_disponiveis[0] == TipoAcao.ColetarOuro:
                 if len(estado.jogadores[index_jogador].cartas_distrito_mao) < 2:
                     debug("Escolheu cartas...")
@@ -239,13 +197,6 @@ class EstrategiaEduardo(Estrategia):
                 else:
                     debug("Escolheu ouro...")
                     return 0 # coletar ouro
-
-                # < 3 - valor testado - pg 3 documento de notas
-                # if acao.value == 1 and estado.jogadores[index_jogador].ouro < 3:
-                #     return 0 # coletar ouro
-                #
-                # else:
-                #     return 1   # coletar carta
 
             for index_acao, acao in enumerate(acoes_disponiveis):
 

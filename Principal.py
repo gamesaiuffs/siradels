@@ -5,6 +5,7 @@ from classes.strategies.EstrategiaTotalmenteAleatoria import EstrategiaTotalment
 from classes.strategies.EstrategiaEduardo import EstrategiaEduardo
 from classes.strategies.EstrategiaGold import EstrategiaGold
 from classes.strategies.EstrategiaManual import EstrategiaManual
+from classes.strategies.EstrategiaFelipe import EstrategiaFelipe
 
 # Flag que modifica caminhos para salvar/ler arquivos dependendo da IDE utilizada
 vscode = False
@@ -20,10 +21,14 @@ startTime = time.time()
 #experimento.treinar_modelo_mcts(600)
 
 # Testar treino contra outras estratégias
+estrategias_meio_a_meio = [EstrategiaFelipe(), EstrategiaGold('Bot 2'), EstrategiaTotalmenteAleatoria('Bot 3'), EstrategiaGold('Bot 4'), EstrategiaEduardo()]
+
 estrategias_gold = [EstrategiaGold('Bot 1'), EstrategiaGold('Bot 2'), EstrategiaGold('Bot 3'), EstrategiaGold('Bot 4'), EstrategiaEduardo()]
 
-estrategias_aleatorio = [EstrategiaTotalmenteAleatoria('Bot 1'), EstrategiaTotalmenteAleatoria('Bot 2'), EstrategiaManual('Bot 3'), EstrategiaTotalmenteAleatoria('Bot 4'), EstrategiaEduardo()]
-Experimento.testar_estrategias(estrategias_aleatorio)
+estrategias_aleatorio = [EstrategiaTotalmenteAleatoria('Bot 1'), EstrategiaTotalmenteAleatoria('Bot 2'), EstrategiaTotalmenteAleatoria('Bot 3'), EstrategiaTotalmenteAleatoria('Bot 4'), EstrategiaEduardo()]
+
+
+Experimento.testar_estrategias(estrategias_meio_a_meio)
 
 
 print(f"Tempo da simulação = {(time.time() - startTime):.2f}s")

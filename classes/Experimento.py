@@ -11,7 +11,7 @@ from subprocess import run
 import os
 
 QTD_SIMULACOES = 10000
-DEBUG = True
+DEBUG = False
 DEBUG_TIME = False
 
 PORCENTAGEM = True

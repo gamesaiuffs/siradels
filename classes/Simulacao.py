@@ -3,7 +3,7 @@ from classes.model.Acao import *
 from classes.model.Tabuleiro import Tabuleiro
 from classes.model.Jogador import Jogador
 from classes.strategies import Estrategia
-DEBUG = True
+DEBUG = False
 DEBUG_TIME = False
 import time
 def debugTime():
