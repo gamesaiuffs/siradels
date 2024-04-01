@@ -48,8 +48,10 @@ class Experimento:
         estrategias.append(mcts)
         while qtd_simulacao < qtd_simulacao_maximo:
             qtd_simulacao += 1
+            # Imprime com o decorrer do treino
             if qtd_simulacao % 100 == 0:
                 print(qtd_simulacao)
+                
             for tipo_tabela in TipoTabela:
                 # Treinamento individual por tipo de tabela
                 mcts.tipo_tabela = tipo_tabela
