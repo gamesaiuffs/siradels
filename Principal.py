@@ -18,15 +18,15 @@ estrategias.append(EstrategiaGustavo())
 estrategias.append(EstrategiaJoao())
 '''
 
-n_features = 23
+n_features = 28
+#n_features = 23
 
-n_amostras = 4000
-jogos = "Jogos 4k"
-rotulos = "Rótulos 4k" 
-modelo = "Model 4k"
-#jogos = "Jogos 25k"
-#rotulos = "Rótulos 25k" 
-#modelo = "Model 25k"
+profundidade = 30 
+n_amostras = 15000
+
+jogos = f"Jogos {n_amostras} {n_features}f"
+rotulos = f"Rótulos {n_amostras} {n_features}f" 
+modelo = f"Model 15k d{profundidade} {n_features}f"
 
 '''for i in range(5):          # fixo em 5 players
    estrategias.append(EstrategiaTotalmenteAleatoria(str(i+1)))
@@ -37,10 +37,10 @@ simulacao = Simulacao(estrategias, 8, True)
 #ColetaEstados.coleta_amostras(n_amostras, n_features, jogos, rotulos, modelo)
 
 #(jogos, rotulos, nome_modelo, criterion, profundidade)
-ClassificaEstados.treinar_modelo(jogos, rotulos, modelo, "log_loss", 20)
+#ClassificaEstados.treinar_modelo(jogos, rotulos, modelo, "log_loss", profundidade)
 
 #(jogos, rotulos, nome_modelo)
-ClassificaEstados.modelo_info(modelo)
+#ClassificaEstados.modelo_info(modelo)
 ClassificaEstados.testar_modelo(jogos, rotulos, modelo)
 
 #ClassificaEstados.plot_tree(modelo)

@@ -107,7 +107,7 @@ class ClassificaEstados:
         return
     
     @staticmethod
-    def sgkf(X, y):
+    def cross_validation(X, y):
         sgkf = StratifiedGroupKFold(n_splits=3)
 
         # Faça a divisão dos dados
@@ -128,24 +128,28 @@ class ClassificaEstados:
 
         modelo = joblib.load(f'./classes/classification/models/{model}')
 
-        # [jogador.ouro, len(jogador.cartas_distrito_mao), num_dist_cons, jogador.personagem.rank]
-        # ADD: tipos_construidos (AC), tipos 
-        '''        
+#        estado_jogador_atual = [ja.ouro, len(ja.cartas_distrito_mao), len(ja.distritos_construidos), ja_custo_construido, ja_custo_mao, ja_tipos_board, ja_tipos_mao, ja_custo123_board, ja_custo456_board, ja_custo123_mao, ja_custo456_mao, ja_especiais_mao, ja_especiais_board, ja.personagem.rank]
+#        estado_outro_jogador = [jmp.ouro, len(jmp.cartas_distrito_mao), len(jmp.distritos_construidos), jmp_custo_construido, jmp_tipos_board, jmp_custo123_board, jmp_custo456_board, jmp_especiais_board, jmp.personagem.rank]
+
+        
         nomes_das_caracteristicas = [
 
+        # Board features
+        "Score P1", "Score P2", "Score P3", "Score P4", "Score P5",
+
         # AP features
-        "Gold Amount (AP)", "Number of cards in Hand (AP)", "Number of constructed Districts (AP)", "Cost of citadel (AP)", "Cost of Hand (AP)", "Character Rank (AP)",
+        "Gold Amount (AP)", "Number of cards in Hand (AP)", "Number of Builded Districts (AP)", "Cost of citadel (AP)", "Cost of Hand (AP)", "Builded District Types (AP)", "District Types in Hand (AP)", "Low Cost District in Hand (AP)", "High Cost District in Hand (AP)", "Special District in Hand (AP)", "Special District Builded (AP)", "Character Rank (AP)",
 
         # MVP features
-        "Gold Amount (MVP)", "Number of Cards in Hand (MVP)", "Number of constructed Districts (MVP)", "Cost of citadel (MVP)", "Character Rank (MVP)",
+        "Gold Amount (MVP)", "Number of Cards in Hand (MVP)", "Number of Builded Districts (MVP)", "Cost of citadel (MVP)", "Builded District Types (MVP)", "District Types in Hand (MVP)", "Low Cost District in Hand (MVP)", "High Cost District in Hand (MVP)", "Special District in Hand (MVP)", "Special District Builded (MVP)", "Character Rank (MVP)",
 
 ]
         tree_rules = export_text(modelo, feature_names= nomes_das_caracteristicas)
 
-        '''        
+                
         # Mostra a estrutura da árvore de decisão no terminal
         print("Estrutura final da árvore: ")
-        #print(tree_rules)
+        print(tree_rules)
         # Mostra as importancia de cada variavel do estado
         print("Feature importances: ")
         print(modelo.feature_importances_)
@@ -190,10 +194,10 @@ class ClassificaEstados:
         print(f"AUC: {round(auc, 2)}%")
         print(f"Log Loss: {round(log, 2)}")
         print(f"F1 Score - Macro: {round(macrof1, 2)}%")
-        print(f"Precisão Geral: {round(precisiong, 2)}%")
-        print(f"Recall Geral: {round(recallg, 2)}%")
-        print(f"Precisão Macro: {round(precisionm, 2)}%")
-        print(f"Recall Macro: {round(recallm, 2)}%")
+        print(f"Precisão Vitória: {round(precisiong, 2)}%")
+        print(f"Recall Vitória: {round(recallg, 2)}%")
+        print(f"Precisão Geral: {round(precisionm, 2)}%")
+        print(f"Recall Geral: {round(recallm, 2)}%")
         print("Matriz de confusão: ")
         print(matriz_confusao)
 
@@ -201,12 +205,21 @@ class ClassificaEstados:
 
     # Plota árvore
     @staticmethod
-    def plot_tree(model_name, f_names):
+    def plot_tree(model_name: str):
 
         modelo = joblib.load(f'./classes/classification/models/{model_name}')
 
+        nomes_das_caracteristicas = [
+
+        # AP features
+        "Gold Amount (AP)", "Number of cards in Hand (AP)", "Number of Builded Districts (AP)", "Cost of citadel (AP)", "Cost of Hand (AP)", "Builded District Types (AP)", "District Types in Hand (AP)", "Low Cost District in Hand (AP)", "High Cost District in Hand (AP)", "Special District in Hand (AP)", "Special District Builded (AP)", "Character Rank (AP)",
+
+        # MVP features
+        "Gold Amount (MVP)", "Number of Cards in Hand (MVP)", "Number of Builded Districts (MVP)", "Cost of citadel (MVP)", "Builded District Types (MVP)", "District Types in Hand (MVP)", "Low Cost District in Hand (MVP)", "High Cost District in Hand (MVP)", "Special District in Hand (MVP)", "Special District Builded (MVP)", "Character Rank (MVP)",
+
+]
         plt.figure(figsize=(10, 5))
-        plot_tree(modelo, feature_names=f_names, class_names=["Lose", "Win"], filled=True)
+        plot_tree(modelo, feature_names=nomes_das_caracteristicas, class_names=["Lose", "Win"], filled=True)
         plt.show()   
         return
 
@@ -388,21 +401,16 @@ class ClassificaEstados:
 
         #print(ja.nome, jmp.nome, ja_custo_mao, ja.distritos_construidos)
 
-        # Features selecionados
-        # [pontuação, ouro, n_dist_mao, n_dist_const, custo_medio_const, custo_medio_mao, rank_person]
-        #
         # OBS: vetores JA e JMP são assimétricos 
-        # Nº total de features atual: 11 
-        #
-        # Ideias de Features:
-        # Custo médio da mão, Custo médio dos distritos construídos, contador unico de tipos, ranking do personagem
+        # Nº total de features atual: 23 
         
         # Cria o vetor dos dois jogadores
+        estado_tabuleiro = [jogadores[4].pontuacao, jogadores[3].pontuacao, jogadores[2].pontuacao, jogadores[1].pontuacao, jogadores[0].pontuacao]
         estado_jogador_atual = [ja.ouro, len(ja.cartas_distrito_mao), len(ja.distritos_construidos), ja_custo_construido, ja_custo_mao, ja_tipos_board, ja_tipos_mao, ja_custo123_board, ja_custo456_board, ja_custo123_mao, ja_custo456_mao, ja_especiais_mao, ja_especiais_board, ja.personagem.rank]
         estado_outro_jogador = [jmp.ouro, len(jmp.cartas_distrito_mao), len(jmp.distritos_construidos), jmp_custo_construido, jmp_tipos_board, jmp_custo123_board, jmp_custo456_board, jmp_especiais_board, jmp.personagem.rank]
 
         # Concatena os vetores em um vetor estado de amostra
-        x_coleta = estado_jogador_atual + estado_outro_jogador
+        x_coleta = estado_tabuleiro + estado_jogador_atual + estado_outro_jogador
         
         #print("Jogador escolhido: ", nome_observado)
         #print("Pontuação parcial dele: ", ja.pontuacao)
