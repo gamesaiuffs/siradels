@@ -44,14 +44,16 @@ class Experimento:
     # Inicializa o treinamento do modelo do zero e treina durante o tempo limite em segundos
     def treinar_modelo_mcts(self, estrategias: list[Estrategia], qtd_simulacao_maximo: int = 1000):
         qtd_simulacao = 0
+
         mcts = EstrategiaMCTS(self.caminho, 0)
         estrategias.append(mcts)
+
         while qtd_simulacao < qtd_simulacao_maximo:
             qtd_simulacao += 1
             # Imprime com o decorrer do treino
-            if qtd_simulacao % 100 == 0:
+            if qtd_simulacao % 10 == 0:
                 print(qtd_simulacao)
-                
+
             for tipo_tabela in TipoTabela:
                 # Treinamento individual por tipo de tabela
                 mcts.tipo_tabela = tipo_tabela
@@ -73,6 +75,9 @@ class Experimento:
                                 for tabela, tabela_hist in zip(modelo, historico):
                                     tabela[:, metade_tabela:] += tabela_hist[:, metade_tabela:]
             mcts.salvar_modelos()
+            estrategias.pop()
+            mcts = EstrategiaMCTS(self.caminho, 1)
+            estrategias.append(mcts)
 
     # Salva o resultado das simulações em arquivos CSV
     # Refatorar
