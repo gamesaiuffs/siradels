@@ -47,5 +47,5 @@ class ColetaEstados:
                     Y.append(Y_coleta)
         # Remove primeira linha nula
         X = np.delete(X, 0, axis=0)
-        ClassificaEstados.salvar_resultados(X, Y, jogos, rotulos)
+        ClassificaEstados.salvar_amostras(X, Y, jogos, rotulos)
         #ClassificaEstados.treinar_modelo(X, Y)

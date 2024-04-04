@@ -41,7 +41,7 @@ simulacao = Simulacao(estrategias, 8, True)
 
 #(jogos, rotulos, nome_modelo)
 #ClassificaEstados.modelo_info(modelo)
-ClassificaEstados.testar_modelo(jogos, rotulos, modelo)
+#print(ClassificaEstados.testar_modelo(jogos, rotulos, modelo))
 
 #ClassificaEstados.plot_tree(modelo)
 #ClassificaEstados.plot_learning_curve(jogos, rotulos, modelo)

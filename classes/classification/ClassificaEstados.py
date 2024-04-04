@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 from more_itertools import sort_together
 import numpy as np
-import csv
+import json
 from classes.strategies.EstrategiaBernardo import EstrategiaBernardo
 from classes.strategies.EstrategiaDjonatan import EstrategiaDjonatan
 from classes.strategies.EstrategiaFelipe import EstrategiaFelipe
@@ -20,249 +20,6 @@ import matplotlib.pyplot as plt
 import joblib
 
 class ClassificaEstados:   
-    
-    # Salva resultados das amostras
-    @staticmethod
-    def salvar_resultados(X: np.ndarray, Y: list, jogos: str, rotulos: str):
-        #j = j.astype(np.uint32)
-        
-        np.savetxt('./classes/classification/samples/' + jogos + '.csv', X, delimiter=',', fmt='%s')   # Features
-        #np.savetxt('./tabela_estado/' + j.name + '.csv', i, delimiter=',', fmt='%6u')
-        np.savetxt('./classes/classification/samples/' + rotulos + '.csv', Y, delimiter=',', fmt='%6u')    # Rotulos
-        #np.savetxt('./tabela_estado/' + 'Rotulos' + '.csv', Y, delimiter=',', fmt='%6u')
-        # Caminho do arquivo CSV
-        '''
-        caminho_arquivo_csv = 'seu_arquivo.csv'
-
-        # Abre o arquivo CSV no modo de adição ('a')
-        with open(caminho_arquivo_csv, mode='a', newline='') as arquivo_csv:
-            # Cria um objeto escritor CSV
-            escritor_csv = csv.writer(arquivo_csv)
-
-            # Adiciona os novos dados ao final do arquivo
-            escritor_csv.writerows(novos_dados)
-        '''
-        return
-
-    # Ler amostras salvas
-    @staticmethod
-    def ler_resultados(jogos: str, rotulos: str) -> list[np.ndarray]:
-        X = np.genfromtxt('./classes/classification/samples/' + jogos + '.csv', delimiter=',')
-        #jogos = np.genfromtxt('./tabela_estado/' + i.name + '.csv', delimiter=',')
-        Y = np.genfromtxt('./classes/classification/samples/' + rotulos + '.csv', delimiter=',') 
-        #rotulos = np.genfromtxt('./tabela_estado/' + 'Rotulos' + '.csv', delimiter=',') 
-        #X = jogos
-        #Y = rotulos
-
-        X_train, X_test, Y_train, Y_test = train_test_split(X, Y, test_size=0.33, random_state=42)
-
-        return X_train, X_test, Y_train, Y_test
-    
-    # Treina o modelo
-    @staticmethod
-    def treinar_modelo(jogos: str, rotulos: str, nome: str, criterion: str, profundidade : int = 1):
-
-        X_train, X_test, Y_train, Y_test = ClassificaEstados.ler_resultados(jogos, rotulos)
-
-        # Definir parametros
-        modelo = DecisionTreeClassifier(criterion=criterion, max_depth=profundidade)
-        modelo.fit(X_train, Y_train)
-
-        # Salva o modelo
-        joblib.dump(modelo, f'./classes/classification/models/{nome}')
-
-        print("Modelo treinado com sucesso!")
-
-        return 
-    
-    # Equilibra as amostras em relação as features
-    @staticmethod
-    def undersampling(jogos_in: str, rotulos_in: str, jogos_out: str, rotulos_out: str):
-
-        idx_remover = []
-        X_train, X_test, Y_train, Y_test = ClassificaEstados.ler_resultados(jogos_in, rotulos_in)
-        X = np.concatenate((X_train, X_test), axis=0)
-        Y = np.concatenate((Y_train, Y_test), axis=0)
-        wins = np.sum(Y == 1)
-        loses = np.sum(Y == 0)
-        print("Wins: ", wins)
-        print("Loses: ", loses)
-
-        for indice, linha in enumerate(reversed(Y)):
-            if linha == 0 and loses > wins:
-                idx_remover.append(len(Y) - 1 - indice)
-                loses = loses - 1
-                print("Iterações restantes: ", loses-wins)
-
-        X = np.delete(X, idx_remover, axis=0)
-        Y = np.delete(Y, idx_remover, axis=0)
-
-        wins = np.sum(Y == 1)
-        loses = np.sum(Y == 0)
-        print("Wins: ", wins)
-        print("Loses: ", loses)
-
-        ClassificaEstados.salvar_resultados(X, Y, jogos_out, rotulos_out)
-   
-        return
-    
-    @staticmethod
-    def cross_validation(X, y):
-        sgkf = StratifiedGroupKFold(n_splits=3)
-
-        # Faça a divisão dos dados
-        for train_index, test_index in sgkf.split(X, y, groups):
-            X_train, X_test = X[train_index], X[test_index]
-            y_train, y_test = y[train_index], y[test_index]
-            groups_train, groups_test = groups[train_index], groups[test_index]
-   
-        groups = np.array([1, 1, 2, 2, 3]) 
-        f1_macro_scorer = make_scorer(f1_score, average='macro')
-        scores = cross_val_score(estimator=f1_macro_scorer)
-
-        return X_test, y_test 
-    
-    # Mostra informacoes do modelo
-    @staticmethod
-    def modelo_info(model: str):
-
-        modelo = joblib.load(f'./classes/classification/models/{model}')
-
-#        estado_jogador_atual = [ja.ouro, len(ja.cartas_distrito_mao), len(ja.distritos_construidos), ja_custo_construido, ja_custo_mao, ja_tipos_board, ja_tipos_mao, ja_custo123_board, ja_custo456_board, ja_custo123_mao, ja_custo456_mao, ja_especiais_mao, ja_especiais_board, ja.personagem.rank]
-#        estado_outro_jogador = [jmp.ouro, len(jmp.cartas_distrito_mao), len(jmp.distritos_construidos), jmp_custo_construido, jmp_tipos_board, jmp_custo123_board, jmp_custo456_board, jmp_especiais_board, jmp.personagem.rank]
-
-        
-        nomes_das_caracteristicas = [
-
-        # Board features
-        "Score P1", "Score P2", "Score P3", "Score P4", "Score P5",
-
-        # AP features
-        "Gold Amount (AP)", "Number of cards in Hand (AP)", "Number of Builded Districts (AP)", "Cost of citadel (AP)", "Cost of Hand (AP)", "Builded District Types (AP)", "District Types in Hand (AP)", "Low Cost District in Hand (AP)", "High Cost District in Hand (AP)", "Special District in Hand (AP)", "Special District Builded (AP)", "Character Rank (AP)",
-
-        # MVP features
-        "Gold Amount (MVP)", "Number of Cards in Hand (MVP)", "Number of Builded Districts (MVP)", "Cost of citadel (MVP)", "Builded District Types (MVP)", "District Types in Hand (MVP)", "Low Cost District in Hand (MVP)", "High Cost District in Hand (MVP)", "Special District in Hand (MVP)", "Special District Builded (MVP)", "Character Rank (MVP)",
-
-]
-        tree_rules = export_text(modelo, feature_names= nomes_das_caracteristicas)
-
-                
-        # Mostra a estrutura da árvore de decisão no terminal
-        print("Estrutura final da árvore: ")
-        print(tree_rules)
-        # Mostra as importancia de cada variavel do estado
-        print("Feature importances: ")
-        print(modelo.feature_importances_)
-        # Mostra a profundidade da árvore
-        print()
-        print(f"Modelo Analisado: {model}")
-        print("Profundidade: ", modelo.get_depth())
-        # Mostra o número de nós
-        print("Número de Nós: ", modelo.tree_.node_count)
-        # Mostra o número de folhas
-        print("Número de Folhas: ", modelo.get_n_leaves())
-        
-        # Plotar matriz confusão 
-        #disp = ConfusionMatrixDisplay(confusion_matrix=matriz_confusao, display_labels=nomes_das_caracteristicas)
-
-        return
-    
-    # Testa modelo
-    @staticmethod
-    def testar_modelo(jogos: str, rotulos: str, model: str):
-        modelo = joblib.load(f'./classes/classification/models/{model}')
-
-        X_train, X_test, Y_train, Y_test = ClassificaEstados.ler_resultados(jogos, rotulos)
-
-        # Y_pred: Rótulos que o modelo previu para os testes
-        # Y_test: Rótulos reais dos testes
-        Y_pred = modelo.predict(X_test)
-
-        macrof1 = f1_score(y_true=Y_test, y_pred=Y_pred, average='macro')*100
-        # Accuracy tem mesmo valor que F1_score: Micro        
-        accuracy = accuracy_score(y_true=Y_test, y_pred=Y_pred)*100
-        log = log_loss(y_true=Y_test, y_pred=Y_pred)
-        matriz_confusao = confusion_matrix(y_true=Y_test, y_pred=Y_pred )
-        precisiong = precision_score(y_true=Y_test, y_pred=Y_pred) * 100
-        recallg = recall_score(y_true=Y_test, y_pred=Y_pred) * 100
-        precisionm = precision_score(y_true=Y_test, y_pred=Y_pred, average='macro') * 100
-        recallm = recall_score(y_true=Y_test, y_pred=Y_pred, average='macro') * 100
-
-        auc = roc_auc_score(y_true=Y_test, y_score=Y_pred, ) * 100
-
-        print(f"Accuracy: {round(accuracy, 2)}%")
-        print(f"AUC: {round(auc, 2)}%")
-        print(f"Log Loss: {round(log, 2)}")
-        print(f"F1 Score - Macro: {round(macrof1, 2)}%")
-        print(f"Precisão Vitória: {round(precisiong, 2)}%")
-        print(f"Recall Vitória: {round(recallg, 2)}%")
-        print(f"Precisão Geral: {round(precisionm, 2)}%")
-        print(f"Recall Geral: {round(recallm, 2)}%")
-        print("Matriz de confusão: ")
-        print(matriz_confusao)
-
-        return
-
-    # Plota árvore
-    @staticmethod
-    def plot_tree(model_name: str):
-
-        modelo = joblib.load(f'./classes/classification/models/{model_name}')
-
-        nomes_das_caracteristicas = [
-
-        # AP features
-        "Gold Amount (AP)", "Number of cards in Hand (AP)", "Number of Builded Districts (AP)", "Cost of citadel (AP)", "Cost of Hand (AP)", "Builded District Types (AP)", "District Types in Hand (AP)", "Low Cost District in Hand (AP)", "High Cost District in Hand (AP)", "Special District in Hand (AP)", "Special District Builded (AP)", "Character Rank (AP)",
-
-        # MVP features
-        "Gold Amount (MVP)", "Number of Cards in Hand (MVP)", "Number of Builded Districts (MVP)", "Cost of citadel (MVP)", "Builded District Types (MVP)", "District Types in Hand (MVP)", "Low Cost District in Hand (MVP)", "High Cost District in Hand (MVP)", "Special District in Hand (MVP)", "Special District Builded (MVP)", "Character Rank (MVP)",
-
-]
-        plt.figure(figsize=(10, 5))
-        plot_tree(modelo, feature_names=nomes_das_caracteristicas, class_names=["Lose", "Win"], filled=True)
-        plt.show()   
-        return
-
-    # Plota curva de aprendizado
-    @staticmethod
-    def plot_learning_curve(jogos: str, rotulos: str, model_name: str):
-
-        model = joblib.load(f'./classes/classification/models/{model_name}')
-
-        X_train, X_test, Y_train, Y_test = ClassificaEstados.ler_resultados(jogos, rotulos)
-
-        f1_macro_scorer = make_scorer(f1_score, average='macro')
-
-        train_sizes, train_scores, test_scores = learning_curve(model, X_train, Y_train, cv=5, scoring=f1_macro_scorer, n_jobs=-1)
-
-        # Calculando as médias e desvios padrão das pontuações
-        train_scores_mean = np.mean(train_scores, axis=1)
-        train_scores_std = np.std(train_scores, axis=1)
-        test_scores_mean = np.mean(test_scores, axis=1)
-        test_scores_std = np.std(test_scores, axis=1)
-
-        precision_scores = []
-        recall_scores = []
-        for size in train_sizes:
-            y_pred = model.predict(X_train[:size])
-            precision_scores.append(precision_score(Y_train[:size], y_pred, average='macro'))
-            recall_scores.append(recall_score(Y_train[:size], y_pred, average='macro'))
-
-        # Plotando a curva de aprendizado
-        plt.figure(figsize=(10, 7))
-        plt.fill_between(train_sizes, train_scores_mean - train_scores_std, train_scores_mean + train_scores_std, alpha=0.1, color="blue")
-        plt.fill_between(train_sizes, test_scores_mean - test_scores_std, test_scores_mean + test_scores_std, alpha=0.1, color="orange")
-        #plt.plot(train_sizes, precision_scores, 'o-', color="green", label="Precisão")
-        #plt.plot(train_sizes, recall_scores, 'o-', color="red", label="Recall")
-        plt.plot(train_sizes, train_scores_mean, 'o-', color="blue", label="Score de Treinamento")
-        plt.plot(train_sizes, test_scores_mean, 'o-', color="orange", label="Score de Teste")
-        plt.title("Curva de Aprendizado da Árvore de Decisão")
-        plt.xlabel("Tamanho do Conjunto de Treinamento")
-        plt.ylabel("F1 Score Macro")
-        plt.legend(loc="best")
-        plt.show()
-        
-        return
 
     @staticmethod
     def coleta_features(jogadores, nome_observado, coleta, X, model_name):
@@ -429,6 +186,339 @@ class ClassificaEstados:
         if nome_vencedor != "":              
             Y = 1 if nome_observado == nome_vencedor else 0
             return Y
+    
+    # Salva resultados das amostras
+    @staticmethod
+    def salvar_amostras(X: np.ndarray, Y: list, jogos: str, rotulos: str):
+        #j = j.astype(np.uint32)
+        
+        np.savetxt('./classes/classification/samples/' + jogos + '.csv', X, delimiter=',', fmt='%s')   # Features
+        #np.savetxt('./tabela_estado/' + j.name + '.csv', i, delimiter=',', fmt='%6u')
+        np.savetxt('./classes/classification/samples/' + rotulos + '.csv', Y, delimiter=',', fmt='%6u')    # Rotulos
+        #np.savetxt('./tabela_estado/' + 'Rotulos' + '.csv', Y, delimiter=',', fmt='%6u')
+        '''
+        # Caminho do arquivo CSV
+        caminho_arquivo_csv = 'seu_arquivo.csv'
+
+        # Abre o arquivo CSV no modo de adição ('a')
+        with open(caminho_arquivo_csv, mode='a', newline='') as arquivo_csv:
+            # Cria um objeto escritor CSV
+            escritor_csv = csv.writer(arquivo_csv)
+
+            # Adiciona os novos dados ao final do arquivo
+            escritor_csv.writerows(novos_dados)
+        '''
+        return
+
+    # Ler amostras salvas
+    @staticmethod
+    def ler_amostras(jogos: str, rotulos: str) -> list[np.ndarray]:
+        X = np.genfromtxt('./classes/classification/samples/' + jogos + '.csv', delimiter=',')
+        #jogos = np.genfromtxt('./tabela_estado/' + i.name + '.csv', delimiter=',')
+        Y = np.genfromtxt('./classes/classification/samples/' + rotulos + '.csv', delimiter=',') 
+        #rotulos = np.genfromtxt('./tabela_estado/' + 'Rotulos' + '.csv', delimiter=',') 
+        #X = jogos
+        #Y = rotulos
+
+        X_train, X_test, Y_train, Y_test = train_test_split(X, Y, test_size=0.33, random_state=42)
+
+        return X_train, X_test, Y_train, Y_test
+       
+    @staticmethod
+    def cross_validation(X, y):
+        sgkf = StratifiedGroupKFold(n_splits=3)
+
+        # Faça a divisão dos dados
+        for train_index, test_index in sgkf.split(X, y, groups):
+            X_train, X_test = X[train_index], X[test_index]
+            y_train, y_test = y[train_index], y[test_index]
+            groups_train, groups_test = groups[train_index], groups[test_index]
+   
+        groups = np.array([1, 1, 2, 2, 3]) 
+        f1_macro_scorer = make_scorer(f1_score, average='macro')
+        scores = cross_val_score(estimator=f1_macro_scorer)
+
+        return X_test, y_test 
+    
+    # Equilibra as amostras em relação as features
+    @staticmethod
+    def undersampling(jogos_in: str, rotulos_in: str, jogos_out: str, rotulos_out: str):
+
+        idx_remover = []
+        X_train, X_test, Y_train, Y_test = ClassificaEstados.ler_amostras(jogos_in, rotulos_in)
+        X = np.concatenate((X_train, X_test), axis=0)
+        Y = np.concatenate((Y_train, Y_test), axis=0)
+        wins = np.sum(Y == 1)
+        loses = np.sum(Y == 0)
+        print("Wins: ", wins)
+        print("Loses: ", loses)
+
+        for indice, linha in enumerate(reversed(Y)):
+            if linha == 0 and loses > wins:
+                idx_remover.append(len(Y) - 1 - indice)
+                loses = loses - 1
+                print("Iterações restantes: ", loses-wins)
+
+        X = np.delete(X, idx_remover, axis=0)
+        Y = np.delete(Y, idx_remover, axis=0)
+
+        wins = np.sum(Y == 1)
+        loses = np.sum(Y == 0)
+        print("Wins: ", wins)
+        print("Loses: ", loses)
+
+        ClassificaEstados.salvar_amostras(X, Y, jogos_out, rotulos_out)
+   
+        return
+
+    #------------------------------------------------- FIM MANIPULAÇÃO DE AMOSTRAS ------------------------------------------------------------#
+    
+    # Treina o modelo
+    @staticmethod
+    def treinar_modelo(jogos: str, rotulos: str, nome: str, criterion: str, min_samples: int,  peso_vitoria, profundidade ):
+
+        X_train, X_test, Y_train, Y_test = ClassificaEstados.ler_amostras(jogos, rotulos)
+
+        # Definir parametros
+        modelo = DecisionTreeClassifier(criterion=criterion, max_depth=profundidade, min_samples_leaf=min_samples, class_weight=peso_vitoria)
+        modelo.fit(X_train, Y_train)
+
+        # Salva o modelo
+        joblib.dump(modelo, f'./classes/classification/models/{nome}')
+
+        print("Modelo treinado com sucesso!")
+
+        return 
+    
+    # Testa modelo
+    @staticmethod
+    def testar_modelo(jogos: str, rotulos: str, model: str):
+        modelo = joblib.load(f'./classes/classification/models/{model}')
+
+        X_train, X_test, Y_train, Y_test = ClassificaEstados.ler_amostras(jogos, rotulos)
+
+        # Y_pred: Rótulos que o modelo previu para os testes
+        # Y_test: Rótulos reais dos testes
+        Y_pred = modelo.predict(X_test)
+
+        macrof1 = round((f1_score(y_true=Y_test, y_pred=Y_pred, average='macro')*100), 2)
+        # Accuracy tem mesmo valor que F1_score: Micro        
+        accuracy = round((accuracy_score(y_true=Y_test, y_pred=Y_pred)*100), 2)
+        matriz_confusao = confusion_matrix(y_true=Y_test, y_pred=Y_pred )
+        precisionv = round((precision_score(y_true=Y_test, y_pred=Y_pred) * 100), 2)
+        recallv = round((recall_score(y_true=Y_test, y_pred=Y_pred) * 100), 2)
+        precisionm = round((precision_score(y_true=Y_test, y_pred=Y_pred, average='macro') * 100), 2)
+        recallm = round((recall_score(y_true=Y_test, y_pred=Y_pred, average='macro') * 100), 2)
+        auc = round((roc_auc_score(y_true=Y_test, y_score=Y_pred, ) * 100), 2)
+
+        print(f"Nome do modelo: {modelo}")
+        print(f"Precisão Geral: {round(precisionm, 2)}%")
+        print(f"Recall Geral: {round(recallm, 2)}%")
+        print("Matriz de confusão: ")
+        print(matriz_confusao)
+
+        model_test_info = {
+            "Nome": modelo,
+            "F1 Macro": f"{macrof1}%",
+            "Precisão Vitória": f"{precisionv}%",
+            "Recall Vitória": f"{recallv}%",
+            "Accuracy": f"{accuracy}%",
+            "AUC": f"{auc}",
+            "Precisão Macro": f"{precisionm}%",
+            "Recall Macro": f"{recallm}%",
+            "Matriz Confusão": matriz_confusao
+        }
+
+        return model_test_info
+
+    @staticmethod
+    def circuito_treino_teste(jogos: str, rotulos: str, n_features: int):
+        criterion_range = ["gini", "log_loss"]
+        min_samples_range = 500
+        class_weight_range = {0: 1, 1: 5}
+
+        # para cada critério, talvez retirar
+        for i in criterion_range:
+            criterion = criterion_range[i]
+            # min_samples (500, 0, -25)
+            while min_samples_range != 0:
+                min_samples_range = min_samples_range - 25
+                # Itera pelos pesos da vitória (5, 0, -1) <- (De 5 até 0 diminuindo 1 por vez)
+                while class_weight_range[1] != 1:
+                    win_weight = class_weight_range[1]
+                    class_weight_range[1] = class_weight_range[1] - 1
+
+                    if class_weight_range[1] == 1:
+                        class_weight_range = "balanced"
+
+                    # Treina o modelo com os parâmetros iterados
+                    nome_modelo = f"{criterion} {min_samples_range}ms {win_weight}mw {n_features}f"
+                    ClassificaEstados.treinar_modelo(jogos, rotulos, nome_modelo, criterion,  min_samples_range, class_weight_range, None)
+                    # Profundidade None por enquanto
+
+                    dados_dict = ClassificaEstados.testar_modelo(jogos, rotulos, nome_modelo)
+                    # Talvez desacoplar o teste do treino
+
+                    # Salva testes realizados
+                    ClassificaEstados.salva_testes(dados_dict, "testes modelos")
+
+        return
+    
+    # Salva testes
+    @staticmethod
+    def salva_testes(dados_dict: dict, arquivo: str):
+        dados_json = json.dumps(dados_dict)
+        with open(f'{arquivo}.json', 'w') as arquivo_json:
+            arquivo_json.write(dados_json) 
+        return
+
+    # Avalia testes
+    @staticmethod
+    def avalia_testes():
+        melhor_f1, melhor_precision, melhor_recall = 0, 0, 0
+
+        with open('testes modelos.json', 'r') as arquivo_json:
+            dados = arquivo_json.load(arquivo_json) 
+
+        # Pega melhores pontuações
+        for modelo in dados:
+            if modelo["F1 Macro"] > melhor_f1:
+                melhor_f1 = modelo["F1 Macro"]
+            if modelo["Precisão Vitória"] > melhor_precision:
+                melhor_precision = modelo["Precisão Vitória"]
+            if modelo["Recall Vitória"] > melhor_recall:
+                melhor_recall = modelo["Recall Vitória"]
+
+        # Pega melhores modelos por pontuação
+        for modelo in dados:
+
+            if modelo["F1 Macro"] == melhor_f1:
+
+                f1_model_info = ClassificaEstados.modelo_info(modelo["Nome"])
+                modelo_f1 = {
+                    "Teste do Modelo": modelo,
+                    "Informações Adicionais": f1_model_info
+                }
+
+            if modelo["Precisão Vitória"] == melhor_precision:
+
+                precision_model_info = ClassificaEstados.modelo_info(modelo["Nome"])
+                modelo_precision = {
+                    "Teste do Modelo": modelo,
+                    "Informações Adicionais": precision_model_info
+                }
+
+            if modelo["Recall Vitória"] == melhor_recall:
+
+                recall_model_info = ClassificaEstados.modelo_info(modelo["Nome"])
+                modelo_recall = {
+                    "Teste do Modelo": modelo,
+                    "Informações Adicionais": recall_model_info
+                }
+
+        # Dicionário aninhado grau 3
+        melhores_modelos = {
+            "Top F1": modelo_f1,
+            "Top Precisão": modelo_precision,
+            "Top Recall": modelo_recall
+        }
+
+        ClassificaEstados.salva_testes(melhores_modelos, "top modelos")
+
+        return
+
+    # Mostra informacoes do modelo
+    @staticmethod
+    def modelo_info(model: str):
+
+        modelo = joblib.load(f'./classes/classification/models/{model}')
+            
+        # Mostra as importancia de cada variavel do estado
+        feat_imp = modelo.feature_importances_
+        profundidade = modelo.get_depth()
+        n_nos = modelo.tree_.node_count
+        n_folhas = modelo.get_n_leaves()
+        
+        # Podem ser adicionadas mais informações
+        # https://scikit-learn.org/stable/auto_examples/tree/plot_unveil_tree_structure.html
+
+        info_dict = {
+            "Features Importances": feat_imp,
+            "Profundidade": profundidade,
+            "Número de Nós": n_nos,
+            "Número de Folhas": n_folhas
+        }
+
+        return info_dict
+    
+    # Plota árvore
+    @staticmethod
+    def plot_tree(model_name: str):
+
+        modelo = joblib.load(f'./classes/classification/models/{model_name}')
+
+        nomes_das_caracteristicas = [
+
+        # Board features
+        "Score P1", "Score P2", "Score P3", "Score P4", "Score P5",
+
+        # AP features
+        "Gold Amount (AP)", "Number of cards in Hand (AP)", "Number of Builded Districts (AP)", "Cost of citadel (AP)", "Cost of Hand (AP)", "Builded District Types (AP)", "District Types in Hand (AP)", "Low Cost District in Hand (AP)", "High Cost District in Hand (AP)", "Special District in Hand (AP)", "Special District Builded (AP)", "Character Rank (AP)",
+
+        # MVP features
+        "Gold Amount (MVP)", "Number of Cards in Hand (MVP)", "Number of Builded Districts (MVP)", "Cost of citadel (MVP)", "Builded District Types (MVP)", "District Types in Hand (MVP)", "Low Cost District in Hand (MVP)", "High Cost District in Hand (MVP)", "Special District in Hand (MVP)", "Special District Builded (MVP)", "Character Rank (MVP)",
+
+]
+        tree_rules = export_text(modelo, feature_names= nomes_das_caracteristicas)
+        # Mostra a estrutura da árvore de decisão no terminal
+        print("Estrutura final da árvore: ")
+        print(tree_rules)
+
+        plt.figure(figsize=(10, 5))
+        plot_tree(modelo, feature_names=nomes_das_caracteristicas, class_names=["Lose", "Win"], filled=True)
+        plt.show()   
+        return
+
+    # Plota curva de aprendizado
+    @staticmethod
+    def plot_learning_curve(jogos: str, rotulos: str, model_name: str):
+
+        model = joblib.load(f'./classes/classification/models/{model_name}')
+
+        X_train, X_test, Y_train, Y_test = ClassificaEstados.ler_amostras(jogos, rotulos)
+
+        f1_macro_scorer = make_scorer(f1_score, average='macro')
+
+        train_sizes, train_scores, test_scores = learning_curve(model, X_train, Y_train, cv=5, scoring=f1_macro_scorer, n_jobs=-1)
+
+        # Calculando as médias e desvios padrão das pontuações
+        train_scores_mean = np.mean(train_scores, axis=1)
+        train_scores_std = np.std(train_scores, axis=1)
+        test_scores_mean = np.mean(test_scores, axis=1)
+        test_scores_std = np.std(test_scores, axis=1)
+
+        precision_scores = []
+        recall_scores = []
+        for size in train_sizes:
+            y_pred = model.predict(X_train[:size])
+            precision_scores.append(precision_score(Y_train[:size], y_pred, average='macro'))
+            recall_scores.append(recall_score(Y_train[:size], y_pred, average='macro'))
+
+        # Plotando a curva de aprendizado
+        plt.figure(figsize=(10, 7))
+        plt.fill_between(train_sizes, train_scores_mean - train_scores_std, train_scores_mean + train_scores_std, alpha=0.1, color="blue")
+        plt.fill_between(train_sizes, test_scores_mean - test_scores_std, test_scores_mean + test_scores_std, alpha=0.1, color="orange")
+        #plt.plot(train_sizes, precision_scores, 'o-', color="green", label="Precisão")
+        #plt.plot(train_sizes, recall_scores, 'o-', color="red", label="Recall")
+        plt.plot(train_sizes, train_scores_mean, 'o-', color="blue", label="Score de Treinamento")
+        plt.plot(train_sizes, test_scores_mean, 'o-', color="orange", label="Score de Teste")
+        plt.title("Curva de Aprendizado da Árvore de Decisão")
+        plt.xlabel("Tamanho do Conjunto de Treinamento")
+        plt.ylabel("F1 Score Macro")
+        plt.legend(loc="best")
+        plt.show()
+        
+        return
 
     # Utiliza modelo treinado para obter chance de vitoria
     @staticmethod
