@@ -36,12 +36,16 @@ simulacao = Simulacao(estrategias, 8, True)
 #(qtd_pts, n_features, nome_jogos, nome_rotulos, nome_modelo)
 #ColetaEstados.coleta_amostras(n_amostras, n_features, jogos, rotulos, modelo)
 
+#(jogos, rotulos, n_features)
+#ClassificaEstados.circuito_treino_teste(jogos, rotulos, n_features)
+ClassificaEstados.avalia_testes()
+
 #(jogos, rotulos, nome_modelo, criterion, profundidade)
-#ClassificaEstados.treinar_modelo(jogos, rotulos, modelo, "log_loss", profundidade)
+#ClassificaEstados.treinar_modelo(False, jogos, rotulos, modelo, "log_loss", profundidade)
 
 #(jogos, rotulos, nome_modelo)
 #ClassificaEstados.modelo_info(modelo)
-#print(ClassificaEstados.testar_modelo(jogos, rotulos, modelo))
+#print(ClassificaEstados.testar_modelo(jogos, rotulos, modelo, False))
 
 #ClassificaEstados.plot_tree(modelo)
 #ClassificaEstados.plot_learning_curve(jogos, rotulos, modelo)

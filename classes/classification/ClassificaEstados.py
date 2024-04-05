@@ -275,9 +275,13 @@ class ClassificaEstados:
     
     # Treina o modelo
     @staticmethod
-    def treinar_modelo(jogos: str, rotulos: str, nome: str, criterion: str, min_samples: int,  peso_vitoria, profundidade ):
+    def treinar_modelo(circuito: bool, jogos: str, rotulos: str, nome: str, criterion: str, min_samples: int,  peso_vitoria, profundidade):
 
-        X_train, X_test, Y_train, Y_test = ClassificaEstados.ler_amostras(jogos, rotulos)
+        if circuito != True:
+            X_train, X_test, Y_train, Y_test = ClassificaEstados.ler_amostras(jogos, rotulos)
+        else:
+            X_train = jogos
+            Y_train = rotulos
 
         # Definir parametros
         modelo = DecisionTreeClassifier(criterion=criterion, max_depth=profundidade, min_samples_leaf=min_samples, class_weight=peso_vitoria)
@@ -286,107 +290,137 @@ class ClassificaEstados:
         # Salva o modelo
         joblib.dump(modelo, f'./classes/classification/models/{nome}')
 
-        print("Modelo treinado com sucesso!")
+        if circuito == False:
+            print("Modelo treinado com sucesso!")
 
         return 
     
     # Testa modelo
     @staticmethod
-    def testar_modelo(jogos: str, rotulos: str, model: str):
-        modelo = joblib.load(f'./classes/classification/models/{model}')
+    def testar_modelo(jogos: str, rotulos: str, model: str, circuito: bool):
 
-        X_train, X_test, Y_train, Y_test = ClassificaEstados.ler_amostras(jogos, rotulos)
+        modelo = joblib.load(f'./classes/classification/models/{model}')
+        if circuito != True:
+            X_train, X_test, Y_train, Y_test = ClassificaEstados.ler_amostras(jogos, rotulos)
+        else:
+            X_test = jogos
+            Y_test = rotulos
 
         # Y_pred: Rótulos que o modelo previu para os testes
         # Y_test: Rótulos reais dos testes
         Y_pred = modelo.predict(X_test)
 
-        macrof1 = round((f1_score(y_true=Y_test, y_pred=Y_pred, average='macro')*100), 2)
+        macrof1 = round(f1_score(y_true=Y_test, y_pred=Y_pred, average='macro'), 2)
         # Accuracy tem mesmo valor que F1_score: Micro        
-        accuracy = round((accuracy_score(y_true=Y_test, y_pred=Y_pred)*100), 2)
-        matriz_confusao = confusion_matrix(y_true=Y_test, y_pred=Y_pred )
-        precisionv = round((precision_score(y_true=Y_test, y_pred=Y_pred) * 100), 2)
-        recallv = round((recall_score(y_true=Y_test, y_pred=Y_pred) * 100), 2)
-        precisionm = round((precision_score(y_true=Y_test, y_pred=Y_pred, average='macro') * 100), 2)
-        recallm = round((recall_score(y_true=Y_test, y_pred=Y_pred, average='macro') * 100), 2)
-        auc = round((roc_auc_score(y_true=Y_test, y_score=Y_pred, ) * 100), 2)
+        accuracy = round(accuracy_score(y_true=Y_test, y_pred=Y_pred), 2)
+        #matriz_confusao = confusion_matrix(y_true=Y_test, y_pred=Y_pred )
+        #matriz_confusao.tolist() if isinstance(matriz_confusao, np.ndarray) else matriz_confusao    
+        precisionv = round(precision_score(y_true=Y_test, y_pred=Y_pred), 2)
+        recallv = round(recall_score(y_true=Y_test, y_pred=Y_pred), 2)
+        precisionm = round(precision_score(y_true=Y_test, y_pred=Y_pred, average='macro'), 2)
+        recallm = round(recall_score(y_true=Y_test, y_pred=Y_pred, average='macro') , 2)
+        auc = round(roc_auc_score(y_true=Y_test, y_score=Y_pred), 2)
 
+        '''
         print(f"Nome do modelo: {modelo}")
         print(f"Precisão Geral: {round(precisionm, 2)}%")
         print(f"Recall Geral: {round(recallm, 2)}%")
         print("Matriz de confusão: ")
         print(matriz_confusao)
+        '''
 
         model_test_info = {
-            "Nome": modelo,
-            "F1 Macro": f"{macrof1}%",
-            "Precisão Vitória": f"{precisionv}%",
-            "Recall Vitória": f"{recallv}%",
-            "Accuracy": f"{accuracy}%",
-            "AUC": f"{auc}",
-            "Precisão Macro": f"{precisionm}%",
-            "Recall Macro": f"{recallm}%",
-            "Matriz Confusão": matriz_confusao
+            "Nome": model,
+            "F1 Macro": macrof1,
+            "Precisão Vitória": precisionv,
+            "Recall Vitória": recallv,
+            "Accuracy": accuracy,
+            "AUC": auc,
+            "Precisão Macro": precisionm,
+            "Recall Macro": recallm
         }
 
         return model_test_info
 
     @staticmethod
     def circuito_treino_teste(jogos: str, rotulos: str, n_features: int):
+
+        X_train, X_test, Y_train, Y_test = ClassificaEstados.ler_amostras(jogos, rotulos)
+
         criterion_range = ["gini", "log_loss"]
+        criterion = "log_loss"
         min_samples_range = 500
         class_weight_range = {0: 1, 1: 5}
 
-        # para cada critério, talvez retirar
-        for i in criterion_range:
-            criterion = criterion_range[i]
-            # min_samples (500, 0, -25)
-            while min_samples_range != 0:
-                min_samples_range = min_samples_range - 25
-                # Itera pelos pesos da vitória (5, 0, -1) <- (De 5 até 0 diminuindo 1 por vez)
-                while class_weight_range[1] != 1:
-                    win_weight = class_weight_range[1]
-                    class_weight_range[1] = class_weight_range[1] - 1
+        # min_samples (500, 0, -25)
+        while min_samples_range != 0:
+            min_samples_range = min_samples_range - 25
+            # Itera pelos pesos da vitória (5, 0, -1) <- (De 5 até 0 diminuindo 1 por vez)
+            while class_weight_range[1] != 0:
+                win_weight = class_weight_range[1]
+                class_weight_range[1] = class_weight_range[1] - 1
 
-                    if class_weight_range[1] == 1:
-                        class_weight_range = "balanced"
+                if class_weight_range[1] == 1:
+                    class_weight_range = "balanced"
 
-                    # Treina o modelo com os parâmetros iterados
-                    nome_modelo = f"{criterion} {min_samples_range}ms {win_weight}mw {n_features}f"
-                    ClassificaEstados.treinar_modelo(jogos, rotulos, nome_modelo, criterion,  min_samples_range, class_weight_range, None)
-                    # Profundidade None por enquanto
+                # Treina o modelo com os parâmetros iterados
+                nome_modelo = f"{criterion} {min_samples_range}ms {win_weight}mw {n_features}f"
+                ClassificaEstados.treinar_modelo(True, X_train, Y_train, nome_modelo, criterion,  min_samples_range, class_weight_range, None)
+                # Profundidade None por enquanto
 
-                    dados_dict = ClassificaEstados.testar_modelo(jogos, rotulos, nome_modelo)
-                    # Talvez desacoplar o teste do treino
+                dados_dict = ClassificaEstados.testar_modelo(X_test, Y_test, nome_modelo, True)
+                # Talvez desacoplar o teste do treino
 
-                    # Salva testes realizados
-                    ClassificaEstados.salva_testes(dados_dict, "testes modelos")
+                # Salva testes realizados
+                ClassificaEstados.salva_testes(dados_dict, "./classes/classification/results/testes modelos")
 
+                class_weight_range[1] = 0
         return
     
     # Salva testes
     @staticmethod
     def salva_testes(dados_dict: dict, arquivo: str):
         dados_json = json.dumps(dados_dict)
-        with open(f'{arquivo}.json', 'w') as arquivo_json:
-            arquivo_json.write(dados_json) 
+
+        try:
+            with open(f"{arquivo}.json", "r", encoding="utf-8") as json_file:
+                dados_json = json.load(json_file)
+        except:
+            with open(f"{arquivo}.json", "w", encoding="utf-8") as json_file:
+                json.dump([], json_file, indent=4)
+
+        with open(f"{arquivo}.json", "w", encoding="utf-8") as json_file:
+            json.dump(dados_json, json_file, indent=4)
         return
 
     # Avalia testes
     @staticmethod
     def avalia_testes():
-        melhor_f1, melhor_precision, melhor_recall = 0, 0, 0
+        melhor_f1 = float("-inf")
+        melhor_precision = float("-inf")
+        melhor_recall = float("-inf")
 
-        with open('testes modelos.json', 'r') as arquivo_json:
-            dados = arquivo_json.load(arquivo_json) 
+        with open('./classes/classification/results/testes modelos.json', 'r', encoding="utf-8") as arquivo_json:
+            dados = json.load(arquivo_json) 
+
+        print(type(dados))
+        #f1_macro = dados.get("F1 macro")
+
+        print(f1_macro + "\n")
+        raise("")
 
         # Pega melhores pontuações
         for modelo in dados:
-            if modelo["F1 Macro"] > melhor_f1:
+
+            f1_macro = float(modelo["F1 Macro"].rstrip('%'))  # Remove o '%' e converte para float
+            precisao_vitoria = float(modelo["Precisão Vitória"].rstrip('%'))  # Remove o '%' e converte para float
+            recall_vitoria = float(modelo["Recall Vitória"].rstrip('%'))  # Remove o '%' e converte para float
+
+            if f1_macro > melhor_f1:
                 melhor_f1 = modelo["F1 Macro"]
-            if modelo["Precisão Vitória"] > melhor_precision:
+            if precisao_vitoria > melhor_precision:
                 melhor_precision = modelo["Precisão Vitória"]
-            if modelo["Recall Vitória"] > melhor_recall:
+            if recall_vitoria > melhor_recall:
                 melhor_recall = modelo["Recall Vitória"]
 
         # Pega melhores modelos por pontuação
@@ -423,7 +457,7 @@ class ClassificaEstados:
             "Top Recall": modelo_recall
         }
 
-        ClassificaEstados.salva_testes(melhores_modelos, "top modelos")
+        ClassificaEstados.salva_testes(melhores_modelos, "./classes/classification/results/best results/top modelos")
 
         return
 
