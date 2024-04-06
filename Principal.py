@@ -37,7 +37,7 @@ simulacao = Simulacao(estrategias, 8, True)
 #ColetaEstados.coleta_amostras(n_amostras, n_features, jogos, rotulos, modelo)
 
 #(jogos, rotulos, n_features)
-#ClassificaEstados.circuito_treino_teste(jogos, rotulos, n_features)
+ClassificaEstados.circuito_treino_teste(jogos, rotulos, n_features)
 ClassificaEstados.avalia_testes()
 
 #(jogos, rotulos, nome_modelo, criterion, profundidade)

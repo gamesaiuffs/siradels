@@ -315,10 +315,10 @@ class ClassificaEstados:
         accuracy = round(accuracy_score(y_true=Y_test, y_pred=Y_pred), 2)
         #matriz_confusao = confusion_matrix(y_true=Y_test, y_pred=Y_pred )
         #matriz_confusao.tolist() if isinstance(matriz_confusao, np.ndarray) else matriz_confusao    
-        precisionv = round(precision_score(y_true=Y_test, y_pred=Y_pred), 2)
-        recallv = round(recall_score(y_true=Y_test, y_pred=Y_pred), 2)
-        precisionm = round(precision_score(y_true=Y_test, y_pred=Y_pred, average='macro'), 2)
-        recallm = round(recall_score(y_true=Y_test, y_pred=Y_pred, average='macro') , 2)
+        precisionv = round(precision_score(y_true=Y_test, y_pred=Y_pred, zero_division=0), 2)
+        recallv = round(recall_score(y_true=Y_test, y_pred=Y_pred, zero_division=0), 2)
+        precisionm = round(precision_score(y_true=Y_test, y_pred=Y_pred, average='macro', zero_division=0), 2)
+        recallm = round(recall_score(y_true=Y_test, y_pred=Y_pred, average='macro', zero_division=0) , 2)
         auc = round(roc_auc_score(y_true=Y_test, y_score=Y_pred), 2)
 
         '''
@@ -330,14 +330,14 @@ class ClassificaEstados:
         '''
 
         model_test_info = {
-            "Nome": model,
+            "Name": model,
             "F1 Macro": macrof1,
-            "Precisão Vitória": precisionv,
-            "Recall Vitória": recallv,
+            "Win Precision": precisionv,
+            "Win Recall": recallv,
             "Accuracy": accuracy,
             "AUC": auc,
-            "Precisão Macro": precisionm,
-            "Recall Macro": recallm
+            "Macro Precision": precisionm,
+            "Macro Recall": recallm
         }
 
         return model_test_info
@@ -345,23 +345,24 @@ class ClassificaEstados:
     @staticmethod
     def circuito_treino_teste(jogos: str, rotulos: str, n_features: int):
 
+        # Quantidade de modelos treinados atual: 40 
+        # Adicionar profundidade e/ou outros recursos
+
         X_train, X_test, Y_train, Y_test = ClassificaEstados.ler_amostras(jogos, rotulos)
 
         criterion_range = ["gini", "log_loss"]
         criterion = "log_loss"
-        min_samples_range = 500
+        min_samples_range = 501
         class_weight_range = {0: 1, 1: 5}
 
         # min_samples (500, 0, -25)
-        while min_samples_range != 0:
-            min_samples_range = min_samples_range - 25
+        while min_samples_range != 1:
+            min_samples_range = min_samples_range - 50
+            class_weight_range[1] = 5
             # Itera pelos pesos da vitória (5, 0, -1) <- (De 5 até 0 diminuindo 1 por vez)
-            while class_weight_range[1] != 0:
+            while class_weight_range[1] != 1:
                 win_weight = class_weight_range[1]
                 class_weight_range[1] = class_weight_range[1] - 1
-
-                if class_weight_range[1] == 1:
-                    class_weight_range = "balanced"
 
                 # Treina o modelo com os parâmetros iterados
                 nome_modelo = f"{criterion} {min_samples_range}ms {win_weight}mw {n_features}f"
@@ -374,24 +375,21 @@ class ClassificaEstados:
                 # Salva testes realizados
                 ClassificaEstados.salva_testes(dados_dict, "./classes/classification/results/testes modelos")
 
-                class_weight_range[1] = 0
         return
     
     # Salva testes
     @staticmethod
     def salva_testes(dados_dict: dict, arquivo: str):
-        dados_json = json.dumps(dados_dict)
-
         try:
             with open(f"{arquivo}.json", "r", encoding="utf-8") as json_file:
                 dados_json = json.load(json_file)
-        except:
-            with open(f"{arquivo}.json", "w", encoding="utf-8") as json_file:
-                json.dump([], json_file, indent=4)
+        except FileNotFoundError:
+            dados_json = []
+
+        dados_json.append(dados_dict)
 
         with open(f"{arquivo}.json", "w", encoding="utf-8") as json_file:
             json.dump(dados_json, json_file, indent=4)
-        return
 
     # Avalia testes
     @staticmethod
@@ -403,57 +401,50 @@ class ClassificaEstados:
         with open('./classes/classification/results/testes modelos.json', 'r', encoding="utf-8") as arquivo_json:
             dados = json.load(arquivo_json) 
 
-        print(type(dados))
-        #f1_macro = dados.get("F1 macro")
-
-        print(f1_macro + "\n")
-        raise("")
-
         # Pega melhores pontuações
         for modelo in dados:
 
-            f1_macro = float(modelo["F1 Macro"].rstrip('%'))  # Remove o '%' e converte para float
-            precisao_vitoria = float(modelo["Precisão Vitória"].rstrip('%'))  # Remove o '%' e converte para float
-            recall_vitoria = float(modelo["Recall Vitória"].rstrip('%'))  # Remove o '%' e converte para float
-
-            if f1_macro > melhor_f1:
+            if modelo["F1 Macro"] > melhor_f1:
                 melhor_f1 = modelo["F1 Macro"]
-            if precisao_vitoria > melhor_precision:
-                melhor_precision = modelo["Precisão Vitória"]
-            if recall_vitoria > melhor_recall:
-                melhor_recall = modelo["Recall Vitória"]
+                nome_f1 = modelo["Name"]
+            if modelo["Win Precision"] > melhor_precision:
+                melhor_precision = modelo["Win Precision"]
+                nome_precision = modelo["Name"]
+            if modelo["Win Recall"] > melhor_recall:
+                melhor_recall = modelo["Win Recall"]
+                nome_recall = modelo["Name"]
 
         # Pega melhores modelos por pontuação
         for modelo in dados:
 
-            if modelo["F1 Macro"] == melhor_f1:
+            if modelo["Name"] == nome_f1:
 
-                f1_model_info = ClassificaEstados.modelo_info(modelo["Nome"])
+                f1_model_info = ClassificaEstados.modelo_info(modelo["Name"])
                 modelo_f1 = {
-                    "Teste do Modelo": modelo,
-                    "Informações Adicionais": f1_model_info
+                    "Tested Model": modelo,
+                    "Adictional Information": f1_model_info
                 }
 
-            if modelo["Precisão Vitória"] == melhor_precision:
+            if modelo["Name"] == nome_precision:
 
-                precision_model_info = ClassificaEstados.modelo_info(modelo["Nome"])
+                precision_model_info = ClassificaEstados.modelo_info(modelo["Name"])
                 modelo_precision = {
-                    "Teste do Modelo": modelo,
-                    "Informações Adicionais": precision_model_info
+                    "Tested Model": modelo,
+                    "Adictional Information": precision_model_info
                 }
 
-            if modelo["Recall Vitória"] == melhor_recall:
+            if modelo["Name"] == nome_recall:
 
-                recall_model_info = ClassificaEstados.modelo_info(modelo["Nome"])
+                recall_model_info = ClassificaEstados.modelo_info(modelo["Name"])
                 modelo_recall = {
-                    "Teste do Modelo": modelo,
-                    "Informações Adicionais": recall_model_info
+                    "Tested Model": modelo,
+                    "Adictional Information": recall_model_info
                 }
 
         # Dicionário aninhado grau 3
         melhores_modelos = {
             "Top F1": modelo_f1,
-            "Top Precisão": modelo_precision,
+            "Top Precision": modelo_precision,
             "Top Recall": modelo_recall
         }
 
@@ -472,16 +463,21 @@ class ClassificaEstados:
         profundidade = modelo.get_depth()
         n_nos = modelo.tree_.node_count
         n_folhas = modelo.get_n_leaves()
+        n_folhas = int(n_folhas)
         
         # Podem ser adicionadas mais informações
         # https://scikit-learn.org/stable/auto_examples/tree/plot_unveil_tree_structure.html
 
         info_dict = {
             "Features Importances": feat_imp,
-            "Profundidade": profundidade,
-            "Número de Nós": n_nos,
-            "Número de Folhas": n_folhas
+            "Depth": profundidade,
+            "Node Number": n_nos,
+            "Leaves Number": n_folhas
         }
+
+        for chave, valor in info_dict.items():
+            if isinstance(valor, np.ndarray):
+                info_dict[chave] = valor.tolist()
 
         return info_dict
     
