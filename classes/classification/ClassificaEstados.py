@@ -22,7 +22,7 @@ import joblib
 class ClassificaEstados:   
 
     @staticmethod
-    def coleta_features(jogadores, nome_observado, coleta, X, model_name):
+    def coleta_features(jogadores, rodada, nome_observado, coleta, X, model_name):
         # Inicializa vetores
         estado_jogador_atual, estado_outro_jogador, ja_tipos_mao_v, ja_tipos_board_v, jmp_tipos_board_v =  [], [], [0, 0, 0, 0, 0], [0, 0, 0, 0, 0], [0, 0, 0, 0, 0]                                             
         # Conta tipos de distritos na mão e construídos
@@ -162,7 +162,7 @@ class ClassificaEstados:
         # Nº total de features atual: 23 
         
         # Cria o vetor dos dois jogadores
-        estado_tabuleiro = [jogadores[4].pontuacao, jogadores[3].pontuacao, jogadores[2].pontuacao, jogadores[1].pontuacao, jogadores[0].pontuacao]
+        estado_tabuleiro = [rodada, jogadores[4].pontuacao, jogadores[3].pontuacao, jogadores[2].pontuacao, jogadores[1].pontuacao, jogadores[0].pontuacao]
         estado_jogador_atual = [ja.ouro, len(ja.cartas_distrito_mao), len(ja.distritos_construidos), ja_custo_construido, ja_custo_mao, ja_tipos_board, ja_tipos_mao, ja_custo123_board, ja_custo456_board, ja_custo123_mao, ja_custo456_mao, ja_especiais_mao, ja_especiais_board, ja.personagem.rank]
         estado_outro_jogador = [jmp.ouro, len(jmp.cartas_distrito_mao), len(jmp.distritos_construidos), jmp_custo_construido, jmp_tipos_board, jmp_custo123_board, jmp_custo456_board, jmp_especiais_board, jmp.personagem.rank]
 
@@ -346,17 +346,16 @@ class ClassificaEstados:
     @staticmethod
     def circuito_treino_teste(jogos: str, rotulos: str, n_features: int):
 
-        # Quantidade de modelos treinados atual: 40 
         # Adicionar profundidade e/ou outros recursos
 
         X_train, X_test, Y_train, Y_test = ClassificaEstados.ler_amostras(jogos, rotulos)
 
-        criterion_range = ["gini", "log_loss"]
+        criterion_range = ["gini", "log_loss", "entropy"]
         criterion = "log_loss"
         min_samples_range = 501
         class_weight_range = {0: 1, 1: 5}
 
-        # min_samples (500, 0, -25)
+        # min_samples (501, 1, -50)
         while min_samples_range != 1:
             min_samples_range = min_samples_range - 50
             class_weight_range[1] = 5
@@ -375,6 +374,18 @@ class ClassificaEstados:
 
                 # Salva testes realizados
                 ClassificaEstados.salva_testes(dados_dict, "./classes/classification/results/testes modelos")
+
+
+            # Treina o modelo com os parâmetros iterados
+            nome_modelo = f"{criterion} {min_samples_range}ms balamw {n_features}f"
+            ClassificaEstados.treinar_modelo(True, X_train, Y_train, nome_modelo, criterion,  min_samples_range, "balanced", None)
+            # Profundidade None por enquanto
+
+            dados_dict = ClassificaEstados.testar_modelo(X_test, Y_test, nome_modelo, True)
+            # Talvez desacoplar o teste do treino
+
+            # Salva testes realizados
+            ClassificaEstados.salva_testes(dados_dict, "./classes/classification/results/testes modelos")
 
         return
     
@@ -519,31 +530,33 @@ class ClassificaEstados:
         X, Y = ClassificaEstados.ler_amostras(jogos, rotulos, False)
 
         f1_macro_scorer = make_scorer(f1_score, average='macro')
+        precision_scorer = make_scorer(precision_score)
+        recall_scorer = make_scorer(recall_score)
 
+                                                                        # StratifiedKFold c/ K = 5                  # All processors
         train_sizes_f1, train_scores_f1, test_scores_f1 = learning_curve(model, X, Y, cv=5, scoring=f1_macro_scorer, n_jobs=-1)
-        train_sizes_p, train_scores_p, test_scores_p = learning_curve(model, X, Y, cv=5, scoring=precision_score, n_jobs=-1)
-        train_sizes_r, train_scores_r, test_scores_r = learning_curve(model, X, Y, cv=5, scoring=recall_score, n_jobs=-1)
-        
+        train_sizes_p, train_scores_p, test_scores_p = learning_curve(model, X, Y, cv=5, scoring=precision_scorer, n_jobs=-1)
+        train_sizes_r, train_scores_r, test_scores_r = learning_curve(model, X, Y, cv=5, scoring=recall_scorer, n_jobs=-1)
 
-        ''' Faz sentido tirar a media dos Folds, quando eles são os pontos de referência?
         # Calculando as médias e desvios padrão das pontuações
-        train_scores_mean = np.mean(train_scores_f1, axis=1)
-        train_scores_std = np.std(train_scores_f1, axis=1)
-        test_scores_mean = np.mean(test_scores_f1, axis=1)
-        test_scores_std = np.std(test_scores_f1, axis=1)
+        f1_train_scores_mean = np.mean(train_scores_f1, axis=1)
+        f1_train_scores_std = np.std(train_scores_f1, axis=1)
+        f1_test_scores_mean = np.mean(test_scores_f1, axis=1)
+        f1_test_scores_std = np.std(test_scores_f1, axis=1)
+        p_test_scores_mean = np.mean(test_scores_p, axis=1)
+        p_test_scores_std = np.std(test_scores_p, axis=1)
+        r_test_scores_mean = np.mean(test_scores_r, axis=1)
+        r_test_scores_std = np.std(test_scores_r, axis=1)
 
         # Plotando a curva de aprendizado
         plt.figure(figsize=(10, 7))
-        plt.fill_between(train_sizes_f1, train_scores_mean - train_scores_std, train_scores_mean + train_scores_std, alpha=0.1, color="blue")
-        plt.fill_between(train_sizes_f1, test_scores_mean - test_scores_std, test_scores_mean + test_scores_std, alpha=0.1, color="orange")
-        #plt.plot(train_sizes, precision_scores, 'o-', color="green", label="Precisão")
-        #plt.plot(train_sizes, recall_scores, 'o-', color="red", label="Recall")
-        '''
+        plt.fill_between(train_sizes_f1, f1_train_scores_mean - f1_train_scores_std, f1_train_scores_mean + f1_train_scores_std, alpha=0.1, color="blue")
+        plt.fill_between(train_sizes_f1, f1_test_scores_mean - f1_test_scores_std, f1_test_scores_mean + f1_test_scores_std, alpha=0.1, color="orange")
 
-        plt.plot(train_sizes_f1, train_scores_f1, 'o-', color="orange", label="F1 Train")
-        plt.plot(train_sizes_f1, test_scores_f1, 'o-', color="blue", label="F1 Test")
-        plt.plot(train_sizes_f1, test_scores_p, 'o-', color="red", label="Precision Test")
-        plt.plot(train_sizes_f1, test_scores_r, 'o-', color="yellow", label="Recall Test")
+        plt.plot(train_sizes_f1, f1_train_scores_mean, 'o-', color="orange", label="F1 Train")
+        plt.plot(train_sizes_f1, f1_test_scores_mean, 'o-', color="blue", label="F1 Test")
+        plt.plot(train_sizes_f1, p_test_scores_mean, 'o-', color="red", label="Precision Test")
+        plt.plot(train_sizes_f1, r_test_scores_mean, 'o-', color="yellow", label="Recall Test")
 
         plt.title("Curva de Aprendizado da Árvore de Decisão")
         plt.xlabel("Tamanho do Conjunto de Treinamento")

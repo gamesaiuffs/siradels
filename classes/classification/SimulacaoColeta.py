@@ -203,7 +203,7 @@ class SimulacaoColeta:
                         # Quebra laço, pois não existem personagens com ranks repetidos
                         break
             # Coleta amostra 
-            X = ClassificaEstados.coleta_features(self.estado.jogadores, jogador_observado, 1, X, nome_modelo)
+            X = ClassificaEstados.coleta_features(self.estado.jogadores, self.estado.rodada, jogador_observado, 1, X, nome_modelo)
             
         # Rotina de final de jogo
         self.computar_pontuacao_final()
