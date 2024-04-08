@@ -212,17 +212,18 @@ class ClassificaEstados:
 
     # Ler amostras salvas
     @staticmethod
-    def ler_amostras(jogos: str, rotulos: str) -> list[np.ndarray]:
+    def ler_amostras(jogos: str, rotulos: str, div: bool = True):
         X = np.genfromtxt('./classes/classification/samples/' + jogos + '.csv', delimiter=',')
         #jogos = np.genfromtxt('./tabela_estado/' + i.name + '.csv', delimiter=',')
         Y = np.genfromtxt('./classes/classification/samples/' + rotulos + '.csv', delimiter=',') 
         #rotulos = np.genfromtxt('./tabela_estado/' + 'Rotulos' + '.csv', delimiter=',') 
         #X = jogos
         #Y = rotulos
-
-        X_train, X_test, Y_train, Y_test = train_test_split(X, Y, test_size=0.33, random_state=42)
-
-        return X_train, X_test, Y_train, Y_test
+        if div == True:
+            X_train, X_test, Y_train, Y_test = train_test_split(X, Y, test_size=0.33, random_state=42)
+            return X_train, X_test, Y_train, Y_test
+        else:
+            return X, Y
        
     @staticmethod
     def cross_validation(X, y):
@@ -515,36 +516,38 @@ class ClassificaEstados:
 
         model = joblib.load(f'./classes/classification/models/{model_name}')
 
-        X_train, X_test, Y_train, Y_test = ClassificaEstados.ler_amostras(jogos, rotulos)
+        X, Y = ClassificaEstados.ler_amostras(jogos, rotulos, False)
 
         f1_macro_scorer = make_scorer(f1_score, average='macro')
 
-        train_sizes, train_scores, test_scores = learning_curve(model, X_train, Y_train, cv=5, scoring=f1_macro_scorer, n_jobs=-1)
+        train_sizes_f1, train_scores_f1, test_scores_f1 = learning_curve(model, X, Y, cv=5, scoring=f1_macro_scorer, n_jobs=-1)
+        train_sizes_p, train_scores_p, test_scores_p = learning_curve(model, X, Y, cv=5, scoring=precision_score, n_jobs=-1)
+        train_sizes_r, train_scores_r, test_scores_r = learning_curve(model, X, Y, cv=5, scoring=recall_score, n_jobs=-1)
+        
 
+        ''' Faz sentido tirar a media dos Folds, quando eles são os pontos de referência?
         # Calculando as médias e desvios padrão das pontuações
-        train_scores_mean = np.mean(train_scores, axis=1)
-        train_scores_std = np.std(train_scores, axis=1)
-        test_scores_mean = np.mean(test_scores, axis=1)
-        test_scores_std = np.std(test_scores, axis=1)
-
-        precision_scores = []
-        recall_scores = []
-        for size in train_sizes:
-            y_pred = model.predict(X_train[:size])
-            precision_scores.append(precision_score(Y_train[:size], y_pred, average='macro'))
-            recall_scores.append(recall_score(Y_train[:size], y_pred, average='macro'))
+        train_scores_mean = np.mean(train_scores_f1, axis=1)
+        train_scores_std = np.std(train_scores_f1, axis=1)
+        test_scores_mean = np.mean(test_scores_f1, axis=1)
+        test_scores_std = np.std(test_scores_f1, axis=1)
 
         # Plotando a curva de aprendizado
         plt.figure(figsize=(10, 7))
-        plt.fill_between(train_sizes, train_scores_mean - train_scores_std, train_scores_mean + train_scores_std, alpha=0.1, color="blue")
-        plt.fill_between(train_sizes, test_scores_mean - test_scores_std, test_scores_mean + test_scores_std, alpha=0.1, color="orange")
+        plt.fill_between(train_sizes_f1, train_scores_mean - train_scores_std, train_scores_mean + train_scores_std, alpha=0.1, color="blue")
+        plt.fill_between(train_sizes_f1, test_scores_mean - test_scores_std, test_scores_mean + test_scores_std, alpha=0.1, color="orange")
         #plt.plot(train_sizes, precision_scores, 'o-', color="green", label="Precisão")
         #plt.plot(train_sizes, recall_scores, 'o-', color="red", label="Recall")
-        plt.plot(train_sizes, train_scores_mean, 'o-', color="blue", label="Score de Treinamento")
-        plt.plot(train_sizes, test_scores_mean, 'o-', color="orange", label="Score de Teste")
+        '''
+
+        plt.plot(train_sizes_f1, train_scores_f1, 'o-', color="orange", label="F1 Train")
+        plt.plot(train_sizes_f1, test_scores_f1, 'o-', color="blue", label="F1 Test")
+        plt.plot(train_sizes_f1, test_scores_p, 'o-', color="red", label="Precision Test")
+        plt.plot(train_sizes_f1, test_scores_r, 'o-', color="yellow", label="Recall Test")
+
         plt.title("Curva de Aprendizado da Árvore de Decisão")
         plt.xlabel("Tamanho do Conjunto de Treinamento")
-        plt.ylabel("F1 Score Macro")
+        plt.ylabel("Scores")
         plt.legend(loc="best")
         plt.show()
         
