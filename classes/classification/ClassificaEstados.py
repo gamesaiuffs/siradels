@@ -15,6 +15,7 @@ from sklearn.tree import DecisionTreeClassifier, export_text, plot_tree
 from sklearn.model_selection import train_test_split, cross_val_score
 from sklearn.metrics import f1_score, precision_score, recall_score, roc_auc_score, make_scorer, accuracy_score, confusion_matrix, log_loss, ConfusionMatrixDisplay
 from sklearn.model_selection import learning_curve
+from sklearn.decomposition import PCA
 from sklearn.model_selection import StratifiedGroupKFold
 import matplotlib.pyplot as plt
 import joblib
@@ -296,6 +297,27 @@ class ClassificaEstados:
 
         return 
     
+    @staticmethod
+    def pca(X: str, Y: str, n_features_dest: int):
+        
+        X, Y = ClassificaEstados.ler_amostras(X, Y, False)
+
+        pca = PCA(n_features_dest)
+        pca.fit(X)
+
+        
+        print("Variância: \n", pca.explained_variance_ratio_)
+        
+        print("Valores: \n", pca.singular_values_)
+
+        print("Parâmetros: \n", pca.get_params(True))
+
+        print("Precisão: \n", pca.get_precision())
+
+        output = pca.set_output()
+
+        return output
+    
     # Testa modelo
     @staticmethod
     def testar_modelo(jogos: str, rotulos: str, model: str, circuito: bool):
@@ -533,10 +555,10 @@ class ClassificaEstados:
         precision_scorer = make_scorer(precision_score)
         recall_scorer = make_scorer(recall_score)
 
-                                                                        # StratifiedKFold c/ K = 5                  # All processors
-        train_sizes_f1, train_scores_f1, test_scores_f1 = learning_curve(model, X, Y, cv=5, scoring=f1_macro_scorer, n_jobs=-1)
-        train_sizes_p, train_scores_p, test_scores_p = learning_curve(model, X, Y, cv=5, scoring=precision_scorer, n_jobs=-1)
-        train_sizes_r, train_scores_r, test_scores_r = learning_curve(model, X, Y, cv=5, scoring=recall_scorer, n_jobs=-1)
+                                                                        # StratifiedKFold c/ K = 10                 # All processors
+        train_sizes_f1, train_scores_f1, test_scores_f1 = learning_curve(model, X, Y, cv=10, scoring=f1_macro_scorer, n_jobs=-1)
+        train_sizes_p, train_scores_p, test_scores_p = learning_curve(model, X, Y, cv=10, scoring=precision_scorer, n_jobs=-1)
+        train_sizes_r, train_scores_r, test_scores_r = learning_curve(model, X, Y, cv=10, scoring=recall_scorer, n_jobs=-1)
 
         # Calculando as médias e desvios padrão das pontuações
         f1_train_scores_mean = np.mean(train_scores_f1, axis=1)

@@ -19,10 +19,10 @@ estrategias.append(EstrategiaJoao())
 '''
 
 n_features = 29
-#n_features = 23
+n_features = 28
 
 profundidade = 30
-n_amostras = 10000
+n_amostras = 15000
 min_samp = 200
 win_weigth = {0: 1, 1: 3}
 criterion = "log_loss"
@@ -42,19 +42,21 @@ simulacao = Simulacao(estrategias, 8, True)
 #(qtd_pts, n_features, nome_jogos, nome_rotulos, nome_modelo)
 #ColetaEstados.coleta_amostras(n_amostras, n_features, jogos, rotulos, modelo)
 
+#(jogos, rotulos, nome_modelo, criterion, profundidade)
+#ClassificaEstados.treinar_modelo(False, jogos, rotulos, modelo, criterion, min_samp, win_weigth, profundidade)
+
+ClassificaEstados.pca(jogos, rotulos, 20)
+
 #(jogos, rotulos, n_features)
 #ClassificaEstados.circuito_treino_teste(jogos, rotulos, n_features)
 #ClassificaEstados.avalia_testes()
 
-#(jogos, rotulos, nome_modelo, criterion, profundidade)
-ClassificaEstados.treinar_modelo(False, jogos, rotulos, modelo, criterion, min_samp, win_weigth, profundidade)
-
 #(jogos, rotulos, nome_modelo)
 #ClassificaEstados.modelo_info(modelo)
-print(ClassificaEstados.testar_modelo(jogos, rotulos, modelo, False))
+#print(ClassificaEstados.testar_modelo(jogos, rotulos, modelo, False))
 
 #ClassificaEstados.plot_tree(modelo)
-ClassificaEstados.plot_learning_curve(jogos, rotulos, modelo)
+#ClassificaEstados.plot_learning_curve(jogos, rotulos, modelo)
 
 #(jogos_entrada, rotulos_entrada, jogos_saida, rotulos_saida)
 #ClassificaEstados.undersampling("Jogos 2", "Rótulos 2", "Jogos 2 Balanceados", "Rotulos 2 Balanceados")
