@@ -244,30 +244,38 @@ class ClassificaEstados:
     
     # Equilibra as amostras em relação as features
     @staticmethod
-    def undersampling(jogos_in: str, rotulos_in: str, jogos_out: str, rotulos_out: str):
+    def undersampling(jogos_in: str, rotulos_in: str, jogos_out: str, rotulos_out: str, fim_jogo: bool = False):
 
         idx_remover = []
-        X_train, X_test, Y_train, Y_test = ClassificaEstados.ler_amostras(jogos_in, rotulos_in)
-        X = np.concatenate((X_train, X_test), axis=0)
-        Y = np.concatenate((Y_train, Y_test), axis=0)
-        wins = np.sum(Y == 1)
-        loses = np.sum(Y == 0)
-        print("Wins: ", wins)
-        print("Loses: ", loses)
+        X, Y = ClassificaEstados.ler_amostras(jogos_in, rotulos_in, False)
+        
+        if fim_jogo == False:
+            wins = np.sum(Y == 1)
+            loses = np.sum(Y == 0)
+            print("Wins: ", wins)
+            print("Loses: ", loses)
 
-        for indice, linha in enumerate(reversed(Y)):
-            if linha == 0 and loses > wins:
-                idx_remover.append(len(Y) - 1 - indice)
-                loses = loses - 1
-                print("Iterações restantes: ", loses-wins)
+            for indice, linha in enumerate(reversed(Y)):
+                if linha == 0 and loses > wins:
+                    idx_remover.append(len(Y) - 1 - indice)
+                    loses = loses - 1
+                    print("Iterações restantes: ", loses-wins)
 
-        X = np.delete(X, idx_remover, axis=0)
-        Y = np.delete(Y, idx_remover, axis=0)
+            X = np.delete(X, idx_remover, axis=0)
+            Y = np.delete(Y, idx_remover, axis=0)
 
-        wins = np.sum(Y == 1)
-        loses = np.sum(Y == 0)
-        print("Wins: ", wins)
-        print("Loses: ", loses)
+            wins = np.sum(Y == 1)
+            loses = np.sum(Y == 0)
+            print("Wins: ", wins)
+            print("Loses: ", loses)
+
+        else:
+            for indice, linha in enumerate(reversed(X)):
+                if linha[0] < 15:
+                    idx_remover.append(len(Y) - 1 - indice)
+
+            X = np.delete(X, idx_remover, axis=0)
+            Y = np.delete(Y, idx_remover, axis=0)
 
         ClassificaEstados.salvar_amostras(X, Y, jogos_out, rotulos_out)
    
@@ -280,7 +288,7 @@ class ClassificaEstados:
     def treinar_modelo(circuito: bool, jogos: str, rotulos: str, nome: str, criterion: str, min_samples: int,  peso_vitoria, profundidade):
 
         if circuito != True:
-            X_train, X_test, Y_train, Y_test = ClassificaEstados.ler_amostras(jogos, rotulos)
+            X_train, X_test, Y_train, Y_test = ClassificaEstados.ler_amostras(jogos, rotulos, True)
         else:
             X_train = jogos
             Y_train = rotulos
@@ -298,25 +306,27 @@ class ClassificaEstados:
         return 
     
     @staticmethod
-    def pca(X: str, Y: str, n_features_dest: int):
-        
-        X, Y = ClassificaEstados.ler_amostras(X, Y, False)
+    def pca(X: str):
 
-        pca = PCA(n_features_dest)
+        pca = PCA(n_features)
         pca.fit(X)
 
+        while sum(pca.explained_variance_ratio_) >= 0.96:
+
+            print(n_features)
+
+            n_features = n_features-1
+            pca = PCA(n_features)
+            pca.fit(X)
         
-        print("Variância: \n", pca.explained_variance_ratio_)
-        
-        print("Valores: \n", pca.singular_values_)
+        print("Valores: \n", pca.explained_variance_ratio_)
+        print("Soma: ", sum(pca.explained_variance_ratio_))
+        X = pca.transform(X)
 
-        print("Parâmetros: \n", pca.get_params(True))
-
-        print("Precisão: \n", pca.get_precision())
-
-        output = pca.set_output()
-
-        return output
+        #output = pca.set_output()  #Estimator  
+        #print("Parâmetros: \n", pca.get_params(True))
+        #print("Precisão: \n", pca.get_precision())
+        return X
     
     # Testa modelo
     @staticmethod
@@ -324,7 +334,7 @@ class ClassificaEstados:
 
         modelo = joblib.load(f'./classes/classification/models/{model}')
         if circuito != True:
-            X_train, X_test, Y_train, Y_test = ClassificaEstados.ler_amostras(jogos, rotulos)
+            X_train, X_test, Y_train, Y_test = ClassificaEstados.ler_amostras(jogos, rotulos, True)
         else:
             X_test = jogos
             Y_test = rotulos
@@ -368,47 +378,39 @@ class ClassificaEstados:
     @staticmethod
     def circuito_treino_teste(jogos: str, rotulos: str, n_features: int):
 
-        # Adicionar profundidade e/ou outros recursos
-
-        X_train, X_test, Y_train, Y_test = ClassificaEstados.ler_amostras(jogos, rotulos)
-
         criterion_range = ["gini", "log_loss", "entropy"]
-        criterion = "log_loss"
         min_samples_range = 501
         class_weight_range = {0: 1, 1: 5}
 
-        # min_samples (501, 1, -50)
-        while min_samples_range != 1:
-            min_samples_range = min_samples_range - 50
-            class_weight_range[1] = 5
-            # Itera pelos pesos da vitória (5, 0, -1) <- (De 5 até 0 diminuindo 1 por vez)
-            while class_weight_range[1] != 1:
-                win_weight = class_weight_range[1]
-                class_weight_range[1] = class_weight_range[1] - 1
+        X_train, X_test, Y_train, Y_test = ClassificaEstados.ler_amostras(jogos, rotulos, True)
+        for criterio in criterion_range:
+            criterion = criterio
+            # min_samples (501, 1, -50)
+            while min_samples_range != 1:
+                min_samples_range = min_samples_range - 50
+                class_weight_range[1] = 5
+                # Itera pelos pesos da vitória (5, 0, -1) <- (De 5 até 0 diminuindo 1 por vez)
+                while class_weight_range[1] != 1:
+                    win_weight = class_weight_range[1]
+                    class_weight_range[1] = class_weight_range[1] - 1
 
-                # Treina o modelo com os parâmetros iterados
-                nome_modelo = f"{criterion} {min_samples_range}ms {win_weight}mw {n_features}f"
-                ClassificaEstados.treinar_modelo(True, X_train, Y_train, nome_modelo, criterion,  min_samples_range, class_weight_range, None)
-                # Profundidade None por enquanto
+                    # Treina o modelo com os parâmetros iterados
+                    nome_modelo = f"{criterion} {min_samples_range}ms {win_weight}mw {n_features}f"
+                    ClassificaEstados.treinar_modelo(True, X_train, Y_train, nome_modelo, criterion,  min_samples_range, class_weight_range, None)
+                    # Profundidade None por enquanto
 
+                    dados_dict = ClassificaEstados.testar_modelo(X_test, Y_test, nome_modelo, True)
+                    # Talvez desacoplar o teste do treino
+
+                    # Salva testes realizados
+                    ClassificaEstados.salva_testes(dados_dict, "./classes/classification/results/testes modelos")
+
+                # Repete bloco para class_weight = "balanced"
+                nome_modelo = f"{criterion} {min_samples_range}ms balanced {n_features}f"
+                ClassificaEstados.treinar_modelo(True, X_train, Y_train, nome_modelo, criterion,  min_samples_range, "balanced", None)
                 dados_dict = ClassificaEstados.testar_modelo(X_test, Y_test, nome_modelo, True)
-                # Talvez desacoplar o teste do treino
-
-                # Salva testes realizados
                 ClassificaEstados.salva_testes(dados_dict, "./classes/classification/results/testes modelos")
-
-
-            # Treina o modelo com os parâmetros iterados
-            nome_modelo = f"{criterion} {min_samples_range}ms balamw {n_features}f"
-            ClassificaEstados.treinar_modelo(True, X_train, Y_train, nome_modelo, criterion,  min_samples_range, "balanced", None)
-            # Profundidade None por enquanto
-
-            dados_dict = ClassificaEstados.testar_modelo(X_test, Y_test, nome_modelo, True)
-            # Talvez desacoplar o teste do treino
-
-            # Salva testes realizados
-            ClassificaEstados.salva_testes(dados_dict, "./classes/classification/results/testes modelos")
-
+        ClassificaEstados.avalia_testes()
         return
     
     # Salva testes
@@ -424,10 +426,24 @@ class ClassificaEstados:
 
         with open(f"{arquivo}.json", "w", encoding="utf-8") as json_file:
             json.dump(dados_json, json_file, indent=4)
+        return
 
     # Avalia testes
     @staticmethod
     def avalia_testes():
+
+        feature_names = [
+
+        # Board features
+        "Round", "Score P1", "Score P2", "Score P3", "Score P4", "Score P5",
+
+        # AP features
+        "Gold Amount (AP)", "Number of cards in Hand (AP)", "Number of Builded Districts (AP)", "Cost of citadel (AP)", "Cost of Hand (AP)", "Builded District Types (AP)", "District Types in Hand (AP)", "Low Cost District in Hand (AP)", "High Cost District in Hand (AP)", "Special District in Hand (AP)", "Special District Builded (AP)", "Character Rank (AP)",
+
+        # MVP features
+        "Gold Amount (MVP)", "Number of Cards in Hand (MVP)", "Number of Builded Districts (MVP)", "Cost of citadel (MVP)", "Builded District Types (MVP)", "District Types in Hand (MVP)", "Low Cost District in Hand (MVP)", "High Cost District in Hand (MVP)", "Special District in Hand (MVP)", "Special District Builded (MVP)", "Character Rank (MVP)",
+
+        ]
         melhor_f1 = float("-inf")
         melhor_precision = float("-inf")
         melhor_recall = float("-inf")
@@ -453,7 +469,7 @@ class ClassificaEstados:
 
             if modelo["Name"] == nome_f1:
 
-                f1_model_info = ClassificaEstados.modelo_info(modelo["Name"])
+                f1_model_info = ClassificaEstados.modelo_info(modelo["Name"], feature_names)
                 modelo_f1 = {
                     "Tested Model": modelo,
                     "Adictional Information": f1_model_info
@@ -461,7 +477,7 @@ class ClassificaEstados:
 
             if modelo["Name"] == nome_precision:
 
-                precision_model_info = ClassificaEstados.modelo_info(modelo["Name"])
+                precision_model_info = ClassificaEstados.modelo_info(modelo["Name"], feature_names)
                 modelo_precision = {
                     "Tested Model": modelo,
                     "Adictional Information": precision_model_info
@@ -469,7 +485,7 @@ class ClassificaEstados:
 
             if modelo["Name"] == nome_recall:
 
-                recall_model_info = ClassificaEstados.modelo_info(modelo["Name"])
+                recall_model_info = ClassificaEstados.modelo_info(modelo["Name"], feature_names)
                 modelo_recall = {
                     "Tested Model": modelo,
                     "Adictional Information": recall_model_info
@@ -488,12 +504,13 @@ class ClassificaEstados:
 
     # Mostra informacoes do modelo
     @staticmethod
-    def modelo_info(model: str):
+    def modelo_info(model: str, feature_names: list):
 
         modelo = joblib.load(f'./classes/classification/models/{model}')
             
         # Mostra as importancia de cada variavel do estado
         feat_imp = modelo.feature_importances_
+        feat_imp = dict(zip(feature_names, feat_imp))
         profundidade = modelo.get_depth()
         n_nos = modelo.tree_.node_count
         n_folhas = modelo.get_n_leaves()
@@ -572,11 +589,20 @@ class ClassificaEstados:
 
         # Plotando a curva de aprendizado
         plt.figure(figsize=(10, 7))
-        plt.fill_between(train_sizes_f1, f1_train_scores_mean - f1_train_scores_std, f1_train_scores_mean + f1_train_scores_std, alpha=0.1, color="blue")
-        plt.fill_between(train_sizes_f1, f1_test_scores_mean - f1_test_scores_std, f1_test_scores_mean + f1_test_scores_std, alpha=0.1, color="orange")
 
+        # Desvio padrão f1_train e f1_test
+        plt.fill_between(train_sizes_f1, f1_train_scores_mean - f1_train_scores_std, f1_train_scores_mean + f1_train_scores_std, alpha=0.1, color="orange")
+        plt.fill_between(train_sizes_f1, f1_test_scores_mean - f1_test_scores_std, f1_test_scores_mean + f1_test_scores_std, alpha=0.1, color="blue")
+
+        # Média f1_train e f1_test
         plt.plot(train_sizes_f1, f1_train_scores_mean, 'o-', color="orange", label="F1 Train")
         plt.plot(train_sizes_f1, f1_test_scores_mean, 'o-', color="blue", label="F1 Test")
+
+        # Desvio padrão precision e recall
+        plt.fill_between(train_sizes_p, p_test_scores_mean - p_test_scores_std, p_test_scores_mean + p_test_scores_std, alpha=0.1, color="red")
+        plt.fill_between(train_sizes_r, r_test_scores_mean - r_test_scores_std, r_test_scores_mean + r_test_scores_std, alpha=0.1, color="yello")
+
+        # Média precision e recall
         plt.plot(train_sizes_f1, p_test_scores_mean, 'o-', color="red", label="Precision Test")
         plt.plot(train_sizes_f1, r_test_scores_mean, 'o-', color="yellow", label="Recall Test")
 

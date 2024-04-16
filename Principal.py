@@ -6,23 +6,10 @@ from classes.strategies.EstrategiaTotalmenteAleatoria import EstrategiaTotalment
 from sklearn.model_selection import train_test_split
 vscode = True
 
-estrategias = []
-
-# Estrategias fixas e especificas
-'''
-estrategias.append(EstrategiaDjonatan())
-estrategias.append(EstrategiaAndrei())
-estrategias.append(EstrategiaBernardo())
-estrategias.append(EstrategiaFelipe())
-estrategias.append(EstrategiaGustavo())
-estrategias.append(EstrategiaJoao())
-'''
-
 n_features = 29
-n_features = 28
 
 profundidade = 30
-n_amostras = 15000
+n_amostras = 10000
 min_samp = 200
 win_weigth = {0: 1, 1: 3}
 criterion = "log_loss"
@@ -34,10 +21,6 @@ modelo = f"Model 10k d{profundidade} {n_features}f"
 
 modelo = "log_loss 351ms 3mw 29f"
 
-'''for i in range(5):          # fixo em 5 players
-   estrategias.append(EstrategiaTotalmenteAleatoria(str(i+1)))
-simulacao = Simulacao(estrategias, 8, True)
-'''
 
 #(qtd_pts, n_features, nome_jogos, nome_rotulos, nome_modelo)
 #ColetaEstados.coleta_amostras(n_amostras, n_features, jogos, rotulos, modelo)
@@ -45,11 +28,9 @@ simulacao = Simulacao(estrategias, 8, True)
 #(jogos, rotulos, nome_modelo, criterion, profundidade)
 #ClassificaEstados.treinar_modelo(False, jogos, rotulos, modelo, criterion, min_samp, win_weigth, profundidade)
 
-ClassificaEstados.pca(jogos, rotulos, 20)
-
 #(jogos, rotulos, n_features)
 #ClassificaEstados.circuito_treino_teste(jogos, rotulos, n_features)
-#ClassificaEstados.avalia_testes()
+ClassificaEstados.avalia_testes()
 
 #(jogos, rotulos, nome_modelo)
 #ClassificaEstados.modelo_info(modelo)
@@ -63,6 +44,20 @@ ClassificaEstados.pca(jogos, rotulos, 20)
 #simulacao.rodar_simulacao(X=0, model="Log Model")
 
 '''
+estrategias = []
+
+# Estrategias fixas e especificas
+estrategias.append(EstrategiaDjonatan())
+estrategias.append(EstrategiaAndrei())
+estrategias.append(EstrategiaBernardo())
+estrategias.append(EstrategiaFelipe())
+estrategias.append(EstrategiaGustavo())
+estrategias.append(EstrategiaJoao())
+
+for i in range(5):          # fixo em 5 players
+   estrategias.append(EstrategiaTotalmenteAleatoria(str(i+1)))
+simulacao = Simulacao(estrategias, 8, True)
+
 # Flag que modifica caminhos para salvar/ler arquivos dependendo da IDE utilizada
 experimento = Experimento(vscode)
 startTime = time.time()
