@@ -17,9 +17,7 @@ DEBUG_TIME = False
 PORCENTAGEM = True
 COMANDO_CLEAR = "cls"
 
-
 import time
-
 import os
 
 def debugTime():
@@ -83,6 +81,7 @@ class Experimento:
                 (vitoria, pontuacao) = resultados[jogador.nome]
                 resultados[jogador.nome] = (int(jogador.vencedor) + vitoria, jogador.pontuacao_final + pontuacao)
         print()
+        # os.system("pause")
         print("Resultados |------------------------------------------------------------------------------------------------")
         print(f"Num de partidas: {qtd_simulacao_maximo}")
         for jogador, resultado in resultados.items():
