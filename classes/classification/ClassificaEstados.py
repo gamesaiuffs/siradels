@@ -227,20 +227,19 @@ class ClassificaEstados:
             return X, Y
        
     @staticmethod
-    def cross_validation(X, y):
+    def cross_validation(X, y, group):
         sgkf = StratifiedGroupKFold(n_splits=3)
 
         # Faça a divisão dos dados
-        for train_index, test_index in sgkf.split(X, y, groups):
+        for train_index, test_index in sgkf.split(X, y, group):
             X_train, X_test = X[train_index], X[test_index]
             y_train, y_test = y[train_index], y[test_index]
-            groups_train, groups_test = groups[train_index], groups[test_index]
+            groups_train, groups_test = group[train_index], group[test_index]
    
-        groups = np.array([1, 1, 2, 2, 3]) 
         f1_macro_scorer = make_scorer(f1_score, average='macro')
         scores = cross_val_score(estimator=f1_macro_scorer)
 
-        return X_test, y_test 
+        return groups_train, groups_test 
     
     # Equilibra as amostras em relação as features
     @staticmethod
