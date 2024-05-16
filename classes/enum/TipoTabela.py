@@ -30,4 +30,4 @@ class TipoTabela(Enum):
     JmQtdOuro = 12, 7
     JmQtdCarta = 13, 6
     PersonagemDisponivel = 14, 252
-    PersonagemDescartado = 15, 8
+    PersonagemDescartado = 15, 9

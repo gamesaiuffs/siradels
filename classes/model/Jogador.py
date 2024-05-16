@@ -7,10 +7,10 @@ from classes.enum.TipoAcao import TipoAcao
 
 class Jogador:
     # Construtor
-    def __init__(self, nome: str):
+    def __init__(self):
         self.pontuacao: int = 0
         self.pontuacao_final: int = 0
-        self.nome: str = nome
+        self.nome: str = ''
         self.personagem: CartaPersonagem = CartaPersonagem('Nenhum', 0, TipoPersonagem.Nenhum)
         self.ouro: int = 2
         self.cartas_distrito_mao: list[CartaDistrito] = []

@@ -41,26 +41,35 @@ class Estado:
         ordem = [jogador.pontuacao_final for jogador in self.jogadores]
         self.jogadores = sort_together([ordem, self.jogadores], reverse=True)[1]
 
-    def converter_estado(self) -> list[int]:
+    def converter_estado(self, openaigym: bool = False) -> list[int]:
+        # Controle de queme está vendo o estado
+        jogador_visao = None
+        if openaigym:
+            for jogador in self.jogadores:
+                if jogador.nome == 'Agente':
+                    jogador_visao = jogador
+        else:
+            jogador_visao = self.jogador_atual
+
         estado_vetor = []
-        
+
         # Qtd ouro [0,1,2,3,4,5,>=6]
-        if self.jogador_atual.ouro >= 6:
+        if jogador_visao.ouro >= 6:
             estado_vetor.append(6)
         else:
-            estado_vetor.append(self.jogador_atual.ouro)
+            estado_vetor.append(jogador_visao.ouro)
         
         # Qtd carta mão [0,1,2,3,4,>=5]
-        if len(self.jogador_atual.cartas_distrito_mao) >= 5:
+        if len(jogador_visao.cartas_distrito_mao) >= 5:
             estado_vetor.append(5)
         else:
-            estado_vetor.append(len(self.jogador_atual.cartas_distrito_mao))        
+            estado_vetor.append(len(jogador_visao.cartas_distrito_mao))
         
         # Carta mão mais cara [0 a 6]
         # Carta mão mais barata [0 a 6]
         maior_custo = 0
         menor_custo = 10
-        for distrito in self.jogador_atual.cartas_distrito_mao:
+        for distrito in jogador_visao.cartas_distrito_mao:
             # descobre o distrito mais caro da mao
             if distrito.valor_do_distrito > maior_custo:
                 maior_custo = distrito.valor_do_distrito
@@ -73,10 +82,10 @@ class Estado:
         estado_vetor.append(menor_custo)
 
         # Qtd distritos construido [0 a 7+]
-        if len(self.jogador_atual.distritos_construidos) > 7:
+        if len(jogador_visao.distritos_construidos) > 7:
             estado_vetor.append(7)
         else:
-            estado_vetor.append(len(self.jogador_atual.distritos_construidos))
+            estado_vetor.append(len(jogador_visao.distritos_construidos))
         
         # Qtd distrito construido Militar [0,1,2,>=3]
         # Qtd distrito construido Religioso [0,1,2,>=3]
@@ -86,7 +95,7 @@ class Estado:
         religioso = 0
         militar = 0
         comercial = 0
-        for distrito in self.jogador_atual.distritos_construidos:
+        for distrito in jogador_visao.distritos_construidos:
             if distrito.tipo_de_distrito == TipoDistrito.Nobre:
                 nobre += 1
             if distrito.tipo_de_distrito == TipoDistrito.Religioso:
@@ -117,17 +126,17 @@ class Estado:
         estado_vetor.append(len(self.tabuleiro.baralho_personagens)-2)
         
         # Pontuacao [0-3,4-7,8-11,12-15,16-19,20-23,>=24]
-        if self.jogador_atual.pontuacao <= 3:
+        if jogador_visao.pontuacao <= 3:
             estado_vetor.append(0)
-        elif self.jogador_atual.pontuacao <= 7:
+        elif jogador_visao.pontuacao <= 7:
             estado_vetor.append(1)
-        elif self.jogador_atual.pontuacao <= 11:
+        elif jogador_visao.pontuacao <= 11:
             estado_vetor.append(2)
-        elif self.jogador_atual.pontuacao <= 15:
+        elif jogador_visao.pontuacao <= 15:
             estado_vetor.append(3)
-        elif self.jogador_atual.pontuacao <= 19:
+        elif jogador_visao.pontuacao <= 19:
             estado_vetor.append(4)
-        elif self.jogador_atual.pontuacao <= 23:
+        elif jogador_visao.pontuacao <= 23:
             estado_vetor.append(5)
         else:
             estado_vetor.append(6)
@@ -186,7 +195,10 @@ class Estado:
 
         # Otimizado para regra de 5 jogadores onde sempre uma carta é descartada de forma visível
         # Personagem visivel descartado
-        cartas_visiveis = self.tabuleiro.cartas_visiveis[0].rank
-        estado_vetor.append(cartas_visiveis - 1)
+        if self.tabuleiro.cartas_visiveis:
+            cartas_visiveis = self.tabuleiro.cartas_visiveis[0].rank
+            estado_vetor.append(cartas_visiveis)
+        else:
+            estado_vetor.append(0)
         return estado_vetor
         
