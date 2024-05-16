@@ -122,8 +122,11 @@ class Estado:
             estado_vetor.append(comercial)
 
         # Qtd personagens disponíveis [2,3,4,5,6]
-        # -2 para aproveitar idx do vetor do 0 ao 4
-        estado_vetor.append(len(self.tabuleiro.baralho_personagens)-2)
+        # -1 para aproveitar idx do vetor do 1 ao 5
+        if self.tabuleiro.baralho_personagens:
+            estado_vetor.append(len(self.tabuleiro.baralho_personagens)-1)
+        else:
+            estado_vetor.append(0)
         
         # Pontuacao [0-3,4-7,8-11,12-15,16-19,20-23,>=24]
         if jogador_visao.pontuacao <= 3:
@@ -191,7 +194,7 @@ class Estado:
                 personagens += 0b1000000
             if carta.rank == 8:
                 personagens += 0b10000000
-        estado_vetor.append(int(personagens) - 1)
+        estado_vetor.append(int(personagens))
 
         # Otimizado para regra de 5 jogadores onde sempre uma carta é descartada de forma visível
         # Personagem visivel descartado

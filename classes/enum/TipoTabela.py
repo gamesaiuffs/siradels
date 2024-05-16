@@ -24,10 +24,10 @@ class TipoTabela(Enum):
     JaConstruidosReligioso = 6, 4
     JaConstruidosNobre = 7, 4
     JaConstruidosComercial = 8, 4
-    JaQtdPersonagem = 9, 5
+    JaQtdPersonagem = 9, 6
     JaPontuacao = 10, 7
     JmConstruidos = 11, 8
     JmQtdOuro = 12, 7
     JmQtdCarta = 13, 6
-    PersonagemDisponivel = 14, 252
+    PersonagemDisponivel = 14, 256
     PersonagemDescartado = 15, 9

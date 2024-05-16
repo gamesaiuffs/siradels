@@ -1,6 +1,7 @@
 from typing import Any, SupportsFloat
 
 import gymnasium as gym
+import numpy as np
 from gymnasium import Space, spaces
 from gymnasium.core import ObsType, ActType, RenderFrame
 
@@ -28,18 +29,14 @@ class Citadels(gym.Env):
         # Mapeado apenas ação de escolha de personagem
         self.action_space: Space[ActType] = spaces.Discrete(self.simulacao.num_personagens)
         # Mapeado estado conforme implementado em método Estado.converter_estado() e TipoTabela
-        estado_dict: dict[str: Space] = dict()
+        self.estado_vetor: list[int] = []
         for tipo_tabela in TipoTabela:
-            estado_dict.update({tipo_tabela.name: spaces.Discrete(tipo_tabela.tamanho)})
-        self.observation_space: Space[ObsType] = spaces.Dict(estado_dict)
+            self.estado_vetor.append(tipo_tabela.tamanho)
+        self.observation_space: Space[ObsType] = spaces.MultiDiscrete(self.estado_vetor)
 
     # Mapeia estado atual na estrutura do espaço observacional (observação do agente do ambiente do problema)
     def observation(self):
-        estado_vetor = self.simulacao.estado.converter_estado(openaigym=True)
-        estado_dict: dict[str: Space] = dict()
-        for tipo_tabela in TipoTabela:
-            estado_dict.update({tipo_tabela.name: estado_vetor[tipo_tabela.idx]})
-        return estado_dict
+        return np.array(self.simulacao.estado.converter_estado(openaigym=True))
 
     # Método usado para iniciar uma nova simulação a partir de um estado inicial
     def reset(self, *, seed: int | None = None, options: dict[str, Any] | None = None) -> tuple[ObsType, dict[str, Any]]:

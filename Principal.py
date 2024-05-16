@@ -27,14 +27,14 @@ Experimento.testar_estrategias(estrategias)
 print(f"Tempo da simulação = {(time.time() - startTime):.2f}s")
 '''
 
-import gymnasium as gym
-
+from stable_baselines3.common.env_checker import check_env
 from stable_baselines3 import A2C
 
 env = Citadels()
+#check_env(env)
 
-model = A2C("MultiInputPolicy", env, verbose=1)
-model.learn(total_timesteps=1000, log_interval=4)
+model = A2C("MlpPolicy", env, verbose=1)
+model.learn(total_timesteps=2000, log_interval=4)
 model.save("ppo_citadels")
 
 # remove to demonstrate saving and loading
