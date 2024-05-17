@@ -7,7 +7,6 @@ from gymnasium.core import ObsType, ActType, RenderFrame
 
 from classes.Simulacao import Simulacao
 from classes.enum.TipoTabela import TipoTabela
-from classes.strategies.Agente import Agente
 from classes.strategies.EstrategiaTotalmenteAleatoria import EstrategiaTotalmenteAleatoria
 
 
@@ -17,7 +16,7 @@ class Citadels(gym.Env):
     def __init__(self):
         # Atributos específicos do jogo
         # Adversários
-        self.estrategias = [Agente(), EstrategiaTotalmenteAleatoria('Bot 1'), EstrategiaTotalmenteAleatoria('Bot 2'), EstrategiaTotalmenteAleatoria('Bot 3'), EstrategiaTotalmenteAleatoria('Bot 4')]
+        self.estrategias = [EstrategiaTotalmenteAleatoria('Agente'), EstrategiaTotalmenteAleatoria('Bot 1'), EstrategiaTotalmenteAleatoria('Bot 2'), EstrategiaTotalmenteAleatoria('Bot 3'), EstrategiaTotalmenteAleatoria('Bot 4')]
         # Cria simulação
         self.simulacao = Simulacao(self.estrategias, openaigym=True)
         # Marca pontuação, ouro e quantidade de cartas na mão atual do agente (usada para recompensa)

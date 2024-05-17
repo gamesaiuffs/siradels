@@ -1,3 +1,5 @@
+from stable_baselines3 import PPO
+
 from classes.enum.TipoAcao import TipoAcao
 from classes.model.CartaDistrito import CartaDistrito
 from classes.model.CartaPersonagem import CartaPersonagem
@@ -5,16 +7,26 @@ from classes.strategies.Estrategia import Estrategia
 from classes.model.Estado import Estado
 from classes.model.Jogador import Jogador
 import random
+import numpy as np
 
 
 class Agente(Estrategia):
     def __init__(self, nome: str = 'Agente'):
         super().__init__(nome)
+        self.model = PPO.load("ppo_citadels")
 
     # Estratégia usada na fase de escolha dos personagens
-    @staticmethod
-    def escolher_personagem(estado: Estado) -> int:
-        return random.randint(0, len(estado.tabuleiro.baralho_personagens) - 1)
+    def escolher_personagem(self, estado: Estado) -> int:
+        action, _ = self.model.predict(np.array(estado.converter_estado(openaigym=True)))
+        # Verifica se o personagem esoclhida está disponível e identifica o seu índice
+        escolha_personagem = -1
+        for idx, personagem in enumerate(estado.tabuleiro.baralho_personagens):
+            if action == personagem.rank - 1:
+                escolha_personagem = idx
+        # Caso não esteja, retorna um aleatório
+        if escolha_personagem == -1:
+            return random.randint(0, len(estado.tabuleiro.baralho_personagens) - 1)
+        return escolha_personagem
 
     # Estratégia usada na fase de escolha das ações no turno
     @staticmethod
