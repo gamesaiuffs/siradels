@@ -13,19 +13,20 @@ import numpy as np
 class Agente(Estrategia):
     def __init__(self, nome: str = 'Agente'):
         super().__init__(nome)
-        self.model = PPO.load("ppo_citadels")
+        self.model = PPO.load("citadels_agent")
 
     # Estratégia usada na fase de escolha dos personagens
     def escolher_personagem(self, estado: Estado) -> int:
-        action, _ = self.model.predict(np.array(estado.converter_estado(openaigym=True)))
-        # Verifica se o personagem esoclhida está disponível e identifica o seu índice
-        escolha_personagem = -1
-        for idx, personagem in enumerate(estado.tabuleiro.baralho_personagens):
-            if action == personagem.rank - 1:
-                escolha_personagem = idx
-        # Caso não esteja, retorna um aleatório
-        if escolha_personagem == -1:
-            return random.randint(0, len(estado.tabuleiro.baralho_personagens) - 1)
+        while True:
+            action, _ = self.model.predict(np.array(estado.converter_estado(openaigym=True)), deterministic=False)
+            # Verifica se o personagem esoclhida está disponível e identifica o seu índice
+            escolha_personagem = -1
+            for idx, personagem in enumerate(estado.tabuleiro.baralho_personagens):
+                if action == personagem.rank - 1:
+                    escolha_personagem = idx
+            # Caso não esteja, retorna um aleatório
+            if escolha_personagem != -1:
+                break
         return escolha_personagem
 
     # Estratégia usada na fase de escolha das ações no turno

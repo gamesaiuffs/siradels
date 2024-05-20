@@ -55,9 +55,9 @@ class Citadels(gym.Env):
         for idx, personagem in enumerate(self.simulacao.estado.tabuleiro.baralho_personagens):
             if action == personagem.rank - 1:
                 escolha_personagem = idx
-        # Caso não esteja, retorna estado atual
+        # Caso não esteja, retorna estado atual com recompensa negativa
         if escolha_personagem == -1:
-            return self.observation(), 0, self.simulacao.final_jogo, False, dict()
+            return self.observation(), -10, self.simulacao.final_jogo, False, dict()
 
         # Simula a rodada inteira com a ação escolhida
         self.simulacao.executar_rodada(escolha_personagem)

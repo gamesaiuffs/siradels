@@ -14,20 +14,9 @@ from stable_baselines3 import PPO
 env = Citadels()
 #check_env(env)
 
-model = PPO(env = env,
-  policy= 'MlpPolicy',
-  batch_size= 64,
-  n_steps= 32,
-  gamma= 0.999,
-  learning_rate= 0.000222425,
-  ent_coef= 1.37976e-07,
-  clip_range= 0.4,
-  n_epochs= 5,
-  gae_lambda= 0.9,
-  max_grad_norm= 0.3,
-  vf_coef= 0.19816)
-#model.learn(total_timesteps=100000)
-#model.save("ppo_citadels")
+model = PPO(env=env, policy='MlpPolicy')
+model.learn(total_timesteps=100000)
+model.save("citadels_agent")
 
 
 # Flag que modifica caminhos para salvar/ler arquivos dependendo da IDE utilizada
