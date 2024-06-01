@@ -6,35 +6,35 @@ from classes.strategies.EstrategiaTotalmenteAleatoria import EstrategiaTotalment
 from sklearn.model_selection import train_test_split
 vscode = True
 
-n_features = 29
+n_features = 28
 
-profundidade = 30
-n_amostras = 10000
-min_samp = 200
+profundidade = 15
+n_amostras = 15000
+min_samp = 351
 win_weigth = {0: 1, 1: 3}
-criterion = "log_loss"
-
+criterion = "gini"
+ww = 3
 
 jogos = f"Jogos {n_amostras} {n_features}f"
 rotulos = f"Rótulos {n_amostras} {n_features}f" 
-modelo = f"Model 10k d{profundidade} {n_features}f"
-
-modelo = "log_loss 351ms 3mw 29f"
-
+modelo = f"{criterion} {min_samp}ms {ww}mw {n_features}f"
 
 #(qtd_pts, n_features, nome_jogos, nome_rotulos, nome_modelo)
 #ColetaEstados.coleta_amostras(n_amostras, n_features, jogos, rotulos, modelo)
 
 #(jogos, rotulos, nome_modelo, criterion, profundidade)
-#ClassificaEstados.treinar_modelo(False, jogos, rotulos, modelo, criterion, min_samp, win_weigth, profundidade)
+ClassificaEstados.treinar_modelo(False, jogos, rotulos, modelo, criterion, min_samp, win_weigth, profundidade)
+#ClassificaEstados.treinar_floresta(False, jogos, rotulos, "Forest1", 100, criterion, min_samp, win_weigth, profundidade)
+#ClassificaEstados.treinar_gradiente(False, jogos, rotulos, "Gradient1", 100, 'friedman_mse', min_samp, 'log_loss', 0.1, profundidade)
 
 #(jogos, rotulos, n_features)
 #ClassificaEstados.circuito_treino_teste(jogos, rotulos, n_features)
-ClassificaEstados.avalia_testes()
+#ClassificaEstados.avalia_testes()
 
 #(jogos, rotulos, nome_modelo)
 #ClassificaEstados.modelo_info(modelo)
-#print(ClassificaEstados.testar_modelo(jogos, rotulos, modelo, False))
+print(ClassificaEstados.testar_modelo(jogos, rotulos, modelo, False))
+#print(ClassificaEstados.testar_modelo(jogos, rotulos, 'Gradient1', False))
 
 #ClassificaEstados.plot_tree(modelo)
 #ClassificaEstados.plot_learning_curve(jogos, rotulos, modelo)

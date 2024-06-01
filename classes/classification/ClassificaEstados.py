@@ -12,7 +12,9 @@ from classes.strategies.EstrategiaMCTS import EstrategiaMCTS
 from classes.strategies.EstrategiaTotalmenteAleatoria import EstrategiaTotalmenteAleatoria
 from classes.enum.TipoDistrito import TipoDistrito
 from sklearn.tree import DecisionTreeClassifier, export_text, plot_tree
-from sklearn.model_selection import train_test_split, cross_val_score
+from sklearn.ensemble import GradientBoostingClassifier
+from sklearn.ensemble import RandomForestClassifier
+from sklearn.model_selection import train_test_split, cross_val_score, GridSearchCV
 from sklearn.metrics import f1_score, precision_score, recall_score, roc_auc_score, make_scorer, accuracy_score, confusion_matrix, log_loss, ConfusionMatrixDisplay
 from sklearn.model_selection import learning_curve
 from sklearn.decomposition import PCA
@@ -304,6 +306,50 @@ class ClassificaEstados:
 
         return 
     
+    # Treina floresta
+    @staticmethod
+    def treinar_floresta(circuito: bool, jogos: str, rotulos: str, nome: str, n_arvores: int, criterio: str, min_samples: int,  peso_vitoria, profundidade):
+
+        if circuito != True:
+            X_train, X_test, Y_train, Y_test = ClassificaEstados.ler_amostras(jogos, rotulos, True)
+        else:
+            X_train = jogos
+            Y_train = rotulos
+
+        # Definir parametros
+        modelo = RandomForestClassifier(n_estimators=n_arvores, criterion=criterio, max_depth=profundidade, min_samples_leaf=min_samples, class_weight=peso_vitoria, random_state=42)
+        modelo.fit(X_train, Y_train)
+
+        # Salva o modelo
+        joblib.dump(modelo, f'./classes/classification/models/{nome}')
+
+        if circuito == False:
+            print("Modelo treinado com sucesso!")
+
+        return 
+    
+    # Treina gradient boosting
+    @staticmethod
+    def treinar_gradiente(circuito: bool, jogos: str, rotulos: str, nome: str, n_arvores: int, criterio: str, min_samples: int, log_opt, rate, profundidade):
+
+        if circuito != True:
+            X_train, X_test, Y_train, Y_test = ClassificaEstados.ler_amostras(jogos, rotulos, True)
+        else:
+            X_train = jogos
+            Y_train = rotulos
+
+        # Definir parametros
+        modelo = GradientBoostingClassifier(n_estimators=n_arvores, loss=log_opt, learning_rate=rate, criterion=criterio, min_samples_leaf=min_samples, max_depth=profundidade, random_state=42)
+        modelo.fit(X_train, Y_train)
+
+        # Salva o modelo
+        joblib.dump(modelo, f'./classes/classification/models/{nome}')
+
+        if circuito == False:
+            print("Modelo treinado com sucesso!")
+
+        return 
+    
     @staticmethod
     def pca(X: str):
 
@@ -381,6 +427,34 @@ class ClassificaEstados:
         min_samples_range = 501
         class_weight_range = {0: 1, 1: 5}
 
+        '''
+        # Definir a grade de hiperparâmetros
+        param_grid = {
+            'learning_rate': [0.01, 0.1, 0.2, 0.3],
+            'n_estimators': [50, 100, 200, 300]
+        }
+
+        # Configurar o GridSearchCV
+        grid_search = GridSearchCV(
+            estimator=GradientBoostingClassifier(max_depth=3, random_state=42),
+            param_grid=param_grid,
+            cv=5,  # 5-fold cross-validation
+            n_jobs=-1,  # Use todos os núcleos disponíveis
+            scoring='accuracy'  # Métrica de avaliação
+        )
+
+        # Treinar o modelo
+        grid_search.fit(X_train, y_train)
+
+        # Avaliar os melhores parâmetros encontrados
+        best_params = grid_search.best_params_
+        print(f"Melhores parâmetros: {best_params}")
+
+        # Avaliar o modelo com os melhores parâmetros no conjunto de teste
+        best_model = grid_search.best_estimator_
+        y_pred = best_model.predict(X_test)
+
+        '''
         X_train, X_test, Y_train, Y_test = ClassificaEstados.ler_amostras(jogos, rotulos, True)
         for criterio in criterion_range:
             criterion = criterio
