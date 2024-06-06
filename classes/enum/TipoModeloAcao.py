@@ -13,7 +13,15 @@ class TipoModeloAcao(Enum):
     def __init__(self, idx, tamanho):
         self.idx = idx
         self.tamanho = tamanho
+    # EscolhaPersonagem + EscolherAcao(Ouro ou Carta) + ConstruirDistrito(5 Tipos, MaisCaro/MaisBarato)
 
+    # Recompensa negativa ao escolher ação inválida = -12
+    # Recompensa ao conseguir construir distrito = 6
+    # Recompensa ao aumentar pontuação parcial = delta pontuacao parcial + ou -
+    # Recompensa ao vencer jogo = 84
+    # Recompensa em relação média pontuação adversários = variação entre sua pontuação e média
+
+    # 17 ações
     # São 8 opções de personagens (ranks 1 a 8)
     EscolherPersonagem = 0, 8
     # São 15 ações distintas possíveis durante um turno (definidas no TipoAcao)

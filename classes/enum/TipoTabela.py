@@ -24,10 +24,18 @@ class TipoTabela(Enum):
     JaConstruidosReligioso = 6, 4
     JaConstruidosNobre = 7, 4
     JaConstruidosComercial = 8, 4
-    JaQtdPersonagem = 9, 6
-    JaPontuacao = 10, 7
+    JaConstruidosEspecial
+    #JaQtdPersonagem = 9, 6
+    #JaPontuacao = 10, 7
+    JaPersonagem
     JmConstruidos = 11, 8
-    JmQtdOuro = 12, 7
+    #JmQtdOuro = 12, 7
     JmQtdCarta = 13, 6
-    PersonagemDisponivel = 14, 256
-    PersonagemDescartado = 15, 9
+    #PersonagemDisponivel = 14, 256
+    #PersonagemDescartado = 15, 9
+    MediaOuroAdversarios
+    EtapaPersonagem 0,1
+    EtapaOuroCarta 0,1
+    EtapaConstrucao 0, 1
+    # Assassina e Ladrao desconsideram personagens descartados
+    # Ilusionista sempre pega de quem tem mais carta
