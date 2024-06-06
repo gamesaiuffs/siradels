@@ -38,6 +38,3 @@ class TipoTabela(Enum):
     # JmQtdOuro = 12, 7
     # PersonagemDisponivel = 14, 256
     # PersonagemDescartado = 15, 9
-
-    # Assassina e Ladrao desconsideram personagens descartados
-    # Ilusionista sempre pega de quem tem mais carta
