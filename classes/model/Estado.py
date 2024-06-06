@@ -13,6 +13,9 @@ class Estado:
         self.turno: int = 0
         self.rodada: int = 0
         self.jogador_atual: Jogador | None = None
+        self.escolher_personagem = False
+        self.coletar_recursos = False
+        self.construir_distrito = False
 
     # To String
     def __str__(self):
@@ -42,7 +45,7 @@ class Estado:
         self.jogadores = sort_together([ordem, self.jogadores], reverse=True)[1]
 
     def converter_estado(self, openaigym: bool = False) -> list[int]:
-        # Controle de queme está vendo o estado
+        # Controle de quem ve o estado
         jogador_visao = None
         if openaigym:
             for jogador in self.jogadores:
@@ -91,10 +94,12 @@ class Estado:
         # Qtd distrito construido Religioso [0,1,2,>=3]
         # Qtd distrito construido Nobre [0,1,2,>=3]
         # Qtd distrito construido Comercial [0,1,2,>=3]
+        # Qtd distrito construido Especial [0,1,2,>=3]
         nobre = 0
         religioso = 0
         militar = 0
         comercial = 0
+        especial = 0
         for distrito in jogador_visao.distritos_construidos:
             if distrito.tipo_de_distrito == TipoDistrito.Nobre:
                 nobre += 1
@@ -104,6 +109,8 @@ class Estado:
                 militar += 1
             if distrito.tipo_de_distrito == TipoDistrito.Comercial:
                 comercial += 1
+            if distrito.tipo_de_distrito == TipoDistrito.Especial:
+                especial += 1
         if nobre >= 3:
             estado_vetor.append(3)
         else:
@@ -120,14 +127,58 @@ class Estado:
             estado_vetor.append(3)
         else:
             estado_vetor.append(comercial)
+        if especial >= 3:
+            estado_vetor.append(3)
+        else:
+            estado_vetor.append(comercial)
 
+        # Rank do personagem do jogador atual [0 a 8]
+        # Rank 0 quando o jogador não possui personagem selecionado ainda
+        estado_vetor.append(jogador_visao.personagem.rank)
+
+        # Qtd distrito construido [0 a 7+]
+        qtd_distritos = 0
+        for jogador in self.jogadores:
+            if qtd_distritos < len(jogador.distritos_construidos):
+                qtd_distritos = len(jogador.distritos_construidos)
+        if qtd_distritos > 7:
+            estado_vetor.append(7)
+        else:
+            estado_vetor.append(qtd_distritos)
+        
+        # Qtd carta mão [0,1,2,3,4,>=5]
+        maior_custo = 0
+        for jogador in self.jogadores:
+            if maior_custo < len(jogador.cartas_distrito_mao):
+                maior_custo = len(jogador.cartas_distrito_mao)
+        if maior_custo >= 5:
+            estado_vetor.append(5)
+        else:
+            estado_vetor.append(maior_custo)
+
+        # Média de ouro dos adversários (arredondada para baixo) [0,1,2,3,>=4]
+        media = 0
+        for jogador in self.jogadores:
+            if jogador_visao != jogador:
+                media += jogador.ouro
+        media = media // (len(self.jogadores) - 1)
+        estado_vetor.append(media)
+
+        # Flag que marca se a fase atual é a de escolha de personagem [0,1]
+        estado_vetor.append(int(self.escolher_personagem))
+        # Flag que marca se a fase atual é a de coletar recursos [0,1]
+        estado_vetor.append(int(self.coletar_recursos))
+        # Flag que marca se a fase atual é a de construção de distritos [0,1]
+        estado_vetor.append(int(self.construir_distrito))
+
+        '''
         # Qtd personagens disponíveis [2,3,4,5,6]
         # -1 para aproveitar idx do vetor do 1 ao 5
         if self.tabuleiro.baralho_personagens:
-            estado_vetor.append(len(self.tabuleiro.baralho_personagens)-1)
+            estado_vetor.append(len(self.tabuleiro.baralho_personagens) - 1)
         else:
             estado_vetor.append(0)
-        
+
         # Pontuacao [0-3,4-7,8-11,12-15,16-19,20-23,>=24]
         if jogador_visao.pontuacao <= 3:
             estado_vetor.append(0)
@@ -144,16 +195,6 @@ class Estado:
         else:
             estado_vetor.append(6)
             
-        # Qtd distrito construido [0 a 7+]
-        qtd_distritos = 0
-        for jogador in self.jogadores:
-            if qtd_distritos < len(jogador.distritos_construidos):
-                qtd_distritos = len(jogador.distritos_construidos)
-        if qtd_distritos > 7:
-            estado_vetor.append(7)
-        else:
-            estado_vetor.append(qtd_distritos)
-        
         # Qtd ouro [0,1,2,3,4,5,>=6]
         maior_custo = 0
         for jogador in self.jogadores:
@@ -163,17 +204,7 @@ class Estado:
             estado_vetor.append(6)
         else:
             estado_vetor.append(maior_custo)
-        
-        # Qtd carta mão [0,1,2,3,4,>=5]
-        maior_custo = 0
-        for jogador in self.jogadores:
-            if maior_custo < len(jogador.cartas_distrito_mao):
-                maior_custo = len(jogador.cartas_distrito_mao)
-        if maior_custo >= 5:
-            estado_vetor.append(5)
-        else:
-            estado_vetor.append(maior_custo)
-
+            
         # Otimizado para regra de 5 jogadores onde no máximo 6 opções de escolha são possíveis
         # Personagem disponivel para escolha
         personagens = 0b0
@@ -203,5 +234,6 @@ class Estado:
             estado_vetor.append(cartas_visiveis)
         else:
             estado_vetor.append(0)
+        '''
         return estado_vetor
         

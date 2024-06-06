@@ -129,6 +129,7 @@ class Simulacao:
             jogador.acoes_realizadas[TipoAcao.PassarTurno.value] = False
         self.estado.ordenar_jogadores_coroado()
         # Fase de escolha de personagens
+        self.estado.escolher_personagem = True
         for jogador in self.estado.jogadores:
             # Marca jogador atual
             self.estado.jogador_atual = jogador
@@ -140,6 +141,7 @@ class Simulacao:
             jogador.personagem = self.estado.tabuleiro.baralho_personagens[escolha_personagem]
             self.estado.tabuleiro.baralho_personagens.remove(jogador.personagem)
         # Fase de ações
+        self.estado.escolher_personagem = False
         # Os jogadores seguem a ordem do rank dos seus personagens como ordem de turno
         for rank in range(1, 9):
             for jogador in self.estado.jogadores:
@@ -207,10 +209,12 @@ class Simulacao:
         acoes_disponiveis = []
         acoes_realizadas = self.estado.jogador_atual.acoes_realizadas
         # Deve ter coletado recursos primeiro para poder realizar demais ações no turno
-        if acoes_realizadas[TipoAcao.ColetarOuro.value] or acoes_realizadas[TipoAcao.ColetarCartas.value]:
+        self.estado.coletar_recursos = not (acoes_realizadas[TipoAcao.ColetarOuro.value] or acoes_realizadas[TipoAcao.ColetarCartas.value])
+        if not self.estado.coletar_recursos:
             acoes_disponiveis.append(TipoAcao.PassarTurno)
             # Ação de construir distrito
-            if not acoes_realizadas[TipoAcao.ConstruirDistrito.value]:
+            self.estado.construir_distrito = not acoes_realizadas[TipoAcao.ConstruirDistrito.value]
+            if self.estado.construir_distrito:
                 acoes_disponiveis.append(TipoAcao.ConstruirDistrito)
             # As habilidades dos personagens só podem ser utilizadas uma única vez
             # O jogador deve possuir a carta do personagem para usar a sua habilidade

@@ -24,18 +24,20 @@ class TipoTabela(Enum):
     JaConstruidosReligioso = 6, 4
     JaConstruidosNobre = 7, 4
     JaConstruidosComercial = 8, 4
-    JaConstruidosEspecial
-    #JaQtdPersonagem = 9, 6
-    #JaPontuacao = 10, 7
-    JaPersonagem
+    JaConstruidosEspecial = 9, 4
+    JaPersonagem = 10, 9
     JmConstruidos = 11, 8
-    #JmQtdOuro = 12, 7
-    JmQtdCarta = 13, 6
-    #PersonagemDisponivel = 14, 256
-    #PersonagemDescartado = 15, 9
-    MediaOuroAdversarios
-    EtapaPersonagem 0,1
-    EtapaOuroCarta 0,1
-    EtapaConstrucao 0, 1
+    JmQtdCarta = 12, 6
+    MediaOuroAdversarios = 13, 5
+    EtapaPersonagem = 14, 2
+    EtapaOuroCarta = 15, 2
+    EtapaConstrucao = 16, 2
+    # Dados implementados, mas retirados do método converter_estado
+    # JaQtdPersonagem = 9, 6
+    # JaPontuacao = 10, 7
+    # JmQtdOuro = 12, 7
+    # PersonagemDisponivel = 14, 256
+    # PersonagemDescartado = 15, 9
+
     # Assassina e Ladrao desconsideram personagens descartados
     # Ilusionista sempre pega de quem tem mais carta
