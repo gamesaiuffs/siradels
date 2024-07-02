@@ -1,5 +1,6 @@
 import numpy as np
 import random
+import os
 
 
 from classes.enum.TipoAcao import TipoAcao
@@ -56,9 +57,16 @@ class EstrategiaMCTS(Estrategia):
 
     # Salva os modelos em arquivos CSV
     def salvar_modelos(self):
+        # Verifica se pastas existem, senão as cria
+        for tipo_modelo in TipoModeloAcao:
+            diretorio = self.caminho_modelo + '/modelos_mcts/' + tipo_modelo.name
+            if not os.path.exists(diretorio):
+                os.makedirs(diretorio)
+                print(f"Criou diretório: {diretorio}")
+
         for (modelo, tipo_modelo) in zip(self.modelos_mcts, TipoModeloAcao):
             for (i, tipo_tabela) in zip(modelo, TipoTabela):
-                    np.savetxt(self.caminho_modelo + '/modelos_mcts/' + tipo_modelo.name + '/' + tipo_tabela.name + '.csv', i, delimiter=',', fmt='%7u')
+                np.savetxt(self.caminho_modelo + '/modelos_mcts/' + tipo_modelo.name + '/' + tipo_tabela.name + '.csv', i, delimiter=',', fmt='%5u')
 
     def modelo_mcts_escolha(self, qtd_opcoes: int, opcoes_disponiveis: np.ndarray) -> int:
         if self.treino:
@@ -70,7 +78,7 @@ class EstrategiaMCTS(Estrategia):
         else:
             soma_colunas = np.sum(opcoes_disponiveis, axis=0)
             # Computar divisão proporcional com soma das colunas (considera apenas vitórias)
-            divisao_proporcional = self.computar_divisao_proporcional(soma_colunas, 1, True)
+            divisao_proporcional = self.computar_divisao_proporcional(soma_colunas, apenas_vitorias=True)
             # Escolher opção seguindo distribuição da divisão
             escolha = random.choices(range(0, qtd_opcoes), divisao_proporcional)[0]
             return escolha
@@ -120,8 +128,10 @@ class EstrategiaMCTS(Estrategia):
                 opcoes_disponiveis.append(linha_tabela[acao.value])
             for acao in acoes_disponiveis:
                 opcoes_disponiveis.append(linha_tabela[acao.value + tipo_modelo_acao.tamanho])
-            # Aplica modelo MCTS para escolha das opções dentre as opções disponíveis
+            # Aplica modelo MCTS para escolha das opções dentre as opções disponíveis (deixa passar turno por último)
             escolha = self.modelo_mcts_escolha(len(acoes_disponiveis), np.array(opcoes_disponiveis))
+            while len(acoes_disponiveis) > 1 and acoes_disponiveis[escolha] == TipoAcao.PassarTurno:
+                escolha = self.modelo_mcts_escolha(len(acoes_disponiveis), np.array(opcoes_disponiveis))
             # Salvar histórico das escolhas para acrescentar no modelo após resultado
             self.modelos_historico[tipo_modelo_acao.idx][self.tipo_tabela.idx][indice_linha_tabela][acoes_disponiveis[escolha].value] = 1
             self.modelos_historico[tipo_modelo_acao.idx][self.tipo_tabela.idx][indice_linha_tabela][acoes_disponiveis[escolha].value + tipo_modelo_acao.tamanho] = 1
@@ -137,7 +147,10 @@ class EstrategiaMCTS(Estrategia):
             for acao in acoes_disponiveis:
                 opcoes_disponiveis.append(tabela_consulta[:, acao.value])
             opcoes_disponiveis = np.stack(opcoes_disponiveis, axis=1)
-            return self.modelo_mcts_escolha(len(acoes_disponiveis), opcoes_disponiveis)
+            escolha = self.modelo_mcts_escolha(len(acoes_disponiveis), opcoes_disponiveis)
+            while len(acoes_disponiveis) > 1 and acoes_disponiveis[escolha] == TipoAcao.PassarTurno:
+                escolha = self.modelo_mcts_escolha(len(acoes_disponiveis), opcoes_disponiveis)
+            return escolha
 
     # Estratégia usada na ação de coletar cartas
     def coletar_cartas(self, estado: Estado, cartas_compradas: list[CartaDistrito], qtd_cartas: int) -> int:
