@@ -130,7 +130,7 @@ class Estado:
         if especial >= 3:
             estado_vetor.append(3)
         else:
-            estado_vetor.append(comercial)
+            estado_vetor.append(especial)
 
         # Rank do personagem do jogador atual [0 a 8]
         # Rank 0 quando o jogador não possui personagem selecionado ainda
@@ -162,6 +162,8 @@ class Estado:
             if jogador_visao != jogador:
                 media += jogador.ouro
         media = media // (len(self.jogadores) - 1)
+        if media > 4:
+            media = 4
         estado_vetor.append(media)
 
         # Flag que marca se a fase atual é a de escolha de personagem [0,1]
@@ -171,7 +173,7 @@ class Estado:
         # Flag que marca se a fase atual é a de construção de distritos [0,1]
         estado_vetor.append(int(self.construir_distrito))
 
-        '''
+        ''' Observações retiradas
         # Qtd personagens disponíveis [2,3,4,5,6]
         # -1 para aproveitar idx do vetor do 1 ao 5
         if self.tabuleiro.baralho_personagens:
