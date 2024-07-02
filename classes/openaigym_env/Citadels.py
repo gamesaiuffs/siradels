@@ -6,6 +6,8 @@ from gymnasium import Space, spaces
 from gymnasium.core import ObsType, ActType, RenderFrame
 
 from classes.Simulacao import Simulacao
+from classes.enum.TipoAcaoOpenAI import TipoAcaoOpenAI
+from classes.enum.TipoDistrito import TipoDistrito
 from classes.enum.TipoTabela import TipoTabela
 from classes.strategies.EstrategiaTotalmenteAleatoria import EstrategiaTotalmenteAleatoria
 
@@ -15,18 +17,17 @@ class Citadels(gym.Env):
     # Inicializa um novo ambiente de simulação
     def __init__(self):
         # Atributos específicos do jogo
-        # Adversários
+        # Agente + Adversários de Treino
         self.estrategias = [EstrategiaTotalmenteAleatoria('Agente'), EstrategiaTotalmenteAleatoria('Bot 1'), EstrategiaTotalmenteAleatoria('Bot 2'), EstrategiaTotalmenteAleatoria('Bot 3'), EstrategiaTotalmenteAleatoria('Bot 4')]
         # Cria simulação
-        self.simulacao = Simulacao(self.estrategias, openaigym=True)
-        # Marca pontuação, ouro e quantidade de cartas na mão atual do agente (usada para recompensa)
+        self.simulacao = Simulacao(self.estrategias, treino_openaigym=True)
+        # Marca pontuação atual do agente (usada para recompensa)
         self.pontuacao_atual = 0
-        self.ouro_atual = 2
-        self.qtd_cartas_atual = 4
 
         # Atributos da interface gym.Env
-        # Mapeado apenas ação de escolha de personagem
-        self.action_space: Space[ActType] = spaces.Discrete(self.simulacao.num_personagens)
+        # Mapeamento do espaço de ações
+        # EscolhaPersonagem (8) + EscolherAcao(Ouro ou Carta) + ConstruirDistrito(5 Tipos, MaisCaro ou MaisBarato da mão)
+        self.action_space: Space[ActType] = spaces.Discrete(17)
         # Mapeado estado conforme implementado em método Estado.converter_estado() e TipoTabela
         self.estado_vetor: list[int] = []
         for tipo_tabela in TipoTabela:
@@ -34,7 +35,7 @@ class Citadels(gym.Env):
         self.observation_space: Space[ObsType] = spaces.MultiDiscrete(self.estado_vetor)
 
     # Mapeia estado atual na estrutura do espaço observacional (observação do agente do ambiente do problema)
-    def observation(self):
+    def observation(self) -> np.array:
         return np.array(self.simulacao.estado.converter_estado(openaigym=True))
 
     # Método usado para iniciar uma nova simulação a partir de um estado inicial
@@ -43,44 +44,76 @@ class Citadels(gym.Env):
         self.simulacao.criar_estado_inicial(self.simulacao.num_personagens, self.simulacao.automatico)
         # Marca pontuação, ouro e quantidade de cartas na mão atual do agente (usada para recompensa)
         self.pontuacao_atual = 0
-        self.ouro_atual = 2
-        self.qtd_cartas_atual = 4
         # O segundo argumento refere-se a alguma informação adicional repassada para o agente
         return self.observation(), dict()
 
     # Método usado para executar uma transição de estado a partir de uma ação do agente
     def step(self, action: ActType) -> tuple[ObsType, SupportsFloat, bool, bool, dict[str, Any]]:
-        # Verifica se o personagem esoclhida está disponível e identifica o seu índice
-        escolha_personagem = -1
-        for idx, personagem in enumerate(self.simulacao.estado.tabuleiro.baralho_personagens):
-            if action == personagem.rank - 1:
-                escolha_personagem = idx
-        # Caso não esteja, retorna estado atual com recompensa negativa
-        if escolha_personagem == -1:
-            return self.observation(), -10, self.simulacao.final_jogo, False, dict()
+        if self.simulacao.nova_rodada:
+            self.simulacao.iniciar_rodada()
+        recompensa = 0.0
+        jogador_agente = None
+        for jogador in self.simulacao.estado.jogadores:
+            if jogador.nome == 'Agente':
+                jogador_agente = jogador
+        if jogador_agente is None:
+            raise Exception("Agente não encontrado!")
+        # Verifica e executa a ação no ambiente simulado
+        if 0 <= action < 8 and self.observation()[TipoTabela.EtapaPersonagem.idx] == 1:
+            # Verifica se o personagem escolhido está disponível e identifica o seu índice
+            escolha_personagem = -1
+            for idx, personagem in enumerate(self.simulacao.estado.tabuleiro.baralho_personagens):
+                if action == personagem.rank - 1:
+                    escolha_personagem = idx
+            # Caso não esteja, retorna estado atual
+            if escolha_personagem == -1:
+                return self.observation(), recompensa, self.simulacao.final_jogo, False, dict()
+            # Executa escolha de personagem
+            self.simulacao.executar_rodada(TipoAcaoOpenAI(escolha_personagem))
+        elif 8 <= action < 10 and self.observation()[TipoTabela.EtapaOuroCarta.idx] == 1:
+            # Executa coletar recursos
+            self.simulacao.executar_coletar_recursos(TipoAcaoOpenAI(action))
+        elif self.observation()[TipoTabela.EtapaConstrucao.idx] == 1 and len(jogador_agente.cartas_distrito_mao) != 0:
+            if action < 15:
+                # Verifica se possui tipo de distrito escolhido
+                tipo_escolhido = False
+                for distrito in jogador_agente.cartas_distrito_mao:
+                    if distrito.tipo_de_distrito == TipoDistrito(action - 10):
+                        tipo_escolhido = True
+                        break
+                # Caso tipo não esteja disponível, retorna estado atual
+                if not tipo_escolhido:
+                    # Recompensa negativa ao escolher ação inválida
+                    recompensa += -12.0
+                    return self.observation(), recompensa, self.simulacao.final_jogo, False, dict()
+            # Executa construção de distritos
+            self.simulacao.executar_construir_distrito(TipoAcaoOpenAI(action))
+            # Recompensa por construir distritos
+            recompensa += 6
+        # Recompensa negativa ao escolher ação inválida
+        else:
+            recompensa += -12.0
+            return self.observation(), recompensa, self.simulacao.final_jogo, False, dict()
 
-        # Simula a rodada inteira com a ação escolhida
-        self.simulacao.executar_rodada(escolha_personagem)
-
-        recompensa = 0
-        # Recompensa no final do jogo
+        # Rotina executada se chegou no final do jogo após a ação
         if self.simulacao.final_jogo:
-            # Rotina de final de jogo
             self.simulacao.computar_pontuacao_final()
             self.simulacao.estado.ordenar_jogadores_pontuacao()
-            # Agente ganhou o jogo
+            # Recompensa ao vencer jogo
             if self.simulacao.estado.jogadores[0].nome == 'Agente':
-                recompensa = 100
-            # Agente perdeu o jogo
-            else:
-                recompensa = -100
-        # A diferença na pontuação atual, ouro e cartas atuais serão usadas na recompensa imediata
+                recompensa += 84.0
         else:
+            media_adv = 0
             for jogador in self.simulacao.estado.jogadores:
-                if jogador.nome == 'Agente':
+                if jogador == jogador_agente:
+                    # Recompensa ao aumentar pontuação parcial = delta pontuacao parcial + ou -
                     recompensa, self.pontuacao_atual = recompensa + jogador.pontuacao - self.pontuacao_atual, jogador.pontuacao
-                    recompensa, self.ouro_atual = recompensa + (jogador.ouro - self.ouro_atual) * 0.5, jogador.ouro
-                    recompensa, self.qtd_cartas_atual = recompensa + (len(jogador.cartas_distrito_mao) - self.qtd_cartas_atual) * 0.9, len(jogador.cartas_distrito_mao)
+                else:
+                    media_adv += jogador.pontuacao
+            media_adv /= len(self.simulacao.estado.jogadores) - 1
+            # Recompensa em relação média pontuação adversários = variação entre sua pontuação e média
+            recompensa += self.pontuacao_atual - media_adv
+
         # Retorna uma tupla contendo:
         # a observação do próximo estado, a recompensa imediata obtida, se o estado é final,
         # se a simulação deve ser encerrada (estado inválido, mas não final) e informações adicionais

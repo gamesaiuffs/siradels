@@ -1,4 +1,6 @@
 from random import shuffle
+
+from classes.enum.TipoAcaoOpenAI import TipoAcaoOpenAI
 from classes.model.Acao import *
 from classes.model.Tabuleiro import Tabuleiro
 from classes.model.Jogador import Jogador
@@ -7,7 +9,7 @@ from classes.strategies import Estrategia
 
 class Simulacao:
     # Construtor
-    def __init__(self, estrategias: list[Estrategia], num_personagens: int = 8, automatico: bool = True, openaigym: bool = False):
+    def __init__(self, estrategias: list[Estrategia], num_personagens: int = 8, automatico: bool = True, treino_openaigym: bool = False):
         # Define o número de jogadores
         self.num_jogadores: int = len(estrategias)
         # Define número de cartas de personagens utilizado (pode ser 8 ou 9)
@@ -24,8 +26,10 @@ class Simulacao:
         self.final_jogo = False
         # Estratégias de cada jogador
         self.estrategias: dict[Jogador, Estrategia] = self.criar_estrategias(estrategias)
-        # Flag para uso da classe Simulacao dentro de classe gym.Env
-        self.openaigym = openaigym
+        # Flag para indicar treino da OpenAI Gym
+        self.treino_openaigym = treino_openaigym
+        # Flag para indicar início de nova rodada
+        self.nova_rodada = True
 
     # Cria o estado inicial do tabuleiro
     def criar_estado_inicial(self, num_personagens, automatico) -> Estado:
@@ -105,7 +109,8 @@ class Simulacao:
     def rodar_simulacao(self) -> Estado:
         # Laço de rodadas do jogo
         while not self.final_jogo:
-            self.executar_rodada(None)
+            self.iniciar_rodada()
+            self.executar_rodada()
         # Rotina de final de jogo
         self.computar_pontuacao_final()
         self.estado.ordenar_jogadores_pontuacao()
@@ -118,7 +123,7 @@ class Simulacao:
                 print(f'{jogador.nome} - Pontuação final: {jogador.pontuacao_final}')
         return self.estado
 
-    def executar_rodada(self, escolha_agente: int | None):
+    def iniciar_rodada(self) -> None:
         # Preparação para nova rodada
         self.estado.tabuleiro.cartas_nao_visiveis = []
         self.estado.tabuleiro.cartas_visiveis = []
@@ -129,19 +134,34 @@ class Simulacao:
             jogador.acoes_realizadas[TipoAcao.PassarTurno.value] = False
         self.estado.ordenar_jogadores_coroado()
         # Fase de escolha de personagens
+        self.nova_rodada = False
         self.estado.escolher_personagem = True
+
+    def executar_rodada(self, action: TipoAcaoOpenAI | None = None):
         for jogador in self.estado.jogadores:
             # Marca jogador atual
             self.estado.jogador_atual = jogador
             # print(f'Turno atual: {jogador.nome}')
-            if self.openaigym and jogador.nome == 'Agente':
-                escolha_personagem = escolha_agente
+            escolha_personagem = -1
+            if self.treino_openaigym and jogador.nome == 'Agente':
+                for idx, personagem in enumerate(self.estado.tabuleiro.baralho_personagens):
+                    if personagem.rank == action.idx + 1:
+                        escolha_personagem = idx
             else:
                 escolha_personagem = self.estrategias[jogador].escolher_personagem(self.estado)
+            if escolha_personagem == -1:
+                raise Exception("Falha ao escolher personagem!")
             jogador.personagem = self.estado.tabuleiro.baralho_personagens[escolha_personagem]
             self.estado.tabuleiro.baralho_personagens.remove(jogador.personagem)
         # Fase de ações
         self.estado.escolher_personagem = False
+        self.estado.coletar_recursos = True
+        self.executar_turno_jogador(rank_inicial, rank_final)
+
+    def executar_turno_jogador(self, rank_inicial: int, rank_final: int):
+
+
+    def executar_coletar_recursos(self, action: TipoAcaoOpenAI | None = None):
         # Os jogadores seguem a ordem do rank dos seus personagens como ordem de turno
         for rank in range(1, 9):
             for jogador in self.estado.jogadores:
@@ -203,6 +223,9 @@ class Simulacao:
                         self.final_jogo = True
                     # Quebra laço, pois não existem personagens com ranks repetidos
                     break
+
+    def executar_construir_distrito(self, action: TipoAcaoOpenAI | None = None):
+        pass
 
     # Retorna apenas as ações disponíveis para o estado atual da simulação
     def acoes_disponiveis(self) -> list[TipoAcao]:
