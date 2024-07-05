@@ -72,30 +72,30 @@ Experimento.testar_estrategias(estrategias, 1000)
 print(f"Tempo da simulação = {(time.time() - startTime):.2f}s")
 
 '''
-Bot 4 - Vitórias: 274 - Porcento Vitorias: 27.40% - Pontuação Média: 16.425
-Bot 1 - Vitórias: 218 - Porcento Vitorias: 21.80% - Pontuação Média: 15.458
-Bot 2 - Vitórias: 240 - Porcento Vitorias: 24.00% - Pontuação Média: 15.731
-Agente - Vitórias: 11 - Porcento Vitorias: 1.10% - Pontuação Média: 5.571
-Bot 3 - Vitórias: 257 - Porcento Vitorias: 25.70% - Pontuação Média: 16.096
+Bot 3 - Vitórias: 202 - Porcento Vitorias: 20.20% - Pontuação Média: 14.73
+Bot 1 - Vitórias: 218 - Porcento Vitorias: 21.80% - Pontuação Média: 15.109
+Bot 4 - Vitórias: 213 - Porcento Vitorias: 21.30% - Pontuação Média: 15.152
+Bot 2 - Vitórias: 214 - Porcento Vitorias: 21.40% - Pontuação Média: 14.83
+Agente - Vitórias: 153 - Porcento Vitorias: 15.30% - Pontuação Média: 13.126
 
-Bot 2 - Vitórias: 172 - Porcento Vitorias: 17.20% - Pontuação Média: 14.684
-MCTS - Vitórias: 266 - Porcento Vitorias: 26.60% - Pontuação Média: 16.472
-Bot 1 - Vitórias: 180 - Porcento Vitorias: 18.00% - Pontuação Média: 14.782
-Bot 4 - Vitórias: 204 - Porcento Vitorias: 20.40% - Pontuação Média: 15.22
-Bot 3 - Vitórias: 178 - Porcento Vitorias: 17.80% - Pontuação Média: 14.76
+Bot 2 - Vitórias: 182 - Porcento Vitorias: 18.20% - Pontuação Média: 14.594
+Bot 4 - Vitórias: 198 - Porcento Vitorias: 19.80% - Pontuação Média: 14.203
+Bot 3 - Vitórias: 193 - Porcento Vitorias: 19.30% - Pontuação Média: 14.271
+MCTS - Vitórias: 250 - Porcento Vitorias: 25.00% - Pontuação Média: 15.381
+Bot 1 - Vitórias: 177 - Porcento Vitorias: 17.70% - Pontuação Média: 14.044
 
-Felipe. - Vitórias: 731 - Porcento Vitorias: 73.10% - Pontuação Média: 26.117
-Bot 3 - Vitórias: 83 - Porcento Vitorias: 8.30% - Pontuação Média: 12.574
-Bot 2 - Vitórias: 58 - Porcento Vitorias: 5.80% - Pontuação Média: 12.264
-Bot 4 - Vitórias: 71 - Porcento Vitorias: 7.10% - Pontuação Média: 12.622
-Bot 1 - Vitórias: 57 - Porcento Vitorias: 5.70% - Pontuação Média: 12.226
+Felipe. - Vitórias: 720 - Porcento Vitorias: 72.00% - Pontuação Média: 25.169
+Bot 3 - Vitórias: 70 - Porcento Vitorias: 7.00% - Pontuação Média: 12.173
+Bot 2 - Vitórias: 75 - Porcento Vitorias: 7.50% - Pontuação Média: 12.243
+Bot 1 - Vitórias: 68 - Porcento Vitorias: 6.80% - Pontuação Média: 11.94
+Bot 4 - Vitórias: 67 - Porcento Vitorias: 6.70% - Pontuação Média: 12.197
 
-Felipe. - Vitórias: 739 - Porcento Vitorias: 73.90% - Pontuação Média: 25.693
-Bot 2 - Vitórias: 83 - Porcento Vitorias: 8.30% - Pontuação Média: 12.549
-Bot 1 - Vitórias: 73 - Porcento Vitorias: 7.30% - Pontuação Média: 12.457
-MCTS - Vitórias: 101 - Porcento Vitorias: 10.10% - Pontuação Média: 13.371
-Agente - Vitórias: 4 - Porcento Vitorias: 0.40% - Pontuação Média: 4.585
-Tempo da simulação = 191.60s
+Felipe. - Vitórias: 715 - Porcento Vitorias: 71.50% - Pontuação Média: 25.101
+MCTS - Vitórias: 98 - Porcento Vitorias: 9.80% - Pontuação Média: 13.775
+Bot 2 - Vitórias: 72 - Porcento Vitorias: 7.20% - Pontuação Média: 12.679
+Bot 1 - Vitórias: 68 - Porcento Vitorias: 6.80% - Pontuação Média: 12.346
+Agente - Vitórias: 47 - Porcento Vitorias: 4.70% - Pontuação Média: 10.83
+Tempo da simulação = 1060.15s
 '''
 
 
