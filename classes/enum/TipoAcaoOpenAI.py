@@ -2,15 +2,6 @@ from enum import Enum
 
 
 class TipoAcaoOpenAI(Enum):
-    def __new__(cls, *args, **kwds):
-        value = len(cls.__members__) + 1
-        obj = object.__new__(cls)
-        obj._value_ = value
-        return obj
-
-    # tamanho está relacionado à quantidade de valores distintos possíveis para o atributo
-    def __init__(self, idx):
-        self.idx = idx
 
     # Ações básicas
     EscolherAssassina = 0

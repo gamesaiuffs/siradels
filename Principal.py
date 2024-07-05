@@ -1,6 +1,7 @@
 from classes.Experimento import Experimento
 import time
 
+from classes.enum.TipoAcaoOpenAI import TipoAcaoOpenAI
 from classes.openaigym_env.Citadels import Citadels
 from classes.strategies.Agente import Agente
 from classes.strategies.EstrategiaFelipe import EstrategiaFelipe
@@ -25,6 +26,7 @@ else:  # PyCharm
 '''
 env = Citadels()
 '''
+
 # Método que checa se o Ambiente segue os padrões da OpeanAI Gym
 '''
 check_env(env)
@@ -45,6 +47,7 @@ experimento.treinar_modelo_mcts(600, 0)
 '''
 
 # Testar treino contra outras estratégias
+
 estrategias = [Agente(), EstrategiaTotalmenteAleatoria('Bot 1'), EstrategiaTotalmenteAleatoria('Bot 2'), EstrategiaTotalmenteAleatoria('Bot 3'), EstrategiaTotalmenteAleatoria('Bot 4')]
 Experimento.testar_estrategias(estrategias, 1000)
 
@@ -57,11 +60,11 @@ Experimento.testar_estrategias(estrategias, 1000)
 estrategias = [Agente(), EstrategiaMCTS(caminho), EstrategiaFelipe(), EstrategiaTotalmenteAleatoria('Bot 1'), EstrategiaTotalmenteAleatoria('Bot 2')]
 Experimento.testar_estrategias(estrategias, 1000)
 
+
 # Imprime duração do experimento
 print(f"Tempo da simulação = {(time.time() - startTime):.2f}s")
 
 '''
-C:\Users\felip\PycharmProjects\Scripts\python.exe D:\Git\siradels\Principal.py 
 
 Bot 2 - Vitórias: 262 - Porcento Vitorias: 26.20% - Pontuação Média: 15.716
 Bot 1 - Vitórias: 229 - Porcento Vitorias: 22.90% - Pontuação Média: 15.637
@@ -90,7 +93,5 @@ Tempo da simulação = 74.73s
 
 Process finished with exit code 0
 '''
-
-
 
 

@@ -2,6 +2,7 @@ from typing import Any, SupportsFloat
 
 import gymnasium as gym
 import numpy as np
+import random
 from gymnasium import Space, spaces
 from gymnasium.core import ObsType, ActType, RenderFrame
 
@@ -9,6 +10,7 @@ from classes.Simulacao import Simulacao
 from classes.enum.TipoAcaoOpenAI import TipoAcaoOpenAI
 from classes.enum.TipoDistrito import TipoDistrito
 from classes.enum.TipoTabela import TipoTabela
+from classes.model.Acao import ConstruirDistrito
 from classes.strategies.EstrategiaTotalmenteAleatoria import EstrategiaTotalmenteAleatoria
 
 
@@ -61,35 +63,56 @@ class Citadels(gym.Env):
         # Verifica e executa a ação no ambiente simulado
         if 0 <= action < 8 and self.observation()[TipoTabela.EtapaPersonagem.idx] == 1:
             # Verifica se o personagem escolhido está disponível e identifica o seu índice
-            escolha_personagem = -1
+            idx_escolha_personagem = -1
             for idx, personagem in enumerate(self.simulacao.estado.tabuleiro.baralho_personagens):
                 if action == personagem.rank - 1:
-                    escolha_personagem = idx
+                    idx_escolha_personagem = idx
             # Caso não esteja, retorna estado atual
-            if escolha_personagem == -1:
+            if idx_escolha_personagem == -1:
                 return self.observation(), recompensa, self.simulacao.final_jogo, False, dict()
             # Executa escolha de personagem
-            self.simulacao.executar_rodada(TipoAcaoOpenAI(escolha_personagem))
+            self.simulacao.executar_rodada(idx_escolha_personagem)
         elif 8 <= action < 10 and self.observation()[TipoTabela.EtapaOuroCarta.idx] == 1:
             # Executa coletar recursos
-            self.simulacao.executar_coletar_recursos(TipoAcaoOpenAI(action))
-        elif self.observation()[TipoTabela.EtapaConstrucao.idx] == 1 and len(jogador_agente.cartas_distrito_mao) != 0:
-            if action < 15:
-                # Verifica se possui tipo de distrito escolhido
-                tipo_escolhido = False
-                for distrito in jogador_agente.cartas_distrito_mao:
-                    if distrito.tipo_de_distrito == TipoDistrito(action - 10):
-                        tipo_escolhido = True
-                        break
-                # Caso tipo não esteja disponível, retorna estado atual
-                if not tipo_escolhido:
-                    # Recompensa negativa ao escolher ação inválida
-                    recompensa += -12.0
-                    return self.observation(), recompensa, self.simulacao.final_jogo, False, dict()
+            self.simulacao.executar_coletar_recursos(TipoAcaoOpenAI(action), jogador_agente)
+        elif 10 <= action and self.observation()[TipoTabela.EtapaConstrucao.idx] == 1 and len(jogador_agente.cartas_distrito_mao) != 0:
             # Executa construção de distritos
-            self.simulacao.executar_construir_distrito(TipoAcaoOpenAI(action))
-            # Recompensa por construir distritos
-            recompensa += 6
+            distritos_para_construir, distritos_para_construir_covil_ladroes = ConstruirDistrito.distritos_possiveis_construir(jogador_agente)
+            distritos_possiveis = distritos_para_construir + distritos_para_construir_covil_ladroes
+            if len(distritos_possiveis) == 0:
+                self.simulacao.executar_construir_distrito(-1, jogador_agente)
+            else:
+                # Seleciona distrito a ser construído segundo estratégia/ação selecionada
+                distritos_selecionados = []
+                # Verifica se é possível construir ao menos 1 distrito da mão para recompensar o agente
+                if len(distritos_possiveis) > 0:
+                    # Recompensa por construir distritos
+                    recompensa += 6
+                    if action < 15:
+                        # Verifica se possui tipo de distrito escolhido
+                        for idx, distrito in enumerate(distritos_possiveis):
+                            if distrito.tipo_de_distrito == TipoDistrito(action - 10):
+                                distritos_selecionados.append(idx)
+                    elif action == TipoAcaoOpenAI.ConstruirDistritoMaisCaro.value:
+                        caro = distritos_possiveis[0]
+                        idx_caro = 0
+                        for idx, distrito in enumerate(distritos_possiveis):
+                            if caro.valor_do_distrito < distrito.valor_do_distrito:
+                                caro = distrito
+                                idx_caro = idx
+                        distritos_selecionados.append(idx_caro)
+                    elif action == TipoAcaoOpenAI.ConstruirDistritoMaisBarato.value:
+                        barato = distritos_possiveis[0]
+                        idx_barato = 0
+                        for idx, distrito in enumerate(distritos_possiveis):
+                            if barato.valor_do_distrito > distrito.valor_do_distrito:
+                                barato = distrito
+                                idx_barato = idx
+                        distritos_selecionados.append(idx_barato)
+                idx_distrito_escolhido = random.randint(0, len(distritos_possiveis) - 1)
+                if len(distritos_selecionados) > 0:
+                    idx_distrito_escolhido = random.sample(distritos_selecionados, 1)[0]
+                self.simulacao.executar_construir_distrito(idx_distrito_escolhido, jogador_agente)
         # Recompensa negativa ao escolher ação inválida
         else:
             recompensa += -12.0
@@ -111,7 +134,7 @@ class Citadels(gym.Env):
                 else:
                     media_adv += jogador.pontuacao
             media_adv /= len(self.simulacao.estado.jogadores) - 1
-            # Recompensa em relação média pontuação adversários = variação entre sua pontuação e média
+            # Recompensa em relação média pontuação adversários = variação entre a sua pontuação e a média da pontuação dos adversários
             recompensa += self.pontuacao_atual - media_adv
 
         # Retorna uma tupla contendo:

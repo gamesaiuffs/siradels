@@ -16,6 +16,7 @@ class Estado:
         self.escolher_personagem = False
         self.coletar_recursos = False
         self.construir_distrito = False
+        self.inicio_turno_acoes = False
 
     # To String
     def __str__(self):
