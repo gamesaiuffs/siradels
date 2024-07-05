@@ -35,10 +35,7 @@ class Simulacao:
     def criar_estado_inicial(self, num_personagens, automatico) -> Estado:
         # Constrói o tabuleiro
         tabuleiro = Tabuleiro(num_personagens)
-        if automatico:
-            jogadores = self.criar_jogadores_automatico()
-        else:
-            jogadores = self.criar_jogadores_manual()
+        jogadores = self.criar_jogadores()
         # Distribui 4 cartas para cada jogador
         for jogador in jogadores:
             jogador.cartas_distrito_mao.extend(tabuleiro.baralho_distritos[0:4])
@@ -53,20 +50,10 @@ class Simulacao:
         return Estado(tabuleiro, jogadores)
 
     # Cria os jogadores de forma automática
-    def criar_jogadores_automatico(self) -> list[Jogador]:
+    def criar_jogadores(self) -> list[Jogador]:
         lista_jogadores = []
         for jogador in range(self.num_jogadores):
             lista_jogadores.append(Jogador())
-        return lista_jogadores
-
-    # Cria os jogadores de forma manual
-    def criar_jogadores_manual(self) -> list[Jogador]:
-        lista_jogadores = []
-        # Laço para nomear os jogadores
-        for jogador in range(self.num_jogadores):
-            # Informar o nome de cada um dos jogadores
-            nome_jogador = input('Digite o nome do jogador:')
-            lista_jogadores.append(Jogador(nome_jogador))
         return lista_jogadores
 
     # Instância as estratégais para os jogadores
@@ -117,8 +104,8 @@ class Simulacao:
         self.estado.jogadores[0].vencedor = True
         # Mostra estado final
         if not self.automatico:
+            print('-----ESTADO FINAL-----')
             print(self.estado)
-            print()
             for jogador in self.estado.jogadores:
                 print(f'{jogador.nome} - Pontuação final: {jogador.pontuacao_final}')
         return self.estado
@@ -154,7 +141,7 @@ class Simulacao:
         self.estado.escolher_personagem = False
         self.estado.inicio_turno_acoes = True
         if rank_final == -1:
-            rank_final = 9
+            rank_final = self.num_personagens + 1
         self.executar_turno_jogador(1, rank_final)
 
     def executar_turno_jogador(self, rank_inicial: int, rank_final: int):
@@ -189,7 +176,7 @@ class Simulacao:
                         if jogador.personagem.nome == 'Comerciante':
                             jogador.ouro += 1
                         # Aplica habilidade passiva da Arquiteta
-                        if jogador.personagem.nome == 'Arquiteta' and not self.estado.tabuleiro.baralho_distritos:
+                        if jogador.personagem.nome == 'Arquiteta' and len(self.estado.tabuleiro.baralho_distritos) > 0:
                             qtd_cartas = 2
                             # Cartas insuficientes no baralho para pescar
                             if len(self.estado.tabuleiro.baralho_distritos) < qtd_cartas:
@@ -201,19 +188,21 @@ class Simulacao:
                     # Laço de ações no turno do jogo
                     while True:
                         # Mostra estado e jogador atual caso a simulação esteja no modo manual
-                        if not self.automatico:
+                        if not self.automatico and self.estrategias[jogador].imprimir:
+                            print('/--------------------------/', end='')
                             print(self.estado)
                             print(f'Turno atual: {jogador.nome}, {jogador.personagem}')
                         # Mostra apenas ações disponíveis segundo regras do jogo
                         acoes_disponiveis = self.acoes_disponiveis()
                         escolha_acao = self.estrategias[jogador].escolher_acao(self.estado, acoes_disponiveis)
+                        if not self.automatico and self.estrategias[jogador].imprimir:
+                            print(f'Ação escolhida: {self.acoes[acoes_disponiveis[escolha_acao].value]}')
+                            print('/--------------------------/')
                         # Interrompe turno para que o modelo execute a ação segundo política aprendida pelo Agente sendo treinado
                         if self.treino_openaigym:
-                            if acoes_disponiveis[escolha_acao] in (TipoAcao.ColetarOuro, TipoAcao.ColetarCartas):
-                                self.estado.coletar_recursos = True
+                            if self.estado.coletar_recursos:
                                 return
-                            elif acoes_disponiveis[escolha_acao] == TipoAcao.ConstruirDistrito:
-                                self.estado.construir_distrito = True
+                            elif self.estado.construir_distrito:
                                 return
                         # Executa ação escolhida
                         self.acoes[acoes_disponiveis[escolha_acao].value].ativar(self.estado, self.estrategias[jogador])
@@ -229,13 +218,14 @@ class Simulacao:
                         self.final_jogo = True
                     # Quebra laço, pois não existem personagens com ranks repetidos
                     break
+        if rank_final == self.num_personagens + 1:
+            self.nova_rodada = True
 
     def executar_coletar_recursos(self, action: TipoAcaoOpenAI, jogador: Jogador):
         acao_escolhida = TipoAcao.ColetarOuro if action == TipoAcaoOpenAI.ColetarOuro else TipoAcao.ColetarCartas
         # Executa ação escolhida
         self.acoes[acao_escolhida.value].ativar(self.estado, self.estrategias[jogador])
         # Continua turno
-        self.estado.coletar_recursos = False
         self.estado.inicio_turno_acoes = False
         self.executar_turno_jogador(jogador.personagem.rank, jogador.personagem.rank + 1)
 
@@ -246,10 +236,11 @@ class Simulacao:
         else:
             # Executa ação para cosntruir distrito escolhido
             self.acoes[TipoAcao.ConstruirDistrito.value].ativar(self.estado, idx_distrito_escolhido)
-        # Finaliza turno do agente e demais jogadores da rodada
-        self.estado.coletar_recursos = False
-        self.estado.nova_rodada = True
-        self.executar_turno_jogador(jogador.personagem.rank, 9)
+        # Finaliza turno do agente
+        self.executar_turno_jogador(jogador.personagem.rank, jogador.personagem.rank + 1)
+        # Finaliza turno dos demais jogadores da rodada
+        self.estado.inicio_turno_acoes = True
+        self.executar_turno_jogador(jogador.personagem.rank + 1, self.num_personagens + 1)
 
     # Retorna apenas as ações disponíveis para o estado atual da simulação
     def acoes_disponiveis(self) -> list[TipoAcao]:

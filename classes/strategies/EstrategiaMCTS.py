@@ -14,8 +14,8 @@ from classes.model.Jogador import Jogador
 
 
 class EstrategiaMCTS(Estrategia):
-    def __init__(self, caminho_modelo: str, tipo_treino: int = 2, nome: str = 'MCTS'):
-        super().__init__(nome)
+    def __init__(self, caminho_modelo: str, tipo_treino: int = 2, nome: str = 'MCTS', imprimir: bool = False):
+        super().__init__(nome, imprimir)
         # Caminho inicial dos arquivos do modelo
         self.caminho_modelo: str = caminho_modelo
         # 0 - treino zerado, 1 - treino continuado a partir de modelo pré-existente, 2 - apenas teste

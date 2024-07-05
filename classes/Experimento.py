@@ -14,11 +14,11 @@ class Experimento:
         self.caminho: str = caminho
 
     @staticmethod
-    def testar_estrategias(estrategias: list[Estrategia], qtd_simulacao_maximo: int = 1000):
+    def testar_estrategias(estrategias: list[Estrategia], qtd_simulacao_maximo: int = 1000, automatico: bool = True):
         qtd_simulacao = 1
         resultados: dict[str, (int, int)] = dict()
         # Cria simulação
-        simulacao = Simulacao(estrategias)
+        simulacao = Simulacao(estrategias, automatico=automatico)
         # Executa simulação
         estado_final = simulacao.rodar_simulacao()
         for jogador in estado_final.jogadores:
@@ -26,7 +26,7 @@ class Experimento:
         while qtd_simulacao < qtd_simulacao_maximo:
             qtd_simulacao += 1
             # Cria simulação
-            simulacao = Simulacao(estrategias)
+            simulacao = Simulacao(estrategias, automatico=automatico)
             # Executa simulação
             estado_final = simulacao.rodar_simulacao()
             for jogador in estado_final.jogadores:

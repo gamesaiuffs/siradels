@@ -61,6 +61,7 @@ class Citadels(gym.Env):
         if jogador_agente is None:
             raise Exception("Agente não encontrado!")
         # Verifica e executa a ação no ambiente simulado
+        idx_escolha_personagem = -1
         if 0 <= action < 8 and self.observation()[TipoTabela.EtapaPersonagem.idx] == 1:
             # Verifica se o personagem escolhido está disponível e identifica o seu índice
             idx_escolha_personagem = -1
@@ -75,47 +76,50 @@ class Citadels(gym.Env):
         elif 8 <= action < 10 and self.observation()[TipoTabela.EtapaOuroCarta.idx] == 1:
             # Executa coletar recursos
             self.simulacao.executar_coletar_recursos(TipoAcaoOpenAI(action), jogador_agente)
-        elif 10 <= action and self.observation()[TipoTabela.EtapaConstrucao.idx] == 1 and len(jogador_agente.cartas_distrito_mao) != 0:
+        elif 10 <= action and self.observation()[TipoTabela.EtapaConstrucao.idx] == 1:
             # Executa construção de distritos
-            distritos_para_construir, distritos_para_construir_covil_ladroes = ConstruirDistrito.distritos_possiveis_construir(jogador_agente)
-            distritos_possiveis = distritos_para_construir + distritos_para_construir_covil_ladroes
-            if len(distritos_possiveis) == 0:
+            distritos_para_construir, distritos_para_construir_covil = ConstruirDistrito.distritos_possiveis_construir(jogador_agente)
+            # Recompensa fixa por construir distritos
+            if len(distritos_para_construir) + len(distritos_para_construir_covil) > 0:
+                recompensa += 6
+            # Usa escolha aleatória se consegue construir apenas com o efeito do covil dos ladrões
+            if len(distritos_para_construir) == 0:
                 self.simulacao.executar_construir_distrito(-1, jogador_agente)
             else:
                 # Seleciona distrito a ser construído segundo estratégia/ação selecionada
                 distritos_selecionados = []
                 # Verifica se é possível construir ao menos 1 distrito da mão para recompensar o agente
-                if len(distritos_possiveis) > 0:
-                    # Recompensa por construir distritos
-                    recompensa += 6
+                if len(distritos_para_construir) > 0:
                     if action < 15:
                         # Verifica se possui tipo de distrito escolhido
-                        for idx, distrito in enumerate(distritos_possiveis):
+                        for idx, distrito in enumerate(distritos_para_construir):
                             if distrito.tipo_de_distrito == TipoDistrito(action - 10):
                                 distritos_selecionados.append(idx)
                     elif action == TipoAcaoOpenAI.ConstruirDistritoMaisCaro.value:
-                        caro = distritos_possiveis[0]
+                        caro = distritos_para_construir[0]
                         idx_caro = 0
-                        for idx, distrito in enumerate(distritos_possiveis):
+                        for idx, distrito in enumerate(distritos_para_construir):
                             if caro.valor_do_distrito < distrito.valor_do_distrito:
                                 caro = distrito
                                 idx_caro = idx
                         distritos_selecionados.append(idx_caro)
                     elif action == TipoAcaoOpenAI.ConstruirDistritoMaisBarato.value:
-                        barato = distritos_possiveis[0]
+                        barato = distritos_para_construir[0]
                         idx_barato = 0
-                        for idx, distrito in enumerate(distritos_possiveis):
+                        for idx, distrito in enumerate(distritos_para_construir):
                             if barato.valor_do_distrito > distrito.valor_do_distrito:
                                 barato = distrito
                                 idx_barato = idx
                         distritos_selecionados.append(idx_barato)
-                idx_distrito_escolhido = random.randint(0, len(distritos_possiveis) - 1)
                 if len(distritos_selecionados) > 0:
                     idx_distrito_escolhido = random.sample(distritos_selecionados, 1)[0]
-                self.simulacao.executar_construir_distrito(idx_distrito_escolhido, jogador_agente)
+                    self.simulacao.executar_construir_distrito(idx_distrito_escolhido, jogador_agente)
+                else:
+                    self.simulacao.executar_construir_distrito(-1, jogador_agente)
         # Recompensa negativa ao escolher ação inválida
         else:
-            recompensa += -12.0
+            #recompensa += -12.0
+            recompensa += -200.0
             return self.observation(), recompensa, self.simulacao.final_jogo, False, dict()
 
         # Rotina executada se chegou no final do jogo após a ação
