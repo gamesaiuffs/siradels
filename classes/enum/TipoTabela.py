@@ -24,10 +24,17 @@ class TipoTabela(Enum):
     JaConstruidosReligioso = 6, 4
     JaConstruidosNobre = 7, 4
     JaConstruidosComercial = 8, 4
-    JaQtdPersonagem = 9, 5
-    JaPontuacao = 10, 7
+    JaConstruidosEspecial = 9, 4
+    JaPersonagem = 10, 9
     JmConstruidos = 11, 8
-    JmQtdOuro = 12, 7
-    JmQtdCarta = 13, 6
-    PersonagemDisponivel = 14, 252
-    PersonagemDescartado = 15, 8
+    JmQtdCarta = 12, 6
+    MediaOuroAdversarios = 13, 5
+    EtapaPersonagem = 14, 2
+    EtapaOuroCarta = 15, 2
+    EtapaConstrucao = 16, 2
+    # Dados implementados, mas retirados do método converter_estado
+    # JaQtdPersonagem = 9, 6
+    # JaPontuacao = 10, 7
+    # JmQtdOuro = 12, 7
+    # PersonagemDisponivel = 14, 256
+    # PersonagemDescartado = 15, 9

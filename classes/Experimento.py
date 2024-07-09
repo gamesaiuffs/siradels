@@ -14,11 +14,11 @@ class Experimento:
         self.caminho: str = caminho
 
     @staticmethod
-    def testar_estrategias(estrategias: list[Estrategia], qtd_simulacao_maximo: int = 1000):
+    def testar_estrategias(estrategias: list[Estrategia], qtd_simulacao_maximo: int = 1000, automatico: bool = True):
         qtd_simulacao = 1
         resultados: dict[str, (int, int)] = dict()
         # Cria simulação
-        simulacao = Simulacao(estrategias)
+        simulacao = Simulacao(estrategias, automatico=automatico)
         # Executa simulação
         estado_final = simulacao.rodar_simulacao()
         for jogador in estado_final.jogadores:
@@ -26,7 +26,7 @@ class Experimento:
         while qtd_simulacao < qtd_simulacao_maximo:
             qtd_simulacao += 1
             # Cria simulação
-            simulacao = Simulacao(estrategias)
+            simulacao = Simulacao(estrategias, automatico=automatico)
             # Executa simulação
             estado_final = simulacao.rodar_simulacao()
             for jogador in estado_final.jogadores:
@@ -37,14 +37,14 @@ class Experimento:
             (vitoria, pontuacao) = resultado
             pontuacao_media = pontuacao / qtd_simulacao
             print(
-                f'{jogador} - \tVitórias: {vitoria} - Porcento Vitorias: {vitoria / qtd_simulacao * 100:.2f}% - Pontuação Média: {pontuacao_media}')
+                f'{jogador} - Vitórias: {vitoria} - Porcento Vitorias: {vitoria / qtd_simulacao * 100:.2f}% - Pontuação Média: {pontuacao_media}')
 
     # Inicializa o treinamento do modelo do zero e treina durante o tempo limite em segundos
-    def treinar_modelo_mcts(self, tempo_limite: int):
+    def treinar_modelo_mcts(self, tempo_limite: int, tipo_treino):
         inicio = time.time()
         # Fixado quantidade de jogadores em 5
         qtd_jogadores = 5
-        mcts = EstrategiaMCTS(self.caminho, 0)
+        mcts = EstrategiaMCTS(self.caminho, tipo_treino)
         estrategias = [mcts]
         for i in range(qtd_jogadores - 1):
             estrategias.append(EstrategiaTotalmenteAleatoria(str(i + 1)))
@@ -59,7 +59,7 @@ class Experimento:
                 estado_final = simulacao.rodar_simulacao()
                 # Atualizar modelo com vitórias e ações escolhidas
                 for jogador in estado_final.jogadores:
-                    if jogador.nome == 'Bot - MCTS':
+                    if jogador.nome == 'MCTS':
                         if jogador.vencedor:
                             for modelo, historico in zip(mcts.modelos_mcts, mcts.modelos_historico):
                                 for tabela, tabela_hist in zip(modelo, historico):
