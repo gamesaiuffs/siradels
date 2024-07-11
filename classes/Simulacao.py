@@ -97,7 +97,7 @@ class Simulacao:
         # Laço de rodadas do jogo
         while not self.final_jogo:
             self.iniciar_rodada()
-            self.executar_rodada()
+            self.executar_rodada(0, self.num_jogadores)
         # Rotina de final de jogo
         self.computar_pontuacao_final()
         self.estado.ordenar_jogadores_pontuacao()
@@ -124,25 +124,25 @@ class Simulacao:
         self.nova_rodada = False
         self.estado.escolher_personagem = True
 
-    def executar_rodada(self, idx_escolha_personagem: int | None = None):
+    def executar_rodada(self, idx_jog_inicial: int, idx_final: int, idx_escolha_personagem: int | None = None):
         rank_final = -1
-        for jogador in self.estado.jogadores:
+        for idx_jogador in range(idx_jog_inicial, idx_final):
             # Marca jogador atual
-            self.estado.jogador_atual = jogador
-            # print(f'Turno atual: {jogador.nome}')
-            if self.treino_openaigym and jogador.nome == 'Agente':
+            self.estado.jogador_atual = self.estado.jogadores[idx_jogador]
+            if self.treino_openaigym and self.estado.jogador_atual.nome == 'Agente':
                 escolha_personagem = idx_escolha_personagem
                 rank_final = self.estado.tabuleiro.baralho_personagens[escolha_personagem].rank + 1
             else:
-                escolha_personagem = self.estrategias[jogador].escolher_personagem(self.estado)
-            jogador.personagem = self.estado.tabuleiro.baralho_personagens[escolha_personagem]
-            self.estado.tabuleiro.baralho_personagens.remove(jogador.personagem)
-        # Fase de ações
-        self.estado.escolher_personagem = False
-        self.estado.inicio_turno_acoes = True
-        if rank_final == -1:
-            rank_final = self.num_personagens + 1
-        self.executar_turno_jogador(1, rank_final)
+                escolha_personagem = self.estrategias[self.estado.jogador_atual].escolher_personagem(self.estado)
+            self.estado.jogador_atual.personagem = self.estado.tabuleiro.baralho_personagens[escolha_personagem]
+            self.estado.tabuleiro.baralho_personagens.remove(self.estado.jogador_atual.personagem)
+        # Finaliza fase de personagens e segue para fase de ações
+        if self.num_jogadores == idx_final:
+            self.estado.escolher_personagem = False
+            self.estado.inicio_turno_acoes = True
+            if rank_final == -1:
+                rank_final = self.num_personagens + 1
+            self.executar_turno_jogador(1, rank_final)
 
     def executar_turno_jogador(self, rank_inicial: int, rank_final: int):
         # Os jogadores seguem a ordem do rank dos seus personagens como ordem de turno

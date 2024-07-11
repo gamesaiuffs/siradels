@@ -25,6 +25,8 @@ class Citadels(gym.Env):
         self.simulacao = Simulacao(self.estrategias, treino_openaigym=True)
         # Marca pontuação atual do agente (usada para recompensa)
         self.pontuacao_atual = 0
+        # Marca posição do agente na ordem de turno para escolha de personagem
+        self.idx_jogador = -1
 
         # Atributos da interface gym.Env
         # Mapeamento do espaço de ações
@@ -40,11 +42,21 @@ class Citadels(gym.Env):
     def observation(self) -> np.array:
         return np.array(self.simulacao.estado.converter_estado(openaigym=True))
 
-    # Método usado para iniciar uma nova simulação a partir de um estado inicial
+    # Método que identificar e retorna o idx referente a vez do jogador na escolha de personagens
+    def identificar_idx_jogador(self) -> int:
+        for idx, jogador in enumerate(self.simulacao.estado.jogadores):
+            if jogador.nome == 'Agente':
+                return idx
+        raise Exception("Agente não encontrado!")
+
+    # Método usado para iniciar uma nova simulação a partir de um estado inicial até o turno do agente
     def reset(self, *, seed: int | None = None, options: dict[str, Any] | None = None) -> tuple[ObsType, dict[str, Any]]:
         super().reset(seed=seed)
-        self.simulacao.criar_estado_inicial(self.simulacao.num_personagens, self.simulacao.automatico)
-        # Marca pontuação, ouro e quantidade de cartas na mão atual do agente (usada para recompensa)
+        self.simulacao.criar_estado_inicial(self.simulacao.num_personagens)
+        self.simulacao.iniciar_rodada()
+        self.idx_jogador = self.identificar_idx_jogador()
+        self.simulacao.executar_rodada(0, self.idx_jogador)
+        # Marca pontuação atual do agente (usada para recompensa)
         self.pontuacao_atual = 0
         # O segundo argumento refere-se a alguma informação adicional repassada para o agente
         return self.observation(), dict()
@@ -53,6 +65,7 @@ class Citadels(gym.Env):
     def step(self, action: ActType) -> tuple[ObsType, SupportsFloat, bool, bool, dict[str, Any]]:
         if self.simulacao.nova_rodada:
             self.simulacao.iniciar_rodada()
+            self.idx_jogador = self.identificar_idx_jogador()
         recompensa = 0.0
         jogador_agente = None
         for jogador in self.simulacao.estado.jogadores:
@@ -61,18 +74,16 @@ class Citadels(gym.Env):
         if jogador_agente is None:
             raise Exception("Agente não encontrado!")
         # Verifica e executa a ação no ambiente simulado
-        idx_escolha_personagem = -1
-        if 0 <= action < 8 and self.observation()[TipoTabela.EtapaPersonagem.idx] == 1:
-            # Verifica se o personagem escolhido está disponível e identifica o seu índice
+        if 0 <= action < 8 and self.observation()[TipoTabela.EtapaPersonagem.idx] == 1 and self.observation()[-8 + action] == 1:
+            # Identificar índice do personagem escolhido
             idx_escolha_personagem = -1
             for idx, personagem in enumerate(self.simulacao.estado.tabuleiro.baralho_personagens):
                 if action == personagem.rank - 1:
                     idx_escolha_personagem = idx
-            # Caso não esteja, retorna estado atual
             if idx_escolha_personagem == -1:
-                return self.observation(), recompensa, self.simulacao.final_jogo, False, dict()
+                raise Exception("Personagem não encontrado!")
             # Executa escolha de personagem
-            self.simulacao.executar_rodada(idx_escolha_personagem)
+            self.simulacao.executar_rodada(self.idx_jogador, self.simulacao.num_jogadores, idx_escolha_personagem)
         elif 8 <= action < 10 and self.observation()[TipoTabela.EtapaOuroCarta.idx] == 1:
             # Executa coletar recursos
             self.simulacao.executar_coletar_recursos(TipoAcaoOpenAI(action), jogador_agente)
@@ -119,7 +130,7 @@ class Citadels(gym.Env):
         # Recompensa negativa ao escolher ação inválida
         else:
             #recompensa += -12.0
-            recompensa += -200.0
+            recompensa += -120.0
             return self.observation(), recompensa, self.simulacao.final_jogo, False, dict()
 
         # Rotina executada se chegou no final do jogo após a ação
