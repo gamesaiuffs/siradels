@@ -14,10 +14,10 @@ class Simulacao:
         self.num_jogadores: int = len(estrategias)
         # Define número de cartas de personagens utilizado (pode ser 8 ou 9)
         self.num_personagens = num_personagens
-        # Define se a criação dos jogadores
+        # Define se deve imprimir estado do jogo a cada turno (automatico = False)
         self.automatico: bool = automatico
         # Inicializa o jogo num estado inicial válido
-        self.estado: Estado = self.criar_estado_inicial(num_personagens, automatico)
+        self.estado: Estado = self.criar_estado_inicial(num_personagens)
         # Instância as ações do jogo
         self.acoes: list[Acao] = self.criar_acoes()
         # Primeiro jogador a finalizar cidade (construir 7 ou mais distritos)
@@ -32,7 +32,7 @@ class Simulacao:
         self.nova_rodada = True
 
     # Cria o estado inicial do tabuleiro
-    def criar_estado_inicial(self, num_personagens, automatico) -> Estado:
+    def criar_estado_inicial(self, num_personagens: int) -> Estado:
         # Constrói o tabuleiro
         tabuleiro = Tabuleiro(num_personagens)
         jogadores = self.criar_jogadores()
