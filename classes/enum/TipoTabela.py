@@ -32,6 +32,14 @@ class TipoTabela(Enum):
     EtapaPersonagem = 14, 2
     EtapaOuroCarta = 15, 2
     EtapaConstrucao = 16, 2
+    Rank1Disponivel = 17, 2
+    Rank2Disponivel = 18, 2
+    Rank3Disponivel = 19, 2
+    Rank4Disponivel = 20, 2
+    Rank5Disponivel = 21, 2
+    Rank6Disponivel = 22, 2
+    Rank7Disponivel = 23, 2
+    Rank8Disponivel = 24, 2
     # Dados implementados, mas retirados do método converter_estado
     # JaQtdPersonagem = 9, 6
     # JaPontuacao = 10, 7

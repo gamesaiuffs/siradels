@@ -173,6 +173,27 @@ class Estado:
         estado_vetor.append(int(self.coletar_recursos))
         # Flag que marca se a fase atual é a de construção de distritos [0,1]
         estado_vetor.append(int(self.construir_distrito))
+        # Conjunto de flags para personagens disponíveis
+        # Devem ficar por último no mapeamento do estado para lógica de verificação na classe Citadels funcionar
+        p1 = p2 = p3 = p4 = p5 = p6 = p7 = p8 = 0
+        for carta in self.tabuleiro.baralho_personagens:
+            if carta.rank == 1:
+                p1 = 1
+            if carta.rank == 2:
+                p2 = 1
+            if carta.rank == 3:
+                p3 = 1
+            if carta.rank == 4:
+                p4 = 1
+            if carta.rank == 5:
+                p5 = 1
+            if carta.rank == 6:
+                p6 = 1
+            if carta.rank == 7:
+                p7 = 1
+            if carta.rank == 8:
+                p8 = 1
+        estado_vetor.extend([p1, p2, p3, p4, p5, p6, p7, p8])
 
         ''' Observações retiradas
         # Qtd personagens disponíveis [2,3,4,5,6]
