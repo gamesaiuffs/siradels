@@ -34,6 +34,7 @@ gym.register(
 )
 env = gym.make('Citadels')
 
+
 # Método que checa se o Ambiente segue os padrões da OpeanAI Gym
 '''
 check_env(env)
@@ -55,7 +56,7 @@ experimento.treinar_modelo_mcts(600, 0)
 
 # Testar treino contra outras estratégias
 
-estrategias = [Agente(imprimir=True), EstrategiaTotalmenteAleatoria('Bot 1'), EstrategiaTotalmenteAleatoria('Bot 2'), EstrategiaTotalmenteAleatoria('Bot 3'), EstrategiaTotalmenteAleatoria('Bot 4')]
+estrategias = [Agente(imprimir=False), EstrategiaTotalmenteAleatoria('Bot 1'), EstrategiaTotalmenteAleatoria('Bot 2'), EstrategiaTotalmenteAleatoria('Bot 3'), EstrategiaTotalmenteAleatoria('Bot 4')]
 Experimento.testar_estrategias(estrategias, 1000, True)
 
 estrategias = [EstrategiaMCTS(caminho), EstrategiaTotalmenteAleatoria('Bot 1'), EstrategiaTotalmenteAleatoria('Bot 2'), EstrategiaTotalmenteAleatoria('Bot 3'), EstrategiaTotalmenteAleatoria('Bot 4')]
