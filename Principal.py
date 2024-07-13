@@ -25,7 +25,7 @@ estrategias_meio_a_meio = [EstrategiaTotalmenteAleatoria('Rand 1'), EstrategiaGo
 
 estrategias_gold = [EstrategiaGold('Gold 1'), EstrategiaGold('Gold 2'), EstrategiaGold('Gold 3'), EstrategiaGold('Gold 4'), EstrategiaEduardo()]
 
-estrategias_aleatorio = [EstrategiaTotalmenteAleatoria('Rand 1'), EstrategiaTotalmenteAleatoria('Rand 2'), EstrategiaTotalmenteAleatoria('Rand 3'), EstrategiaTotalmenteAleatoria('Rand 4'), EstrategiaEduardo()]
+estrategias_aleatorio = [EstrategiaTotalmenteAleatoria('Rand 1'), EstrategiaTotalmenteAleatoria('Rand 2'), EstrategiaTotalmenteAleatoria('Rand 3'), EstrategiaManual('Manual'), EstrategiaEduardo()]
 
 
 Experimento.testar_estrategias(estrategias_aleatorio)

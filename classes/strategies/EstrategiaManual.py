@@ -70,6 +70,12 @@ class EstrategiaManual(Estrategia):
     def construir_distrito(estado: Estado, distritos_para_construir: list[CartaDistrito],
                            distritos_para_construir_covil_ladroes: list[(CartaDistrito, int, int)]) -> int:
         i = 0
+
+        print("Distritos na mão: -----------------------------------------------------------")
+        for carta in estado.jogador_atual.cartas_distrito_mao:
+            print(f"{carta.nome_do_distrito} Tipo: {carta.tipo_de_distrito.value} Valor: {carta.valor_do_distrito} Quantidade: {carta.quantidade}")
+        print("-----------------------------------------------------------------------------")
+
         for carta in distritos_para_construir:
             print(f'{i}: {carta.imprimir_tudo()}')
             i += 1

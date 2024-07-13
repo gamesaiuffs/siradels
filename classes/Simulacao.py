@@ -3,17 +3,19 @@ from classes.model.Acao import *
 from classes.model.Tabuleiro import Tabuleiro
 from classes.model.Jogador import Jogador
 from classes.strategies import Estrategia
-DEBUG = False
-DEBUG_TIME = False
-import time
-def debugTime():
-    if DEBUG_TIME:
-        time.sleep(5)
+# DEBUG = False
+# DEBUG_TIME = False
+# import time
+# def debugTime():
+#     if DEBUG_TIME:
+#         time.sleep(5)
+#
+#
+# def debug(message: str):
+#     if (DEBUG):
+#         print(message)
 
-
-def debug(message: str):
-    if (DEBUG):
-        print(message)
+from classes.strategies.estrategiaEduardoUtils.funcoesDebug.debug import *
 
 class Simulacao:
     # Construtor
