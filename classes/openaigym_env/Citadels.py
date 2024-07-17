@@ -15,7 +15,7 @@ from classes.strategies.EstrategiaTotalmenteAleatoria import EstrategiaTotalment
 
 
 class Citadels(gym.Env):
-
+    passos = 0
     # Inicializa um novo ambiente de simulação
     def __init__(self):
         # Atributos específicos do jogo
@@ -63,6 +63,10 @@ class Citadels(gym.Env):
 
     # Método usado para executar uma transição de estado a partir de uma ação do agente
     def step(self, action: ActType) -> tuple[ObsType, SupportsFloat, bool, bool, dict[str, Any]]:
+        
+        Citadels.passos += 1
+        print("step: ", Citadels.passos, end="\r")
+        
         if self.simulacao.nova_rodada:
             self.simulacao.iniciar_rodada()
             self.idx_jogador = self.identificar_idx_jogador()

@@ -175,7 +175,7 @@ env = gym.make('Citadels')
 # Verifica se o ambiente está conforme os padrões da OpenAI Gym
 # check_env(env)
 
-ref = 0
+ref = 7
 
 while True:
     print("\n\nRodada:", ref)
@@ -227,6 +227,8 @@ while True:
         model = DQN.load("reforco2/" + str(ref))
         model.set_env(env=env)
         
+
+    # model.learn(total_timesteps=10000)
 
     print("Treinando...")
     fail = True

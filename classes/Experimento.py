@@ -23,7 +23,10 @@ class Experimento:
         estado_final = simulacao.rodar_simulacao()
         for jogador in estado_final.jogadores:
             resultados[jogador.nome] = (int(jogador.vencedor), jogador.pontuacao_final)
+            
+            
         while qtd_simulacao < qtd_simulacao_maximo:
+            print("ptds: ", qtd_simulacao, end="\r")
             qtd_simulacao += 1
             # Cria simulação
             simulacao = Simulacao(estrategias, automatico=automatico)
