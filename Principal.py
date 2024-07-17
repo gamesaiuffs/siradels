@@ -12,7 +12,7 @@ from classes.strategies.EstrategiaTotalmenteAleatoria import EstrategiaTotalment
 
 
 from stable_baselines3.common.env_checker import check_env
-from stable_baselines3 import PPO
+from stable_baselines3 import DQN
 
 # Marca tempo de início para computar duração do experimento
 startTime = time.time()
@@ -42,22 +42,49 @@ check_env(env)
 
 # Cria, treina e salva instância de modelo de RL da biblioteca Stable-Baseline
 
-model = PPO(env=env, policy='MlpPolicy')
-model.learn(total_timesteps=100000)
-model.save("citadels_agent")
+# model = DQN(
+#             "MlpPolicy",                     # Política de rede neural MLP
+#             env=env,                         # Ambiente de OpenAI Gym
+#             verbose=0,                       # Nível de detalhamento dos logs
+
+#             # Parâmetros de exploração
+#             exploration_initial_eps=0.7,     # Taxa inicial de exploração alta
+#             exploration_final_eps=0.7,       # Taxa final de exploração baixa
+#             exploration_fraction=0.3,        # Fração do total de etapas dedicadas à exploração
+
+#             # Parâmetros de treinamento e otimização
+#             learning_rate=6.3e-4,            # Taxa de aprendizado
+#             learning_starts=1000,            # Número de etapas de aprendizado antes de começar a treinar
+#             gradient_steps=-1,               # Número de passos de gradiente (padrão usa -1, que é automático)
+#             policy_kwargs=dict(net_arch=[256, 256]),  # Arquitetura da rede neural
+
+#             # Parâmetros de desconto e frequência de treinamento
+#             gamma=0.99,                      # Fator de desconto
+#             train_freq=4,                    # Frequência de treinamento (a cada 4 passos)
+
+#             # Parâmetros do replay buffer
+#             buffer_size=50000,               # Tamanho do buffer de replay
+#             batch_size=128,                  # Tamanho do lote de amostras para o treinamento
+#             target_update_interval=1000,     # Intervalo de atualização do alvo
+#         )
+# model.learn(total_timesteps=1000)
+# model.save("treino/2")
 
 
 # Cria uma instância experimento para gerar estatítisticas e comparar o desempenho dos modelos
 # Treinar modelo MCTS RL por 10min = 600s
 
-experimento = Experimento(caminho)
-experimento.treinar_modelo_mcts(600, 0)
+# experimento = Experimento(caminho)
+# experimento.treinar_modelo_mcts(600, 0)
 
 
 # Testar treino contra outras estratégias
+model = DQN.load("treino/2", env=env)
 
-estrategias = [Agente(imprimir=False), EstrategiaTotalmenteAleatoria('Bot 1'), EstrategiaTotalmenteAleatoria('Bot 2'), EstrategiaTotalmenteAleatoria('Bot 3'), EstrategiaTotalmenteAleatoria('Bot 4')]
-Experimento.testar_estrategias(estrategias, 1000, True)
+model.exploration_rate = 0.01
+
+estrategias = [Agente(imprimir=False, model=model), EstrategiaTotalmenteAleatoria('Bot 1'), EstrategiaTotalmenteAleatoria('Bot 2'), EstrategiaTotalmenteAleatoria('Bot 3'), EstrategiaTotalmenteAleatoria('Bot 4')]
+Experimento.testar_estrategias(estrategias, 100, True)
 
 # estrategias = [EstrategiaMCTS(caminho), EstrategiaTotalmenteAleatoria('Bot 1'), EstrategiaTotalmenteAleatoria('Bot 2'), EstrategiaTotalmenteAleatoria('Bot 3'), EstrategiaTotalmenteAleatoria('Bot 4')]
 # Experimento.testar_estrategias(estrategias, 1000)

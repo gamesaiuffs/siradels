@@ -175,7 +175,7 @@ env = gym.make('Citadels')
 # Verifica se o ambiente está conforme os padrões da OpenAI Gym
 # check_env(env)
 
-ref = 7
+ref = 10
 
 while True:
     print("\n\nRodada:", ref)
@@ -224,8 +224,8 @@ while True:
         )
     else:
         # Carrega o modelo treinado
-        model = DQN.load("reforco2/" + str(ref))
-        model.set_env(env=env)
+            model = DQN.load("reforco2/" + str(ref))
+            model.set_env(env=env)
         
 
     # model.learn(total_timesteps=10000)
@@ -240,6 +240,8 @@ while True:
             exit(0)
         except: 
             print("Erro...")
+            model = DQN.load("reforco2/" + str(ref))
+            model.set_env(env=env)
             continue
         
     print()
@@ -250,16 +252,17 @@ while True:
     
 
     print("Jogando...")
-    model = DQN.load("reforco2/" + str(ref), env)
     # model = DQN.load("reforco")
     # model.set_env(env)
     
     # Definindo exploração para zero durante o teste
-    model.exploration_rate = 0.01
+    
 
     fail = True
     while fail:
         try:
+            model = DQN.load("reforco2/" + str(ref), env)
+            model.exploration_rate = 0.01
             estrategias = [Agente(model=model), EstrategiaTotalmenteAleatoria('Bot 0'), EstrategiaTotalmenteAleatoria('Bot 1'), EstrategiaTotalmenteAleatoria('Bot 2'), EstrategiaTotalmenteAleatoria('Bot 3')]
             Experimento.testar_estrategias(estrategias, 100)
             break
