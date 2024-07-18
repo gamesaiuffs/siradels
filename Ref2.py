@@ -61,8 +61,8 @@ model = DQN(
     target_update_interval=1000,     # Intervalo de atualização do alvo
 )
 
-total_timesteps = 1000000
-checkpoint_interval = 10000
+total_timesteps = 1000
+checkpoint_interval = 100
 
 print("Treinando...")
 
@@ -72,12 +72,14 @@ for i in range(0, total_timesteps, checkpoint_interval):
 
     # Salva o modelo após cada intervalo
     ref = (i + checkpoint_interval) // checkpoint_interval
-    model.save("reforco3/" + str(ref))
+    model.save("treino/" + str(ref))
 
+    print()
     print(f"Rodada de teste após {i + checkpoint_interval} passos de treinamento...")
+    print()
     # Carrega o modelo e configura para testes
-    test_model = DQN.load("reforco2/" + str(ref), env)
-    test_model.exploration_rate = 0.0
+    test_model = DQN.load("treino/" + str(ref), env)
+    test_model.exploration_rate = 0.1
 
     # Executa 100 rodadas de teste
     estrategias = [

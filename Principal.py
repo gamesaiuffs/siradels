@@ -34,6 +34,8 @@ gym.register(
 )
 env = gym.make('Citadels')
 
+path = "treino/5"
+
 
 # Método que checa se o Ambiente segue os padrões da OpeanAI Gym
 '''
@@ -67,9 +69,36 @@ check_env(env)
 #             batch_size=128,                  # Tamanho do lote de amostras para o treinamento
 #             target_update_interval=1000,     # Intervalo de atualização do alvo
 #         )
-# model.learn(total_timesteps=1000)
-# model.save("treino/2")
+model = DQN(
+    "MlpPolicy",                     
+    env=env,                         
+    verbose=0,                       
 
+    # Parâmetros de exploração
+    exploration_initial_eps=0.5,    
+    exploration_final_eps=0.2,      
+    exploration_fraction=0.3,       
+
+    # Parâmetros de treinamento e otimização
+    learning_rate=1e-5,             
+    learning_starts=2000,           
+    gradient_steps=-1,            
+    policy_kwargs=dict(net_arch=[256, 256]),  
+
+    # Parâmetros de desconto e frequência de treinamento
+    gamma=0.7,                     
+    train_freq=10,                   
+
+    # Parâmetros do replay buffer
+    buffer_size=100000,             
+    batch_size=256,                 
+    target_update_interval=800,     
+)
+print()
+
+model.learn(total_timesteps=500000)
+model.save(path)
+print()
 
 # Cria uma instância experimento para gerar estatítisticas e comparar o desempenho dos modelos
 # Treinar modelo MCTS RL por 10min = 600s
@@ -79,9 +108,11 @@ check_env(env)
 
 
 # Testar treino contra outras estratégias
-model = DQN.load("treino/2", env=env)
+model = DQN.load(path, env=env)
 
-model.exploration_rate = 0.01
+model.exploration_rate = 0.1
+
+
 
 estrategias = [Agente(imprimir=False, model=model), EstrategiaTotalmenteAleatoria('Bot 1'), EstrategiaTotalmenteAleatoria('Bot 2'), EstrategiaTotalmenteAleatoria('Bot 3'), EstrategiaTotalmenteAleatoria('Bot 4')]
 Experimento.testar_estrategias(estrategias, 100, True)

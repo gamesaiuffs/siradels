@@ -175,7 +175,7 @@ env = gym.make('Citadels')
 # Verifica se o ambiente está conforme os padrões da OpenAI Gym
 # check_env(env)
 
-ref = 10
+ref = 0
 
 while True:
     print("\n\nRodada:", ref)
@@ -197,35 +197,80 @@ while True:
         #     buffer_size=50000,
         #     batch_size=128,
         # )
+        
+        # model = DQN(
+        #     "MlpPolicy",                     # Política de rede neural MLP
+        #     env=env,                         # Ambiente de OpenAI Gym
+        #     verbose=0,                       # Nível de detalhamento dos logs
+
+        #     # Parâmetros de exploração
+        #     exploration_initial_eps=0.7,     # Taxa inicial de exploração alta
+        #     exploration_final_eps=0.1,       # Taxa final de exploração baixa
+        #     exploration_fraction=0.4,        # Fração do total de etapas dedicadas à exploração
+
+        #     # Parâmetros de treinamento e otimização
+        #     learning_rate=6.3e-4,            # Taxa de aprendizado
+        #     learning_starts=1000,            # Número de etapas de aprendizado antes de começar a treinar
+        #     gradient_steps=-1,               # Número de passos de gradiente (padrão usa -1, que é automático)
+        #     policy_kwargs=dict(net_arch=[256, 256]),  # Arquitetura da rede neural
+
+        #     # Parâmetros de desconto e frequência de treinamento
+        #     gamma=0.99,                      # Fator de desconto
+        #     train_freq=4,                    # Frequência de treinamento (a cada 4 passos)
+
+        #     # Parâmetros do replay buffer
+        #     buffer_size=50000,               # Tamanho do buffer de replay
+        #     batch_size=128,                  # Tamanho do lote de amostras para o treinamento
+        #     target_update_interval=1000,     # Intervalo de atualização do alvo
+        # )
+        
         model = DQN(
-            "MlpPolicy",                     # Política de rede neural MLP
-            env=env,                         # Ambiente de OpenAI Gym
-            verbose=0,                       # Nível de detalhamento dos logs
+            "MlpPolicy",                     
+            env=env,                         
+            verbose=0,                       
 
             # Parâmetros de exploração
-            exploration_initial_eps=0.7,     # Taxa inicial de exploração alta
-            exploration_final_eps=0.7,       # Taxa final de exploração baixa
-            exploration_fraction=0.3,        # Fração do total de etapas dedicadas à exploração
+            exploration_initial_eps=0.5,    
+            exploration_final_eps=0.2,      
+            exploration_fraction=0.3,       
 
             # Parâmetros de treinamento e otimização
-            learning_rate=6.3e-4,            # Taxa de aprendizado
-            learning_starts=1000,            # Número de etapas de aprendizado antes de começar a treinar
-            gradient_steps=-1,               # Número de passos de gradiente (padrão usa -1, que é automático)
-            policy_kwargs=dict(net_arch=[256, 256]),  # Arquitetura da rede neural
+            learning_rate=1e-5,             
+            learning_starts=2000,           
+            gradient_steps=-1,            
+            policy_kwargs=dict(net_arch=[256, 256]),  
 
             # Parâmetros de desconto e frequência de treinamento
-            gamma=0.99,                      # Fator de desconto
-            train_freq=4,                    # Frequência de treinamento (a cada 4 passos)
+            gamma=0.7,                     
+            train_freq=10,                   
 
             # Parâmetros do replay buffer
-            buffer_size=50000,               # Tamanho do buffer de replay
-            batch_size=128,                  # Tamanho do lote de amostras para o treinamento
-            target_update_interval=1000,     # Intervalo de atualização do alvo
+            buffer_size=100000,             
+            batch_size=256,                 
+            target_update_interval=800,     
         )
+        
+        # proximas modificações 
+            # reduzir gamma (menos peso para recompensas futuras)
+                # pode ajudar ao modelo aprender a não escolher ação errada 
+            
+            # learning rate
+                # Alta: Pode fazer o modelo aprender mais rapidamente, mas também pode levar a um comportamento instável e saltos excessivos.
+                # Baixa: Pode resultar em aprendizado mais lento, mas mais estável e com convergência mais suave.
+                
+            # train freq: 
+                # quantos passos para atualizar a rede 
+                
+            # buffer size : grande = bom 
+            
+            # batch size: grande = melhor
+            
+            # target_update_interval    
+                # curto = melhor
+            
     else:
         # Carrega o modelo treinado
-            model = DQN.load("reforco2/" + str(ref))
-            model.set_env(env=env)
+            model = DQN.load("reforco3/" + str(ref))
         
 
     # model.learn(total_timesteps=10000)
@@ -234,20 +279,24 @@ while True:
     fail = True
     while fail:
         try:
+            model.set_env(env=env)
+            # model.exploration_initial_eps = 0.5
+            # model.exploration_final_eps = 0.1
+            # model.exploration_rate = 0.7    
             model.learn(total_timesteps=10000)
             fail = False
         except KeyboardInterrupt: 
             exit(0)
         except: 
             print("Erro...")
-            model = DQN.load("reforco2/" + str(ref))
+            model = DQN.load("reforco3/" + str(ref))
             model.set_env(env=env)
             continue
         
     print()
     
     ref += 1
-    model.save("reforco2/" + str(ref))
+    model.save("reforco3/" + str(ref))
     
     
 
@@ -261,8 +310,8 @@ while True:
     fail = True
     while fail:
         try:
-            model = DQN.load("reforco2/" + str(ref), env)
-            model.exploration_rate = 0.01
+            model = DQN.load("reforco3/" + str(ref), env)
+            model.exploration_rate = 0.1
             estrategias = [Agente(model=model), EstrategiaTotalmenteAleatoria('Bot 0'), EstrategiaTotalmenteAleatoria('Bot 1'), EstrategiaTotalmenteAleatoria('Bot 2'), EstrategiaTotalmenteAleatoria('Bot 3')]
             Experimento.testar_estrategias(estrategias, 100)
             break
