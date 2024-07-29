@@ -15,7 +15,7 @@ class Acao:
     def __str__(self):
         return f'{self.descricao}'
 
-    def ativar(self, estado: Estado, estrategia: Estrategia = None):
+    def ativar(self, estado: Estado, estrategia: Estrategia | int = None):
         estado.jogador_atual.acoes_realizadas[self.tipo_acao.value] = True
 
 
@@ -85,52 +85,17 @@ class ConstruirDistrito(Acao):
     def __init__(self):
         super().__init__('Construa um distrito em sua cidade.', TipoAcao.ConstruirDistrito)
 
-    def ativar(self, estado: Estado, estrategia: Estrategia = None):
-        # Identifica distritos que podem ser construídos
-        distritos_para_construir: list[CartaDistrito] = []
-        # Identifica opções especiais para construir o covil dos ladrões (divisão do custo em ouro e cartas da mão)
-        distritos_para_construir_covil_ladroes: list[(CartaDistrito, int, int)] = []
-        # Identifica se o jogador construiu a Fábrica (afeta custo dos distritos especiais)
-        fabrica = estado.jogador_atual.construiu_distrito('Fábrica')
-        # Identifica se o jogador construiu a Pedreira (adiciona opções de construção repetida)
-        pedreira = estado.jogador_atual.construiu_distrito('Pedreira')
-        # Enumera opções de construção
-        for carta in estado.jogador_atual.cartas_distrito_mao:
-            # Distritos repetidos não podem ser construídos (a não ser que tenha construído a Pedreira)
-            repetido = estado.jogador_atual.construiu_distrito(carta.nome_do_distrito)
-            if repetido and not pedreira:
-                continue
-            # Deve possuir ouro suficiente para construir o distrito (Fábrica dá desconto para distritos especiais)
-            if carta.valor_do_distrito <= estado.jogador_atual.ouro or \
-                    (fabrica and carta.tipo_de_distrito == TipoDistrito.Especial and carta.valor_do_distrito - 1 <= estado.jogador_atual.ouro):
-                distritos_para_construir.append(carta)
-            # O covil dos ladrões pode ser construído com um custo misto de ouro e cartas da mão
-            if carta.nome_do_distrito == 'Covil dos Ladrões':
-                qtd_cartas = len(estado.jogador_atual.cartas_distrito_mao) - 1
-                # Não é necessário ter mais que 6 cartas no pagamento, pois o custo do distrito é 6 (5 com fábrica)
-                if qtd_cartas > 6:
-                    qtd_cartas = 6
-                if fabrica and qtd_cartas > 5:
-                    qtd_cartas = 5
-                qtd_ouro = carta.valor_do_distrito - 1
-                # Fábrica concede 1 de desconto para distritos especiais
-                if fabrica:
-                    qtd_ouro -= 1
-                while qtd_ouro + qtd_cartas >= carta.valor_do_distrito:
-                    if qtd_ouro > estado.jogador_atual.ouro:
-                        qtd_ouro -= 1
-                        continue
-                    distritos_para_construir_covil_ladroes.append((carta, qtd_ouro, carta.valor_do_distrito - qtd_ouro))
-                    if qtd_ouro > 0:
-                        qtd_ouro -= 1
-                    else:
-                        qtd_cartas -= 1
+    def ativar(self, estado: Estado, estrategia: Estrategia | int = None):
+        distritos_para_construir, distritos_para_construir_covil_ladroes = ConstruirDistrito.distritos_possiveis_construir(estado.jogador_atual)
         # Verifica se é possível construir ao menos 1 distrito da mão
         if len(distritos_para_construir) + len(distritos_para_construir_covil_ladroes) == 0:
             super().ativar(estado)
             return
         # Aplica estratégia do jogador
-        escolha_construir = estrategia.construir_distrito(estado, distritos_para_construir, distritos_para_construir_covil_ladroes)
+        if isinstance(estrategia, int):
+            escolha_construir = estrategia
+        else:
+            escolha_construir = estrategia.construir_distrito(estado, distritos_para_construir, distritos_para_construir_covil_ladroes)
         # Construção normal
         if escolha_construir < len(distritos_para_construir):
             distrito = distritos_para_construir[escolha_construir]
@@ -139,7 +104,7 @@ class ConstruirDistrito(Acao):
             # Paga distrito
             estado.jogador_atual.ouro -= distrito.valor_do_distrito
             # Fábrica concede 1 de desconto para distritos especiais
-            if fabrica and distrito.tipo_de_distrito == TipoDistrito.Especial:
+            if estado.jogador_atual.construiu_distrito('Fábrica') and distrito.tipo_de_distrito == TipoDistrito.Especial:
                 estado.jogador_atual.ouro += 1
         # Construção de covil dos ladrões com custo misto de ouro e cartas
         else:
@@ -161,6 +126,49 @@ class ConstruirDistrito(Acao):
         if (estado.jogador_atual.qtd_construido_turno == 1 and estado.jogador_atual.personagem.nome != 'Arquiteta') \
            or estado.jogador_atual.qtd_construido_turno == 3:
             super().ativar(estado)
+
+    @staticmethod
+    def distritos_possiveis_construir(jogador_atual: Jogador) -> tuple[list[CartaDistrito], list[CartaDistrito]]:
+        # Identifica distritos que podem ser construídos
+        distritos_para_construir: list[CartaDistrito] = []
+        # Identifica opções especiais para construir o covil dos ladrões (divisão do custo em ouro e cartas da mão)
+        distritos_para_construir_covil_ladroes: list[(CartaDistrito, int, int)] = []
+        # Identifica se o jogador construiu a Fábrica (afeta custo dos distritos especiais)
+        fabrica = jogador_atual.construiu_distrito('Fábrica')
+        # Identifica se o jogador construiu a Pedreira (adiciona opções de construção repetida)
+        pedreira = jogador_atual.construiu_distrito('Pedreira')
+        # Enumera opções de construção
+        for carta in jogador_atual.cartas_distrito_mao:
+            # Distritos repetidos não podem ser construídos (exceto que tenha construído a Pedreira)
+            repetido = jogador_atual.construiu_distrito(carta.nome_do_distrito)
+            if repetido and not pedreira:
+                continue
+            # Deve possuir ouro suficiente para construir o distrito (Fábrica dá desconto para distritos especiais)
+            if carta.valor_do_distrito <= jogador_atual.ouro or \
+                    (fabrica and carta.tipo_de_distrito == TipoDistrito.Especial and carta.valor_do_distrito - 1 <= jogador_atual.ouro):
+                distritos_para_construir.append(carta)
+            # O covil dos ladrões pode ser construído com um custo misto de ouro e cartas da mão
+            if carta.nome_do_distrito == 'Covil dos Ladrões':
+                qtd_cartas = len(jogador_atual.cartas_distrito_mao) - 1
+                # Não é necessário ter mais que 6 cartas no pagamento, pois o custo do distrito é 6 (5 com fábrica)
+                if qtd_cartas > 6:
+                    qtd_cartas = 6
+                if fabrica and qtd_cartas > 5:
+                    qtd_cartas = 5
+                qtd_ouro = carta.valor_do_distrito - 1
+                # Fábrica concede 1 de desconto para distritos especiais
+                if fabrica:
+                    qtd_ouro -= 1
+                while qtd_ouro + qtd_cartas >= carta.valor_do_distrito:
+                    if qtd_ouro > jogador_atual.ouro:
+                        qtd_ouro -= 1
+                        continue
+                    distritos_para_construir_covil_ladroes.append((carta, qtd_ouro, carta.valor_do_distrito - qtd_ouro))
+                    if qtd_ouro > 0:
+                        qtd_ouro -= 1
+                    else:
+                        qtd_cartas -= 1
+        return distritos_para_construir, distritos_para_construir_covil_ladroes
 
 
 class HabilidadeAssassina(Acao):
@@ -223,7 +231,7 @@ class HabilidadeIlusionistaTrocar(Acao):
         for jogador in estado.jogadores:
             if jogador != estado.jogador_atual and len(jogador.cartas_distrito_mao) > 0:
                 opcoes_jogadores.append(jogador)
-        # Opção de escolha para o efeito (0- Trocar cartas com outro Jogador ou 1- descartar e pescar cartas
+        # Opção de escolha para o efeito (0- Trocar cartas com outro Jogador ou 1- descartar e pescar cartas)
         # Se existem jogadores com cartas e o jogador atual também tem cartas na mão, ambas opções são válidas
         if not opcoes_jogadores:
             super().ativar(estado)

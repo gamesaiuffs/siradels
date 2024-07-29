@@ -3,7 +3,7 @@ from enum import Enum
 
 class TipoPersonagem(Enum):
     # Usado apenas para controle
-    Nenhum = 0
+    Nenhum = -1
     # Rank 1
     Assassina = 1
     # Bruxa = auto()
@@ -17,23 +17,23 @@ class TipoPersonagem(Enum):
     # Mago = 3
     # Vidente = auto()
     # Rank 4
-    Rei = 4
+    Rei = 0
     # Imperador = auto()
     # Patricio = auto()
     # Rank 5
-    Bispo = 5
+    Bispo = 4
     # Abade = auto()
     # Cardeal = 4
     # Rank 6
-    Comerciante = 6
+    Comerciante = 5
     # Alquimista = 5
     # Mercador = auto()
     # Rank 7
-    Arquiteta = 7
+    Arquiteta = 6
     # Navegadora = 6
     # Estudiosa = auto()
     # Rank 8
-    SenhorDaGuerra = 8
+    SenhorDaGuerra = 7
     # Diplomata = auto()
     # Marechal = auto()
     # Rank 9

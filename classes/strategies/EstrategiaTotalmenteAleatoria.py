@@ -8,7 +8,7 @@ import random
 
 
 class EstrategiaTotalmenteAleatoria(Estrategia):
-    def __init__(self, nome: str):
+    def __init__(self, nome: str = 'Bot Random'):
         super().__init__(nome)
 
     # Estratégia usada na fase de escolha dos personagens
@@ -19,9 +19,11 @@ class EstrategiaTotalmenteAleatoria(Estrategia):
     # Estratégia usada na fase de escolha das ações no turno
     @staticmethod
     def escolher_acao(estado: Estado, acoes_disponiveis: list[TipoAcao]) -> int:
-        if len(acoes_disponiveis) > 1:
-            return random.randint(1, len(acoes_disponiveis) - 1)
-        return 0
+        # Deixa passar turno por último
+        acao_escolhida = random.randint(0, len(acoes_disponiveis) - 1)
+        while len(acoes_disponiveis) > 1 and acoes_disponiveis[acao_escolhida] == TipoAcao.PassarTurno:
+            acao_escolhida = random.randint(0, len(acoes_disponiveis) - 1)
+        return acao_escolhida
 
     # Estratégia usada na ação de coletar cartas
     @staticmethod
@@ -44,16 +46,38 @@ class EstrategiaTotalmenteAleatoria(Estrategia):
     @staticmethod
     def habilidade_assassina(estado: Estado, opcoes_personagem: list[CartaPersonagem]) -> int:
         return random.randint(0, len(opcoes_personagem) - 1)
+        # Retira opções de personagens descartados
+        opcoes = []
+        for personagem in opcoes_personagem:
+            if personagem not in estado.tabuleiro.cartas_visiveis:
+                opcoes.append(personagem)
+        return random.randint(0, len(opcoes) - 1)
 
     # Estratégia usada na habilidade do Ladrão
     @staticmethod
     def habilidade_ladrao(estado: Estado, opcoes_personagem: list[CartaPersonagem]) -> int:
         return random.randint(0, len(opcoes_personagem) - 1)
+        # Retira opções de personagens descartados
+        opcoes = []
+        for personagem in opcoes_personagem:
+            if personagem not in estado.tabuleiro.cartas_visiveis:
+                opcoes.append(personagem)
+        return random.randint(0, len(opcoes) - 1)
 
     # Estratégia usada na habilidade da Ilusionista (escolha do jogador alvo)
     @staticmethod
     def habilidade_ilusionista_trocar(estado: Estado, opcoes_jogadores: list[Jogador]) -> int:
         return random.randint(0, len(opcoes_jogadores) - 1)
+        # Ilusionista sempre troca de mão com o adversário que possui mais cartas, o desempate é uma escolha aleatória entre empatados
+        mais_cartas = 0
+        for jogador in opcoes_jogadores:
+            if len(jogador.cartas_distrito_mao) > mais_cartas:
+                mais_cartas = len(jogador.cartas_distrito_mao)
+        opcoes = []
+        for idx, jogador in enumerate(opcoes_jogadores):
+            if len(jogador.cartas_distrito_mao) == mais_cartas:
+                opcoes.append(idx)
+        return random.sample(opcoes, 1)[0]
 
     # Estratégia usada na habilidade da Ilusionista (escolha de quantas cartas serão descartadas)
     @staticmethod

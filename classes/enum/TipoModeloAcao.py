@@ -13,7 +13,7 @@ class TipoModeloAcao(Enum):
     def __init__(self, idx, tamanho):
         self.idx = idx
         self.tamanho = tamanho
-
+    # 17 ações
     # São 8 opções de personagens (ranks 1 a 8)
     EscolherPersonagem = 0, 8
     # São 15 ações distintas possíveis durante um turno (definidas no TipoAcao)

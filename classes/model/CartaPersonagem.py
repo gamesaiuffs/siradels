@@ -4,7 +4,7 @@ from classes.model.IndexMCTS import IndexMCTS
 
 class CartaPersonagem(IndexMCTS):
     # Construtor
-    def __init__(self, nome: str, rank: int, tipo_personagem: TipoPersonagem, idx: int, descricao_habilidade: str = ''):
+    def __init__(self, nome: str, rank: int, tipo_personagem: TipoPersonagem, descricao_habilidade: str = ''):
         super().__init__(rank - 1)
         self.nome: str = nome
         self.rank: int = rank
