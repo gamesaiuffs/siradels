@@ -6,9 +6,7 @@ from classes.enum.TipoTabela import TipoTabela
 from classes.strategies.Estrategia import Estrategia
 from classes.strategies.EstrategiaMCTS import EstrategiaMCTS
 from classes.strategies.EstrategiaTotalmenteAleatoria import EstrategiaTotalmenteAleatoria
-from classes.strategies.EstrategiaAllin import EstrategiaAllin
-from classes.enum.TipoTabela import TipoTabela
-from classes.enum.TipoModeloAcao import TipoModeloAcao
+
 
 class Experimento:
 
@@ -16,11 +14,11 @@ class Experimento:
         self.caminho: str = caminho
 
     @staticmethod
-    def testar_estrategias(estrategias: list[Estrategia], qtd_simulacao_maximo: int = 1000):
+    def testar_estrategias(estrategias: list[Estrategia], qtd_simulacao_maximo: int = 1000, automatico: bool = True):
         qtd_simulacao = 1
         resultados: dict[str, (int, int)] = dict()
         # Cria simulação
-        simulacao = Simulacao(estrategias)
+        simulacao = Simulacao(estrategias, automatico=automatico)
         # Executa simulação
         estado_final = simulacao.rodar_simulacao()
         for jogador in estado_final.jogadores:
@@ -28,7 +26,7 @@ class Experimento:
         while qtd_simulacao < qtd_simulacao_maximo:
             qtd_simulacao += 1
             # Cria simulação
-            simulacao = Simulacao(estrategias)
+            simulacao = Simulacao(estrategias, automatico=automatico)
             # Executa simulação
             estado_final = simulacao.rodar_simulacao()
             for jogador in estado_final.jogadores:
@@ -39,21 +37,18 @@ class Experimento:
             (vitoria, pontuacao) = resultado
             pontuacao_media = pontuacao / qtd_simulacao
             print(
-                f'{jogador} - \tVitórias: {vitoria} - Porcento Vitorias: {vitoria / qtd_simulacao * 100:.2f}% - Pontuação Média: {pontuacao_media}')
+                f'{jogador} - Vitórias: {vitoria} - Porcento Vitorias: {vitoria / qtd_simulacao * 100:.2f}% - Pontuação Média: {pontuacao_media}')
 
     # Inicializa o treinamento do modelo do zero e treina durante o tempo limite em segundos
-    def treinar_modelo_mcts(self, estrategias: list[Estrategia], qtd_simulacao_maximo: int = 1000):
-        qtd_simulacao = 0
-
-        mcts = EstrategiaMCTS(self.caminho, 0)
-        estrategias.append(mcts)
-
-        while qtd_simulacao < qtd_simulacao_maximo:
-            qtd_simulacao += 1
-            # Imprime com o decorrer do treino
-            if qtd_simulacao % 10 == 0:
-                print(qtd_simulacao)
-
+    def treinar_modelo_mcts(self, tempo_limite: int, tipo_treino):
+        inicio = time.time()
+        # Fixado quantidade de jogadores em 5
+        qtd_jogadores = 5
+        mcts = EstrategiaMCTS(self.caminho, tipo_treino)
+        estrategias = [mcts]
+        for i in range(qtd_jogadores - 1):
+            estrategias.append(EstrategiaTotalmenteAleatoria(str(i + 1)))
+        while tempo_limite > time.time() - inicio:
             for tipo_tabela in TipoTabela:
                 # Treinamento individual por tipo de tabela
                 mcts.tipo_tabela = tipo_tabela
@@ -64,7 +59,7 @@ class Experimento:
                 estado_final = simulacao.rodar_simulacao()
                 # Atualizar modelo com vitórias e ações escolhidas
                 for jogador in estado_final.jogadores:
-                    if jogador.nome == 'Bot - MCTS':
+                    if jogador.nome == 'MCTS':
                         if jogador.vencedor:
                             for modelo, historico in zip(mcts.modelos_mcts, mcts.modelos_historico):
                                 for tabela, tabela_hist in zip(modelo, historico):
@@ -75,9 +70,6 @@ class Experimento:
                                 for tabela, tabela_hist in zip(modelo, historico):
                                     tabela[:, metade_tabela:] += tabela_hist[:, metade_tabela:]
             mcts.salvar_modelos()
-            estrategias.pop()
-            mcts = EstrategiaMCTS(self.caminho, 1)
-            estrategias.append(mcts)
 
     # Salva o resultado das simulações em arquivos CSV
     # Refatorar

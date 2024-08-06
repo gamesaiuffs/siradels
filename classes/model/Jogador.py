@@ -7,7 +7,7 @@ from classes.enum.TipoAcao import TipoAcao
 
 class Jogador:
     # Construtor
-    def __init__(self, nome: str):
+    def __init__(self, nome: str = ''):
         self.pontuacao: int = 0
         self.pontuacao_final: int = 0
         self.nome: str = nome
