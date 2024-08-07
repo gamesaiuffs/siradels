@@ -313,7 +313,7 @@ while True:
             model = DQN.load("reforco3/" + str(ref), env)
             model.exploration_rate = 0.1
             estrategias = [Agente(model=model), EstrategiaTotalmenteAleatoria('Bot 0'), EstrategiaTotalmenteAleatoria('Bot 1'), EstrategiaTotalmenteAleatoria('Bot 2'), EstrategiaTotalmenteAleatoria('Bot 3')]
-            Experimento.testar_estrategias(estrategias, 100)
+            Experimento.testar_estrategias(estrategias, 1000)
             break
         except KeyboardInterrupt: 
             exit(0)

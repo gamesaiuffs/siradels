@@ -34,7 +34,7 @@ gym.register(
 )
 env = gym.make('Citadels')
 
-path = "treino/5"
+path = "modelo4/3"
 
 
 # Método que checa se o Ambiente segue os padrões da OpeanAI Gym
@@ -69,34 +69,100 @@ check_env(env)
 #             batch_size=128,                  # Tamanho do lote de amostras para o treinamento
 #             target_update_interval=1000,     # Intervalo de atualização do alvo
 #         )
+
+
+# Melhor até agora +- 40% de vitória contra aleatórios 
+# model = DQN(
+#     "MlpPolicy",                     
+#     env=env,                         
+#     verbose=0,                       
+
+#     # Parâmetros de exploração
+#     exploration_initial_eps=0.5,
+#     exploration_final_eps=0.2,      
+#     exploration_fraction=0.3,       
+
+#     # Parâmetros de treinamento e otimização
+#     learning_rate=1e-5,             
+#     learning_starts=2000,           
+#     gradient_steps=-1,            
+#     policy_kwargs=dict(net_arch=[256, 256]),  
+
+#     # Parâmetros de desconto e frequência de treinamento
+#     gamma=0.7,                     
+#     train_freq=10,                   
+
+#     # Parâmetros do replay buffer
+#     buffer_size=100000,             
+#     batch_size=256,                 
+#     target_update_interval=800
+# )
+# print()
+
+
+
+# modelo 3 
+    # exploração inicial 0.5 -> 0.8
+    # exploração final 0.3 -> 0.1
+    # piorou - 8% de vitória
+    
+    # exploração inicial 0.8 -> 0.7
+    # exploração final 0.1 -> 0.2
+    # melhorou - 34% de vitória - salvo - modelo4/2
+    
+    # exploração inicial 0.7 -> 0.6
+    # piorou - 2% e 30% - 10000 steps
+        # 29% - 30000 steps
+    
+    # exploração inicial 0.6 -> 0.7
+    # exploração final 0.2 -> 0.3
+        # piorou - 3% 
+        
+        
+        
+    
+# modelo 4 -
+    # learning rate - 1e-4
+        # 43% - 0% - 
+        
+    
+# (venv) D:\github\siradels>python Principal.py
+# step:  10000
+# ptds:  99
+# Bot 3 - Vitórias: 16 - Porcento Vitorias: 16.00% - Pontuação Média: 13.94
+# Bot 4 - Vitórias: 20 - Porcento Vitorias: 20.00% - Pontuação Média: 14.84
+# Bot 2 - Vitórias: 9 - Porcento Vitorias: 9.00% - Pontuação Média: 13.1
+# Bot 1 - Vitórias: 17 - Porcento Vitorias: 17.00% - Pontuação Média: 14.11
+# Agente - Vitórias: 38 - Porcento Vitorias: 38.00% - Pontuação Média: 18.47
+# Tempo da simulação = 114.73s
+    
 model = DQN(
-    "MlpPolicy",                     
-    env=env,                         
-    verbose=0,                       
+            "MlpPolicy",                     # Política de rede neural MLP
+            env=env,                         # Ambiente de OpenAI Gym
+            verbose=0,                       # Nível de detalhamento dos logs
 
-    # Parâmetros de exploração
-    exploration_initial_eps=0.5,    
-    exploration_final_eps=0.2,      
-    exploration_fraction=0.3,       
+            # Parâmetros de exploração
+            exploration_initial_eps=0.7,     # Taxa inicial de exploração alta
+            exploration_final_eps=0.3,       # Taxa final de exploração baixa
+            exploration_fraction=0.3,        # Fração do total de etapas dedicadas à exploração
 
-    # Parâmetros de treinamento e otimização
-    learning_rate=1e-5,             
-    learning_starts=2000,           
-    gradient_steps=-1,            
-    policy_kwargs=dict(net_arch=[256, 256]),  
+            # Parâmetros de treinamento e otimização
+            learning_rate=6.3e-4,            # Taxa de aprendizado
+            learning_starts=1000,            # Número de etapas de aprendizado antes de começar a treinar
+            gradient_steps=-1,               # Número de passos de gradiente (padrão usa -1, que é automático)
+            policy_kwargs=dict(net_arch=[256, 256]),  # Arquitetura da rede neural
 
-    # Parâmetros de desconto e frequência de treinamento
-    gamma=0.7,                     
-    train_freq=10,                   
+            # Parâmetros de desconto e frequência de treinamento
+            gamma=0.99,                      # Fator de desconto
+            train_freq=4,                    # Frequência de treinamento (a cada 4 passos)
 
-    # Parâmetros do replay buffer
-    buffer_size=100000,             
-    batch_size=256,                 
-    target_update_interval=800,     
+            # Parâmetros do replay buffer
+            buffer_size=50000,               # Tamanho do buffer de replay
+            batch_size=128,                  # Tamanho do lote de amostras para o treinamento
+            target_update_interval=1000,     # Intervalo de atualização do alvo
 )
-print()
 
-model.learn(total_timesteps=500000)
+model.learn(total_timesteps=10000)
 model.save(path)
 print()
 
@@ -110,7 +176,7 @@ print()
 # Testar treino contra outras estratégias
 model = DQN.load(path, env=env)
 
-model.exploration_rate = 0.1
+# model.exploration_rate = 0.1
 
 
 

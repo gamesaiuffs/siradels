@@ -1,0 +1,55 @@
+MODELO 1 ==========================================================================4
+model = DQN(
+    "MlpPolicy",                     
+    env=env,                         
+    verbose=0,                       
+
+    # Parâmetros de exploração
+    exploration_initial_eps=0.5,    
+    exploration_final_eps=0.2,      
+    exploration_fraction=0.3,       
+
+    # Parâmetros de treinamento e otimização
+    learning_rate=1e-5,             
+    learning_starts=2000,           
+    gradient_steps=-1,            
+    policy_kwargs=dict(net_arch=[256, 256]),  
+
+    # Parâmetros de desconto e frequência de treinamento
+    gamma=0.7,                     
+    train_freq=10,                   
+
+    # Parâmetros do replay buffer
+    buffer_size=100000,             
+    batch_size=256,                 
+    target_update_interval=800,     
+)
+
+
+testes: 
+
+1.zip
+step no treinamento:  10000
+
+partidas de teste:  100
+Agente - Vitórias: 39 - Porcento Vitorias: 39.00% - Pontuação Média: 19.4
+Bot 1 - Vitórias: 13 - Porcento Vitorias: 13.00% - Pontuação Média: 12.89
+Bot 3 - Vitórias: 20 - Porcento Vitorias: 20.00% - Pontuação Média: 15.05
+Bot 2 - Vitórias: 11 - Porcento Vitorias: 11.00% - Pontuação Média: 12.93
+Bot 4 - Vitórias: 17 - Porcento Vitorias: 17.00% - Pontuação Média: 13.74
+
+
+partidas de teste:  1000
+Bot 2 - Vitórias: 169 - Porcento Vitorias: 16.90% - Pontuação Média: 14.122
+Bot 4 - Vitórias: 174 - Porcento Vitorias: 17.40% - Pontuação Média: 14.19
+Bot 3 - Vitórias: 153 - Porcento Vitorias: 15.30% - Pontuação Média: 13.736
+Agente - Vitórias: 349 - Porcento Vitorias: 34.90% - Pontuação Média: 18.244
+Bot 1 - Vitórias: 155 - Porcento Vitorias: 15.50% - Pontuação Média: 13.849
+
+
+partidas de teste:  1000
+Bot 3 - Vitórias: 155 - Porcento Vitorias: 15.50% - Pontuação Média: 13.814
+Bot 1 - Vitórias: 137 - Porcento Vitorias: 13.70% - Pontuação Média: 13.431
+Bot 4 - Vitórias: 157 - Porcento Vitorias: 15.70% - Pontuação Média: 13.895
+Agente - Vitórias: 388 - Porcento Vitorias: 38.80% - Pontuação Média: 18.555
+Bot 2 - Vitórias: 163 - Porcento Vitorias: 16.30% - Pontuação Média: 14.199
