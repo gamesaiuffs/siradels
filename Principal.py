@@ -34,7 +34,7 @@ gym.register(
 )
 env = gym.make('Citadels')
 
-path = "modelo4/3"
+path = "testes/1"
 
 
 # Método que checa se o Ambiente segue os padrões da OpeanAI Gym
@@ -162,7 +162,7 @@ model = DQN(
             target_update_interval=1000,     # Intervalo de atualização do alvo
 )
 
-model.learn(total_timesteps=10000)
+model.learn(total_timesteps=50000)
 model.save(path)
 print()
 
