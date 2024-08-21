@@ -1,0 +1,71 @@
+------------------------------
+treinamento\1
+Rodadas: 100 Steps: 20000 Vit�rias: 14 M�dia de pontos 13.53
+------------------------------
+treinamento\2
+Rodadas: 100 Steps: 40000 Vit�rias: 27 M�dia de pontos 15.93
+------------------------------
+treinamento\3
+Rodadas: 100 Steps: 60000 Vit�rias: 1 M�dia de pontos 6.71
+------------------------------
+treinamento\4
+Rodadas: 100 Steps: 80000 Vit�rias: 3 M�dia de pontos 5.3
+------------------------------
+treinamento\5
+Rodadas: 100 Steps: 100000 Vit�rias: 3 M�dia de pontos 5.28
+------------------------------
+treinamento\6
+Rodadas: 100 Steps: 120000 Vit�rias: 1 M�dia de pontos 5.34
+------------------------------
+treinamento\7
+Rodadas: 100 Steps: 140000 Vit�rias: 21 M�dia de pontos 15.43
+------------------------------
+treinamento\8
+Rodadas: 100 Steps: 160000 Vit�rias: 28 M�dia de pontos 15.94
+------------------------------
+treinamento\9
+Rodadas: 100 Steps: 180000 Vit�rias: 0 M�dia de pontos 4.85
+------------------------------
+treinamento\10
+Rodadas: 100 Steps: 200000 Vit�rias: 0 M�dia de pontos 4.91
+------------------------------
+treinamento\11
+Rodadas: 100 Steps: 220000 Vit�rias: 2 M�dia de pontos 5.86
+------------------------------
+treinamento\12
+Rodadas: 100 Steps: 240000 Vit�rias: 1 M�dia de pontos 5.07
+------------------------------
+treinamento\13
+Rodadas: 100 Steps: 260000 Vit�rias: 29 M�dia de pontos 16.14
+------------------------------
+treinamento\14
+Rodadas: 100 Steps: 280000 Vit�rias: 0 M�dia de pontos 6.22
+------------------------------
+treinamento\15
+Rodadas: 100 Steps: 300000 Vit�rias: 19 M�dia de pontos 14.82
+
+    model = DQN(
+    "MlpPolicy",                     
+    env=env,                         
+    verbose=0,                       
+
+    # Parâmetros de exploração
+    exploration_initial_eps=0.5,    
+    exploration_final_eps=0.2,      
+    exploration_fraction=0.3,       
+
+    # Parâmetros de treinamento e otimização
+    learning_rate=1e-5,             
+    learning_starts=2000,           
+    gradient_steps=-1,            
+    policy_kwargs=dict(net_arch=[256, 256]),  
+
+    # Parâmetros de desconto e frequência de treinamento
+    gamma=0.7,                     
+    train_freq=10,                   
+
+    # Parâmetros do replay buffer
+    buffer_size=100000,             
+    batch_size=256,                 
+    target_update_interval=800,     
+)

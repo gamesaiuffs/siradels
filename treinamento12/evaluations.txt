@@ -1,0 +1,110 @@
+------------------------------
+treinamento\1
+Rodadas: 100 Steps: 20000 Vit�rias: 16 M�dia de pontos 13.3
+------------------------------
+treinamento\2
+Rodadas: 100 Steps: 40000 Vit�rias: 16 M�dia de pontos 13.41
+------------------------------
+treinamento\3
+Rodadas: 100 Steps: 60000 Vit�rias: 23 M�dia de pontos 15.54
+------------------------------
+treinamento\4
+Rodadas: 100 Steps: 80000 Vit�rias: 16 M�dia de pontos 14.64
+------------------------------
+treinamento\5
+Rodadas: 100 Steps: 100000 Vit�rias: 20 M�dia de pontos 12.53
+------------------------------
+treinamento\6
+Rodadas: 100 Steps: 120000 Vit�rias: 19 M�dia de pontos 14.89
+------------------------------
+treinamento\7
+Rodadas: 100 Steps: 140000 Vit�rias: 20 M�dia de pontos 14.3
+------------------------------
+treinamento\8
+Rodadas: 100 Steps: 160000 Vit�rias: 16 M�dia de pontos 12.23
+------------------------------
+treinamento\9
+Rodadas: 100 Steps: 180000 Vit�rias: 25 M�dia de pontos 15.97
+------------------------------
+treinamento\10
+Rodadas: 100 Steps: 200000 Vit�rias: 9 M�dia de pontos 11.77
+------------------------------
+treinamento\11
+Rodadas: 100 Steps: 220000 Vit�rias: 13 M�dia de pontos 12.27
+------------------------------
+treinamento\12
+Rodadas: 100 Steps: 240000 Vit�rias: 18 M�dia de pontos 15.25
+------------------------------
+treinamento\13
+Rodadas: 100 Steps: 260000 Vit�rias: 13 M�dia de pontos 12.35
+------------------------------
+treinamento\14
+Rodadas: 100 Steps: 280000 Vit�rias: 18 M�dia de pontos 13.4
+------------------------------
+treinamento\15
+Rodadas: 100 Steps: 300000 Vit�rias: 23 M�dia de pontos 15.0
+------------------------------
+treinamento\16
+Rodadas: 100 Steps: 320000 Vit�rias: 27 M�dia de pontos 15.62
+------------------------------
+treinamento\17
+Rodadas: 100 Steps: 340000 Vit�rias: 17 M�dia de pontos 12.34
+------------------------------
+treinamento\18
+Rodadas: 100 Steps: 360000 Vit�rias: 24 M�dia de pontos 15.44
+------------------------------
+treinamento\19
+Rodadas: 100 Steps: 380000 Vit�rias: 15 M�dia de pontos 12.03
+------------------------------
+treinamento\20
+Rodadas: 100 Steps: 400000 Vit�rias: 12 M�dia de pontos 11.97
+------------------------------
+treinamento\21
+Rodadas: 100 Steps: 420000 Vit�rias: 10 M�dia de pontos 12.3
+------------------------------
+treinamento\22
+Rodadas: 100 Steps: 440000 Vit�rias: 14 M�dia de pontos 13.57
+------------------------------
+treinamento\23
+Rodadas: 100 Steps: 460000 Vit�rias: 12 M�dia de pontos 11.93
+------------------------------
+treinamento\24
+Rodadas: 100 Steps: 480000 Vit�rias: 22 M�dia de pontos 14.5
+------------------------------
+treinamento\25
+Rodadas: 100 Steps: 500000 Vit�rias: 22 M�dia de pontos 14.83
+------------------------------
+treinamento\26
+Rodadas: 100 Steps: 520000 Vit�rias: 9 M�dia de pontos 11.98
+------------------------------
+treinamento\27
+Rodadas: 100 Steps: 540000 Vit�rias: 13 M�dia de pontos 11.48
+------------------------------
+treinamento\28
+
+
+    model = DQN(
+            "MlpPolicy",                     # Política de rede neural MLP
+            env=env,                         # Ambiente de OpenAI Gym
+            verbose=0,                       # Nível de detalhamento dos logs
+            tau=0.7,   
+            # Parâmetros de exploração
+            exploration_initial_eps=0.5,     # Taxa inicial de exploração alta
+            exploration_final_eps=0.1,       # Taxa final de exploração baixa
+            exploration_fraction=0.4,        # Fração do total de etapas dedicadas à exploração
+
+            # Parâmetros de treinamento e otimização
+            learning_rate= 1e-4,            # Taxa de aprendizado
+            learning_starts=5000,            # Número de etapas de aprendizado antes de começar a treinar
+            gradient_steps=1,               # Número de passos de gradiente (padrão usa -1, que é automático)
+            policy_kwargs=dict(net_arch=[48]),  # Arquitetura da rede neural
+
+            # Parâmetros de desconto e frequência de treinamento
+            gamma=0.95,                      # Fator de desconto
+            train_freq=(1, 'episode'),                    # Frequência de treinamento 
+
+            # Parâmetros do replay buffer
+            buffer_size=100000,               # Tamanho do buffer de replay
+            batch_size=256,                  # Tamanho do lote de amostras para o treinamento
+            target_update_interval=8000,     # Intervalo de atualização do alvo
+    )

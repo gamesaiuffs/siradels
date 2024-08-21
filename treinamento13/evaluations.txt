@@ -1,0 +1,71 @@
+------------------------------
+treinamento\1
+Rodadas: 100 Steps: 20000 Vit�rias: 14 M�dia de pontos 13.76
+------------------------------
+treinamento\2
+Rodadas: 100 Steps: 40000 Vit�rias: 26 M�dia de pontos 15.16
+------------------------------
+treinamento\3
+Rodadas: 100 Steps: 60000 Vit�rias: 27 M�dia de pontos 15.44
+------------------------------
+treinamento\4
+Rodadas: 100 Steps: 80000 Vit�rias: 17 M�dia de pontos 13.59
+------------------------------
+treinamento\5
+Rodadas: 100 Steps: 100000 Vit�rias: 18 M�dia de pontos 14.09
+------------------------------
+treinamento\6
+Rodadas: 100 Steps: 120000 Vit�rias: 15 M�dia de pontos 14.34
+------------------------------
+treinamento\7
+Rodadas: 100 Steps: 140000 Vit�rias: 14 M�dia de pontos 13.55
+------------------------------
+treinamento\8
+Rodadas: 100 Steps: 160000 Vit�rias: 20 M�dia de pontos 14.55
+------------------------------
+treinamento\9
+Rodadas: 100 Steps: 180000 Vit�rias: 19 M�dia de pontos 14.49
+------------------------------
+treinamento\10
+Rodadas: 100 Steps: 200000 Vit�rias: 22 M�dia de pontos 15.57
+------------------------------
+treinamento\11
+Rodadas: 100 Steps: 220000 Vit�rias: 30 M�dia de pontos 15.69
+------------------------------
+treinamento\12
+Rodadas: 100 Steps: 240000 Vit�rias: 13 M�dia de pontos 14.41
+------------------------------
+treinamento\13
+Rodadas: 100 Steps: 260000 Vit�rias: 18 M�dia de pontos 14.63
+------------------------------
+treinamento\14
+Rodadas: 100 Steps: 280000 Vit�rias: 15 M�dia de pontos 12.6
+------------------------------
+treinamento\15
+Rodadas: 100 Steps: 300000 Vit�rias: 17 M�dia de pontos 14.15
+
+    # model = DQN(
+    #     "MlpPolicy",                     # Política de rede neural MLP
+    #     env=env,                         # Ambiente de OpenAI Gym
+    #     verbose=0,                       # Nível de detalhamento dos logs
+    #     tau=0.7,   
+    #     # Parâmetros de exploração
+    #     exploration_initial_eps=0.5,     # Taxa inicial de exploração alta
+    #     exploration_final_eps=0.1,       # Taxa final de exploração baixa
+    #     exploration_fraction=0.4,        # Fração do total de etapas dedicadas à exploração
+
+    #     # Parâmetros de treinamento e otimização
+    #     learning_rate= 1e-4,            # Taxa de aprendizado
+    #     learning_starts=5000,            # Número de etapas de aprendizado antes de começar a treinar
+    #     gradient_steps=1,               # Número de passos de gradiente (padrão usa -1, que é automático)
+    #     policy_kwargs=dict(net_arch=[16]),  # Arquitetura da rede neural
+
+    #     # Parâmetros de desconto e frequência de treinamento
+    #     gamma=0.95,                      # Fator de desconto
+    #     train_freq=1000,                    # Frequência de treinamento 
+
+    #     # Parâmetros do replay buffer
+    #     buffer_size=100000,               # Tamanho do buffer de replay
+    #     batch_size=256,                  # Tamanho do lote de amostras para o treinamento
+    #     target_update_interval=8000,     # Intervalo de atualização do alvo
+    # )

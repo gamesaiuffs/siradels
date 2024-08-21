@@ -1,0 +1,37 @@
+D:\github\siradels\venv\Lib\site-packages\gymnasium\envs\registration.py:694: UserWarning: ←[33mWARN: Overriding environment Citadels already in registry.←[0m
+  logger.warn(f"Overriding environment {new_spec.id} already in registry.")
+Traceback (most recent call last):
+  File "D:\github\siradels\learnCallback.py", line 210, in <module>
+    model.learn(total_timesteps=TRAIN_STEPS, callback=[save_callback])
+  File "D:\github\siradels\venv\Lib\site-packages\stable_baselines3\dqn\dqn.py", line 267, in learn
+    return super().learn(
+           ^^^^^^^^^^^^^^
+  File "D:\github\siradels\venv\Lib\site-packages\stable_baselines3\common\off_policy_algorithm.py", line 328, in learn
+    rollout = self.collect_rollouts(
+              ^^^^^^^^^^^^^^^^^^^^^^
+  File "D:\github\siradels\venv\Lib\site-packages\stable_baselines3\common\off_policy_algorithm.py", line 560, in collect_rollouts
+    new_obs, rewards, dones, infos = env.step(actions)
+                                     ^^^^^^^^^^^^^^^^^
+  File "D:\github\siradels\venv\Lib\site-packages\stable_baselines3\common\vec_env\base_vec_env.py", line 206, in step
+    return self.step_wait()
+           ^^^^^^^^^^^^^^^^
+  File "D:\github\siradels\venv\Lib\site-packages\stable_baselines3\common\vec_env\dummy_vec_env.py", line 58, in step_wait
+    obs, self.buf_rews[env_idx], terminated, truncated, self.buf_infos[env_idx] = self.envs[env_idx].step(
+                                                                                  ^^^^^^^^^^^^^^^^^^^^^^^^
+  File "D:\github\siradels\venv\Lib\site-packages\stable_baselines3\common\monitor.py", line 94, in step
+    observation, reward, terminated, truncated, info = self.env.step(action)
+                                                       ^^^^^^^^^^^^^^^^^^^^^
+  File "D:\github\siradels\venv\Lib\site-packages\gymnasium\wrappers\order_enforcing.py", line 56, in step
+    return self.env.step(action)
+           ^^^^^^^^^^^^^^^^^^^^^
+  File "D:\github\siradels\venv\Lib\site-packages\gymnasium\wrappers\env_checker.py", line 51, in step
+    return self.env.step(action)
+           ^^^^^^^^^^^^^^^^^^^^^
+  File "D:\github\siradels\classes\openaigym_env\Citadels.py", line 131, in step
+    self.simulacao.executar_construir_distrito(idx_distrito_escolhido, jogador_agente)
+  File "D:\github\siradels\classes\Simulacao.py", line 238, in executar_construir_distrito
+    self.acoes[TipoAcao.ConstruirDistrito.value].ativar(self.estado, idx_distrito_escolhido)
+  File "D:\github\siradels\classes\model\Acao.py", line 111, in ativar
+    (distrito, qtd_ouro, qtd_cartas) = distritos_para_construir_covil_ladroes[escolha_construir - len(distritos_para_construir)]
+                                       ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+IndexError: list index out of range

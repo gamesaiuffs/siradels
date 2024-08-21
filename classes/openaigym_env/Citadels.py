@@ -94,9 +94,11 @@ class Citadels(gym.Env):
         elif 10 <= action and self.observation()[TipoTabela.EtapaConstrucao.idx] == 1:
             # Executa construção de distritos
             distritos_para_construir, distritos_para_construir_covil = ConstruirDistrito.distritos_possiveis_construir(jogador_agente)
+            
             # Recompensa fixa por construir distritos
             if len(distritos_para_construir) + len(distritos_para_construir_covil) > 0:
                 recompensa += 6
+                
             # Usa escolha aleatória se consegue construir apenas com o efeito do covil dos ladrões
             if len(distritos_para_construir) == 0:
                 self.simulacao.executar_construir_distrito(-1, jogador_agente)

@@ -35,12 +35,20 @@ class Experimento:
             for jogador in estado_final.jogadores:
                 (vitoria, pontuacao) = resultados[jogador.nome]
                 resultados[jogador.nome] = (int(jogador.vencedor) + vitoria, jogador.pontuacao_final + pontuacao)
-        print()
+
+        resposta = ""
+        pontuacao_media = 0
         for jogador, resultado in resultados.items():
             (vitoria, pontuacao) = resultado
             pontuacao_media = pontuacao / qtd_simulacao
-            print(
-                f'{jogador} - Vitórias: {vitoria} - Porcento Vitorias: {vitoria / qtd_simulacao * 100:.2f}% - Pontuação Média: {pontuacao_media}')
+            
+            # if jogador.nome == "Agente": pontos += pontuacao
+            
+            resposta +=  f'{jogador} - Vitórias: {vitoria} - Porcento Vitorias: {vitoria / qtd_simulacao * 100:.2f}% - Pontuação Média: {pontuacao_media}\n'
+
+            # print(
+            #     f'{jogador} - Vitórias: {vitoria} - Porcento Vitorias: {vitoria / qtd_simulacao * 100:.2f}% - Pontuação Média: {pontuacao_media}')
+        return resposta, pontuacao_media, vitoria
 
     # Inicializa o treinamento do modelo do zero e treina durante o tempo limite em segundos
     def treinar_modelo_mcts(self, tempo_limite: int, tipo_treino):
