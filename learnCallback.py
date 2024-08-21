@@ -428,6 +428,34 @@ if __name__ == "__main__":
     
     # treinamento 17
     # teste de troca do train_freq de (1, 'episode') para 1000
+    # model = DQN(
+    #         "MlpPolicy",                     # Política de rede neural MLP
+    #         env=env,                         # Ambiente de OpenAI Gym
+    #         verbose=3,                       # Nível de detalhamento dos logs
+    #         tau=0.7,   
+    #         # Parâmetros de exploração
+    #         exploration_initial_eps=0.8,     # Taxa inicial de exploração alta
+    #         exploration_final_eps=0.05,       # Taxa final de exploração baixa
+    #         exploration_fraction=0.8,        # Fração do total de etapas dedicadas à exploração
+
+    #         # Parâmetros de treinamento e otimização
+    #         learning_rate= 1e-4,            # Taxa de aprendizado
+    #         learning_starts=5000,            # Número de etapas de aprendizado antes de começar a treinar
+    #         gradient_steps=1,               # Número de passos de gradiente (padrão usa -1, que é automático)
+    #         policy_kwargs=dict(net_arch=[32]),  # Arquitetura da rede neural
+
+    #         # Parâmetros de desconto e frequência de treinamento
+    #         gamma=0.95,                      # Fator de desconto
+    #         train_freq=1000,                    # Frequência de treinamento 
+
+    #         # Parâmetros do replay buffer
+    #         buffer_size=100000,               # Tamanho do buffer de replay
+    #         batch_size=256,                  # Tamanho do lote de amostras para o treinamento
+    #         target_update_interval=8000,     # Intervalo de atualização do alvo
+    # )
+    
+    #treinamento 18
+    # redução do exploration_fraction
     model = DQN(
             "MlpPolicy",                     # Política de rede neural MLP
             env=env,                         # Ambiente de OpenAI Gym
@@ -436,7 +464,7 @@ if __name__ == "__main__":
             # Parâmetros de exploração
             exploration_initial_eps=0.8,     # Taxa inicial de exploração alta
             exploration_final_eps=0.05,       # Taxa final de exploração baixa
-            exploration_fraction=0.8,        # Fração do total de etapas dedicadas à exploração
+            exploration_fraction=0.2,        # Fração do total de etapas dedicadas à exploração
 
             # Parâmetros de treinamento e otimização
             learning_rate= 1e-4,            # Taxa de aprendizado
