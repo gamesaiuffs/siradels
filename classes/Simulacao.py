@@ -234,7 +234,7 @@ class Simulacao:
         if idx_distrito_escolhido == -1:
             self.acoes[TipoAcao.ConstruirDistrito.value].ativar(self.estado, self.estrategias[jogador])
         else:
-            # Executa ação para cosntruir distrito escolhido
+            # Executa ação para construir distrito escolhido
             self.acoes[TipoAcao.ConstruirDistrito.value].ativar(self.estado, idx_distrito_escolhido)
         # Finaliza turno do agente
         self.executar_turno_jogador(jogador.personagem.rank, jogador.personagem.rank + 1)

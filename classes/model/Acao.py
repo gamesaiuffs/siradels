@@ -116,7 +116,10 @@ class ConstruirDistrito(Acao):
             # Escolhe carta para pagar o resto do custo
             for i in range(qtd_cartas):
                 # Aplica estratégia do jogador
-                escolha_carta = estrategia.construir_distrito_covil_dos_ladroes(estado, qtd_cartas, i)
+                if isinstance(estrategia, int):
+                    escolha_carta = estrategia
+                else:
+                    escolha_carta = estrategia.construir_distrito_covil_dos_ladroes(estado, qtd_cartas, i)
                 carta = estado.jogador_atual.cartas_distrito_mao[escolha_carta]
                 estado.jogador_atual.cartas_distrito_mao.remove(carta)
                 estado.tabuleiro.baralho_distritos.append(carta)
