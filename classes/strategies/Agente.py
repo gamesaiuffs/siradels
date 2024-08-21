@@ -1,4 +1,4 @@
-from stable_baselines3 import PPO
+from stable_baselines3 import DQN
 
 from classes.enum.TipoAcao import TipoAcao
 from classes.enum.TipoAcaoOpenAI import TipoAcaoOpenAI
@@ -15,7 +15,7 @@ import numpy as np
 class Agente(Estrategia):
     def __init__(self, nome: str = 'Agente', imprimir: bool = False):
         super().__init__(nome, imprimir)
-        self.model = PPO.load("citadels_agent")
+        self.model = DQN.load("citadels_agent")
 
     # Estratégia usada na fase de escolha dos personagens
     def escolher_personagem(self, estado: Estado) -> int:
