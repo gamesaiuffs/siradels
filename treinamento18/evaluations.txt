@@ -1,45 +1,71 @@
 ------------------------------
 treinamento\1
-Rodadas: 100 Steps: 20000 Vitórias: 19 Média de pontos 15.21
+Rodadas: 100 Steps: 20000 Vitï¿½rias: 19 Mï¿½dia de pontos 15.21
 ------------------------------
 treinamento\2
-Rodadas: 100 Steps: 40000 Vitórias: 19 Média de pontos 14.46
+Rodadas: 100 Steps: 40000 Vitï¿½rias: 19 Mï¿½dia de pontos 14.46
 ------------------------------
 treinamento\3
-Rodadas: 100 Steps: 60000 Vitórias: 17 Média de pontos 13.85
+Rodadas: 100 Steps: 60000 Vitï¿½rias: 17 Mï¿½dia de pontos 13.85
 ------------------------------
 treinamento\4
-Rodadas: 100 Steps: 80000 Vitórias: 13 Média de pontos 12.78
+Rodadas: 100 Steps: 80000 Vitï¿½rias: 13 Mï¿½dia de pontos 12.78
 ------------------------------
 treinamento\5
-Rodadas: 100 Steps: 100000 Vitórias: 15 Média de pontos 13.81
+Rodadas: 100 Steps: 100000 Vitï¿½rias: 15 Mï¿½dia de pontos 13.81
 ------------------------------
 treinamento\6
-Rodadas: 100 Steps: 120000 Vitórias: 24 Média de pontos 14.8
+Rodadas: 100 Steps: 120000 Vitï¿½rias: 24 Mï¿½dia de pontos 14.8
 ------------------------------
 treinamento\7
-Rodadas: 100 Steps: 140000 Vitórias: 20 Média de pontos 13.38
+Rodadas: 100 Steps: 140000 Vitï¿½rias: 20 Mï¿½dia de pontos 13.38
 ------------------------------
 treinamento\8
-Rodadas: 100 Steps: 160000 Vitórias: 22 Média de pontos 14.14
+Rodadas: 100 Steps: 160000 Vitï¿½rias: 22 Mï¿½dia de pontos 14.14
 ------------------------------
 treinamento\9
-Rodadas: 100 Steps: 180000 Vitórias: 17 Média de pontos 14.11
+Rodadas: 100 Steps: 180000 Vitï¿½rias: 17 Mï¿½dia de pontos 14.11
 ------------------------------
 treinamento\10
-Rodadas: 100 Steps: 200000 Vitórias: 21 Média de pontos 15.47
+Rodadas: 100 Steps: 200000 Vitï¿½rias: 21 Mï¿½dia de pontos 15.47
 ------------------------------
 treinamento\11
-Rodadas: 100 Steps: 220000 Vitórias: 16 Média de pontos 14.25
+Rodadas: 100 Steps: 220000 Vitï¿½rias: 16 Mï¿½dia de pontos 14.25
 ------------------------------
 treinamento\12
-Rodadas: 100 Steps: 240000 Vitórias: 21 Média de pontos 14.01
+Rodadas: 100 Steps: 240000 Vitï¿½rias: 21 Mï¿½dia de pontos 14.01
 ------------------------------
 treinamento\13
-Rodadas: 100 Steps: 260000 Vitórias: 12 Média de pontos 12.65
+Rodadas: 100 Steps: 260000 Vitï¿½rias: 12 Mï¿½dia de pontos 12.65
 ------------------------------
 treinamento\14
-Rodadas: 100 Steps: 280000 Vitórias: 18 Média de pontos 13.65
+Rodadas: 100 Steps: 280000 Vitï¿½rias: 18 Mï¿½dia de pontos 13.65
 ------------------------------
 treinamento\15
-Rodadas: 100 Steps: 300000 Vitórias: 15 Média de pontos 13.5
+Rodadas: 100 Steps: 300000 Vitï¿½rias: 15 Mï¿½dia de pontos 13.5
+
+    model = DQN(
+            "MlpPolicy",                     # PolÃ­tica de rede neural MLP
+            env=env,                         # Ambiente de OpenAI Gym
+            verbose=3,                       # NÃ­vel de detalhamento dos logs
+            tau=0.7,   
+            # ParÃ¢metros de exploraÃ§Ã£o
+            exploration_initial_eps=0.8,     # Taxa inicial de exploraÃ§Ã£o alta
+            exploration_final_eps=0.05,       # Taxa final de exploraÃ§Ã£o baixa
+            exploration_fraction=0.2,        # FraÃ§Ã£o do total de etapas dedicadas Ã  exploraÃ§Ã£o
+
+            # ParÃ¢metros de treinamento e otimizaÃ§Ã£o
+            learning_rate= 1e-4,            # Taxa de aprendizado
+            learning_starts=5000,            # NÃºmero de etapas de aprendizado antes de comeÃ§ar a treinar
+            gradient_steps=1,               # NÃºmero de passos de gradiente (padrÃ£o usa -1, que Ã© automÃ¡tico)
+            policy_kwargs=dict(net_arch=[32]),  # Arquitetura da rede neural
+
+            # ParÃ¢metros de desconto e frequÃªncia de treinamento
+            gamma=0.95,                      # Fator de desconto
+            train_freq=1000,                    # FrequÃªncia de treinamento 
+
+            # ParÃ¢metros do replay buffer
+            buffer_size=100000,               # Tamanho do buffer de replay
+            batch_size=256,                  # Tamanho do lote de amostras para o treinamento
+            target_update_interval=8000,     # Intervalo de atualizaÃ§Ã£o do alvo
+    )

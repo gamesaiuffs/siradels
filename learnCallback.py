@@ -92,31 +92,9 @@ class SaveOnTrainStepsNumCallback(BaseCallback):
             local_env = TEST_ENV
             local_env.reset()
             
-            # episodes_reward_list = []
-            # episode_steps_num = []
-
-            # for i in range(0, NUM_EVAL_EPISODES):
-            #     obs, _ = local_env.reset()
-            #     print("Rodada: ", i)
-            #     episode_rew = 0
-            #     episode_steps = 0
-                # while True:
-                #     action, _states = local_model.predict(obs, deterministic=True)
-                #     obs, reward, done, truncated, _ = local_env.step(action)
-                #     # local_env.render()
-
-                #     episode_steps += 1
-                #     episode_rew += reward
-                #     if done:
-                #         break
             estrategias = [Agente(imprimir=False, model=local_model), EstrategiaTotalmenteAleatoria('Bot 1'), EstrategiaTotalmenteAleatoria('Bot 2'), EstrategiaTotalmenteAleatoria('Bot 3'), EstrategiaTotalmenteAleatoria('Bot 4')]
             resposta, pontuacao_media, vitoria = Experimento.testar_estrategias(estrategias, NUM_EVAL_EPISODES, True)
 
-                # episode_steps_num.append(episode_steps)
-                # episodes_reward_list.append(episode_rew)
-            
-            # Média da recompensa por passo
-            # mean_reward = sum(episodes_reward_list) / sum(episode_steps_num)
             self.historico_vitorias.append(vitoria)
             self.pontos_de_ref.append(self.n_calls)
             self.pontos_media.append(pontuacao_media)
