@@ -43,8 +43,8 @@ TEST_ENV = gym.make(ENV_ID)
 
 
 class SaveOnTrainStepsNumCallback(BaseCallback):
-    def __init__(self, save_freq: int):
-        super().__init__(0)  # 0 -> verbose
+    def __init__(self, save_freq: int, verbose: int):
+        super().__init__(verbose)  # 0 -> verbose
         self.save_freq = save_freq
         self.log_dir = DIR_NAME
         self.num_saves = 1
@@ -72,6 +72,7 @@ class SaveOnTrainStepsNumCallback(BaseCallback):
         
 
     def _on_step(self) -> bool:
+        
         if self.n_calls % self.save_freq == 0:
             print(f"Salvando modelo: {self.save_path}")
             self.model.save(self.save_path)
@@ -153,7 +154,7 @@ if __name__ == "__main__":
     env = Monitor(LEARN_ENV, DIR_NAME)
     
     # Callback de salvamento
-    save_callback = SaveOnTrainStepsNumCallback(save_freq=MODEL_SAVE_FREQ)
+    save_callback = SaveOnTrainStepsNumCallback(save_freq=MODEL_SAVE_FREQ, verbose=3)
 
     # Modelo DQN
     # model = DQN(
