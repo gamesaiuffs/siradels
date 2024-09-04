@@ -1,10 +1,10 @@
 from classes.Experimento import Experimento
 import numpy as np
 import json
+'''
 from classes.classification.ClassificaEstados import ClassificaEstados
 from classes.classification.ColetaEstados import ColetaEstados
 from classes.classification.SimulacaoColeta import SimulacaoColeta 
-from classes.strategies.EstrategiaTotalmenteAleatoria import EstrategiaTotalmenteAleatoria
 from sklearn.model_selection import train_test_split
 from classes.enum.TipoDistrito import TipoDistrito
 from sklearn.tree import DecisionTreeClassifier, export_text, plot_tree
@@ -14,19 +14,20 @@ from sklearn.model_selection import learning_curve
 from sklearn.decomposition import PCA
 from sklearn.model_selection import StratifiedGroupKFold
 import matplotlib.pyplot as plt
+import gymnasium as gym
+from classes.enum.TipoAcaoOpenAI import TipoAcaoOpenAI
+from classes.openaigym_env.Citadels import Citadels
+from classes.strategies.Agente import Agente
+from stable_baselines3 import PPO
+from stable_baselines3.common.env_checker import check_env
 import joblib
+'''
+from classes.Experimento import Experimento
 from classes.Simulacao import Simulacao
 from classes.strategies.EstrategiaDjonatan import EstrategiaDjonatan
 from classes.strategies.EstrategiaFelipe import EstrategiaFelipe
 from classes.strategies.EstrategiaTotalmenteAleatoria import EstrategiaTotalmenteAleatoria
 import time
-import gymnasium as gym
-from classes.Experimento import Experimento
-from classes.enum.TipoAcaoOpenAI import TipoAcaoOpenAI
-from classes.openaigym_env.Citadels import Citadels
-from classes.strategies.Agente import Agente
-from stable_baselines3.common.env_checker import check_env
-from stable_baselines3 import PPO
 vscode = True
 
 n_features = 28
@@ -69,7 +70,7 @@ modelo = f"{criterion} {min_samp}ms {ww}mw {n_features}f"
 # Cria instância do ambiente seguindo o modelo da OpeanAI Gym para treinar modelos
 
 # Marca tempo de início para computar duração do experimento
-startTime = time.time()
+#startTime = time.time()
 
 # Flag que modifica caminhos para salvar/ler arquivos dependendo da IDE utilizada
 vscode = False
@@ -119,4 +120,4 @@ Experimento.testar_estrategias(estrategias, 1000)
 
 
 # Imprime duração do experimento
-print(f"Tempo da simulação = {(time.time() - startTime):.2f}s")
+#print(f"Tempo da simulação = {(time.time() - startTime):.2f}s")
