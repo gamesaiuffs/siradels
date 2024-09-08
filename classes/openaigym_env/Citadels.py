@@ -118,7 +118,7 @@ class Citadels(gym.Env):
                         if barato.valor_do_distrito > distrito.valor_do_distrito:
                             barato = distrito
                             idx_barato = idx
-                        distritos_selecionados.append(idx_barato)
+                    distritos_selecionados.append(idx_barato)
                 if len(distritos_selecionados) > 0:
                     idx_distrito_escolhido = random.sample(distritos_selecionados, 1)[0]
                 # Se a estratégia escolhida não for atendida, constrói um distrito aleatório

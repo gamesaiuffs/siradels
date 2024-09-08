@@ -85,15 +85,15 @@ class ConstruirDistrito(Acao):
     def __init__(self):
         super().__init__('Construa um distrito em sua cidade.', TipoAcao.ConstruirDistrito)
 
-    def ativar(self, estado: Estado, estrategia: Estrategia | int = None):
+    def ativar(self, estado: Estado, estrategia: Estrategia | int = None, idx_escolhido: int = None):
         distritos_para_construir, distritos_para_construir_covil_ladroes = ConstruirDistrito.distritos_possiveis_construir(estado.jogador_atual)
         # Verifica se é possível construir ao menos 1 distrito da mão
         if len(distritos_para_construir) + len(distritos_para_construir_covil_ladroes) == 0:
             super().ativar(estado)
             return
         # Aplica estratégia do jogador
-        if isinstance(estrategia, int):
-            escolha_construir = estrategia
+        if idx_escolhido is not None:
+            escolha_construir = idx_escolhido
         else:
             escolha_construir = estrategia.construir_distrito(estado, distritos_para_construir, distritos_para_construir_covil_ladroes)
         # Construção normal
@@ -116,10 +116,7 @@ class ConstruirDistrito(Acao):
             # Escolhe carta para pagar o resto do custo
             for i in range(qtd_cartas):
                 # Aplica estratégia do jogador
-                if isinstance(estrategia, int):
-                    escolha_carta = estrategia
-                else:
-                    escolha_carta = estrategia.construir_distrito_covil_dos_ladroes(estado, qtd_cartas, i)
+                escolha_carta = estrategia.construir_distrito_covil_dos_ladroes(estado, qtd_cartas, i)
                 carta = estado.jogador_atual.cartas_distrito_mao[escolha_carta]
                 estado.jogador_atual.cartas_distrito_mao.remove(carta)
                 estado.tabuleiro.baralho_distritos.append(carta)
