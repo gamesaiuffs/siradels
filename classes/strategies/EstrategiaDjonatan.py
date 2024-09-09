@@ -209,10 +209,17 @@ class EstrategiaDjonatan(Estrategia):
         # Se tiver poucas cartas na mão, usa ação da forja
         if TipoAcao.Forja in acoes_disponiveis and len(estado.jogador_atual.cartas_distrito_mao) <= 1:
             return acoes_disponiveis.index(TipoAcao.Forja)
-        # Sempre constroi um distrito se puder
+
+        # Fazer um verificador de tipos também, se possível
+        # Constrói primeiro os especiais, a menos que vá ganhar
         if TipoAcao.ConstruirDistrito in acoes_disponiveis:
-            return acoes_disponiveis.index(TipoAcao.ConstruirDistrito)
-            return acoes_disponiveis.index(TipoAcao.HabilidadeSenhorDaGuerraColetar)
+            for distrito in estado.jogador_atual.cartas_distrito_mao:
+                if distrito.tipo_de_distrito == 4 and len(estado.jogador_atual.distritos_construidos) < 6:
+                    if distrito.valor_do_distrito <= estado.jogador_atual.ouro:
+                        return acoes_disponiveis.index(TipoAcao.ConstruirDistrito)
+                else:
+                    return acoes_disponiveis.index(TipoAcao.ConstruirDistrito)
+
         if TipoAcao.HabilidadeSenhorDaGuerraDestruir in acoes_disponiveis:
             for jogador in estado.jogadores:
                 for distrito in jogador.distritos_construidos:
