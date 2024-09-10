@@ -15,10 +15,10 @@ from classes.strategies.EstrategiaEduardo import EstrategiaEduardo
 
 
 from stable_baselines3.common.env_checker import check_env
-from stable_baselines3 import PPO
+from stable_baselines3 import DQN
 
 # Marca tempo de início para computar duração do experimento
-startTime = time.time()
+start_time = time.time()
 
 # Flag que modifica caminhos para salvar/ler arquivos dependendo da IDE utilizada
 vscode = True
@@ -45,17 +45,40 @@ check_env(env)
 
 # Cria, treina e salva instância de modelo de RL da biblioteca Stable-Baseline
 
-model = PPO(env=env, policy='MlpPolicy')
-model.learn(total_timesteps=100000)
+model = DQN(
+    policy="MlpPolicy",
+    env=env,
+    verbose=2,
+
+    # Parâmetros de exploração
+    exploration_initial_eps=1.0,
+    exploration_final_eps=0.1,
+    exploration_fraction=0.9,
+
+    # Parâmetros de treinamento e otimização
+    learning_rate=1e-5,
+    learning_starts=2000,
+    gradient_steps=-1,
+    policy_kwargs=dict(net_arch=[256, 256]),
+
+    # Parâmetros de desconto e frequência de treinamento
+    gamma=0.7,
+    train_freq=10,
+
+    # Parâmetros do replay buffer
+    buffer_size=100000,
+    batch_size=256,
+    target_update_interval=800)
+model.learn(total_timesteps=1000)
 model.save("citadels_agent")
 
 
 # Cria uma instância experimento para gerar estatítisticas e comparar o desempenho dos modelos
 # Treinar modelo MCTS RL por 10min = 600s
-
+'''
 experimento = Experimento(caminho)
 experimento.treinar_modelo_mcts(600, 0)
-
+'''
 
 <<<<<<< HEAD
 # # Testar treino contra outras estratégias
@@ -70,9 +93,9 @@ Experimento.testar_estrategias(estrategias, 1000)
 # Testar treino contra outras estratégias
 >>>>>>> main
 
-estrategias = [Agente(imprimir=False), EstrategiaTotalmenteAleatoria('Bot 1'), EstrategiaTotalmenteAleatoria('Bot 2'), EstrategiaTotalmenteAleatoria('Bot 3'), EstrategiaTotalmenteAleatoria('Bot 4')]
-Experimento.testar_estrategias(estrategias, 1000, True)
-
+estrategias = [Agente(), EstrategiaTotalmenteAleatoria('Bot 1'), EstrategiaTotalmenteAleatoria('Bot 2'), EstrategiaTotalmenteAleatoria('Bot 3'), EstrategiaTotalmenteAleatoria('Bot 4')]
+Experimento.testar_estrategias(estrategias, 1000)
+'''
 estrategias = [EstrategiaMCTS(caminho), EstrategiaTotalmenteAleatoria('Bot 1'), EstrategiaTotalmenteAleatoria('Bot 2'), EstrategiaTotalmenteAleatoria('Bot 3'), EstrategiaTotalmenteAleatoria('Bot 4')]
 Experimento.testar_estrategias(estrategias, 1000)
 
@@ -80,37 +103,13 @@ estrategias = [EstrategiaFelipe(), EstrategiaTotalmenteAleatoria('Bot 1'), Estra
 Experimento.testar_estrategias(estrategias, 1000)
 
 estrategias = [Agente(), EstrategiaMCTS(caminho), EstrategiaFelipe(), EstrategiaTotalmenteAleatoria('Bot 1'), EstrategiaTotalmenteAleatoria('Bot 2')]
-Experimento.testar_estrategias(estrategias, 1000)
-
+Experimento.testar_estrategias(estrategias, 10000)
+'''
 
 # Imprime duração do experimento
-print(f"Tempo da simulação = {(time.time() - startTime):.2f}s")
-
-'''
-Bot 3 - Vitórias: 202 - Porcento Vitorias: 20.20% - Pontuação Média: 14.73
-Bot 1 - Vitórias: 218 - Porcento Vitorias: 21.80% - Pontuação Média: 15.109
-Bot 4 - Vitórias: 213 - Porcento Vitorias: 21.30% - Pontuação Média: 15.152
-Bot 2 - Vitórias: 214 - Porcento Vitorias: 21.40% - Pontuação Média: 14.83
-Agente - Vitórias: 153 - Porcento Vitorias: 15.30% - Pontuação Média: 13.126
-
-Bot 2 - Vitórias: 182 - Porcento Vitorias: 18.20% - Pontuação Média: 14.594
-Bot 4 - Vitórias: 198 - Porcento Vitorias: 19.80% - Pontuação Média: 14.203
-Bot 3 - Vitórias: 193 - Porcento Vitorias: 19.30% - Pontuação Média: 14.271
-MCTS - Vitórias: 250 - Porcento Vitorias: 25.00% - Pontuação Média: 15.381
-Bot 1 - Vitórias: 177 - Porcento Vitorias: 17.70% - Pontuação Média: 14.044
-
-Felipe. - Vitórias: 720 - Porcento Vitorias: 72.00% - Pontuação Média: 25.169
-Bot 3 - Vitórias: 70 - Porcento Vitorias: 7.00% - Pontuação Média: 12.173
-Bot 2 - Vitórias: 75 - Porcento Vitorias: 7.50% - Pontuação Média: 12.243
-Bot 1 - Vitórias: 68 - Porcento Vitorias: 6.80% - Pontuação Média: 11.94
-Bot 4 - Vitórias: 67 - Porcento Vitorias: 6.70% - Pontuação Média: 12.197
-
-Felipe. - Vitórias: 715 - Porcento Vitorias: 71.50% - Pontuação Média: 25.101
-MCTS - Vitórias: 98 - Porcento Vitorias: 9.80% - Pontuação Média: 13.775
-Bot 2 - Vitórias: 72 - Porcento Vitorias: 7.20% - Pontuação Média: 12.679
-Bot 1 - Vitórias: 68 - Porcento Vitorias: 6.80% - Pontuação Média: 12.346
-Agente - Vitórias: 47 - Porcento Vitorias: 4.70% - Pontuação Média: 10.83
-Tempo da simulação = 1060.15s
-'''
-
-
+s = time.time() - start_time
+m = s // 60
+h = m // 60
+s -= m * 60
+m -= h * 60
+print(f"Tempo de execução = {h:.0f}h {m:.0f}min {s:.2f}s")
