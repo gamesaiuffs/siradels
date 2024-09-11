@@ -136,7 +136,8 @@ class Citadels(gym.Env):
         # Recompensa negativa ao escolher ação inválida
         else:
             #recompensa += -12.0
-            recompensa += -120.0
+            # recompensa += -120.0
+            recompensa += -50.0
             return self.observation(), recompensa, self.simulacao.final_jogo, False, dict()
 
         # Rotina executada se chegou no final do jogo após a ação
