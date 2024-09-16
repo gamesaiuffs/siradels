@@ -94,12 +94,6 @@ class Simulacao:
 
     # Executa uma simulação do jogo e retorna estado final
     def rodar_simulacao(self) -> Estado:
-<<<<<<< HEAD
-        # self.estrategias INSTANCIAR O MCTS AQUI A CADA SIMULAÇÃO
-
-        final_jogo = False
-=======
->>>>>>> main
         # Laço de rodadas do jogo
         while not self.final_jogo:
             self.iniciar_rodada()
@@ -191,44 +185,6 @@ class Simulacao:
                             cartas_compradas = self.estado.tabuleiro.baralho_distritos[:qtd_cartas]
                             del self.estado.tabuleiro.baralho_distritos[:qtd_cartas]
                             self.estado.jogador_atual.cartas_distrito_mao.extend(cartas_compradas)
-<<<<<<< HEAD
-                        # Laço de turnos do jogo
-                        while True:
-                            # Mostra estado e jogador atual caso a simulação esteja no modo manual
-                            if not self.automatico:
-                                print(self.estado)
-                                print(f'Turno atual: {jogador.nome}, {jogador.personagem}')
-                            # Mostra apenas ações disponíveis segundo regras do jogo
-                            acoes_disponiveis = self.acoes_disponiveis()
-                            escolha_acao = self.estrategias[jogador].escolher_acao(self.estado, acoes_disponiveis)
-                            # Executa ação escolhida
-
-                            self.acoes[acoes_disponiveis[escolha_acao].value].ativar(self.estado, self.estrategias[jogador])
-
-                            # Finaliza turno se jogador escolheu a ação de passar o turno
-                            if jogador.acoes_realizadas[TipoAcao.PassarTurno.value]:
-                                break
-                        # Identifica gatilhos de final de jogo
-                        # Marca fim de jogo e jogador finalizador (monumento conta como 2 distritos para fins de uma cidade completa)
-                        if len(jogador.distritos_construidos) >= 7:
-                            jogador.terminou = True
-                            if self.jogador_finalizador is None:
-                                self.jogador_finalizador = jogador
-                            final_jogo = True
-                        # Quebra laço, pois não existem personagens com ranks repetidos
-                        break
-        # Rotina de final de jogo
-        self.computar_pontuacao_final()
-        self.estado.ordenar_jogadores_pontuacao()
-        self.estado.jogadores[0].vencedor = True
-        # Mostra estado final
-        if not self.automatico:
-            print(self.estado)
-            print()
-            for jogador in self.estado.jogadores:
-                print(f'{jogador.nome} - Pontuação final: {jogador.pontuacao_final}')
-        return self.estado
-=======
                     # Laço de ações no turno do jogo
                     while True:
                         # Mostra estado e jogador atual caso a simulação esteja no modo manual
@@ -285,7 +241,6 @@ class Simulacao:
         # Finaliza turno dos demais jogadores da rodada
         self.estado.inicio_turno_acoes = True
         self.executar_turno_jogador(jogador.personagem.rank + 1, self.num_personagens + 1)
->>>>>>> main
 
     # Retorna apenas as ações disponíveis para o estado atual da simulação
     def acoes_disponiveis(self) -> list[TipoAcao]:
