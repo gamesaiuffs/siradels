@@ -6,12 +6,11 @@ from classes.strategies.EstrategiaAndrei import EstrategiaAndrei
 from classes.strategies.EstrategiaDjonatan import EstrategiaDjonatan
 from classes.strategies.EstrategiaFelipe import EstrategiaFelipe
 from classes.strategies.EstrategiaLuis import EstrategiaLuis
-from classes.strategies.Agente import Agente
 import numpy as np
 import random
 import itertools
 
-estrategias_disponiveis = [EstrategiaDjonatan(), EstrategiaAndrei(), EstrategiaFelipe(), EstrategiaLuis(), Agente()]
+estrategias_disponiveis = [EstrategiaDjonatan(), EstrategiaFelipe(), EstrategiaLuis('luis'), EstrategiaTotalmenteAleatoria('bot-1'), EstrategiaTotalmenteAleatoria('bot-2')]
 
 class ColetaEstados:
     @staticmethod
@@ -23,7 +22,14 @@ class ColetaEstados:
 
         qtd_simulacao = 0
 
+        assert len(estrategias_disponiveis) >= qtd_jogadores, "Estratégias insuficientes para formar combinações."
+
         combinacoes_estrategias = list(itertools.permutations(estrategias_disponiveis, qtd_jogadores))
+
+        # Verifica se há combinações disponíveis
+        if len(combinacoes_estrategias) == 0:
+            raise ValueError("Não há combinações de estratégias disponíveis.")
+
 
         while qtd_simulacao < qtd_partidas:
 
@@ -33,10 +39,10 @@ class ColetaEstados:
             estrategias = []
             
             combinacao_atual = combinacoes_estrategias[qtd_simulacao % len(combinacoes_estrategias)]
-        
+
             for i in range(qtd_jogadores):
                 estrategia_classe = combinacao_atual[i]
-                estrategias.append(estrategia_classe(str(i+1)))
+                estrategias.append(estrategia_classe)
                 
             # Cria simulacao
             simulacao = SimulacaoColeta(estrategias)

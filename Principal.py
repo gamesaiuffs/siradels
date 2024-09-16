@@ -1,7 +1,6 @@
 from classes.Experimento import Experimento
 import numpy as np
 import json
-'''
 from classes.classification.ClassificaEstados import ClassificaEstados
 from classes.classification.ColetaEstados import ColetaEstados
 from classes.classification.SimulacaoColeta import SimulacaoColeta 
@@ -14,6 +13,7 @@ from sklearn.model_selection import learning_curve
 from sklearn.decomposition import PCA
 from sklearn.model_selection import StratifiedGroupKFold
 import matplotlib.pyplot as plt
+'''
 import gymnasium as gym
 from classes.enum.TipoAcaoOpenAI import TipoAcaoOpenAI
 from classes.openaigym_env.Citadels import Citadels
@@ -30,10 +30,10 @@ from classes.strategies.EstrategiaTotalmenteAleatoria import EstrategiaTotalment
 import time
 vscode = True
 
-n_features = 28
+n_features = 29
 
 profundidade = 15
-n_amostras = 15000
+n_amostras = 10
 min_samp = 351
 win_weigth = {0: 1, 1: 3}
 criterion = "gini"
@@ -115,8 +115,8 @@ check_env(env)
 #estrategias = [EstrategiaFelipe(), EstrategiaTotalmenteAleatoria('Bot 1'), EstrategiaTotalmenteAleatoria('Bot 2'), EstrategiaTotalmenteAleatoria('Bot 3'), EstrategiaTotalmenteAleatoria('Bot 4')]
 #Experimento.testar_estrategias(estrategias, 1000)
 
-estrategias = [EstrategiaDjonatan(), EstrategiaFelipe(), EstrategiaTotalmenteAleatoria('Bot 1'), EstrategiaTotalmenteAleatoria('Bot 2'), EstrategiaTotalmenteAleatoria('Bot 3')]
-Experimento.testar_estrategias(estrategias, 1000)
+#estrategias = [EstrategiaDjonatan(), EstrategiaFelipe(), EstrategiaTotalmenteAleatoria('Bot 1'), EstrategiaTotalmenteAleatoria('Bot 2'), EstrategiaTotalmenteAleatoria('Bot 3')]
+#Experimento.testar_estrategias(estrategias, 1000)
 
 
 # Imprime duração do experimento
