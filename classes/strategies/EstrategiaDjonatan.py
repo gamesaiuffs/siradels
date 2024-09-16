@@ -180,15 +180,20 @@ class EstrategiaDjonatan(Estrategia):
         religioso = False
         militar = False
         comercial = False
+        tipos = set()
         for distrito in estado.jogador_atual.distritos_construidos:
             if distrito.tipo_de_distrito == TipoDistrito.Nobre:
                 nobre = True
+                tipos.add(2)
             if distrito.tipo_de_distrito == TipoDistrito.Religioso:
                 religioso = True
+                tipos.add(0)
             if distrito.tipo_de_distrito == TipoDistrito.Comercial:
                 comercial = True
+                tipos.add(3)
             if distrito.tipo_de_distrito == TipoDistrito.Militar:
                 militar = True
+                tipos.add(1)
         if TipoAcao.HabilidadeRei in acoes_disponiveis and nobre:
             return acoes_disponiveis.index(TipoAcao.HabilidadeRei)
         if TipoAcao.HabilidadeBispo in acoes_disponiveis and religioso:
@@ -212,13 +217,18 @@ class EstrategiaDjonatan(Estrategia):
 
         # Fazer um verificador de tipos também, se possível
         # Constrói primeiro os especiais, a menos que vá ganhar
+        contador = 0
+        caso_especial = False
         if TipoAcao.ConstruirDistrito in acoes_disponiveis:
             for distrito in estado.jogador_atual.cartas_distrito_mao:
-                if distrito.tipo_de_distrito == 4 and len(estado.jogador_atual.distritos_construidos) < 6:
+                contador += 1
+                if (distrito.tipo_de_distrito == 4 or (len(tipos) == 3 and distrito.tipo_de_distrito not in tipos) and len(estado.jogador_atual.distritos_construidos) < 6):
                     if distrito.valor_do_distrito <= estado.jogador_atual.ouro:
+                        caso_especial = True
                         return acoes_disponiveis.index(TipoAcao.ConstruirDistrito)
                 else:
-                    return acoes_disponiveis.index(TipoAcao.ConstruirDistrito)
+                    if caso_especial == False and contador == len(estado.jogador_atual.cartas_distrito_mao):
+                        return acoes_disponiveis.index(TipoAcao.ConstruirDistrito)
 
         if TipoAcao.HabilidadeSenhorDaGuerraDestruir in acoes_disponiveis:
             for jogador in estado.jogadores:
@@ -254,8 +264,7 @@ class EstrategiaDjonatan(Estrategia):
                            distritos_para_construir: list[CartaDistrito],
                            distritos_para_construir_covil_ladroes: list[(CartaDistrito, int, int)]) -> int:
         tamanho_maximo = len(distritos_para_construir) + len(distritos_para_construir_covil_ladroes)
-
-        tipos = [0, 0, 0, 0]        
+   
         contador_tipos = 0
         maior_valor_mao = 0
         for distrito in estado.jogador_atual.cartas_distrito_mao:
@@ -263,29 +272,26 @@ class EstrategiaDjonatan(Estrategia):
                 maior_valor_mao = distrito.valor_do_distrito
 
         # Rever lógica de fechar tipos de distrito
-        for i, distrito in enumerate(estado.jogador_atual.distritos_construidos):
-            if distrito.tipo_de_distrito == 3:
-                tipos[3] = 1
-            if distrito.tipo_de_distrito == 2:
-                tipos[2] = 1
-            if distrito.tipo_de_distrito == 1:
-                tipos[1] = 1
-            if distrito.tipo_de_distrito == 0:
-                tipos[0] = 1
-        for i in tipos:
-            if i == 1:
-                contador_tipos += 1
+        tipos = set()
+        for distrito in estado.jogador_atual.distritos_construidos:
+            if distrito.tipo_de_distrito == TipoDistrito.Nobre:
+                tipos.add(2)
+            if distrito.tipo_de_distrito == TipoDistrito.Religioso:
+                tipos.add(0)
+            if distrito.tipo_de_distrito == TipoDistrito.Comercial:
+                tipos.add(3)
+            if distrito.tipo_de_distrito == TipoDistrito.Militar:
+                tipos.add(1)
         
         # Construa somente especiais enquanto houver na mão     
         #for i, distrito in enumerate(estado.jogador_atual.cartas_distrito_mao): # Tenta construir especial
         #    if distrito.tipo_de_distrito == 4:
         #        return i
             
-        if contador_tipos == 3:
-            for i, distritoI in enumerate(estado.jogador_atual.cartas_distrito_mao):
-                for distritoJ in estado.jogador_atual.distritos_construidos:
-                    if (distritoI.tipo_de_distrito != distritoJ.tipo_de_distrito and distritoI.tipo_de_distrito != 4) and distritoJ not in estado.jogador_atual.distritos_construidos:
-                        return i
+        if len(tipos) == 3:
+            for i, distrito in enumerate(estado.jogador_atual.cartas_distrito_mao):
+                if distrito.tipo_de_distrito not in tipos:    
+                    return i
 
         for i, distrito in enumerate(estado.jogador_atual.cartas_distrito_mao): # Tenta construir especial
             if distrito.tipo_de_distrito == 4:

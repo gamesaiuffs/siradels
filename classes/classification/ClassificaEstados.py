@@ -2,11 +2,8 @@
 from more_itertools import sort_together
 import numpy as np
 import json
-from classes.strategies.EstrategiaBernardo import EstrategiaBernardo
 from classes.strategies.EstrategiaDjonatan import EstrategiaDjonatan
 from classes.strategies.EstrategiaFelipe import EstrategiaFelipe
-from classes.strategies.EstrategiaGustavo import EstrategiaGustavo
-from classes.strategies.EstrategiaJoao import EstrategiaJoao
 from classes.strategies.EstrategiaAndrei import EstrategiaAndrei
 from classes.strategies.EstrategiaMCTS import EstrategiaMCTS
 from classes.strategies.EstrategiaTotalmenteAleatoria import EstrategiaTotalmenteAleatoria
