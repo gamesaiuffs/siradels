@@ -337,11 +337,8 @@ class HabilidadeSenhorDaGuerraDestruir(Acao):
             return
         # Aplica estratégia do jogador
         escolha_destruir = estrategia.habilidade_senhor_da_guerra_destruir(estado, distritos_para_destruir)
-        if escolha_destruir == 0:
-            super().ativar(estado)
-            return
         # Paga o custo e destrói distrito escolhido do jogador alvo
-        (distrito, jogador) = distritos_para_destruir[escolha_destruir - 1]
+        (distrito, jogador) = distritos_para_destruir[escolha_destruir]
         estado.jogador_atual.ouro -= distrito.valor_do_distrito - 1
         jogador.destruir(estado, distrito)
         # Marca flag de ação utilizada

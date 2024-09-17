@@ -6,9 +6,9 @@ from classes.model.Estado import Estado
 from classes.model.Jogador import Jogador
 import random
 
-
-class EstrategiaTotalmenteAleatoria(Estrategia):
-    def __init__(self, nome: str = 'Bot Random'):
+# Baseada no artigo de G. Groeneweg. A heurística consiste em coletar ouro se não tem o suficiente para construir o distrito mais caro, e sempre construir o distrito mais caro
+class EstrategiaBuild(Estrategia):
+    def __init__(self, nome: str):
         super().__init__(nome)
 
     # Estratégia usada na fase de escolha dos personagens
@@ -19,21 +19,32 @@ class EstrategiaTotalmenteAleatoria(Estrategia):
     # Estratégia usada na fase de escolha das ações no turno
     @staticmethod
     def escolher_acao(estado: Estado, acoes_disponiveis: list[TipoAcao]) -> int:
-        # Deixa passar turno por último
-        acao_escolhida = random.randint(0, len(acoes_disponiveis) - 1)
-        while len(acoes_disponiveis) > 1 and acoes_disponiveis[acao_escolhida] == TipoAcao.PassarTurno:
-            acao_escolhida = random.randint(0, len(acoes_disponiveis) - 1)
-        return acao_escolhida
+
+        # Verifica se tem ouro para construir a mais cara
+        if acoes_disponiveis[0] == TipoAcao.ColetarOuro:
+            for carta in estado.jogador_atual.cartas_distrito_mao:
+                if carta.valor_do_distrito > estado.jogador_atual.ouro:
+                    return 0
+
+        if len(acoes_disponiveis) > 1:
+            return random.randint(1, len(acoes_disponiveis) - 1)
+        return 0
 
     # Estratégia usada na ação de coletar cartas
     @staticmethod
     def coletar_cartas(estado: Estado, cartas_compradas: list[CartaDistrito], qtd_cartas: int) -> int:
         return random.randint(0, qtd_cartas - 1)
 
-    # Estratégia usada na ação de construir distritos
+    # Estratégia usada na ação de construir distritos (covil dos ladroes desabilitado)
     @staticmethod
     def construir_distrito(estado: Estado, distritos_para_construir: list[CartaDistrito],
                            distritos_para_construir_covil_ladroes: list[(CartaDistrito, int, int)]) -> int:
+        
+        # Constroi sempre o distrito de maior valor. A função max encontra o distrito mais valioso enquanto a enumarate gera as tuplas com os indices de cada
+        if distritos_para_construir:
+            maior_index = max(enumerate(distritos_para_construir), key=lambda x: x[1].valor_do_distrito)[0]
+            return maior_index
+    
         tamanho_maximo = len(distritos_para_construir) + len(distritos_para_construir_covil_ladroes)
         return random.randint(0, tamanho_maximo - 1)
 
@@ -46,38 +57,16 @@ class EstrategiaTotalmenteAleatoria(Estrategia):
     @staticmethod
     def habilidade_assassina(estado: Estado, opcoes_personagem: list[CartaPersonagem]) -> int:
         return random.randint(0, len(opcoes_personagem) - 1)
-        # Retira opções de personagens descartados
-        opcoes = []
-        for personagem in opcoes_personagem:
-            if personagem not in estado.tabuleiro.cartas_visiveis:
-                opcoes.append(personagem)
-        return random.randint(0, len(opcoes) - 1)
 
     # Estratégia usada na habilidade do Ladrão
     @staticmethod
     def habilidade_ladrao(estado: Estado, opcoes_personagem: list[CartaPersonagem]) -> int:
         return random.randint(0, len(opcoes_personagem) - 1)
-        # Retira opções de personagens descartados
-        opcoes = []
-        for personagem in opcoes_personagem:
-            if personagem not in estado.tabuleiro.cartas_visiveis:
-                opcoes.append(personagem)
-        return random.randint(0, len(opcoes) - 1)
 
     # Estratégia usada na habilidade da Ilusionista (escolha do jogador alvo)
     @staticmethod
     def habilidade_ilusionista_trocar(estado: Estado, opcoes_jogadores: list[Jogador]) -> int:
         return random.randint(0, len(opcoes_jogadores) - 1)
-        # Ilusionista sempre troca de mão com o adversário que possui mais cartas, o desempate é uma escolha aleatória entre empatados
-        mais_cartas = 0
-        for jogador in opcoes_jogadores:
-            if len(jogador.cartas_distrito_mao) > mais_cartas:
-                mais_cartas = len(jogador.cartas_distrito_mao)
-        opcoes = []
-        for idx, jogador in enumerate(opcoes_jogadores):
-            if len(jogador.cartas_distrito_mao) == mais_cartas:
-                opcoes.append(idx)
-        return random.sample(opcoes, 1)[0]
 
     # Estratégia usada na habilidade da Ilusionista (escolha de quantas cartas serão descartadas)
     @staticmethod
