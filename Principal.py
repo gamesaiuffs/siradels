@@ -12,6 +12,9 @@ from classes.strategies.EstrategiaTotalmenteAleatoria import EstrategiaTotalment
 from classes.strategies.EstrategiaGold import EstrategiaGold
 from classes.strategies.EstrategiaAllin import EstrategiaAllin
 from classes.strategies.EstrategiaAndrei import EstrategiaAndrei
+from classes.strategies.EstrategiaEduardo import EstrategiaEduardo
+from classes.strategies.EstrategiaJean import EstrategiaJean
+from classes.strategies.EstrategiaDjonatan import EstrategiaDjonatan
 
 
 from stable_baselines3.common.env_checker import check_env
@@ -81,8 +84,8 @@ experimento.treinar_modelo_mcts(600, 0)
 '''
 
 # Testar treino contra outras estratégias
-estrategias = [EstrategiaAndrei(), EstrategiaTotalmenteAleatoria('Bot 1'), EstrategiaTotalmenteAleatoria('Bot 2'), EstrategiaTotalmenteAleatoria('Bot 3'), EstrategiaTotalmenteAleatoria('Bot 4')]
-Experimento.testar_estrategias(estrategias, 1000)
+estrategias = [EstrategiaAndrei(), EstrategiaFelipe(), EstrategiaEduardo(), EstrategiaJean(), EstrategiaDjonatan()]
+Experimento.testar_estrategias(estrategias, 10000)
 
 '''
 estrategias = [Agente(), EstrategiaTotalmenteAleatoria('Bot 1'), EstrategiaTotalmenteAleatoria('Bot 2'), EstrategiaTotalmenteAleatoria('Bot 3'), EstrategiaTotalmenteAleatoria('Bot 4')]
