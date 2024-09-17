@@ -159,7 +159,7 @@ class Agente(Estrategia):
     # Estratégia usada na habilidade do Senhor da Guerra
     @staticmethod
     def habilidade_senhor_da_guerra_destruir(estado: Estado, distritos_para_destruir: list[(CartaDistrito, Jogador)]) -> int:
-        return random.randint(0, len(distritos_para_destruir))
+        return random.randint(0, len(distritos_para_destruir) - 1)
 
     # Estratégia usada na ação do Laboratório
     @staticmethod

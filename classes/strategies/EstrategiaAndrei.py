@@ -1,5 +1,6 @@
 from classes.enum.TipoAcao import TipoAcao
 from classes.enum.TipoDistrito import TipoDistrito
+from classes.enum.TipoPersonagem import TipoPersonagem
 from classes.model.CartaDistrito import CartaDistrito
 from classes.model.CartaPersonagem import CartaPersonagem
 from classes.strategies.Estrategia import Estrategia
@@ -9,157 +10,105 @@ import random
 
 
 class EstrategiaAndrei(Estrategia):
-    def __init__(self):
-        super().__init__('Andrei.')
+    def __init__(self, nome: str = 'Andrei'):
+        super().__init__(nome)
 
     # Estratégia usada na fase de escolha dos personagens
     @staticmethod
     def escolher_personagem(estado: Estado) -> int:
-        #Variaveis de flag
-        rank = 8
-        posicao_atual_no_vetor = 0
+        # Flags de quais personagens estão disponíves para escolha
+        try:
+            assassina = estado.tabuleiro.baralho_personagens.index(estado.tabuleiro.personagens[TipoPersonagem.Assassina.value])
+        except ValueError:
+            assassina = -1
+        try:
+            ladrao = estado.tabuleiro.baralho_personagens.index(estado.tabuleiro.personagens[TipoPersonagem.Ladrao.value])
+        except ValueError:
+            ladrao = -1
+        try:
+            ilusionista = estado.tabuleiro.baralho_personagens.index(estado.tabuleiro.personagens[TipoPersonagem.Ilusionista.value])
+        except ValueError:
+            ilusionista = -1
+        try:
+            rei = estado.tabuleiro.baralho_personagens.index(estado.tabuleiro.personagens[TipoPersonagem.Rei.value])
+        except ValueError:
+            rei = -1
+        try:
+            bispo = estado.tabuleiro.baralho_personagens.index(estado.tabuleiro.personagens[TipoPersonagem.Bispo.value])
+        except ValueError:
+            bispo = -1
+        try:
+            comerciante = estado.tabuleiro.baralho_personagens.index(estado.tabuleiro.personagens[TipoPersonagem.Comerciante.value])
+        except ValueError:
+            comerciante = -1
+        try:
+            arquiteta = estado.tabuleiro.baralho_personagens.index(estado.tabuleiro.personagens[TipoPersonagem.Arquiteta.value])
+        except ValueError:
+            arquiteta = -1
+        try:
+            senhor_da_guerra = estado.tabuleiro.baralho_personagens.index(estado.tabuleiro.personagens[TipoPersonagem.SenhorDaGuerra.value])
+        except ValueError:
+            senhor_da_guerra = -1
 
-        #ESCOLHER SEMPRE O REI
-        for personagem in estado.tabuleiro.baralho_personagens:
-            if personagem.tipo_personagem == 0:
-                return posicao_atual_no_vetor
-        posicao_atual_no_vetor = 0
+        # Escolha de personagem caso tenha poucas cartas na mão
+        if len(estado.jogador_atual.cartas_distrito_mao) < 2:
+            if arquiteta != -1:
+                return arquiteta
+            if ilusionista != -1:
+                return ilusionista   
 
-        #ESCOLHER SEMPRE O MENOR RANK DISPONIVEL
-        for personagem in estado.tabuleiro.baralho_personagens:
-            if personagem.rank < rank:
-                rank = personagem.rank
-                posicao_do_escolhido = posicao_atual_no_vetor
+        # Escolhe a comerciante
+        if comerciante != 1:
+            return comerciante
+        
+        if rei != 1:
+            return rei
 
-            posicao_atual_no_vetor += 1
-
-        return posicao_do_escolhido
+        return random.randint(0, len(estado.tabuleiro.baralho_personagens) - 1)
 
     # Estratégia usada na fase de escolha das ações no turno
     @staticmethod
     def escolher_acao(estado: Estado, acoes_disponiveis: list[TipoAcao]) -> int:
-        
-        #COLETA DE INFORMAÇÕES DA MAO ATUAL
-        maior_custo = 0
-        menor_custo = 10
-        for distrito in estado.jogador_atual.cartas_distrito_mao:
-            if distrito.valor_do_distrito > maior_custo: #descobre o distrito mais caro da mao
-                maior_custo = distrito.valor_do_distrito
-            if distrito.valor_do_distrito < menor_custo: #descobre o distrito mais barato da mao
-                menor_custo = distrito.valor_do_distrito
-        
-        #PEGAR OURO OU CARTAS?
-        if TipoAcao.ColetarCartas in acoes_disponiveis or TipoAcao.ColetarOuro in acoes_disponiveis:
-            if len(estado.jogador_atual.cartas_distrito_mao) == 0:      #coletar carta caso não tenha nenhuma
-                return acoes_disponiveis.index(TipoAcao.ColetarCartas)
-            elif estado.jogador_atual.ouro > maior_custo:               #coletar carta caso tenha ouro sobrando
-                return acoes_disponiveis.index(TipoAcao.ColetarCartas)
-            else:
-                return acoes_disponiveis.index(TipoAcao.ColetarOuro)
+        # acao_escolhida = random.randint(0, len(acoes_disponiveis) - 1)
 
-        #PASSAR TURNO
-        if TipoAcao.PassarTurno in acoes_disponiveis and len(acoes_disponiveis) == 1:
-            return 0
+        # Sempre coleta ouro, se possível
+        try:
+            return acoes_disponiveis.index(TipoAcao.ColetarOuro)
+        except:
+            pass
 
-        return random.randint(1, len(acoes_disponiveis) - 1)
+        # Deixa passar turno por último, não usa a habilidade do senhor da guerra e de nenhum distrito especial
+        lista_acoes = []
+        for i in range(len(acoes_disponiveis)):
+            # if acoes_disponiveis[i] != TipoAcao.PassarTurno and acoes_disponiveis[i] != TipoAcao.HabilidadeSenhorDaGuerraDestruir and acoes_disponiveis[i] != TipoAcao.Forja and acoes_disponiveis[i] != TipoAcao.Laboratorio:
+            if acoes_disponiveis[i] != TipoAcao.PassarTurno and acoes_disponiveis[i] != TipoAcao.Forja and acoes_disponiveis[i] != TipoAcao.Laboratorio:
+                lista_acoes.append(i)
+
+        if len(lista_acoes) != 0:
+            acao_escolhida = random.sample(lista_acoes, 1)[0]
+        else:
+            acao_escolhida = acoes_disponiveis.index(TipoAcao.PassarTurno)
+        return acao_escolhida
 
     # Estratégia usada na ação de coletar cartas
     @staticmethod
     def coletar_cartas(estado: Estado, cartas_compradas: list[CartaDistrito], qtd_cartas: int) -> int:
-        
-        #ESCOLHER SEMPRE A DE MENOR VALOR
-        menor_valor = cartas_compradas[-1].valor_do_distrito
-        carta_escolhida = cartas_compradas[-1]
-        for carta in cartas_compradas:
-            #verifica se já possui
-            if carta in estado.jogador_atual.distritos_construidos or carta in estado.jogador_atual.cartas_distrito_mao:
-                continue
-            #coleta sempre que for nobre
-            if carta.tipo_de_distrito == 2:
-                return cartas_compradas.index(carta)
-            #coleta sempre que for especial
-            if carta.tipo_de_distrito == 4:     
-                return cartas_compradas.index(carta)
-            #salva a de menor valor
-            if carta.valor_do_distrito < menor_valor:
-                menor_valor = carta.valor_do_distrito   
-                carta_escolhida = carta
+        return random.randint(0, qtd_cartas - 1)
 
-        return cartas_compradas.index(carta_escolhida)
-        #return random.randint(0, qtd_cartas - 1)
-
-    # Estratégia usada na ação de construir distritos by Felipe (adaptado)
+    # Estratégia usada na ação de construir distritos
     @staticmethod
-    def construir_distrito(estado: Estado,
-                           distritos_para_construir: list[CartaDistrito],
-                           distritos_para_construir_cardeal: list[(CartaDistrito, Jogador)],
-                           distritos_para_construir_necropole: list[(CartaDistrito, CartaDistrito)],
-                           distritos_para_construir_covil_ladroes: list[(CartaDistrito, int, int)],
-                           distritos_para_construir_estrutura: list[CartaDistrito]) -> int:
-        tamanho_maximo = len(distritos_para_construir) + len(distritos_para_construir_cardeal) + \
-                         len(distritos_para_construir_necropole) + len(distritos_para_construir_covil_ladroes) + len(distritos_para_construir_estrutura)
-
-        #construir nobre
-        i = 0
-        for distrito in estado.jogador_atual.cartas_distrito_mao:
-            if distrito.tipo_de_distrito == 2:
-                return i
-            i += 1
-            
+    def construir_distrito(estado: Estado, distritos_para_construir: list[CartaDistrito],
+                           distritos_para_construir_covil_ladroes: list[(CartaDistrito, int, int)]) -> int:
+        tamanho_maximo = len(distritos_para_construir) + len(distritos_para_construir_covil_ladroes)
+        # Escolhe sempre construir o distrito mais caro da mão sempre que possível
         maior_valor_mao = 0
         for distrito in estado.jogador_atual.cartas_distrito_mao:
             if distrito.valor_do_distrito > maior_valor_mao:
                 maior_valor_mao = distrito.valor_do_distrito
-                
-        # Estrutura
-        for i, distrito in enumerate(distritos_para_construir_estrutura):
-            if distrito.valor_do_distrito == maior_valor_mao:
-                return len(distritos_para_construir) + \
-                       len(distritos_para_construir_cardeal) + \
-                       len(distritos_para_construir_necropole) + \
-                       len(distritos_para_construir_covil_ladroes) + i + 1
-                       
-        menor_valor_construido = 9
-        for distrito in estado.jogador_atual.distritos_construidos:
-            if distrito.valor_do_distrito < menor_valor_construido:
-                menor_valor_construido = distrito.valor_do_distrito
-        for i, (_, distrito) in enumerate(distritos_para_construir_necropole):
-            if distrito.valor_do_distrito == menor_valor_construido:
-                return len(distritos_para_construir) + \
-                       len(distritos_para_construir_cardeal) + i + 1
-                       
         for i, distrito in enumerate(distritos_para_construir):
             if distrito == maior_valor_mao:
-                return i + 1
-            
-        if len(distritos_para_construir_necropole) > 0:
-            return len(distritos_para_construir) + \
-                   len(distritos_para_construir_cardeal) + 1
-                   
-        jogador_mais_ouro = estado.jogador_atual
-        qtd_mais_ouro = 0
-        jogador_mais_carta = estado.jogador_atual
-        qtd_mais_carta = 0
-        for jogador in estado.jogadores:
-            if jogador == estado.jogador_atual:
-                continue
-            if jogador.ouro > qtd_mais_ouro:
-                qtd_mais_ouro = jogador.ouro
-                jogador_mais_ouro = jogador
-            if len(jogador.cartas_distrito_mao) > qtd_mais_carta:
-                qtd_mais_carta = len(jogador.cartas_distrito_mao)
-                jogador_mais_carta = jogador
-        for i, (distrito, jogador) in enumerate(distritos_para_construir_cardeal):
-            if jogador == jogador_mais_carta or jogador == jogador_mais_ouro:
-                return len(distritos_para_construir) + i + 1
-            
-        return random.randint(1, tamanho_maximo)
-
-
-    # Estratégia usada na ação de construir distritos (efeito Cardeal)
-    @staticmethod
-    def construir_distrito_cardeal(estado: Estado, diferenca: int, i: int) -> int:
-        return random.randint(0, len(estado.jogador_atual.cartas_distrito_mao) - 1)
+                return i
+        return random.randint(0, tamanho_maximo - 1)
 
     # Estratégia usada na ação de construir distritos (efeito Covil dos Ladrões)
     @staticmethod
@@ -169,56 +118,73 @@ class EstrategiaAndrei(Estrategia):
     # Estratégia usada na habilidade da Assassina
     @staticmethod
     def habilidade_assassina(estado: Estado, opcoes_personagem: list[CartaPersonagem]) -> int:
-        return random.randint(0, len(opcoes_personagem) - 1)
+        # Retira opções de personagens descartados
+        opcoes = []
+        for personagem in opcoes_personagem:
+            if personagem not in estado.tabuleiro.cartas_visiveis:
+                opcoes.append(personagem)
+        return random.randint(0, len(opcoes) - 1)
 
     # Estratégia usada na habilidade do Ladrão
     @staticmethod
     def habilidade_ladrao(estado: Estado, opcoes_personagem: list[CartaPersonagem]) -> int:
-        return random.randint(0, len(opcoes_personagem) - 1)
+        # Retira opções de personagens descartados
+        opcoes = []
+        for personagem in opcoes_personagem:
+            if personagem not in estado.tabuleiro.cartas_visiveis:
+                opcoes.append(personagem)
+        return random.randint(0, len(opcoes) - 1)
 
-    # Estratégia usada na habilidade do Mago (escolha do jogador alvo)
+    # Estratégia usada na habilidade da Ilusionista (escolha do jogador alvo)
     @staticmethod
-    def habilidade_mago_jogador(estado: Estado, opcoes_jogadores: list[Jogador]) -> int:
-        return random.randint(0, len(opcoes_jogadores) - 1)
+    def habilidade_ilusionista_trocar(estado: Estado, opcoes_jogadores: list[Jogador]) -> int:
+        # Ilusionista sempre troca de mão com o adversário que possui mais cartas, o desempate é uma escolha aleatória entre empatados
+        mais_cartas = 0
+        for jogador in opcoes_jogadores:
+            if len(jogador.cartas_distrito_mao) > mais_cartas:
+                mais_cartas = len(jogador.cartas_distrito_mao)
+        opcoes = []
+        for idx, jogador in enumerate(opcoes_jogadores):
+            if len(jogador.cartas_distrito_mao) == mais_cartas:
+                opcoes.append(idx)
+        return random.sample(opcoes, 1)[0]
 
-    # Estratégia usada na habilidade do Mago (escolha da carta da mão)
+    # Estratégia usada na habilidade da Ilusionista (escolha de quantas cartas serão descartadas)
     @staticmethod
-    def habilidade_mago_carta(estado: Estado, opcoes_cartas: list[CartaDistrito]) -> int:
-        return random.randint(0, len(opcoes_cartas) - 1)
+    def habilidade_ilusionista_descartar_qtd_cartas(estado: Estado, qtd_maxima: int) -> int:
+        return random.randint(1, qtd_maxima)
 
-    # Estratégia usada na habilidade da Navegadora
+    # Estratégia usada na habilidade da Ilusionista (escolha de qual carta descartar)
     @staticmethod
-    def habilidade_navegadora(estado: Estado) -> int:
-        return random.randint(0, 1)
+    def habilidade_ilusionista_descartar_carta(estado: Estado, qtd_cartas: int, i: int) -> int:
+        return random.randint(0, len(estado.jogador_atual.cartas_distrito_mao) - 1)
 
     # Estratégia usada na habilidade do Senhor da Guerra
     @staticmethod
-    def habilidade_senhor_da_guerra(estado: Estado, distritos_para_destruir: list[(CartaDistrito, Jogador, int)]) -> int:
-        return random.randint(0, len(distritos_para_destruir))
+    def habilidade_senhor_da_guerra_destruir(estado: Estado, distritos_para_destruir: list[(CartaDistrito, Jogador)]) -> int:
+        
+        melhor_pontuacao = 0
+        jogador_nome = None
+        for jogador in estado.jogadores:
+            if jogador.pontuacao > melhor_pontuacao:
+                melhor_pontuacao = jogador.pontuacao
+                jogador_nome = jogador.nome
 
-    # Estratégia usada na ação do Laboratório by Felipe
+        # Valor / Indice
+        mais_barato = 10
+        indice_mb = 0
+        for i, opcao in enumerate(distritos_para_destruir):
+            if opcao[1].nome == jogador_nome and opcao[0].valor_do_distrito < mais_barato:
+                mais_barato = opcao[0].valor_do_distrito
+                indice_mb = i
+
+        try:
+            return indice_mb
+        except:
+            print("errou imbecil")
+            return random.randint(0, len(distritos_para_destruir) - 1)
+
+    # Estratégia usada na ação do Laboratório
     @staticmethod
     def laboratorio(estado: Estado) -> int:
-        menor_valor = 9
-        distrito_escolhido = -1
-        for i, distrito in enumerate(estado.jogador_atual.cartas_distrito_mao):
-            if distrito.valor_do_distrito < menor_valor:
-                menor_valor = distrito.valor_do_distrito
-                distrito_escolhido = i
-        return distrito_escolhido
-
-    # Estratégia usada na ação do Arsenal by Felipe
-    @staticmethod
-    def arsenal(estado: Estado, distritos_para_destruir: list[(CartaDistrito, Jogador)]) -> int:
-        return random.randint(0, len(distritos_para_destruir))
-
-    # Estratégia usada na ação do Museu by Felipe
-    @staticmethod
-    def museu(estado: Estado) -> int:
-        menor_valor = 9
-        distrito_escolhido = -1
-        for i, distrito in enumerate(estado.jogador_atual.cartas_distrito_mao):
-            if menor_valor < distrito.valor_do_distrito:
-                menor_valor = distrito.valor_do_distrito
-                distrito_escolhido = i
-        return distrito_escolhido
+        return random.randint(0, len(estado.jogador_atual.cartas_distrito_mao) - 1)
