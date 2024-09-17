@@ -137,18 +137,18 @@ class EstrategiaJean(Estrategia):
     # Estratégia usada na habilidade da Assassina
     @staticmethod
     def habilidade_assassina(estado: Estado, opcoes_personagem: list[CartaPersonagem]) -> int:
-        return random.randint(0, len(opcoes_personagem) - 1)
         # Retira opções de personagens descartados
         opcoes = []
         for personagem in opcoes_personagem:
             if personagem not in estado.tabuleiro.cartas_visiveis:
                 opcoes.append(personagem)
+        if TipoPersonagem.Comerciante in opcoes:
+            return opcoes.index(TipoPersonagem.Comerciante)
         return random.randint(0, len(opcoes) - 1)
 
     # Estratégia usada na habilidade do Ladrão
     @staticmethod
     def habilidade_ladrao(estado: Estado, opcoes_personagem: list[CartaPersonagem]) -> int:
-        return random.randint(0, len(opcoes_personagem) - 1)
         # Retira opções de personagens descartados
         opcoes = []
         for personagem in opcoes_personagem:
