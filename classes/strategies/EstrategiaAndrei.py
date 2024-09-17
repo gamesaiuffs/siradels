@@ -80,8 +80,8 @@ class EstrategiaAndrei(Estrategia):
         # Deixa passar turno por último, não usa a habilidade do senhor da guerra e de nenhum distrito especial
         lista_acoes = []
         for i in range(len(acoes_disponiveis)):
-            # if acoes_disponiveis[i] != TipoAcao.PassarTurno and acoes_disponiveis[i] != TipoAcao.HabilidadeSenhorDaGuerraDestruir and acoes_disponiveis[i] != TipoAcao.Forja and acoes_disponiveis[i] != TipoAcao.Laboratorio:
-            if acoes_disponiveis[i] != TipoAcao.PassarTurno and acoes_disponiveis[i] != TipoAcao.Forja and acoes_disponiveis[i] != TipoAcao.Laboratorio:
+            if acoes_disponiveis[i] != TipoAcao.PassarTurno and acoes_disponiveis[i] != TipoAcao.HabilidadeSenhorDaGuerraDestruir and acoes_disponiveis[i] != TipoAcao.Forja and acoes_disponiveis[i] != TipoAcao.Laboratorio:
+            # if acoes_disponiveis[i] != TipoAcao.PassarTurno and acoes_disponiveis[i] != TipoAcao.Forja and acoes_disponiveis[i] != TipoAcao.Laboratorio:
                 lista_acoes.append(i)
 
         if len(lista_acoes) != 0:
@@ -162,27 +162,8 @@ class EstrategiaAndrei(Estrategia):
     # Estratégia usada na habilidade do Senhor da Guerra
     @staticmethod
     def habilidade_senhor_da_guerra_destruir(estado: Estado, distritos_para_destruir: list[(CartaDistrito, Jogador)]) -> int:
-        
-        melhor_pontuacao = 0
-        jogador_nome = None
-        for jogador in estado.jogadores:
-            if jogador.pontuacao > melhor_pontuacao:
-                melhor_pontuacao = jogador.pontuacao
-                jogador_nome = jogador.nome
-
-        # Valor / Indice
-        mais_barato = 10
-        indice_mb = 0
-        for i, opcao in enumerate(distritos_para_destruir):
-            if opcao[1].nome == jogador_nome and opcao[0].valor_do_distrito < mais_barato:
-                mais_barato = opcao[0].valor_do_distrito
-                indice_mb = i
-
-        try:
-            return indice_mb
-        except:
-            print("errou imbecil")
-            return random.randint(0, len(distritos_para_destruir) - 1)
+        return random.randint(0, len(distritos_para_destruir) - 1)
+            
 
     # Estratégia usada na ação do Laboratório
     @staticmethod
