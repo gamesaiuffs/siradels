@@ -1,209 +1,239 @@
-from abc import ABC, abstractmethod
-
-from classes.strategies.Estrategia import Estrategia
-
 from classes.enum.TipoAcao import TipoAcao
-from classes.enum.TipoPersonagem import TipoPersonagem
-from classes.enum.TipoDistrito import TipoDistrito
-
 from classes.model.CartaDistrito import CartaDistrito
 from classes.model.CartaPersonagem import CartaPersonagem
+from classes.strategies.Estrategia import Estrategia
 from classes.model.Estado import Estado
 from classes.model.Jogador import Jogador
-
-# Imports adicionais
+from classes.enum.TipoPersonagem import TipoPersonagem
+from classes.enum.TipoDistrito import TipoDistrito
 import random
-import math
 
 
-class EstrategiaLuis(Estrategia):
-    def __init__(self, descricao: str):
-        self.descricao: str = descricao
+class EstrategiaLuisII(Estrategia):
+    def __init__(self, nome: str = 'João Luis'):
+        super().__init__(nome)
 
     # Estratégia usada na fase de escolha dos personagens
     @staticmethod
     def escolher_personagem(estado: Estado) -> int:
-        # --- Declaração de variáveis gerais
+        # constantes
+        taxa_construcao = 4
+        taxa_construcao = 4
+        grande_incentivo = 3
+        medio_incentivo = 2
+        pequeno_incentivo = 1
+        certeza = 1000
+
         jogador = estado.jogador_atual
         tabuleiro = estado.tabuleiro
-        personagens = tabuleiro.baralho_personagens
+        personagens = estado.tabuleiro.personagens
+        decision = 0
 
         def decisao():
             # Ação final da tomada de ação selecionando a carta mais benéfica
-            maior_confianca = max(peso_escolhas.items(), key=lambda item: item[0])
+            top_choice = max(peso_escolha.items(), key=lambda item: item[0])
             for index, carta in enumerate(estado.tabuleiro.baralho_personagens):
-                nome = carta.nome
-                if nome == maior_confianca[0]:
+                name = carta.nome
+                if name == top_choice[0]:
                     return index
                 else:
                     return random.randint(0, len(estado.tabuleiro.baralho_personagens) - 1)
 
-        peso_escolhas = {}
-        for personagem in personagens:
-            # Beneficio Financeiro / Agressivo
-            id = personagem.nome
-            nivel_confianca = 0
-            peso_escolhas[id] = [nivel_confianca]
-        ids_personagens_disponiveis = peso_escolhas.keys()
-
-        # Mood
-        analise = {
-            'ambicao': 0,
-            'agressividade': 0,
-            'resistencia': 0
+        peso_escolha = {personagem.nome: 0 for personagem in personagens}
+        sentimento = {
+            'avareza': 0,  # Foca em ganhar ouro e construir
+            'violencia': 0,  # Foca em prejudicar outros jogadores
+            'gasto': 0,  # Gasta tudo
         }
-        # Decide o que é melhor como ação atribuindo motivações
-        if estado.jogador_atual.cartas_distrito_mao == 0:
-            analise['resistencia'] += 1
-        else:
-            if TipoPersonagem.Ilusionista in estado.tabuleiro.baralho_personagens:
-                peso_escolhas[TipoPersonagem.Ilusionista.name] -= 3
-        if estado.jogador_atual.ouro <= 6:
-            analise['ambicao'] += 1
-        if len(estado.jogador_atual.distritos_construidos) <= 5:
-            analise['ambicao'] += 1
-            analise['resistencia'] += 1
-        else:
-            analise['agressividade'] += 1
-            analise['resistencia'] += 1
+
+        if jogador.cartas_distrito_mao == 0 and len(jogador.distritos_construidos) < 5:
+            sentimento['avareza'] += 2
+        elif jogador.ouro <= 5:
+            sentimento['avareza'] += 1
+
         if any(inimigo.pontuacao > estado.jogador_atual.pontuacao for inimigo in estado.jogadores):
-            analise['agressividade'] += 1
+            sentimento['violencia'] += 1
 
-        sentimento_dominante = max(analise.items(), key=lambda item: item[0])[0]
-        for personagem in personagens:
-            if sentimento_dominante == analise['ambicao']:
-                # Se personagem x estiver disponivel, aumenta a chance de usar-lo
-                if personagem.tipo_personagem == TipoPersonagem.Comerciante or personagem.tipo_personagem == TipoPersonagem.Arquiteta:
-                    peso_escolhas[personagem.nome] += random.randint(2, 6)
+        if jogador.ouro >= 4:
+            sentimento['gasto'] += 1000
+        sentimento_atual = max(sentimento.items(), key=lambda item: item[1])[0]
+
+        # Calculate distrito total cost
+        custo_distritos = sum(distrito.valor_do_distrito for distrito in jogador.cartas_distrito_mao)
+
+        # Initialize choice weights
+        peso_escolha = {personagem.nome: 0 for personagem in personagens}
+
+        if sentimento_atual == 'avareza':
+            for personagem in personagens:
+                if personagem.tipo_personagem == TipoPersonagem.Comerciante:
+                    peso_escolha[personagem.nome] += grande_incentivo
+                elif jogador.ouro > 0:
+                    if personagem.tipo_personagem == TipoPersonagem.Arquiteta and custo_distritos // jogador.ouro >= taxa_construcao:
+                        peso_escolha[personagem.nome] += grande_incentivo
                 elif personagem.tipo_personagem == TipoPersonagem.Rei:
-                    peso_escolhas[personagem.nome] += random.randint(2, 5)
-                elif len(estado.jogador_atual.distritos_construidos) > 7 and (
-                        personagem.tipo_personagem == TipoPersonagem.Bispo):
-                    peso_escolhas[personagem.nome] -= random.randint(1, 5)
-            if sentimento_dominante == analise['resistencia']:
+                    peso_escolha[personagem.nome] += medio_incentivo
+                    if TipoDistrito.Nobre in jogador.distritos_construidos:
+                        peso_escolha[personagem.nome] += pequeno_incentivo
+                elif len(jogador.distritos_construidos) > 7 and personagem.tipo_personagem == TipoPersonagem.Bispo:
+                    peso_escolha[personagem.nome] -= pequeno_incentivo
+
+        elif sentimento_atual == 'violencia':
+            for personagem in personagens:
                 if personagem.tipo_personagem == TipoPersonagem.Rei:
-                    peso_escolhas[personagem.nome] -= random.randint(1, 5)
-                if personagem.tipo_personagem == TipoPersonagem.Ilusionista:
-                    peso_escolhas[personagem.nome] += random.randint(1, 5)
-            if sentimento_dominante == analise['agressividade']:
-                if personagem.tipo_personagem == TipoPersonagem.Ilusionista:
-                    peso_escolhas[personagem.nome] += random.randint(1, 5)
-                if personagem.tipo_personagem == TipoPersonagem.SenhorDaGuerra:
-                    peso_escolhas[personagem.nome] += random.randint(1, 3)
-                if personagem.tipo_personagem == TipoPersonagem.Ladrao or personagem.tipo_personagem == TipoPersonagem.Assassina:
-                    peso_escolhas[personagem.nome] += random.randint(1, 10)
+                    peso_escolha[personagem.nome] -= grande_incentivo
+                elif jogador.cartas_distrito_mao == 0 and personagem.tipo_personagem == TipoPersonagem.Ilusionista:
+                    peso_escolha[personagem.nome] += medio_incentivo
+                elif any(inimigo.pontuacao > estado.jogador_atual.pontuacao for inimigo in
+                         estado.jogadores) and personagem.tipo_personagem == TipoPersonagem.SenhorDaGuerra and jogador.ouro >= 4:
+                    peso_escolha[personagem.nome] += medio_incentivo
+                elif personagem.tipo_personagem in (TipoPersonagem.Ladrao, TipoPersonagem.Assassina):
+                    peso_escolha[personagem.nome] += pequeno_incentivo
+        elif sentimento_atual == 'gasto':
+            for personagem in personagens:
+                if personagem.tipo_personagem == TipoPersonagem.Arquiteta:
+                    peso_escolha[personagem.nome] += certeza
+                elif personagem.tipo_personagem == TipoPersonagem.Rei:
+                    peso_escolha[personagem.nome] += grande_incentivo
+                    if TipoDistrito.Nobre in jogador.distritos_construidos:
+                        peso_escolha[personagem.nome] += pequeno_incentivo
+                elif len(jogador.distritos_construidos) > 7 and personagem.tipo_personagem == TipoPersonagem.Bispo:
+                    peso_escolha[personagem.nome] -= pequeno_incentivo
 
-            # Se não houver cartas, aumenta a chance de pegar o ilusionista
+        def decisao(peso):
+            # Seleciona a ação baseada no peso mais favorável
+            melhor_escolha = max(peso.items(), key=lambda item: item[1])
+            for index, carta in enumerate(estado.tabuleiro.baralho_personagens):
+                if carta.nome == melhor_escolha[0]:
+                    return index
+            return random.randint(0, len(estado.tabuleiro.baralho_personagens) - 1)
 
-        # Análise dos inimigos
-        for inimigo in estado.jogadores:
-            if inimigo.personagem.tipo_personagem is not TipoPersonagem.Rei:
-                if TipoPersonagem.Assassina in ids_personagens_disponiveis:
-                    analise['agressividade'] += 1
-            if inimigo.pontuacao > jogador.pontuacao:
-                analise['agressividade'] += 1
-                # Escolha por influência
-                if inimigo.personagem.tipo_personagem in ids_personagens_disponiveis:
-                    peso_escolhas[inimigo.personagem.tipo_personagem.name] += random.randint(1, 5)
-
-            return decisao()
+        return decisao(peso_escolha)
 
     # Estratégia usada na fase de escolha das ações no turno
     @staticmethod
     def escolher_acao(estado: Estado, acoes_disponiveis: list[TipoAcao]) -> int:
-        if TipoAcao.ConstruirDistrito in acoes_disponiveis:
-            return acoes_disponiveis.index(TipoAcao.ConstruirDistrito)
+        # constantes
+        taxa_construcao = 4
+        grande_incentivo = 3
+        medio_incentivo = 2
+        pequeno_incentivo = 1
+        certeza = 1000
 
-        carta_disponivel = estado.jogador_atual.personagem.tipo_personagem
-        # Ações disponiveis
-        peso_acoes = {}
-        for acoes in acoes_disponiveis:
-            id = acoes.name
-            nivel_confianca = 0
-            peso_acoes[id] = nivel_confianca
-        ids_acoes_disponiveis = peso_acoes.keys()
+        jogador = estado.jogador_atual
+        tabuleiro = estado.tabuleiro
+        personagens = estado.tabuleiro.personagens
+        pode_construir = [distrito for distrito in tabuleiro.baralho_distritos]
+        pode_construir.sort(key=lambda distrito: distrito.valor_do_distrito)
 
-        analise = {
-            'ambicao': 0,
-            'agressividade': 0,
-            'resistencia': 0
-        }
-        # Decide o que é melhor como ação atribuindo motivações
-        if estado.jogador_atual.cartas_distrito_mao == 0:
-            analise['resistencia'] += 1
-        else:
-            if TipoPersonagem.Ilusionista in estado.tabuleiro.baralho_personagens:
-                peso_acoes[TipoPersonagem.Ilusionista.name] -= 3
-        if estado.jogador_atual.ouro <= 6:
-            analise['ambicao'] += 1
-        if len(estado.jogador_atual.distritos_construidos) <= 5:
-            analise['ambicao'] += 1
-            analise['resistencia'] += 1
-        else:
-            analise['agressividade'] += 1
-            analise['resistencia'] += 1
-        if any(inimigo.pontuacao > estado.jogador_atual.pontuacao for inimigo in estado.jogadores):
-            analise['agressividade'] += 1
-        if all(inimigo.pontuacao < estado.jogador_atual.pontuacao for inimigo in estado.jogadores):
-            analise['agressividade'] += 1
-            # Fica mais agressivo se os jogadores inimigos estiverem ganhando
-        for inimigo in estado.jogadores:
-            if inimigo.pontuacao > estado.jogador_atual.pontuacao:
-                analise['ambicao'] += 1
-
-        sentimento_dominante = max(analise.items(), key=lambda item: item[1])[0]
-        for acao in acoes_disponiveis:
-            if estado.jogador_atual.ouro <= 5 and acao == TipoAcao.ColetarOuro:
-                peso_acoes[acao.name] += 2
-            if sentimento_dominante == 'ambicao':
-                # Se personagem x estiver disponivel, aumenta a chance de usar-lo
-                if acao == TipoAcao.HabilidadeComerciante:
-                    peso_acoes[acao.name] += random.randint(3, 6)
-                if acao == TipoAcao.ColetarOuro or acao == TipoAcao.HabilidadeRei:
-                    peso_acoes[acao.name] += random.randint(1, 5)
-            if sentimento_dominante == 'resistencia':
-                if acao == TipoAcao.HabilidadeIlusionistaTrocar:
-                    peso_acoes[acao.name] += random.randint(1, 5)
-                if acao == TipoAcao.ColetarCartas:
-                    peso_acoes[acao.name] += random.randint(1, 5)
-            if sentimento_dominante == 'agressividade':
-                if acao == TipoAcao.ColetarOuro or acao == TipoAcao.ConstruirDistrito:
-                    peso_acoes[acao.name] += random.randint(1, 5)
-                if acao == TipoAcao.HabilidadeIlusionistaTrocar:
-                    peso_acoes[acao.name] += random.randint(1, 5)
-                if acao == TipoAcao.HabilidadeSenhorDaGuerraDestruir:
-                    peso_acoes[acao.name] += random.randint(1, 5)
-                if acao == TipoAcao.HabilidadeAssassina or acao == TipoAcao.HabilidadeLadrao:
-                    peso_acoes[acao.name] += random.randint(1, 5)
-
-        def decisao():
+        def decisao(peso):
             # Ação final da tomada de ação selecionando a carta mais benéfica
-            maior_confianca = max(peso_acoes.items(), key=lambda item: item[0])
+            melhor_escolha = max(peso.items(), key=lambda item: item[1])
             for index, acao in enumerate(acoes_disponiveis):
-                nome = acao.name
-                if nome == maior_confianca[0] and TipoAcao.ConstruirDistrito in acoes_disponiveis:
+                if acao.name == melhor_escolha[0]:
                     return index
-                else:
-                    return random.randint(0, len(acoes_disponiveis) - 1)
+            return random.randint(0, len(acoes_disponiveis) - 1)
 
-        # Distritos
-        tipos_distritos = []
+        custo_distritos = sum(distrito.valor_do_distrito for distrito in jogador.cartas_distrito_mao)
+        peso_escolha = {acao.name: 0 for acao in acoes_disponiveis}
+        sentimento = {
+            'avareza': 0,  # Foca em ganhar ouro e construir
+            'violencia': 0,  # Foca em prejudicar outros jogadores
+            'socorro': 0,  # Foca em prejudicar outros jogadores
+            'gasto': 0,  # Gasta tudo
+        }
+        if len(jogador.distritos_construidos) < 5:
+            sentimento['avareza'] += grande_incentivo
+        if len(jogador.cartas_distrito_mao) == 0:
+            sentimento['socorro'] += certeza + 1
+        if jogador.ouro > 0:
+            if custo_distritos // jogador.ouro >= taxa_construcao:
+                sentimento['avareza'] += medio_incentivo
+        else:
+            if jogador.ouro <= 5:
+                sentimento['avareza'] += pequeno_incentivo
+
+        if any(inimigo.pontuacao > estado.jogador_atual.pontuacao for inimigo in estado.jogadores):
+            sentimento['violencia'] += medio_incentivo
+
+        if jogador.ouro >= 4:
+            sentimento['gasto'] += certeza
+        sentimento_atual = max(sentimento.items(), key=lambda item: item[1])[0]
         distritos_construidos = [distrito for distrito in estado.jogador_atual.distritos_construidos]
+        tipos_distritos = []
+
         for tipo in distritos_construidos:
             tipos_distritos.append(tipo.tipo_de_distrito)
-            if TipoAcao.HabilidadeComerciante in acoes_disponiveis:
-                peso_acoes[TipoAcao.HabilidadeComerciante.name] += 2
 
-        if TipoDistrito.Nobre in tipos_distritos and TipoAcao.HabilidadeRei in acoes_disponiveis:
-            peso_acoes[TipoAcao.HabilidadeRei.name] += 7
-        if TipoDistrito.Religioso in tipos_distritos and TipoAcao.HabilidadeBispo in acoes_disponiveis:
-            peso_acoes[TipoAcao.HabilidadeBispo.name] += 7
-        if TipoDistrito.Comercial in tipos_distritos and TipoAcao.HabilidadeComerciante in acoes_disponiveis:
-            peso_acoes[TipoAcao.HabilidadeComerciante.name] += 7
-        if TipoDistrito.Militar in tipos_distritos and TipoAcao.HabilidadeSenhorDaGuerraColetar in acoes_disponiveis:
-            peso_acoes[TipoAcao.HabilidadeSenhorDaGuerraColetar.name] += 7
+        if sentimento_atual == 'avareza':
+            for move in acoes_disponiveis:
+                if TipoDistrito.Nobre in tipos_distritos and move == TipoAcao.HabilidadeRei:
+                    peso_escolha[move.name] += medio_incentivo
+                if TipoDistrito.Religioso in tipos_distritos and move == TipoAcao.HabilidadeBispo:
+                    peso_escolha[move.name] += medio_incentivo
+                if TipoDistrito.Comercial in tipos_distritos and move == TipoAcao.HabilidadeComerciante:
+                    peso_escolha[move.name] += medio_incentivo
+                if TipoDistrito.Militar in tipos_distritos and move == TipoAcao.HabilidadeSenhorDaGuerraColetar:
+                    peso_escolha[move.name] += medio_incentivo
 
-        return decisao()
+                # Global actions
+                if move == TipoAcao.PassarTurno and len(acoes_disponiveis) > 1:
+                    peso_escolha[move.name] -= certeza
+                elif move == TipoAcao.ConstruirDistrito:
+                    peso_escolha[move.name] += pequeno_incentivo
+                if move == TipoAcao.ColetarOuro:
+                    peso_escolha[move.name] += grande_incentivo
+
+        elif sentimento_atual == 'violencia':
+            for move in acoes_disponiveis:
+                if move == TipoAcao.HabilidadeSenhorDaGuerraDestruir and any(
+                        inimigo.pontuacao > estado.jogador_atual.pontuacao for inimigo in estado.jogadores):
+                    peso_escolha[move.name] += pequeno_incentivo
+                if move == TipoAcao.HabilidadeAssassina:
+                    peso_escolha[move.name] += pequeno_incentivo
+                if move == TipoAcao.HabilidadeLadrao and (jogador.ouro <= 5 or any(
+                        inimigo.pontuacao > estado.jogador_atual.pontuacao for inimigo in estado.jogadores)):
+                    peso_escolha[move.name] += grande_incentivo
+
+                # Global actions
+                if move == TipoAcao.PassarTurno and len(acoes_disponiveis) > 1:
+                    peso_escolha[move.name] -= certeza
+
+        elif sentimento_atual == 'gasto':
+            for move in acoes_disponiveis:
+                if move == TipoAcao.ConstruirDistrito:
+                    peso_escolha[move.name] += certeza
+                if move == TipoAcao.PassarTurno:
+                    peso_escolha[move.name] -= pequeno_incentivo
+                if TipoDistrito.Nobre in tipos_distritos and move == TipoAcao.HabilidadeRei:
+                    peso_escolha[move.name] += grande_incentivo
+                if TipoDistrito.Religioso in tipos_distritos and move == TipoAcao.HabilidadeBispo:
+                    peso_escolha[move.name] += grande_incentivo
+                if TipoDistrito.Comercial in tipos_distritos and move == TipoAcao.HabilidadeComerciante:
+                    peso_escolha[move.name] += grande_incentivo
+                if TipoDistrito.Militar in tipos_distritos and move == TipoAcao.HabilidadeSenhorDaGuerraColetar:
+                    peso_escolha[move.name] += grande_incentivo
+                else:
+                    peso_escolha[move.name] -= 1
+                if move == TipoAcao.PassarTurno and len(acoes_disponiveis) > 1:
+                    peso_escolha[move.name] -= certeza
+
+        elif sentimento_atual == 'socorro':
+            for move in acoes_disponiveis:
+                if move == TipoAcao.ColetarCartas:
+                    peso_escolha[move.name] += grande_incentivo
+                if move == TipoAcao.HabilidadeIlusionistaTrocar:
+                    peso_escolha[move.name] += certeza
+                if move == TipoAcao.HabilidadeAssassina:
+                    peso_escolha[move.name] += pequeno_incentivo
+                if move == TipoAcao.HabilidadeIlusionistaDescartar:
+                    peso_escolha[move.name] += pequeno_incentivo
+                if move == TipoAcao.HabilidadeRei:
+                    peso_escolha[move.name] += medio_incentivo
+                if move == TipoAcao.PassarTurno and len(acoes_disponiveis) > 1:
+                    peso_escolha[move.name] -= certeza
+
+        return decisao(peso_escolha)
 
     # Estratégia usada na ação de coletar cartas
     @staticmethod
@@ -215,18 +245,15 @@ class EstrategiaLuis(Estrategia):
     def construir_distrito(estado: Estado, distritos_para_construir: list[CartaDistrito],
                            distritos_para_construir_covil_ladroes: list[(CartaDistrito, int, int)]) -> int:
         tamanho_maximo = len(distritos_para_construir) + len(distritos_para_construir_covil_ladroes)
-
         # Escolhe sempre construir o distrito mais caro da mão sempre que possível
-        distritos = {}
+        maior_valor_mao = 0
+        for distrito in estado.jogador_atual.cartas_distrito_mao:
+            if distrito.valor_do_distrito > maior_valor_mao:
+                maior_valor_mao = distrito.valor_do_distrito
         for i, distrito in enumerate(distritos_para_construir):
-            index = i
-            distritos[index] = distrito.valor_do_distrito
-
-        try:
-            maior_valor = max(distritos.items(), key=lambda item: item[0])[0]
-            return maior_valor - 1
-        except ValueError:
-            return random.randint(0, tamanho_maximo - 1)
+            if distrito == maior_valor_mao:
+                return i
+        return random.randint(0, tamanho_maximo - 1)
 
     # Estratégia usada na ação de construir distritos (efeito Covil dos Ladrões)
     @staticmethod
@@ -236,46 +263,39 @@ class EstrategiaLuis(Estrategia):
     # Estratégia usada na habilidade da Assassina
     @staticmethod
     def habilidade_assassina(estado: Estado, opcoes_personagem: list[CartaPersonagem]) -> int:
-        lista_opcoes = {}
-        for opcoes in opcoes_personagem:
-            id = opcoes.nome
-            nivel_confianca = 0
-            lista_opcoes[id] = nivel_confianca
-
-        def decisao():
-            # Ação final da tomada de ação selecionando a carta mais benéfica
-            maior_confianca = max(lista_opcoes.items(), key=lambda item: item[0])
-            for index, opcao in enumerate(lista_opcoes):
-                nome = opcao[index]
-                if nome == maior_confianca[0]:
-                    return index
-                else:
-                    return random.randint(0, len(lista_opcoes) - 1)
-
-        for opcao in opcoes_personagem:
-            if opcao.tipo_personagem == TipoPersonagem.Comerciante or opcao.tipo_personagem == TipoPersonagem.Arquiteta:
-                lista_opcoes[opcao.nome] += 5
-            if any(jogador.pontuacao for jogador in estado.jogadores) > estado.jogador_atual.pontuacao:
-                if opcao.tipo_personagem == TipoPersonagem.Comerciante:
-                    lista_opcoes[opcao.nome] += 7
-                elif opcao.tipo_personagem == TipoPersonagem.Bispo:
-                    lista_opcoes[opcao.nome] += 1
-            if estado.jogador_atual.ouro > 6:
-                if opcao.tipo_personagem == TipoPersonagem.Ladrao:
-                    lista_opcoes[opcao.nome] += 4
-
-        decisao()
         return random.randint(0, len(opcoes_personagem) - 1)
+        # Retira opções de personagens descartados
+        opcoes = []
+        for personagem in opcoes_personagem:
+            if personagem not in estado.tabuleiro.cartas_visiveis:
+                opcoes.append(personagem)
+        return random.randint(0, len(opcoes) - 1)
 
     # Estratégia usada na habilidade do Ladrão
     @staticmethod
     def habilidade_ladrao(estado: Estado, opcoes_personagem: list[CartaPersonagem]) -> int:
         return random.randint(0, len(opcoes_personagem) - 1)
+        # Retira opções de personagens descartados
+        opcoes = []
+        for personagem in opcoes_personagem:
+            if personagem not in estado.tabuleiro.cartas_visiveis:
+                opcoes.append(personagem)
+        return random.randint(0, len(opcoes) - 1)
 
     # Estratégia usada na habilidade da Ilusionista (escolha do jogador alvo)
     @staticmethod
     def habilidade_ilusionista_trocar(estado: Estado, opcoes_jogadores: list[Jogador]) -> int:
         return random.randint(0, len(opcoes_jogadores) - 1)
+        # Ilusionista sempre troca de mão com o adversário que possui mais cartas, o desempate é uma escolha aleatória entre empatados
+        mais_cartas = 0
+        for jogador in opcoes_jogadores:
+            if len(jogador.cartas_distrito_mao) > mais_cartas:
+                mais_cartas = len(jogador.cartas_distrito_mao)
+        opcoes = []
+        for idx, jogador in enumerate(opcoes_jogadores):
+            if len(jogador.cartas_distrito_mao) == mais_cartas:
+                opcoes.append(idx)
+        return random.sample(opcoes, 1)[0]
 
     # Estratégia usada na habilidade da Ilusionista (escolha de quantas cartas serão descartadas)
     @staticmethod
@@ -296,4 +316,11 @@ class EstrategiaLuis(Estrategia):
     # Estratégia usada na ação do Laboratório
     @staticmethod
     def laboratorio(estado: Estado) -> int:
-        return random.randint(0, len(estado.jogador_atual.cartas_distrito_mao) - 1)
+        # Descarta o distrito de menor valor da mão
+        menor_valor = 9
+        distrito_escolhido = 0
+        for i, distrito in enumerate(estado.jogador_atual.cartas_distrito_mao):
+            if distrito.valor_do_distrito < menor_valor:
+                menor_valor = distrito.valor_do_distrito
+                distrito_escolhido = i
+        return distrito_escolhido
