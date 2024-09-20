@@ -26,8 +26,8 @@ gym.register(
 
 
 # Configurações gerais 
-DIR_NAME =              "aateste2"      # Diretório onde são salvos modelos intermediários e graficos 
-TRAIN_STEPS =           300000                 # Steps de treinamento
+DIR_NAME =              "aateste3"      # Diretório onde são salvos modelos intermediários e graficos 
+TRAIN_STEPS =           100000                 # Steps de treinamento
 MODEL_SAVE_FREQ =       10000                   # Frequência de salvamento de modelos 
 NOT_ALLOW_REUSE_DIRS =  True                  # impedir que arquivos com modelos salvos sejam sobrescritos
 ENV_RENDER_MODE =       None                #modo de renderização

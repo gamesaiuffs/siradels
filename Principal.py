@@ -9,6 +9,7 @@ from classes.strategies.EstrategiaFelipe import EstrategiaFelipe
 from classes.strategies.EstrategiaMCTS import EstrategiaMCTS
 from classes.strategies.EstrategiaManual import EstrategiaManual
 from classes.strategies.EstrategiaTotalmenteAleatoria import EstrategiaTotalmenteAleatoria
+from classes.strategies.EstrategiaEduardo import EstrategiaEduardo
 
 
 from stable_baselines3.common.env_checker import check_env
@@ -136,35 +137,35 @@ check_env(env)
 # Agente - Vitórias: 38 - Porcento Vitorias: 38.00% - Pontuação Média: 18.47
 # Tempo da simulação = 114.73s
     
-model = DQN(
-            "MlpPolicy",                     # Política de rede neural MLP
-            env=env,                         # Ambiente de OpenAI Gym
-            verbose=0,                       # Nível de detalhamento dos logs
+# model = DQN(
+#             "MlpPolicy",                     # Política de rede neural MLP
+#             env=env,                         # Ambiente de OpenAI Gym
+#             verbose=0,                       # Nível de detalhamento dos logs
 
-            # Parâmetros de exploração
-            exploration_initial_eps=0.7,     # Taxa inicial de exploração alta
-            exploration_final_eps=0.3,       # Taxa final de exploração baixa
-            exploration_fraction=0.3,        # Fração do total de etapas dedicadas à exploração
+#             # Parâmetros de exploração
+#             exploration_initial_eps=0.7,     # Taxa inicial de exploração alta
+#             exploration_final_eps=0.3,       # Taxa final de exploração baixa
+#             exploration_fraction=0.3,        # Fração do total de etapas dedicadas à exploração
 
-            # Parâmetros de treinamento e otimização
-            learning_rate=6.3e-4,            # Taxa de aprendizado
-            learning_starts=1000,            # Número de etapas de aprendizado antes de começar a treinar
-            gradient_steps=-1,               # Número de passos de gradiente (padrão usa -1, que é automático)
-            policy_kwargs=dict(net_arch=[256, 256]),  # Arquitetura da rede neural
+#             # Parâmetros de treinamento e otimização
+#             learning_rate=6.3e-4,            # Taxa de aprendizado
+#             learning_starts=1000,            # Número de etapas de aprendizado antes de começar a treinar
+#             gradient_steps=-1,               # Número de passos de gradiente (padrão usa -1, que é automático)
+#             policy_kwargs=dict(net_arch=[256, 256]),  # Arquitetura da rede neural
 
-            # Parâmetros de desconto e frequência de treinamento
-            gamma=0.99,                      # Fator de desconto
-            train_freq=4,                    # Frequência de treinamento (a cada 4 passos)
+#             # Parâmetros de desconto e frequência de treinamento
+#             gamma=0.99,                      # Fator de desconto
+#             train_freq=4,                    # Frequência de treinamento (a cada 4 passos)
 
-            # Parâmetros do replay buffer
-            buffer_size=50000,               # Tamanho do buffer de replay
-            batch_size=128,                  # Tamanho do lote de amostras para o treinamento
-            target_update_interval=1000,     # Intervalo de atualização do alvo
-)
+#             # Parâmetros do replay buffer
+#             buffer_size=50000,               # Tamanho do buffer de replay
+#             batch_size=128,                  # Tamanho do lote de amostras para o treinamento
+#             target_update_interval=1000,     # Intervalo de atualização do alvo
+# )
 
-model.learn(total_timesteps=50000)
-model.save(path)
-print()
+# model.learn(total_timesteps=50000)
+# model.save(path)
+# print()
 
 # Cria uma instância experimento para gerar estatítisticas e comparar o desempenho dos modelos
 # Treinar modelo MCTS RL por 10min = 600s
@@ -180,8 +181,11 @@ model = DQN.load(path, env=env)
 
 
 
-estrategias = [Agente(imprimir=False, model=model), EstrategiaTotalmenteAleatoria('Bot 1'), EstrategiaTotalmenteAleatoria('Bot 2'), EstrategiaTotalmenteAleatoria('Bot 3'), EstrategiaTotalmenteAleatoria('Bot 4')]
-Experimento.testar_estrategias(estrategias, 100, True)
+# estrategias = [Agente(imprimir=False, model=model), EstrategiaTotalmenteAleatoria('Bot 1'), EstrategiaTotalmenteAleatoria('Bot 2'), EstrategiaTotalmenteAleatoria('Bot 3'), EstrategiaTotalmenteAleatoria('Bot 4')]
+estrategias = [EstrategiaEduardo("Eduardo"), EstrategiaTotalmenteAleatoria('Bot 1'), EstrategiaTotalmenteAleatoria('Bot 2'), EstrategiaTotalmenteAleatoria('Bot 3'), EstrategiaTotalmenteAleatoria('Bot 4')]
+print("Inicio:")
+resposta, pontuacao_media, vitoria = Experimento.testar_estrategias(estrategias, 10, True)
+print(resposta)
 
 # estrategias = [EstrategiaMCTS(caminho), EstrategiaTotalmenteAleatoria('Bot 1'), EstrategiaTotalmenteAleatoria('Bot 2'), EstrategiaTotalmenteAleatoria('Bot 3'), EstrategiaTotalmenteAleatoria('Bot 4')]
 # Experimento.testar_estrategias(estrategias, 1000)

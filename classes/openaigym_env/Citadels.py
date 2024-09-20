@@ -14,8 +14,37 @@ from classes.model.Acao import ConstruirDistrito
 from classes.strategies.EstrategiaTotalmenteAleatoria import EstrategiaTotalmenteAleatoria
 
 
+# class RewardNormalizer:
+#     def __init__(self):
+#         self.mean = 0
+#         self.var = 1
+#         self.count = 0
+
+#     def update(self, reward):
+#         self.count += 1
+#         old_mean = self.mean
+#         self.mean += (reward - self.mean) / self.count
+#         self.var += (reward - old_mean) * (reward - self.mean)
+
+#     def normalize(self, reward):
+#         std = (self.var / self.count) ** 0.5
+#         return (reward - self.mean) / (std + 1e-8)
+    
+#     def reset(self):
+#         self.mean = 0
+#         self.count = 0
+#         self.var = 1
+
+# # Uso no ambiente
+# def calculate_reward(self):
+#     reward = self.raw_reward()
+#     self.reward_normalizer.update(reward)
+#     return self.reward_normalizer.normalize(reward)
+
 class Citadels(gym.Env):
     passos = 0
+    # normalizador = RewardNormalizer()
+    
     # Inicializa um novo ambiente de simulação
     def __init__(self):
         # Atributos específicos do jogo
@@ -65,7 +94,10 @@ class Citadels(gym.Env):
     def step(self, action: ActType) -> tuple[ObsType, SupportsFloat, bool, bool, dict[str, Any]]:
         
         Citadels.passos += 1
-        print("step: ", Citadels.passos, end="\r")
+        # self.normalizador.reset()
+        
+        
+        # print("step: ", Citadels.passos, end="\r")
         
         if self.simulacao.nova_rodada:
             self.simulacao.iniciar_rodada()
@@ -138,6 +170,9 @@ class Citadels(gym.Env):
             #recompensa += -12.0
             # recompensa += -120.0
             recompensa += -50.0
+            # recompensa = recompensa / 100
+            # print(recompensa)
+            
             return self.observation(), recompensa, self.simulacao.final_jogo, False, dict()
 
         # Rotina executada se chegou no final do jogo após a ação
@@ -162,6 +197,11 @@ class Citadels(gym.Env):
         # Retorna uma tupla contendo:
         # a observação do próximo estado, a recompensa imediata obtida, se o estado é final,
         # se a simulação deve ser encerrada (estado inválido, mas não final) e informações adicionais
+        
+        # normalização 
+        # recompensa = recompensa / 100
+        print(recompensa)
+        
         return self.observation(), recompensa, self.simulacao.final_jogo, False, dict()
 
     # Método (opcional) que implementa interface gráfica
