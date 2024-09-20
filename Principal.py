@@ -1,19 +1,26 @@
 import gymnasium as gym
 import time
+from itertools import permutations
 
 from classes.Experimento import Experimento
 from classes.enum.TipoAcaoOpenAI import TipoAcaoOpenAI
 from classes.openaigym_env.Citadels import Citadels
+
 from classes.strategies.Agente import Agente
-from classes.strategies.EstrategiaFelipe import EstrategiaFelipe
-from classes.strategies.EstrategiaMCTS import EstrategiaMCTS
-from classes.strategies.EstrategiaManual import EstrategiaManual
-from classes.strategies.EstrategiaTotalmenteAleatoria import EstrategiaTotalmenteAleatoria
-from classes.strategies.EstrategiaGold import EstrategiaGold
+from classes.strategies.Estrategia import Estrategia
 from classes.strategies.EstrategiaAllin import EstrategiaAllin
 from classes.strategies.EstrategiaAndrei import EstrategiaAndrei
-
-
+from classes.strategies.EstrategiaBuild import EstrategiaBuild
+from classes.strategies.EstrategiaDjonatan import EstrategiaDjonatan
+from classes.strategies.EstrategiaEduardo import EstrategiaEduardo
+from classes.strategies.EstrategiaFelipe import EstrategiaFelipe
+from classes.strategies.EstrategiaFrequency import EstrategiaFrequency
+from classes.strategies.EstrategiaGold import EstrategiaGold
+from classes.strategies.EstrategiaJean import EstrategiaJean
+from classes.strategies.EstrategiaLuis import EstrategiaLuisII
+from classes.strategies.EstrategiaManual import EstrategiaManual
+from classes.strategies.EstrategiaMCTS import EstrategiaMCTS
+from classes.strategies.EstrategiaTotalmenteAleatoria import EstrategiaTotalmenteAleatoria
 from stable_baselines3.common.env_checker import check_env
 from stable_baselines3 import DQN
 
@@ -72,31 +79,37 @@ check_env(env)
 # model.learn(total_timesteps=1000)
 # model.save("citadels_agent")
 
+# print("Início do treino MCTS")
+# experimento = Experimento(caminho)
+# experimento.treinar_modelo_mcts(600, 0) # Treinar modelo MCTS RL por 10min = 600s
+# print("Fim do treino MCTS")
 
-# Cria uma instância experimento para gerar estatítisticas e comparar o desempenho dos modelos
-# Treinar modelo MCTS RL por 10min = 600s
-'''
-experimento = Experimento(caminho)
-experimento.treinar_modelo_mcts(600, 0)
-'''
-
-# Testar treino contra outras estratégias
-estrategias = [EstrategiaAndrei(), EstrategiaTotalmenteAleatoria('Bot 1'), EstrategiaTotalmenteAleatoria('Bot 2'), EstrategiaTotalmenteAleatoria('Bot 3'), EstrategiaTotalmenteAleatoria('Bot 4')]
-Experimento.testar_estrategias(estrategias, 1000)
-
-'''
-estrategias = [Agente(), EstrategiaTotalmenteAleatoria('Bot 1'), EstrategiaTotalmenteAleatoria('Bot 2'), EstrategiaTotalmenteAleatoria('Bot 3'), EstrategiaTotalmenteAleatoria('Bot 4')]
-Experimento.testar_estrategias(estrategias, 1000)
-
-estrategias = [EstrategiaMCTS(caminho), EstrategiaTotalmenteAleatoria('Bot 1'), EstrategiaTotalmenteAleatoria('Bot 2'), EstrategiaTotalmenteAleatoria('Bot 3'), EstrategiaTotalmenteAleatoria('Bot 4')]
-Experimento.testar_estrategias(estrategias, 1000)
-
-estrategias = [EstrategiaFelipe(), EstrategiaTotalmenteAleatoria('Bot 1'), EstrategiaTotalmenteAleatoria('Bot 2'), EstrategiaTotalmenteAleatoria('Bot 3'), EstrategiaTotalmenteAleatoria('Bot 4')]
-Experimento.testar_estrategias(estrategias, 1000)
-
-estrategias = [Agente(), EstrategiaMCTS(caminho), EstrategiaFelipe(), EstrategiaTotalmenteAleatoria('Bot 1'), EstrategiaTotalmenteAleatoria('Bot 2')]
-Experimento.testar_estrategias(estrategias, 10000)
-'''
+print("Início dos testes das estratégias")
+# Sem o Agente()
+estrategias: list[Estrategia] = [EstrategiaAllin("Allin"), EstrategiaAndrei(), EstrategiaBuild("Build"), EstrategiaDjonatan(), EstrategiaEduardo(),
+                                 EstrategiaFelipe(), EstrategiaFrequency("Frequency"), EstrategiaGold("Gold"), EstrategiaJean(), EstrategiaLuisII(),
+                                 EstrategiaMCTS(caminho), EstrategiaTotalmenteAleatoria()]
+perm = list(permutations(estrategias, 5))
+qtd_perm = len(perm)
+print("Quantidade de Permutações:", qtd_perm)
+qtd_simulacao: int = 2
+resultados_total: dict[str, (int, int)] = dict()
+for e in estrategias:
+    resultados_total[e.nome] = (0, 0, 0)
+for i, p in enumerate(perm):
+    if i % 1000 == 0:
+        print(f"{i}/{qtd_perm} - {(i*100/qtd_perm):.2f}%")
+    resultados = Experimento.testar_estrategias(list(p), qtd_simulacao)
+    for jogador, resultado in resultados.items():
+        (vitoria, pontuacao) = resultado
+        resultados_total[jogador] = (resultados_total[jogador][0] + vitoria, resultados_total[jogador][1] + pontuacao, resultados_total[jogador][2] + qtd_simulacao)
+for jogador, resultado in resultados_total.items():
+    (vitoria, pontuacao, qtd_simulacao_total) = resultado
+    pontuacao_media = pontuacao / qtd_simulacao_total
+    taxa_vitoria = 100 * vitoria / qtd_simulacao_total
+    print(
+        f'{jogador} - Vitórias: {vitoria} - Taxa de Vitórias: {taxa_vitoria:.2f}% - Pontuação Média: {pontuacao_media:.2f}')
+print("Fim dos testes das estratégias")
 
 # Imprime duração do experimento
 s = time.time() - start_time

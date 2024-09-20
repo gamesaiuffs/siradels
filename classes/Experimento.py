@@ -14,7 +14,7 @@ class Experimento:
         self.caminho: str = caminho
 
     @staticmethod
-    def testar_estrategias(estrategias: list[Estrategia], qtd_simulacao_maximo: int = 1000, automatico: bool = True):
+    def testar_estrategias(estrategias: list[Estrategia], qtd_simulacao_maximo: int = 1000, automatico: bool = True) -> dict[str, (int, int)]:
         qtd_simulacao = 1
         resultados: dict[str, (int, int)] = dict()
         # Cria simulação
@@ -32,12 +32,7 @@ class Experimento:
             for jogador in estado_final.jogadores:
                 (vitoria, pontuacao) = resultados[jogador.nome]
                 resultados[jogador.nome] = (int(jogador.vencedor) + vitoria, jogador.pontuacao_final + pontuacao)
-        print()
-        for jogador, resultado in resultados.items():
-            (vitoria, pontuacao) = resultado
-            pontuacao_media = pontuacao / qtd_simulacao
-            print(
-                f'{jogador} - Vitórias: {vitoria} - Porcento Vitorias: {vitoria / qtd_simulacao * 100:.2f}% - Pontuação Média: {pontuacao_media}')
+        return resultados
 
     # Inicializa o treinamento do modelo do zero e treina durante o tempo limite em segundos
     def treinar_modelo_mcts(self, tempo_limite: int, tipo_treino):
