@@ -61,7 +61,7 @@ class Simulacao:
         jogador_estrategia: dict[Jogador, Estrategia] = dict()
         shuffle(estrategias)
         for (jogador, estrategia) in zip(self.estado.jogadores, estrategias):
-            jogador.nome = estrategia.descricao
+            jogador.nome = estrategia.nome
             jogador_estrategia.update({jogador: estrategia})
         return jogador_estrategia
 

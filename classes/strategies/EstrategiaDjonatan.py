@@ -448,6 +448,7 @@ class EstrategiaDjonatan(Estrategia):
         for i, distrito, jogador in enumerate(distritos_para_destruir):
             if distrito.valor_do_distrito == 0:
                 return i
+        return 0
 
     # Estratégia usada na ação do Laboratório
     @staticmethod
