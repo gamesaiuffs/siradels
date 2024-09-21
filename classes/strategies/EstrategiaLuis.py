@@ -47,15 +47,15 @@ class EstrategiaLuisII(Estrategia):
         }
 
         if jogador.cartas_distrito_mao == 0 and len(jogador.distritos_construidos) < 5:
-            sentimento['avareza'] += 2
+            sentimento['avareza'] += medio_incentivo
         elif jogador.ouro <= 5:
-            sentimento['avareza'] += 1
+            sentimento['avareza'] += pequeno_incentivo
 
         if any(inimigo.pontuacao > estado.jogador_atual.pontuacao for inimigo in estado.jogadores):
-            sentimento['violencia'] += 1
+            sentimento['violencia'] += pequeno_incentivo
 
         if jogador.ouro >= 4:
-            sentimento['gasto'] += 1000
+            sentimento['gasto'] += certeza
         sentimento_atual = max(sentimento.items(), key=lambda item: item[1])[0]
 
         # Calculate distrito total cost
@@ -238,7 +238,47 @@ class EstrategiaLuisII(Estrategia):
     # Estratégia usada na ação de coletar cartas
     @staticmethod
     def coletar_cartas(estado: Estado, cartas_compradas: list[CartaDistrito], qtd_cartas: int) -> int:
-        return random.randint(0, qtd_cartas - 1)
+        peso_escolha = {carta.nome_do_distrito: 0 for carta in cartas_compradas}
+        jogador = estado.jogador_atual
+
+        # Pesos
+        grande_incentivo = 3
+        medio_incentivo = 2
+        pequeno_incentivo = 1
+        certeza = 1000
+
+        # Média dos custos das cartas na mão
+        media_de_custos = [carta.valor_do_distrito for carta in jogador.cartas_distrito_mao]
+        media_de_custos = sum(media_de_custos) / len(media_de_custos) if media_de_custos else 0
+
+        # Quantidade de distritos restantes para vencer
+        distancias_para_vitoria = 6 - len(jogador.distritos_construidos)
+
+        for carta in cartas_compradas:
+            # Incentivo para distritos já construídos
+            if carta.tipo_de_distrito in [distrito.tipo_de_distrito for distrito in jogador.distritos_construidos]:
+                peso_escolha[carta.nome_do_distrito] += pequeno_incentivo
+
+            # Alta prioridade se estiver perto de completar os 7 distritos
+            if len(jogador.distritos_construidos) == 6 and carta.valor_do_distrito <= jogador.ouro:
+                peso_escolha[carta.nome_do_distrito] += certeza
+
+            # Priorizar distritos especiais
+            if carta.tipo_de_distrito == 4:
+                peso_escolha[carta.nome_do_distrito] += grande_incentivo
+
+            # Incentivo baseado na diferença do custo da carta em relação à média
+            diferenca = carta.valor_do_distrito - media_de_custos
+            peso_escolha[carta.nome_do_distrito] += (
+                pequeno_incentivo if -pequeno_incentivo <= diferenca <= pequeno_incentivo else
+                -grande_incentivo
+            )
+
+            # Multiplicador de desespero, quanto mais próximo de ganhar mais quer construir coisas baratas
+            if carta.valor_do_distrito <= jogador.ouro:
+                incentivo_por_proximidade = pequeno_incentivo * (7 - distancias_para_vitoria)
+                peso_escolha[carta.nome_do_distrito] += incentivo_por_proximidade
+
 
     # Estratégia usada na ação de construir distritos
     @staticmethod
