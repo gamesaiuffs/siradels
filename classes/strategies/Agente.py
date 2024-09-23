@@ -1,8 +1,6 @@
 from stable_baselines3 import DQN
 
 from classes.enum.TipoAcao import TipoAcao
-from classes.enum.TipoAcaoOpenAI import TipoAcaoOpenAI
-from classes.enum.TipoDistrito import TipoDistrito
 from classes.model.CartaDistrito import CartaDistrito
 from classes.model.CartaPersonagem import CartaPersonagem
 from classes.strategies.Estrategia import Estrategia
@@ -26,38 +24,18 @@ class Agente(Estrategia):
             for idx, personagem in enumerate(estado.tabuleiro.baralho_personagens):
                 if action == personagem.rank - 1:
                     idx_escolha_personagem = idx
-            # Caso não esteja, retorna estado atual
-            if idx_escolha_personagem == -1:
+            if idx_escolha_personagem != -1:
                 break
         return idx_escolha_personagem
 
     # Estratégia usada na fase de escolha das ações no turno
-    def escolher_acao(self, estado: Estado, acoes_disponiveis: list[TipoAcao]) -> int:
-        if len(acoes_disponiveis) > 1:
-            # Verifica se ação de coletar recursos está disponível e armazena o seu índice
-            idx_acao_coleta_ouro = -1
-            idx_acao_coleta_carta = -1
-            for idx, acao in enumerate(acoes_disponiveis):
-                if acao == TipoAcao.ColetarOuro:
-                    idx_acao_coleta_ouro = idx
-                elif acao == TipoAcao.ColetarCartas:
-                    idx_acao_coleta_carta = idx
-            if idx_acao_coleta_ouro != idx_acao_coleta_carta:
-                # Agente escolhe uma das ações
-                while True:
-                    action, _ = self.model.predict(np.array(estado.converter_estado(openaigym=True)), deterministic=False)
-                    if action == TipoAcaoOpenAI.ColetarOuro.value:
-                        return idx_acao_coleta_ouro
-                    elif action == TipoAcaoOpenAI.ColetarCartas.value:
-                        return idx_acao_coleta_carta
-            # Caso contrário escolhe segue comportamente do totalmente aleatório
-            else:
-                # Deixa passar turno por último
-                acao_escolhida = random.randint(0, len(acoes_disponiveis) - 1)
-                while acoes_disponiveis[acao_escolhida] == TipoAcao.PassarTurno:
-                    acao_escolhida = random.randint(0, len(acoes_disponiveis) - 1)
-                return acao_escolhida
-        return 0
+    @staticmethod
+    def escolher_acao(estado: Estado, acoes_disponiveis: list[TipoAcao]) -> int:
+        # Deixa passar turno por último
+        acao_escolhida = random.randint(0, len(acoes_disponiveis) - 1)
+        while len(acoes_disponiveis) > 1 and acoes_disponiveis[acao_escolhida] == TipoAcao.PassarTurno:
+            acao_escolhida = random.randint(0, len(acoes_disponiveis) - 1)
+        return acao_escolhida
 
     # Estratégia usada na ação de coletar cartas
     @staticmethod
@@ -65,43 +43,10 @@ class Agente(Estrategia):
         return random.randint(0, qtd_cartas - 1)
 
     # Estratégia usada na ação de construir distritos
-    def construir_distrito(self, estado: Estado, distritos_para_construir: list[CartaDistrito],
+    @staticmethod
+    def construir_distrito(estado: Estado, distritos_para_construir: list[CartaDistrito],
                            distritos_para_construir_covil_ladroes: list[(CartaDistrito, int, int)]) -> int:
         tamanho_maximo = len(distritos_para_construir) + len(distritos_para_construir_covil_ladroes)
-        # Só usa habilidade do covil dos ladrões se não tiver outra opção
-        if len(distritos_para_construir) == 0:
-            return random.randint(0, tamanho_maximo - 1)
-        while True:
-            action, _ = self.model.predict(np.array(estado.converter_estado(openaigym=True)), deterministic=False)
-            if 10 <= action:
-                break
-        # Seleciona distrito a ser construído segundo estratégia/ação selecionada
-        distritos_selecionados = []
-        # Verifica se é possível construir ao menos 1 distrito da mão para recompensar o agente
-        if action < 15:
-            # Verifica se possui tipo de distrito escolhido
-            for idx, distrito in enumerate(distritos_para_construir):
-                if distrito.tipo_de_distrito == TipoDistrito(action - 10):
-                    distritos_selecionados.append(idx)
-        elif action == TipoAcaoOpenAI.ConstruirDistritoMaisCaro.value:
-            caro = distritos_para_construir[0]
-            idx_caro = 0
-            for idx, distrito in enumerate(distritos_para_construir):
-                if caro.valor_do_distrito < distrito.valor_do_distrito:
-                    caro = distrito
-                    idx_caro = idx
-            distritos_selecionados.append(idx_caro)
-        elif action == TipoAcaoOpenAI.ConstruirDistritoMaisBarato.value:
-            barato = distritos_para_construir[0]
-            idx_barato = 0
-            for idx, distrito in enumerate(distritos_para_construir):
-                if barato.valor_do_distrito > distrito.valor_do_distrito:
-                    barato = distrito
-                    idx_barato = idx
-            distritos_selecionados.append(idx_barato)
-        if len(distritos_selecionados) > 0:
-            return random.sample(distritos_selecionados, 1)[0]
-        # Se tipo de distrito escolhido estiver indisponível, escolhe aleatoriamente
         return random.randint(0, tamanho_maximo - 1)
 
     # Estratégia usada na ação de construir distritos (efeito Covil dos Ladrões)
