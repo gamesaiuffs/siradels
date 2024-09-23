@@ -13,25 +13,30 @@ class Experimento:
     def __init__(self, caminho: str):
         self.caminho: str = caminho
 
+    # Testa estratégias e retorna resultados com dicionário {nome_jogador: (qtd_primeiro, qtd_segundo, qtd_terceiro, qtd_quarto, qtd_quinto, soma_pontuacao)}
     @staticmethod
-    def testar_estrategias(estrategias: list[Estrategia], qtd_simulacao_maximo: int = 1000, automatico: bool = True) -> dict[str, (int, int)]:
+    def testar_estrategias(estrategias: list[Estrategia], qtd_simulacao_maximo: int = 1000, automatico: bool = True) -> dict[str, (int, int, int, int, int, int)]:
         qtd_simulacao = 1
-        resultados: dict[str, (int, int)] = dict()
-        # Cria simulação
-        simulacao = Simulacao(estrategias, automatico=automatico)
-        # Executa simulação
-        estado_final = simulacao.rodar_simulacao()
-        for jogador in estado_final.jogadores:
-            resultados[jogador.nome] = (int(jogador.vencedor), jogador.pontuacao_final)
-        while qtd_simulacao < qtd_simulacao_maximo:
-            qtd_simulacao += 1
+        resultados: dict[str, (int, int, int, int, int, int)] = dict()
+        for jogador in estrategias:
+            resultados[jogador.nome] = (0, 0, 0, 0, 0, 0)
+        while qtd_simulacao <= qtd_simulacao_maximo:
             # Cria simulação
             simulacao = Simulacao(estrategias, automatico=automatico)
             # Executa simulação
             estado_final = simulacao.rodar_simulacao()
             for jogador in estado_final.jogadores:
-                (vitoria, pontuacao) = resultados[jogador.nome]
-                resultados[jogador.nome] = (int(jogador.vencedor) + vitoria, jogador.pontuacao_final + pontuacao)
+                (vitoria, seg, ter, qua, qui, pontuacao) = resultados[jogador.nome]
+                if jogador == estado_final.jogadores[1]:
+                    seg += 1
+                if jogador == estado_final.jogadores[2]:
+                    ter += 1
+                if jogador == estado_final.jogadores[3]:
+                    qua += 1
+                if jogador == estado_final.jogadores[4]:
+                    qui += 1
+                resultados[jogador.nome] = (int(jogador.vencedor) + vitoria, seg, ter, qua, qui, jogador.pontuacao_final + pontuacao)
+            qtd_simulacao += 1
         return resultados
 
     # Inicializa o treinamento do modelo do zero e treina durante o tempo limite em segundos
