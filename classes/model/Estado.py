@@ -13,10 +13,6 @@ class Estado:
         self.turno: int = 0
         self.rodada: int = 0
         self.jogador_atual: Jogador | None = None
-        self.escolher_personagem = False
-        self.coletar_recursos = False
-        self.construir_distrito = False
-        self.inicio_turno_acoes = False
 
     # To String
     def __str__(self):
@@ -43,7 +39,12 @@ class Estado:
     # Reorganiza a lista de jogadores conforme a sua pontuação final no jogo
     def ordenar_jogadores_pontuacao(self):
         ordem = [jogador.pontuacao_final for jogador in self.jogadores]
-        self.jogadores = sort_together([ordem, self.jogadores], reverse=True)[1]
+        self.jogadores = list(sort_together([ordem, self.jogadores], reverse=True)[1])
+        # Verifica empates e aplica critério de desempate
+        for i in range(len(self.jogadores) - 1):
+            if (self.jogadores[i].pontuacao_final == self.jogadores[i+1].pontuacao_final
+                    and self.jogadores[i].personagem.rank < self.jogadores[i+1].personagem.rank):
+                self.jogadores[i], self.jogadores[i+1] = self.jogadores[i+1], self.jogadores[i]
 
     def converter_estado(self, openaigym: bool = False) -> list[int]:
         # Controle de quem ve o estado
@@ -167,33 +168,30 @@ class Estado:
             media = 4
         estado_vetor.append(media)
 
-        # Flag que marca se a fase atual é a de escolha de personagem [0,1]
-        estado_vetor.append(int(self.escolher_personagem))
-        # Flag que marca se a fase atual é a de coletar recursos [0,1]
-        estado_vetor.append(int(self.coletar_recursos))
-        # Flag que marca se a fase atual é a de construção de distritos [0,1]
-        estado_vetor.append(int(self.construir_distrito))
         # Conjunto de flags para personagens disponíveis
         # Devem ficar por último no mapeamento do estado para lógica de verificação na classe Citadels funcionar
         p1 = p2 = p3 = p4 = p5 = p6 = p7 = p8 = 0
         for carta in self.tabuleiro.baralho_personagens:
             if carta.rank == 1:
                 p1 = 1
-            if carta.rank == 2:
+            elif carta.rank == 2:
                 p2 = 1
-            if carta.rank == 3:
+            elif carta.rank == 3:
                 p3 = 1
-            if carta.rank == 4:
+            elif carta.rank == 4:
                 p4 = 1
-            if carta.rank == 5:
+            elif carta.rank == 5:
                 p5 = 1
-            if carta.rank == 6:
+            elif carta.rank == 6:
                 p6 = 1
-            if carta.rank == 7:
+            elif carta.rank == 7:
                 p7 = 1
-            if carta.rank == 8:
+            elif carta.rank == 8:
                 p8 = 1
         estado_vetor.extend([p1, p2, p3, p4, p5, p6, p7, p8])
+
+        # Flag que indica se é o turno do agente
+        estado_vetor.append(0 if self.jogador_atual is None or self.jogador_atual.nome != "Agente" else 1)
 
         ''' Observações retiradas
         # Qtd personagens disponíveis [2,3,4,5,6]

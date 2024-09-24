@@ -8,8 +8,8 @@ from classes.model.Jogador import Jogador
 
 
 class Estrategia(ABC):
-    def __init__(self, descricao: str, imprimir: bool = False):
-        self.descricao: str = descricao
+    def __init__(self, nome: str, imprimir: bool = False):
+        self.nome: str = nome
         self.imprimir: bool = imprimir
 
     # Estratégia usada na fase de escolha dos personagens

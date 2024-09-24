@@ -238,8 +238,14 @@ class HabilidadeIlusionistaTrocar(Acao):
             return
         # Aplica efeito troca de mão com outro jogador
         escolha_jogador = estrategia.habilidade_ilusionista_trocar(estado, opcoes_jogadores)
-        estado.jogador_atual.cartas_distrito_mao, opcoes_jogadores[escolha_jogador].cartas_distrito_mao \
+        try:
+            estado.jogador_atual.cartas_distrito_mao, opcoes_jogadores[escolha_jogador].cartas_distrito_mao \
             = opcoes_jogadores[escolha_jogador].cartas_distrito_mao, estado.jogador_atual.cartas_distrito_mao
+        except IndexError:
+            print(estrategia)
+            print(escolha_jogador)
+            print(opcoes_jogadores)
+            print(opcoes_jogadores[escolha_jogador])
         # Marca flag de ação utilizada
         super().ativar(estado)
 
@@ -337,11 +343,8 @@ class HabilidadeSenhorDaGuerraDestruir(Acao):
             return
         # Aplica estratégia do jogador
         escolha_destruir = estrategia.habilidade_senhor_da_guerra_destruir(estado, distritos_para_destruir)
-        if escolha_destruir == 0:
-            super().ativar(estado)
-            return
         # Paga o custo e destrói distrito escolhido do jogador alvo
-        (distrito, jogador) = distritos_para_destruir[escolha_destruir - 1]
+        (distrito, jogador) = distritos_para_destruir[escolha_destruir]
         estado.jogador_atual.ouro -= distrito.valor_do_distrito - 1
         jogador.destruir(estado, distrito)
         # Marca flag de ação utilizada
