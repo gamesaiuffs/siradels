@@ -13,11 +13,10 @@ from sklearn.model_selection import learning_curve
 from sklearn.decomposition import PCA
 from sklearn.model_selection import StratifiedGroupKFold
 import matplotlib.pyplot as plt
-import time
 from itertools import combinations
 from classes.Experimento import Experimento
-from classes.openaigym_env.Citadels import Citadels
-from classes.strategies.Agente import Agente
+#from classes.openaigym_env.Citadels import Citadels
+#from classes.strategies.Agente import Agente
 from classes.strategies.Estrategia import Estrategia
 from classes.strategies.EstrategiaAllin import EstrategiaAllin
 from classes.strategies.EstrategiaAndrei import EstrategiaAndrei
@@ -30,7 +29,7 @@ from classes.strategies.EstrategiaGold import EstrategiaGold
 from classes.strategies.EstrategiaJean import EstrategiaJean
 from classes.strategies.EstrategiaLuis import EstrategiaLuisII
 from classes.strategies.EstrategiaManual import EstrategiaManual
-from classes.strategies.EstrategiaMCTS import EstrategiaMCTS
+#from classes.strategies.EstrategiaMCTS import EstrategiaMCTS
 from classes.strategies.EstrategiaTotalmenteAleatoria import EstrategiaTotalmenteAleatoria
 import joblib
 '''
@@ -44,9 +43,7 @@ from stable_baselines3.common.env_checker import check_env
 '''
 from classes.Experimento import Experimento
 from classes.Simulacao import Simulacao
-from classes.strategies.EstrategiaDjonatan import EstrategiaDjonatan
-from classes.strategies.EstrategiaFelipe import EstrategiaFelipe
-from classes.strategies.EstrategiaTotalmenteAleatoria import EstrategiaTotalmenteAleatoria
+
 import time
 vscode = True
 
@@ -148,9 +145,9 @@ check_env(env)
 # print("Fim do treino MCTS")
 
 print("Início dos testes das estratégias")
-estrategias: list[Estrategia] = [Agente(), EstrategiaAllin("Allin"), EstrategiaAndrei(), EstrategiaBuild("Build"), EstrategiaDjonatan(), EstrategiaEduardo(),
+estrategias: list[Estrategia] = [EstrategiaAllin("Allin"), EstrategiaAndrei(), EstrategiaBuild("Build"), EstrategiaDjonatan(), EstrategiaEduardo(),
                                  EstrategiaFelipe(), EstrategiaFrequency("Frequency"), EstrategiaGold("Gold"), EstrategiaJean(), EstrategiaLuisII(),
-                                 EstrategiaMCTS(caminho), EstrategiaTotalmenteAleatoria()]
+                                 EstrategiaTotalmenteAleatoria()] #MCTS e Agente off, levar para ColetaEstados e adaptar
 # estrategias: list[Estrategia] = [Agente(imprimir=True), EstrategiaTotalmenteAleatoria("B2"), EstrategiaTotalmenteAleatoria("B3"), EstrategiaTotalmenteAleatoria("B4"), EstrategiaTotalmenteAleatoria("B5")]
 comb = list(combinations(estrategias, 5))
 qtd_comb = len(comb)

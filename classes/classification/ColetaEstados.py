@@ -5,12 +5,12 @@ from classes.strategies.EstrategiaTotalmenteAleatoria import EstrategiaTotalment
 from classes.strategies.EstrategiaAndrei import EstrategiaAndrei
 from classes.strategies.EstrategiaDjonatan import EstrategiaDjonatan
 from classes.strategies.EstrategiaFelipe import EstrategiaFelipe
-from classes.strategies.EstrategiaLuis import EstrategiaLuis
+from classes.strategies.EstrategiaLuis import EstrategiaLuisII
 import numpy as np
 import random
 import itertools
 
-estrategias_disponiveis = [EstrategiaDjonatan(), EstrategiaFelipe(), EstrategiaLuis('luis'), EstrategiaTotalmenteAleatoria('bot-1'), EstrategiaTotalmenteAleatoria('bot-2')]
+estrategias_disponiveis = [EstrategiaDjonatan(), EstrategiaFelipe(), EstrategiaLuisII('luis'), EstrategiaTotalmenteAleatoria('bot-1'), EstrategiaTotalmenteAleatoria('bot-2')]
 
 class ColetaEstados:
     @staticmethod
