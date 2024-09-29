@@ -85,15 +85,15 @@ class ConstruirDistrito(Acao):
     def __init__(self):
         super().__init__('Construa um distrito em sua cidade.', TipoAcao.ConstruirDistrito)
 
-    def ativar(self, estado: Estado, estrategia: Estrategia | int = None):
+    def ativar(self, estado: Estado, estrategia: Estrategia | int = None, idx_escolhido: int = None):
         distritos_para_construir, distritos_para_construir_covil_ladroes = ConstruirDistrito.distritos_possiveis_construir(estado.jogador_atual)
         # Verifica se é possível construir ao menos 1 distrito da mão
         if len(distritos_para_construir) + len(distritos_para_construir_covil_ladroes) == 0:
             super().ativar(estado)
             return
         # Aplica estratégia do jogador
-        if isinstance(estrategia, int):
-            escolha_construir = estrategia
+        if idx_escolhido is not None:
+            escolha_construir = idx_escolhido
         else:
             escolha_construir = estrategia.construir_distrito(estado, distritos_para_construir, distritos_para_construir_covil_ladroes)
         # Construção normal
@@ -238,8 +238,14 @@ class HabilidadeIlusionistaTrocar(Acao):
             return
         # Aplica efeito troca de mão com outro jogador
         escolha_jogador = estrategia.habilidade_ilusionista_trocar(estado, opcoes_jogadores)
-        estado.jogador_atual.cartas_distrito_mao, opcoes_jogadores[escolha_jogador].cartas_distrito_mao \
+        try:
+            estado.jogador_atual.cartas_distrito_mao, opcoes_jogadores[escolha_jogador].cartas_distrito_mao \
             = opcoes_jogadores[escolha_jogador].cartas_distrito_mao, estado.jogador_atual.cartas_distrito_mao
+        except IndexError:
+            print(estrategia)
+            print(escolha_jogador)
+            print(opcoes_jogadores)
+            print(opcoes_jogadores[escolha_jogador])
         # Marca flag de ação utilizada
         super().ativar(estado)
 
@@ -337,11 +343,8 @@ class HabilidadeSenhorDaGuerraDestruir(Acao):
             return
         # Aplica estratégia do jogador
         escolha_destruir = estrategia.habilidade_senhor_da_guerra_destruir(estado, distritos_para_destruir)
-        if escolha_destruir == 0:
-            super().ativar(estado)
-            return
         # Paga o custo e destrói distrito escolhido do jogador alvo
-        (distrito, jogador) = distritos_para_destruir[escolha_destruir - 1]
+        (distrito, jogador) = distritos_para_destruir[escolha_destruir]
         estado.jogador_atual.ouro -= distrito.valor_do_distrito - 1
         jogador.destruir(estado, distrito)
         # Marca flag de ação utilizada
