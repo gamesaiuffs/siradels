@@ -158,6 +158,10 @@ class ClassificaEstados:
         except:
             jmp_custo_construido = 0
 
+        num_max_dist_const = 0
+        for jogador in jogadores:
+            if len(jogador.distritos_construidos) > 0:
+                num_max_dist_const = len(jogador.distritos_construidos)
 
         #print(ja.nome, jmp.nome, ja_custo_mao, ja.distritos_construidos)
 
@@ -165,7 +169,7 @@ class ClassificaEstados:
         # Nº total de features atual: 23 
         
         # Cria o vetor dos dois jogadores
-        estado_tabuleiro = [rodada, jogadores[4].pontuacao, jogadores[3].pontuacao, jogadores[2].pontuacao, jogadores[1].pontuacao, jogadores[0].pontuacao]
+        estado_tabuleiro = [rodada, num_max_dist_const, jogadores[4].pontuacao, jogadores[3].pontuacao, jogadores[2].pontuacao, jogadores[1].pontuacao, jogadores[0].pontuacao]
         estado_jogador_atual = [ja.ouro, len(ja.cartas_distrito_mao), len(ja.distritos_construidos), ja_custo_construido, ja_custo_mao, ja_tipos_board, ja_tipos_mao, ja_custo123_board, ja_custo456_board, ja_custo123_mao, ja_custo456_mao, ja_especiais_mao, ja_especiais_board, ja.personagem.rank]
         estado_outro_jogador = [jmp.ouro, len(jmp.cartas_distrito_mao), len(jmp.distritos_construidos), jmp_custo_construido, jmp_tipos_board, jmp_custo123_board, jmp_custo456_board, jmp_especiais_board, jmp.personagem.rank]
 
@@ -182,7 +186,7 @@ class ClassificaEstados:
             X = np.vstack((X, x_coleta))
             return X
         else:
-            return ClassificaEstados.calcula_porcentagem(x_coleta, model_name)
+            return ClassificaEstados.calcula_porcentagem(x_coleta, model_name, nome_observado)
 
     @staticmethod
     def coleta_rotulos_treino(nome_observado, nome_vencedor):
@@ -397,7 +401,7 @@ class ClassificaEstados:
         recallv = round(recall_score(y_true=Y_test, y_pred=Y_pred, zero_division=0), 2)
         precisionm = round(precision_score(y_true=Y_test, y_pred=Y_pred, average='macro', zero_division=0), 2)
         recallm = round(recall_score(y_true=Y_test, y_pred=Y_pred, average='macro', zero_division=0) , 2)
-        auc = round(roc_auc_score(y_true=Y_test, y_score=Y_pred), 2)
+        #auc = round(roc_auc_score(y_true=Y_test, y_score=Y_pred), 2)
 
         '''
         print(f"Nome do modelo: {modelo}")
@@ -413,13 +417,14 @@ class ClassificaEstados:
             "Win Precision": precisionv,
             "Win Recall": recallv,
             "Accuracy": accuracy,
-            "AUC": auc,
+            #"AUC": auc,
             "Macro Precision": precisionm,
             "Macro Recall": recallm
         }
 
         return model_test_info
 
+    # Implementar o grid search e ciclar amostras e validação cruzada
     @staticmethod
     def circuito_treino_teste(jogos: str, rotulos: str, n_features: int):
 
@@ -503,20 +508,8 @@ class ClassificaEstados:
 
     # Avalia testes
     @staticmethod
-    def avalia_testes():
+    def avalia_testes(feature_names):
 
-        feature_names = [
-
-        # Board features
-        "Round", "Score P1", "Score P2", "Score P3", "Score P4", "Score P5",
-
-        # AP features
-        "Gold Amount (AP)", "Number of cards in Hand (AP)", "Number of Builded Districts (AP)", "Cost of citadel (AP)", "Cost of Hand (AP)", "Builded District Types (AP)", "District Types in Hand (AP)", "Low Cost District in Hand (AP)", "High Cost District in Hand (AP)", "Special District in Hand (AP)", "Special District Builded (AP)", "Character Rank (AP)",
-
-        # MVP features
-        "Gold Amount (MVP)", "Number of Cards in Hand (MVP)", "Number of Builded Districts (MVP)", "Cost of citadel (MVP)", "Builded District Types (MVP)", "District Types in Hand (MVP)", "Low Cost District in Hand (MVP)", "High Cost District in Hand (MVP)", "Special District in Hand (MVP)", "Special District Builded (MVP)", "Character Rank (MVP)",
-
-        ]
         melhor_f1 = float("-inf")
         melhor_precision = float("-inf")
         melhor_recall = float("-inf")
@@ -607,29 +600,17 @@ class ClassificaEstados:
     
     # Plota árvore
     @staticmethod
-    def plot_tree(model_name: str):
+    def plot_tree(model_name: str, nomes_caracteristicas):
 
         modelo = joblib.load(f'./classes/classification/models/{model_name}')
 
-        nomes_das_caracteristicas = [
-
-        # Board features
-        "Score P1", "Score P2", "Score P3", "Score P4", "Score P5",
-
-        # AP features
-        "Gold Amount (AP)", "Number of cards in Hand (AP)", "Number of Builded Districts (AP)", "Cost of citadel (AP)", "Cost of Hand (AP)", "Builded District Types (AP)", "District Types in Hand (AP)", "Low Cost District in Hand (AP)", "High Cost District in Hand (AP)", "Special District in Hand (AP)", "Special District Builded (AP)", "Character Rank (AP)",
-
-        # MVP features
-        "Gold Amount (MVP)", "Number of Cards in Hand (MVP)", "Number of Builded Districts (MVP)", "Cost of citadel (MVP)", "Builded District Types (MVP)", "District Types in Hand (MVP)", "Low Cost District in Hand (MVP)", "High Cost District in Hand (MVP)", "Special District in Hand (MVP)", "Special District Builded (MVP)", "Character Rank (MVP)",
-
-]
-        tree_rules = export_text(modelo, feature_names= nomes_das_caracteristicas)
+        tree_rules = export_text(modelo, feature_names=nomes_caracteristicas)
         # Mostra a estrutura da árvore de decisão no terminal
         print("Estrutura final da árvore: ")
         print(tree_rules)
 
         plt.figure(figsize=(10, 5))
-        plot_tree(modelo, feature_names=nomes_das_caracteristicas, class_names=["Lose", "Win"], filled=True)
+        plot_tree(modelo, feature_names=nomes_caracteristicas, class_names=["Lose", "Win"], filled=True)
         plt.show()   
         return
 
@@ -673,7 +654,7 @@ class ClassificaEstados:
 
         # Desvio padrão precision e recall
         plt.fill_between(train_sizes_p, p_test_scores_mean - p_test_scores_std, p_test_scores_mean + p_test_scores_std, alpha=0.1, color="red")
-        plt.fill_between(train_sizes_r, r_test_scores_mean - r_test_scores_std, r_test_scores_mean + r_test_scores_std, alpha=0.1, color="yello")
+        plt.fill_between(train_sizes_r, r_test_scores_mean - r_test_scores_std, r_test_scores_mean + r_test_scores_std, alpha=0.1, color="yellow")
 
         # Média precision e recall
         plt.plot(train_sizes_f1, p_test_scores_mean, 'o-', color="red", label="Precision Test")
@@ -689,14 +670,14 @@ class ClassificaEstados:
 
     # Utiliza modelo treinado para obter chance de vitoria
     @staticmethod
-    def calcula_porcentagem(data, model_name: str):
+    def calcula_porcentagem(data, model_name: str, nome_jogador):
         # Carrega modelo
-        model = joblib.load(model_name)
+        model = joblib.load(f'./classes/classification/models/{model_name}')
         data_vec = [data]
 
         # Calcula probabilidade de vitória
         win_probability = model.predict_proba(data_vec)
-        win_probability = f"Probabilidade estimada de vitoria: {win_probability[0][1] * 100}%"
+        win_probability = f"Probabilidade estimada de vitoria para o jogador {nome_jogador}: {round(win_probability[0][1] * 100, 2)}%"
 
         print(win_probability)  # Probabilidade estimada de vitória
 

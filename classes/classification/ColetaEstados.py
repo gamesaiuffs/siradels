@@ -2,10 +2,12 @@ from classes.classification.ClassificaEstados import ClassificaEstados
 from classes.Simulacao import Simulacao
 from classes.classification.SimulacaoColeta import SimulacaoColeta
 from classes.strategies.EstrategiaTotalmenteAleatoria import EstrategiaTotalmenteAleatoria
+from classes.strategies.EstrategiaDjonatan import EstrategiaDjonatan
+from classes.strategies.EstrategiaFelipe import EstrategiaFelipe
 import numpy as np
 import random
 
-
+# Achar uma forma de ciclar conjuntos de estratégias para coletar amostras
 class ColetaEstados:
     @staticmethod
     def coleta_amostras(qtd_partidas: int, n_features: int, jogos: str, rotulos: str, nome_modelo: str):
@@ -22,8 +24,9 @@ class ColetaEstados:
                 estrategias = []
                 
                 for i in range(qtd_jogadores):          # fixo em 5 players
-                    estrategias.append(EstrategiaTotalmenteAleatoria(str(i+1)))
-                
+                    #estrategias.append(EstrategiaTotalmenteAleatoria(str(i+1)))
+                    estrategias.append(EstrategiaDjonatan(str(i+1)))
+
                 # Estrategias fixas e especificas
                 '''
                 estrategias.append(EstrategiaDjonatan())
