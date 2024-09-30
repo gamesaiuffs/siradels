@@ -26,9 +26,9 @@ gym.register(
 
 
 # Configurações gerais 
-DIR_NAME =              "aateste2"      # Diretório onde são salvos modelos intermediários e graficos 
+DIR_NAME =              "aateste4"      # Diretório onde são salvos modelos intermediários e graficos 
 TRAIN_STEPS =           500000                 # Steps de treinamento
-MODEL_SAVE_FREQ =       30000                   # Frequência de salvamento de modelos 
+MODEL_SAVE_FREQ =       10000                   # Frequência de salvamento de modelos 
 NOT_ALLOW_REUSE_DIRS =  True                  # impedir que arquivos com modelos salvos sejam sobrescritos
 ENV_RENDER_MODE =       None                #modo de renderização
 
@@ -470,30 +470,85 @@ if __name__ == "__main__":
     
     
     # Modelo da main
+    # Não funciona 
+    # model = DQN(
+    # policy="MlpPolicy",
+    # env=env,
+    # verbose=0,
+
+    # # Parâmetros de exploração
+    # exploration_initial_eps=1.0,
+    # exploration_final_eps=0.05,
+    # exploration_fraction=0.9,
+
+    # # Parâmetros de treinamento e otimização
+    # learning_rate=1e-5,
+    # learning_starts=2000,
+    # gradient_steps=-1,
+    # policy_kwargs=dict(net_arch=[256, 256]),
+
+    # # Parâmetros de desconto e frequência de treinamento
+    # gamma=0.7,
+    # train_freq=1000,
+
+    # # Parâmetros do replay buffer
+    # buffer_size=100000,
+    # batch_size=256,
+    # target_update_interval=2000)
+    
+    # aateste3
+    # model = DQN(
+    #         "MlpPolicy",                     # Política de rede neural MLP
+    #         env=env,                         # Ambiente de OpenAI Gym
+    #         verbose=0,                       # Nível de detalhamento dos logs
+
+    #         # Parâmetros de exploração
+    #         exploration_initial_eps=0.7,     # Taxa inicial de exploração alta
+    #         exploration_final_eps=0.3,       # Taxa final de exploração baixa
+    #         exploration_fraction=0.3,        # Fração do total de etapas dedicadas à exploração
+
+    #         # Parâmetros de treinamento e otimização
+    #         learning_rate=6.3e-4,            # Taxa de aprendizado
+    #         learning_starts=5000,            # Número de etapas de aprendizado antes de começar a treinar
+    #         gradient_steps=-1,               # Número de passos de gradiente (padrão usa -1, que é automático)
+    #         policy_kwargs=dict(net_arch=[32, 32]),  # Arquitetura da rede neural
+
+    #         # Parâmetros de desconto e frequência de treinamento
+    #         gamma=0.99,                      # Fator de desconto
+    #         train_freq=100,                    # Frequência de treinamento (a cada 4 passos)
+
+    #         # Parâmetros do replay buffer
+    #         buffer_size=100000,               # Tamanho do buffer de replay
+    #         batch_size=512,                  # Tamanho do lote de amostras para o treinamento
+    #         target_update_interval=3000,     # Intervalo de atualização do alvo
+    # )
+    
     model = DQN(
-    policy="MlpPolicy",
-    env=env,
-    verbose=0,
+            "MlpPolicy",                     # Política de rede neural MLP
+            env=env,                         # Ambiente de OpenAI Gym
+            verbose=0,                       # Nível de detalhamento dos logs
+            tau=0.7,   
+            # Parâmetros de exploração
+            exploration_initial_eps=0.99,     # Taxa inicial de exploração alta
+            exploration_final_eps=0.5,       # Taxa final de exploração baixa
+            exploration_fraction=0.8,        # Fração do total de etapas dedicadas à exploração
 
-    # Parâmetros de exploração
-    exploration_initial_eps=1.0,
-    exploration_final_eps=0.05,
-    exploration_fraction=0.9,
+            # Parâmetros de treinamento e otimização
+            learning_rate= 1e-4,            # Taxa de aprendizado
+            learning_starts=5000,            # Número de etapas de aprendizado antes de começar a treinar
+            gradient_steps=1,               # Número de passos de gradiente (padrão usa -1, que é automático)
+            policy_kwargs=dict(net_arch=[32]),  # Arquitetura da rede neural
 
-    # Parâmetros de treinamento e otimização
-    learning_rate=1e-5,
-    learning_starts=2000,
-    gradient_steps=-1,
-    policy_kwargs=dict(net_arch=[256, 256]),
+            # Parâmetros de desconto e frequência de treinamento
+            gamma=0.95,                      # Fator de desconto
+            train_freq=1000,                    # Frequência de treinamento 
 
-    # Parâmetros de desconto e frequência de treinamento
-    gamma=0.7,
-    train_freq=1000,
-
-    # Parâmetros do replay buffer
-    buffer_size=100000,
-    batch_size=256,
-    target_update_interval=2000)
+            # Parâmetros do replay buffer
+            buffer_size=100000,               # Tamanho do buffer de replay
+            batch_size=256,                  # Tamanho do lote de amostras para o treinamento
+            target_update_interval=8000,     # Intervalo de atualização do alvo
+    )
+    
     
     # Treinamento com callbacks
     model.learn(total_timesteps=TRAIN_STEPS, callback=[save_callback])
