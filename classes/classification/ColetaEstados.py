@@ -2,53 +2,51 @@ from classes.classification.ClassificaEstados import ClassificaEstados
 from classes.Simulacao import Simulacao
 from classes.classification.SimulacaoColeta import SimulacaoColeta
 from classes.strategies.EstrategiaTotalmenteAleatoria import EstrategiaTotalmenteAleatoria
+from classes.strategies.Estrategia import Estrategia
+from classes.strategies.EstrategiaAllin import EstrategiaAllin
 from classes.strategies.EstrategiaAndrei import EstrategiaAndrei
+from classes.strategies.EstrategiaBuild import EstrategiaBuild
 from classes.strategies.EstrategiaDjonatan import EstrategiaDjonatan
+from classes.strategies.EstrategiaEduardo import EstrategiaEduardo
 from classes.strategies.EstrategiaFelipe import EstrategiaFelipe
+from classes.strategies.EstrategiaFrequency import EstrategiaFrequency
+from classes.strategies.EstrategiaGold import EstrategiaGold
+from classes.strategies.EstrategiaJean import EstrategiaJean
 from classes.strategies.EstrategiaLuis import EstrategiaLuisII
+from classes.Experimento import Experimento
 import numpy as np
 import random
+from itertools import combinations, combinations_with_replacement
 import itertools
 
-estrategias_disponiveis = [EstrategiaDjonatan(), EstrategiaFelipe(), EstrategiaLuisII('luis'), EstrategiaTotalmenteAleatoria('bot-1'), EstrategiaTotalmenteAleatoria('bot-2')]
+estrategias: list[Estrategia] = [EstrategiaAndrei(), EstrategiaDjonatan(), EstrategiaEduardo(),
+                                 EstrategiaFelipe(), EstrategiaJean(), EstrategiaLuisII(),
+                                 EstrategiaTotalmenteAleatoria()] #MCTS e Agente off, levar para ColetaEstados e adaptar
+# estrategias: list[Estrategia] = [Agente(imprimir=True), EstrategiaTotalmenteAleatoria("B2"), EstrategiaTotalmenteAleatoria("B3"), EstrategiaTotalmenteAleatoria("B4"), EstrategiaTotalmenteAleatoria("B5")]
+comb = list(combinations_with_replacement(estrategias, 5))
+
+qtd_comb = len(comb)
+
+#print("Quantidade de Combinações:", qtd_comb)
 
 class ColetaEstados:
     @staticmethod
-    def coleta_amostras(qtd_partidas: int, n_features: int, jogos: str, rotulos: str, nome_modelo: str):
+    def coleta_amostras(n_features: int, jogos: str, rotulos: str, nome_modelo: str, qtd_simulacao: int = 10,):
         X_inicial = [np.zeros(n_features)]
         X = X_inicial
         Y = []
-        qtd_jogadores = 5
+        resultados_total: dict[str, (int, int, int, int, int, int, int)] = dict()
+        for e in estrategias:
+            resultados_total[e.nome] = (0, 0, 0, 0, 0, 0, 0)
+        for i, p in enumerate(comb):
+            if (i+1) % 100 == 0 or i+1 == qtd_comb:
+                print(f"{i+1}/{qtd_comb} - {((i+1)*100/qtd_comb):.2f}%")
 
-        qtd_simulacao = 0
-
-        assert len(estrategias_disponiveis) >= qtd_jogadores, "Estratégias insuficientes para formar combinações."
-
-        combinacoes_estrategias = list(itertools.permutations(estrategias_disponiveis, qtd_jogadores))
-
-        # Verifica se há combinações disponíveis
-        if len(combinacoes_estrategias) == 0:
-            raise ValueError("Não há combinações de estratégias disponíveis.")
-
-
-        while qtd_simulacao < qtd_partidas:
-
-            qtd_simulacao += 1
-            
-            # Inicializa variaveis para nova simulacao do jogo
-            estrategias = []
-            
-            combinacao_atual = combinacoes_estrategias[qtd_simulacao % len(combinacoes_estrategias)]
-
-            for i in range(qtd_jogadores):
-                estrategia_classe = combinacao_atual[i]
-                estrategias.append(estrategia_classe)
-                
+            #resultados = Experimento.testar_estrategias(list(p), qtd_simulacao)
             # Cria simulacao
-            simulacao = SimulacaoColeta(estrategias)
+            simulacao = SimulacaoColeta(list(p))
             # Executa simulacao
             X_coleta, Y_coleta, n_rodada = simulacao.rodar_simulacao(X_inicial, nome_modelo)
-            #print(qtd_partidas-qtd_simulacao)
             # Remove primeira linha nula
             X_coleta = np.delete(X_coleta, 0, axis=0)
             # Empilha linhas na matriz
@@ -56,6 +54,32 @@ class ColetaEstados:
             # Atrubui rótulos de acordo com a quantidade de rodadas
             for i in range(n_rodada):
                 Y.append(Y_coleta)
+            '''
+            for jogador, resultado in resultados.items():
+                (vitoria, seg, ter, qua, qui, pontuacao) = resultado
+                vitoria += resultados_total[jogador][0]
+                seg += resultados_total[jogador][1]
+                ter += resultados_total[jogador][2]
+                qua += resultados_total[jogador][3]
+                qui += resultados_total[jogador][4]
+                pontuacao += resultados_total[jogador][5]
+                resultados_total[jogador] = (vitoria, seg, ter, qua, qui, pontuacao, resultados_total[jogador][6] + qtd_simulacao)
+            '''
+        '''    
+        for jogador, resultado in resultados_total.items():
+            (vitoria, seg, ter, qua, qui, pontuacao, qtd_simulacao_total) = resultado
+            pontuacao_media = pontuacao / qtd_simulacao_total
+            taxa_vitoria = 100 * vitoria / qtd_simulacao_total
+            taxa_seg = 100 * seg / qtd_simulacao_total
+            taxa_ter = 100 * ter / qtd_simulacao_total
+            taxa_qua = 100 * qua / qtd_simulacao_total
+            taxa_qui = 100 * qui / qtd_simulacao_total
+        print(
+        f'\n{jogador} - Vitórias: {vitoria} - Taxa de Vitórias: {taxa_vitoria:.2f}% - Pontuação Média: {pontuacao_media:.2f}\n\t'
+        f'Primeiro: {taxa_vitoria:5.2f}%\n\tSegundo : {taxa_seg:5.2f}%\n\tTerceiro: {taxa_ter:5.2f}%\n\tQuarto  : {taxa_qua:5.2f}%\n\tQuinto  : {taxa_qui:5.2f}%')
+        print("Fim dos testes das estratégias")
+        '''
+           
         # Remove primeira linha nula
         X = np.delete(X, 0, axis=0)
         ClassificaEstados.salvar_amostras(X, Y, jogos, rotulos)

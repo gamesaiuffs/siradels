@@ -10,28 +10,33 @@ import numpy as np
 
 class SimulacaoColeta:
     # Construtor
-    def __init__(self, estrategias: list, num_personagens: int = 8, automatico: bool = True):
+    def __init__(self, estrategias: list[Estrategia], num_personagens: int = 8, automatico: bool = True, treino_openaigym: bool = False):
         # Define o número de jogadores
         self.num_jogadores: int = len(estrategias)
-        # Define se a criação dos jogadores: 0 -> Manual ou 1 -> Automática
-        self.estado: Estado = self.criar_estado_inicial(num_personagens, automatico)
+        # Define número de cartas de personagens utilizado (pode ser 8 ou 9)
+        self.num_personagens = num_personagens
+        # Define se deve imprimir estado do jogo a cada turno (automatico = False)
+        self.automatico: bool = automatico
+        # Inicializa o jogo num estado inicial válido
+        self.estado: Estado = self.criar_estado_inicial(num_personagens)
         # Instância as ações do jogo
         self.acoes: list[Acao] = self.criar_acoes()
         # Primeiro jogador a finalizar cidade (construir 7 ou mais distritos)
-        self.jogador_finalizador: Jogador = None
+        self.jogador_finalizador: Jogador | None = None
+        # Flag para final de jogo (estado final)
+        self.final_jogo = False
         # Estratégias de cada jogador
         self.estrategias: dict[Jogador, Estrategia] = self.criar_estrategias(estrategias)
-        # Criação automática de jogadores
-        self.automatico = automatico
+        # Flag para indicar treino da OpenAI Gym
+        self.treino_openaigym = treino_openaigym
+        # Flag para indicar início de nova rodada
+        self.nova_rodada = True
 
     # Cria o estado inicial do tabuleiro
-    def criar_estado_inicial(self, num_personagens, automatico) -> Estado:
+    def criar_estado_inicial(self, num_personagens: int) -> Estado:
         # Constrói o tabuleiro
         tabuleiro = Tabuleiro(num_personagens)
-        if automatico:
-            jogadores = self.criar_jogadores_automatico()
-        else:
-            jogadores = self.criar_jogadores_manual()
+        jogadores = self.criar_jogadores()
         # Distribui 4 cartas para cada jogador
         for jogador in jogadores:
             jogador.cartas_distrito_mao.extend(tabuleiro.baralho_distritos[0:4])
@@ -40,23 +45,16 @@ class SimulacaoColeta:
         shuffle(jogadores)
         # O define como rei
         jogadores[0].rei = True
+        # Limpa flags de jogador finalizador e de final de jogo
+        self.jogador_finalizador = None
+        self.final_jogo = False
         return Estado(tabuleiro, jogadores)
 
     # Cria os jogadores de forma automática
-    def criar_jogadores_automatico(self) -> list[Jogador]:
+    def criar_jogadores(self) -> list[Jogador]:
         lista_jogadores = []
         for jogador in range(self.num_jogadores):
-            lista_jogadores.append(Jogador(f'Bot'))
-        return lista_jogadores
-
-    # Cria os jogadores de forma manual
-    def criar_jogadores_manual(self) -> list[Jogador]:
-        lista_jogadores = []
-        # Laço para nomear os jogadores
-        for jogador in range(self.num_jogadores):
-            # Informar o nome de cada um dos jogadores
-            nome_jogador = input('Digite o nome do jogador:')
-            lista_jogadores.append(Jogador(nome_jogador))
+            lista_jogadores.append(Jogador())
         return lista_jogadores
 
     # Instância as estratégais para os jogadores
@@ -64,7 +62,7 @@ class SimulacaoColeta:
         jogador_estrategia: dict[Jogador, Estrategia] = dict()
         shuffle(estrategias)
         for (jogador, estrategia) in zip(self.estado.jogadores, estrategias):
-            jogador.nome += ' - ' + estrategia.descricao
+            jogador.nome = estrategia.nome
             jogador_estrategia.update({jogador: estrategia})
         return jogador_estrategia
 
@@ -96,140 +94,134 @@ class SimulacaoColeta:
         return acoes
 
     # Rodar simula��o
-    def rodar_simulacao(self, X, nome_modelo) -> Estado:
-        final_jogo = False
+    def rodar_simulacao(self, X_inicial, nome_modelo: str = '') -> Estado:
         jogador_aleatorio_idx = random.randint(0, len(self.estado.jogadores)-1)
         jogador_observado = self.estado.jogadores[jogador_aleatorio_idx].nome
         #print("Jogador escolhido: " + jogador_observado)
         # Laço de rodadas do jogo
-        while not final_jogo:
-            # Preparação para nova rodada
-            self.estado.tabuleiro.cartas_nao_visiveis = []
-            self.estado.tabuleiro.cartas_visiveis = []
-            self.estado.tabuleiro.criar_baralho_personagem(self.num_jogadores)
-            self.estado.turno = 1
-            self.estado.rodada += 1
-            for jogador in self.estado.jogadores:
-                jogador.acoes_realizadas[TipoAcao.PassarTurno.value] = False
-            self.estado.ordenar_jogadores_coroado()
-            # Fase de escolha de personagens
-            for jogador in self.estado.jogadores:
-                # Marca jogador atual
-                self.estado.jogador_atual = jogador
-                # print(f'Turno atual: {jogador.nome}')
-                escolha_personagem = self.estrategias[jogador].escolher_personagem(self.estado)
-                jogador.personagem = self.estado.tabuleiro.baralho_personagens[escolha_personagem]
-                self.estado.tabuleiro.baralho_personagens.remove(jogador.personagem)
-            # Fase de ações
-            # Os jogadores seguem a ordem do rank dos seus personagens como ordem de turno
-            for rank in range(1, 9):
-                for jogador in self.estado.jogadores:
-                    if jogador.personagem.rank == rank:
-                        # Coleta de features/rotulos
-                        # Marca jogador atual
-                        self.estado.jogador_atual = jogador
-                        # Aplica habilidades/efeitos de início de turno
-                        # Aplica habilidade passiva do Rei
-                        if jogador.personagem.nome == 'Rei':
-                            for antigorei in self.estado.jogadores:
-                                antigorei.rei = False
-                            jogador.rei = True
-                        # Aplica habilidade da Assassina
-                        if jogador.morto:
-                            jogador.morto = False
-                            self.estado.turno += 1
-                            continue
-                        # Aplica habilidade do Ladrão
-                        if jogador.roubado:
-                            jogador.roubado = False
-                            for ladrao in self.estado.jogadores:
-                                if ladrao.personagem.nome == 'Ladrão':
-                                    ladrao.ouro += jogador.ouro
-                                    jogador.ouro = 0
-                                    break
-                        # Aplica habilidade passiva do Comerciante
-                        if jogador.personagem.nome == 'Comerciante':
-                            jogador.ouro += 1
-                        # Aplica habilidade passiva da Arquiteta
-                        if jogador.personagem.nome == 'Arquiteta' and not self.estado.tabuleiro.baralho_distritos:
-                            qtd_cartas = 2
-                            # Cartas insuficientes no baralho para pescar
-                            if len(self.estado.tabuleiro.baralho_distritos) < qtd_cartas:
-                                qtd_cartas = len(self.estado.tabuleiro.baralho_distritos)
-                            # Pescar cartas do baralho
-                            cartas_compradas = self.estado.tabuleiro.baralho_distritos[:qtd_cartas]
-                            del self.estado.tabuleiro.baralho_distritos[:qtd_cartas]
-                            self.estado.jogador_atual.cartas_distrito_mao.extend(cartas_compradas)
-                        # Laço de turnos do jogo
-                        while True:
-                            # Mostra o estado atual
-                            #print(self.estado)
-                            # Mostra estado e jogador atual caso a simulação esteja no modo manual
-                            if not self.automatico:
-                                print(self.estado)
-                                print(f'Turno atual: {jogador.nome}, {jogador.personagem}')
-                            # Mostra o jogador atual
-                            #print(f'Turno atual: {jogador.nome}, {jogador.personagem}')
-                            
-                            # Mostra a chance de vitoria
-                            #print(ClassificaEstados.coleta_features(self.estado, jogador.nome, 0, X)) 
-
-                            # Mostra apenas ações disponíveis segundo regras do jogo
-                            acoes_disponiveis = self.acoes_disponiveis()
-                            escolha_acao = self.estrategias[jogador].escolher_acao(self.estado, acoes_disponiveis)
-                            # Pula uma linha
-                            # print()
-                            # Executa ação escolhida
-                            self.acoes[acoes_disponiveis[escolha_acao].value].ativar(self.estado, self.estrategias[jogador])
-                            # Finaliza turno se jogador escolheu a ação de passar o turno
-                            if jogador.acoes_realizadas[TipoAcao.PassarTurno.value]:
-                                break
-                        # Identifica gatilhos de final de jogo
-                        # Identifica se o jogador construiu o Monumento
-                        monumento = False
-                        for construido in jogador.distritos_construidos:
-                            if construido.nome_do_distrito == 'Monumento':
-                                monumento = True
-                                break
-                        # Marca fim de jogo e jogador finalizador (monumento conta como 2 distritos para fins de uma cidade completa)
-                        if len(jogador.distritos_construidos) >= 7 or (len(jogador.distritos_construidos) == 6 and monumento):
-                            jogador.terminou = True
-                            if self.jogador_finalizador is None:
-                                self.jogador_finalizador = jogador
-
-                            # Coleta de rotulos
-                            Y = ClassificaEstados.coleta_rotulos_treino(jogador_observado, self.jogador_finalizador.nome)
-                            final_jogo = True
-                        # Quebra laço, pois não existem personagens com ranks repetidos
-                        break
-            # Coleta amostra 
-            X = ClassificaEstados.coleta_features(self.estado.jogadores, self.estado.rodada, jogador_observado, 1, X, nome_modelo)
-            
+        while not self.final_jogo:
+            self.iniciar_rodada()
+            self.executar_rodada(0, self.num_jogadores)
         # Rotina de final de jogo
         self.computar_pontuacao_final()
         self.estado.ordenar_jogadores_pontuacao()
-        # Mostra estado final
-        #print(self.estado)
         self.estado.jogadores[0].vencedor = True
-        # print()
         # Mostra estado final
         if not self.automatico:
+            print('-----ESTADO FINAL-----')
             print(self.estado)
-            print()
             for jogador in self.estado.jogadores:
                 print(f'{jogador.nome} - Pontuação final: {jogador.pontuacao_final}')
-        
-        return X, Y, self.estado.rodada
+        return self.estado
+    
+    def iniciar_rodada(self) -> None:
+        # Preparação para nova rodada
+        self.estado.tabuleiro.cartas_nao_visiveis = []
+        self.estado.tabuleiro.cartas_visiveis = []
+        self.estado.tabuleiro.criar_baralho_personagem(self.num_jogadores)
+        self.estado.turno = 1
+        self.estado.rodada += 1
+        for jogador in self.estado.jogadores:
+            jogador.acoes_realizadas[TipoAcao.PassarTurno.value] = False
+        self.estado.ordenar_jogadores_coroado()
+        # Fase de escolha de personagens
+        self.nova_rodada = False
+
+    def executar_rodada(self, idx_jog_inicial: int, idx_final: int, idx_escolha_personagem: int | None = None):
+        for idx_jogador in range(idx_jog_inicial, idx_final):
+            # Marca jogador atual
+            self.estado.jogador_atual = self.estado.jogadores[idx_jogador]
+            if self.treino_openaigym and self.estado.jogador_atual.nome == 'Agente':
+                escolha_personagem = idx_escolha_personagem
+            else:
+                escolha_personagem = self.estrategias[self.estado.jogador_atual].escolher_personagem(self.estado)
+            self.estado.jogador_atual.personagem = self.estado.tabuleiro.baralho_personagens[escolha_personagem]
+            self.estado.tabuleiro.baralho_personagens.remove(self.estado.jogador_atual.personagem)
+        # Finaliza fase de personagens e segue para fase de ações
+        if self.num_jogadores == idx_final:
+            self.executar_turno_jogador()
+
+    def executar_turno_jogador(self):
+        # Os jogadores seguem a ordem do rank dos seus personagens como ordem de turno
+        for rank in range(1, self.num_personagens + 1):
+            for jogador in self.estado.jogadores:
+                if jogador.personagem.rank == rank:
+                    # Marca jogador atual
+                    self.estado.jogador_atual = jogador
+                    # Aplica habilidades/efeitos de início de turno
+                    # Aplica habilidade passiva do Rei
+                    if jogador.personagem.nome == 'Rei':
+                        for antigorei in self.estado.jogadores:
+                            antigorei.rei = False
+                        jogador.rei = True
+                    # Aplica habilidade da Assassina
+                    if jogador.morto:
+                        jogador.morto = False
+                        self.estado.turno += 1
+                        continue
+                    # Aplica habilidade do Ladrão
+                    if jogador.roubado:
+                        jogador.roubado = False
+                        for ladrao in self.estado.jogadores:
+                            if ladrao.personagem.nome == 'Ladrão':
+                                ladrao.ouro += jogador.ouro
+                                jogador.ouro = 0
+                                break
+                    # Aplica habilidade passiva do Comerciante
+                    if jogador.personagem.nome == 'Comerciante':
+                        jogador.ouro += 1
+                    # Aplica habilidade passiva da Arquiteta
+                    if jogador.personagem.nome == 'Arquiteta' and len(self.estado.tabuleiro.baralho_distritos) > 0:
+                        qtd_cartas = 2
+                        # Cartas insuficientes no baralho para pescar
+                        if len(self.estado.tabuleiro.baralho_distritos) < qtd_cartas:
+                            qtd_cartas = len(self.estado.tabuleiro.baralho_distritos)
+                        # Pescar cartas do baralho
+                        cartas_compradas = self.estado.tabuleiro.baralho_distritos[:qtd_cartas]
+                        del self.estado.tabuleiro.baralho_distritos[:qtd_cartas]
+                        self.estado.jogador_atual.cartas_distrito_mao.extend(cartas_compradas)
+                    # Laço de ações no turno do jogo
+                    while True:
+                        # Mostra estado e jogador atual caso a simulação esteja no modo manual
+                        if not self.automatico and self.estrategias[jogador].imprimir:
+                            print('/--------------------------/', end='')
+                            print(self.estado)
+                            print(f'Turno atual: {jogador.nome}, {jogador.personagem}')
+                            # Mostra a chance de vitoria
+                            #X = ClassificaEstados.coleta_features(self.estado, jogador.nome, 0, X, model)
+                        # Mostra apenas ações disponíveis segundo regras do jogo
+                        acoes_disponiveis = self.acoes_disponiveis()
+                        escolha_acao = self.estrategias[jogador].escolher_acao(self.estado, acoes_disponiveis)
+                        if not self.automatico and self.estrategias[jogador].imprimir:
+                            print(f'Ação escolhida: {self.acoes[acoes_disponiveis[escolha_acao].value]}')
+                            print('/--------------------------/')
+                        # Executa ação escolhida
+                        self.acoes[acoes_disponiveis[escolha_acao].value].ativar(self.estado, self.estrategias[jogador])
+                        # Finaliza turno se jogador escolheu a ação de passar o turno
+                        if jogador.acoes_realizadas[TipoAcao.PassarTurno.value]:
+                            break
+                    # Identifica gatilhos de final de jogo
+                    # Marca fim de jogo e jogador finalizador (monumento conta como 2 distritos para fins de uma cidade completa)
+                    if len(jogador.distritos_construidos) >= 7:
+                        jogador.terminou = True
+                        if self.jogador_finalizador is None:
+                            self.jogador_finalizador = jogador
+                        self.final_jogo = True
+                    # Quebra laço, pois não existem personagens com ranks repetidos
+                    break
+        self.nova_rodada = True
 
     # Retorna apenas as ações disponíveis para o estado atual da simulação
     def acoes_disponiveis(self) -> list[TipoAcao]:
         acoes_disponiveis = []
         acoes_realizadas = self.estado.jogador_atual.acoes_realizadas
         # Deve ter coletado recursos primeiro para poder realizar demais ações no turno
-        if acoes_realizadas[TipoAcao.ColetarOuro.value] or acoes_realizadas[TipoAcao.ColetarCartas.value]:
+        self.estado.coletar_recursos = not (acoes_realizadas[TipoAcao.ColetarOuro.value] or acoes_realizadas[TipoAcao.ColetarCartas.value])
+        if not self.estado.coletar_recursos:
             acoes_disponiveis.append(TipoAcao.PassarTurno)
             # Ação de construir distrito
-            if not acoes_realizadas[TipoAcao.ConstruirDistrito.value]:
+            self.estado.construir_distrito = not acoes_realizadas[TipoAcao.ConstruirDistrito.value]
+            if self.estado.construir_distrito:
                 acoes_disponiveis.append(TipoAcao.ConstruirDistrito)
             # As habilidades dos personagens só podem ser utilizadas uma única vez
             # O jogador deve possuir a carta do personagem para usar a sua habilidade
@@ -263,6 +255,7 @@ class SimulacaoColeta:
             acoes_disponiveis.append(TipoAcao.ColetarOuro)
             acoes_disponiveis.append(TipoAcao.ColetarCartas)
         return acoes_disponiveis
+
 
     # Mostra menu com ações
     @staticmethod

@@ -47,21 +47,21 @@ from classes.Simulacao import Simulacao
 import time
 vscode = True
 
-n_features = 29
+n_features = 30
 
 profundidade = 15
-n_amostras = 10
+qtd_simulacao = 10
 min_samp = 351
 win_weigth = {0: 1, 1: 3}
 criterion = "gini"
 ww = 3
 
-jogos = f"Jogos {n_amostras} {n_features}f"
-rotulos = f"Rótulos {n_amostras} {n_features}f" 
+jogos = f"Jogos {qtd_simulacao} {n_features}f"
+rotulos = f"Rótulos {qtd_simulacao} {n_features}f" 
 modelo = f"{criterion} {min_samp}ms {ww}mw {n_features}f"
 
 #(qtd_pts, n_features, nome_jogos, nome_rotulos, nome_modelo)
-#ColetaEstados.coleta_amostras(n_amostras, n_features, jogos, rotulos, modelo)
+ColetaEstados.coleta_amostras(n_features, jogos, rotulos, modelo)
 
 #(jogos, rotulos, nome_modelo, criterion, profundidade)
 #ClassificaEstados.treinar_modelo(False, jogos, rotulos, modelo, criterion, min_samp, win_weigth, profundidade)
@@ -143,7 +143,7 @@ check_env(env)
 # experimento = Experimento(caminho)
 # experimento.treinar_modelo_mcts(600, 0) # Treinar modelo MCTS RL por 10min = 600s
 # print("Fim do treino MCTS")
-
+'''
 print("Início dos testes das estratégias")
 estrategias: list[Estrategia] = [EstrategiaAllin("Allin"), EstrategiaAndrei(), EstrategiaBuild("Build"), EstrategiaDjonatan(), EstrategiaEduardo(),
                                  EstrategiaFelipe(), EstrategiaFrequency("Frequency"), EstrategiaGold("Gold"), EstrategiaJean(), EstrategiaLuisII(),
@@ -185,3 +185,4 @@ print("Fim dos testes das estratégias")
 
 # Imprime duração do experimento
 #print(f"Tempo da simulação = {(time.time() - startTime):.2f}s")
+'''
