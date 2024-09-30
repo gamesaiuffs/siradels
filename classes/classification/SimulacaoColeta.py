@@ -1,12 +1,11 @@
 from random import shuffle
+import random
+
 from classes.model.Acao import *
 from classes.model.Tabuleiro import Tabuleiro
 from classes.model.Jogador import Jogador
 from classes.strategies import Estrategia
 from classes.classification.ClassificaEstados import ClassificaEstados
-from more_itertools import sort_together
-import random
-import numpy as np
 
 class SimulacaoColeta:
     # Construtor
@@ -93,15 +92,16 @@ class SimulacaoColeta:
                  Laboratorio(), Forja()]
         return acoes
 
-    # Rodar simula��o
-    def rodar_simulacao(self, X_inicial, nome_modelo: str = '') -> Estado:
+    # Executa uma simulação do jogo e retorna estado final
+    def rodar_simulacao(self, X, nome_modelo: str = '') -> Estado:
         jogador_aleatorio_idx = random.randint(0, len(self.estado.jogadores)-1)
         jogador_observado = self.estado.jogadores[jogador_aleatorio_idx].nome
-        #print("Jogador escolhido: " + jogador_observado)
         # Laço de rodadas do jogo
         while not self.final_jogo:
             self.iniciar_rodada()
             self.executar_rodada(0, self.num_jogadores)
+            X = ClassificaEstados.coleta_features(self.estado.jogadores, self.estado.rodada, jogador_observado, 1, X, nome_modelo)
+        Y = ClassificaEstados.coleta_rotulos_treino(jogador_observado, self.jogador_finalizador.nome)
         # Rotina de final de jogo
         self.computar_pontuacao_final()
         self.estado.ordenar_jogadores_pontuacao()
@@ -112,8 +112,8 @@ class SimulacaoColeta:
             print(self.estado)
             for jogador in self.estado.jogadores:
                 print(f'{jogador.nome} - Pontuação final: {jogador.pontuacao_final}')
-        return self.estado
-    
+        return self.estado, X, Y, self.estado.rodada
+
     def iniciar_rodada(self) -> None:
         # Preparação para nova rodada
         self.estado.tabuleiro.cartas_nao_visiveis = []
@@ -255,7 +255,6 @@ class SimulacaoColeta:
             acoes_disponiveis.append(TipoAcao.ColetarOuro)
             acoes_disponiveis.append(TipoAcao.ColetarCartas)
         return acoes_disponiveis
-
 
     # Mostra menu com ações
     @staticmethod

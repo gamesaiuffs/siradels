@@ -31,40 +31,46 @@ qtd_comb = len(comb)
 
 class ColetaEstados:
     @staticmethod
-    def coleta_amostras(n_features: int, jogos: str, rotulos: str, nome_modelo: str, qtd_simulacao: int = 10,):
+    def coleta_amostras(n_features: int, jogos: str, rotulos: str, nome_modelo: str = '', qtd_simulacao: int = 100,):
         X_inicial = [np.zeros(n_features)]
         X = X_inicial
         Y = []
+        num_simulacao = 0
         resultados_total: dict[str, (int, int, int, int, int, int, int)] = dict()
-        for e in estrategias:
-            resultados_total[e.nome] = (0, 0, 0, 0, 0, 0, 0)
-        for i, p in enumerate(comb):
-            if (i+1) % 100 == 0 or i+1 == qtd_comb:
-                print(f"{i+1}/{qtd_comb} - {((i+1)*100/qtd_comb):.2f}%")
+        
+        while num_simulacao <= qtd_simulacao-1:
+            print(f"{num_simulacao+1}/{qtd_simulacao}")
+
+            for e in estrategias:
+                resultados_total[e.nome] = (0, 0, 0, 0, 0, 0, 0)
+            for i, p in enumerate(comb):
+                #if (i+1) % 100 == 0 or i+1 == qtd_comb:
+                #    print(f"{i+1}/{qtd_comb} - {((i+1)*100/qtd_comb):.2f}%")
 
             #resultados = Experimento.testar_estrategias(list(p), qtd_simulacao)
-            # Cria simulacao
-            simulacao = SimulacaoColeta(list(p))
-            # Executa simulacao
-            X_coleta, Y_coleta, n_rodada = simulacao.rodar_simulacao(X_inicial, nome_modelo)
-            # Remove primeira linha nula
-            X_coleta = np.delete(X_coleta, 0, axis=0)
-            # Empilha linhas na matriz
-            X = np.vstack((X, X_coleta))
-            # Atrubui rótulos de acordo com a quantidade de rodadas
-            for i in range(n_rodada):
-                Y.append(Y_coleta)
-            '''
-            for jogador, resultado in resultados.items():
-                (vitoria, seg, ter, qua, qui, pontuacao) = resultado
-                vitoria += resultados_total[jogador][0]
-                seg += resultados_total[jogador][1]
-                ter += resultados_total[jogador][2]
-                qua += resultados_total[jogador][3]
-                qui += resultados_total[jogador][4]
-                pontuacao += resultados_total[jogador][5]
-                resultados_total[jogador] = (vitoria, seg, ter, qua, qui, pontuacao, resultados_total[jogador][6] + qtd_simulacao)
-            '''
+                # Cria simulacao
+                simulacao = SimulacaoColeta(list(p))
+                # Executa simulacao
+                estado, X_coleta, Y_coleta, n_rodada = simulacao.rodar_simulacao(X_inicial, nome_modelo)
+                # Remove primeira linha nula
+                X_coleta = np.delete(X_coleta, 0, axis=0)
+                # Empilha linhas na matriz
+                X = np.vstack((X, X_coleta))
+                # Atrubui rótulos de acordo com a quantidade de rodadas
+                for i in range(n_rodada):
+                    Y.append(Y_coleta)
+                '''
+                for jogador, resultado in resultados.items():
+                    (vitoria, seg, ter, qua, qui, pontuacao) = resultado
+                    vitoria += resultados_total[jogador][0]
+                    seg += resultados_total[jogador][1]
+                    ter += resultados_total[jogador][2]
+                    qua += resultados_total[jogador][3]
+                    qui += resultados_total[jogador][4]
+                    pontuacao += resultados_total[jogador][5]
+                    resultados_total[jogador] = (vitoria, seg, ter, qua, qui, pontuacao, resultados_total[jogador][6] + qtd_simulacao)
+                '''
+            num_simulacao += 1
         '''    
         for jogador, resultado in resultados_total.items():
             (vitoria, seg, ter, qua, qui, pontuacao, qtd_simulacao_total) = resultado
