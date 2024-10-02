@@ -13,7 +13,7 @@ from sklearn.model_selection import learning_curve
 from sklearn.decomposition import PCA
 from sklearn.model_selection import StratifiedGroupKFold
 import matplotlib.pyplot as plt
-from itertools import combinations
+from itertools import combinations, combinations_with_replacement
 from classes.Experimento import Experimento
 #from classes.openaigym_env.Citadels import Citadels
 #from classes.strategies.Agente import Agente
@@ -47,12 +47,23 @@ from classes.Simulacao import Simulacao
 import time
 vscode = True
 
-data = '30-09-2024'
+feature_names = [
+    # Board features
+        "Score P1", "Score P2", "Score P3", "Score P4", "Score P5", "Largest Number of Districts Built",
+
+        # AP features
+        "Gold Amount (AP)", "Number of cards in Hand (AP)", "Number of Builded Districts (AP)", "Cost of citadel (AP)", "Cost of Hand (AP)", "Builded District Types (AP)", "District Types in Hand (AP)", "Low Cost District in Hand (AP)", "High Cost District in Hand (AP)", "Special District in Hand (AP)", "Special District Builded (AP)", "Character Rank (AP)",
+
+        # MVP features
+        "Gold Amount (MVP)", "Number of Cards in Hand (MVP)", "Number of Builded Districts (MVP)", "Cost of citadel (MVP)", "Builded District Types (MVP)", "District Types in Hand (MVP)", "Low Cost District in Hand (MVP)", "High Cost District in Hand (MVP)", "Special District in Hand (MVP)", "Special District Builded (MVP)", "Character Rank (MVP)",
+]
+
+data = '02-10-2024'
 n_features = 30
 profundidade = 15
 qtd_simulacao = 10
-min_samp = 351
-win_weigth = {0: 1, 1: 3}
+min_samp = 151
+win_weigth = {0: 1, 1: 1}
 criterion = "gini"
 ww = 3
 
@@ -63,6 +74,9 @@ modelo = f"{criterion} {min_samp}ms {ww}mw {n_features}f"
 #(qtd_pts, n_features, nome_jogos, nome_rotulos, nome_modelo)
 #ColetaEstados.coleta_amostras(n_features, jogos, rotulos)
 
+#{'Name': 'gini 151ms 3mw 30f', 'F1 Macro': np.float64(0.75), 'Win Precision': np.float64(0.73), 'Win Recall': np.float64(0.64), 'Accuracy': 0.77, 'Macro Precision': np.float64(0.76), 'Macro Recall': np.float64(0.74)}
+#ClassificaEstados.grid_cart(jogos, rotulos)
+
 #(jogos, rotulos, nome_modelo, criterion, profundidade)
 #ClassificaEstados.treinar_modelo(False, jogos, rotulos, modelo, criterion, min_samp, win_weigth, profundidade)
 #ClassificaEstados.treinar_floresta(False, jogos, rotulos, "Forest1", 100, criterion, min_samp, win_weigth, profundidade)
@@ -70,12 +84,12 @@ modelo = f"{criterion} {min_samp}ms {ww}mw {n_features}f"
 
 #(jogos, rotulos, n_features)
 #ClassificaEstados.circuito_treino_teste(jogos, rotulos, n_features)
-#ClassificaEstados.avalia_testes()
+#ClassificaEstados.avalia_testes(feature_names)
 
 #(jogos, rotulos, nome_modelo)
 #ClassificaEstados.modelo_info(modelo)
 #print(ClassificaEstados.testar_modelo(jogos, rotulos, modelo, False))
-#print(ClassificaEstados.testar_modelo(jogos, rotulos, 'Gradient1', False))
+#print(ClassificaEstados.testar_modelo(jogos, rotulos, '', False))
 
 #ClassificaEstados.plot_tree(modelo)
 #ClassificaEstados.plot_learning_curve(jogos, rotulos, modelo)
@@ -143,13 +157,13 @@ check_env(env)
 # experimento = Experimento(caminho)
 # experimento.treinar_modelo_mcts(600, 0) # Treinar modelo MCTS RL por 10min = 600s
 # print("Fim do treino MCTS")
-'''
+
 print("Início dos testes das estratégias")
-estrategias: list[Estrategia] = [EstrategiaAllin("Allin"), EstrategiaAndrei(), EstrategiaBuild("Build"), EstrategiaDjonatan(), EstrategiaEduardo(),
-                                 EstrategiaFelipe(), EstrategiaFrequency("Frequency"), EstrategiaGold("Gold"), EstrategiaJean(), EstrategiaLuisII(),
+estrategias: list[Estrategia] = [EstrategiaAndrei(), EstrategiaDjonatan(), EstrategiaEduardo(),
+                                 EstrategiaFelipe(), EstrategiaJean(), EstrategiaLuisII(),
                                  EstrategiaTotalmenteAleatoria()] #MCTS e Agente off, levar para ColetaEstados e adaptar
 # estrategias: list[Estrategia] = [Agente(imprimir=True), EstrategiaTotalmenteAleatoria("B2"), EstrategiaTotalmenteAleatoria("B3"), EstrategiaTotalmenteAleatoria("B4"), EstrategiaTotalmenteAleatoria("B5")]
-comb = list(combinations(estrategias, 5))
+comb = list(combinations_with_replacement(estrategias, 5))
 qtd_comb = len(comb)
 print("Quantidade de Combinações:", qtd_comb)
 
@@ -185,4 +199,3 @@ print("Fim dos testes das estratégias")
 
 # Imprime duração do experimento
 #print(f"Tempo da simulação = {(time.time() - startTime):.2f}s")
-'''

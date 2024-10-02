@@ -36,6 +36,7 @@ class ColetaEstados:
         X = X_inicial
         Y = []
         num_simulacao = 0
+        resultados: dict[str, (int, int, int, int, int, int)] = dict()
         resultados_total: dict[str, (int, int, int, int, int, int, int)] = dict()
         
         while num_simulacao <= qtd_simulacao-1:
@@ -51,7 +52,7 @@ class ColetaEstados:
                 # Cria simulacao
                 simulacao = SimulacaoColeta(list(p))
                 # Executa simulacao
-                estado, X_coleta, Y_coleta, n_rodada = simulacao.rodar_simulacao(X_inicial, nome_modelo)
+                estado_final, X_coleta, Y_coleta, n_rodada = simulacao.rodar_simulacao(X_inicial, nome_modelo)
                 # Remove primeira linha nula
                 X_coleta = np.delete(X_coleta, 0, axis=0)
                 # Empilha linhas na matriz
@@ -60,17 +61,30 @@ class ColetaEstados:
                 for i in range(n_rodada):
                     Y.append(Y_coleta)
                 '''
-                for jogador, resultado in resultados.items():
-                    (vitoria, seg, ter, qua, qui, pontuacao) = resultado
-                    vitoria += resultados_total[jogador][0]
-                    seg += resultados_total[jogador][1]
-                    ter += resultados_total[jogador][2]
-                    qua += resultados_total[jogador][3]
-                    qui += resultados_total[jogador][4]
-                    pontuacao += resultados_total[jogador][5]
-                    resultados_total[jogador] = (vitoria, seg, ter, qua, qui, pontuacao, resultados_total[jogador][6] + qtd_simulacao)
+                for jogador in estado_final.jogadores:
+                    (vitoria, seg, ter, qua, qui, pontuacao) = resultados[jogador.nome]
+                    if jogador == estado_final.jogadores[1]:
+                        seg += 1
+                    if jogador == estado_final.jogadores[2]:
+                        ter += 1
+                    if jogador == estado_final.jogadores[3]:
+                        qua += 1
+                    if jogador == estado_final.jogadores[4]:
+                        qui += 1
+                    resultados[jogador.nome] = (int(jogador.vencedor) + vitoria, seg, ter, qua, qui, jogador.pontuacao_final + pontuacao)
                 '''
             num_simulacao += 1
+        '''
+        for jogador, resultado in resultados.items():
+            (vitoria, seg, ter, qua, qui, pontuacao) = resultado
+            vitoria += resultados_total[jogador][0]
+            seg += resultados_total[jogador][1]
+            ter += resultados_total[jogador][2]
+            qua += resultados_total[jogador][3]
+            qui += resultados_total[jogador][4]
+            pontuacao += resultados_total[jogador][5]
+            resultados_total[jogador] = (vitoria, seg, ter, qua, qui, pontuacao, resultados_total[jogador][6] + qtd_simulacao)
+        '''
         '''    
         for jogador, resultado in resultados_total.items():
             (vitoria, seg, ter, qua, qui, pontuacao, qtd_simulacao_total) = resultado
