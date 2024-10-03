@@ -75,7 +75,7 @@ modelo = f"{criterion} {min_samp}ms {ww}mw {n_features}f"
 #ColetaEstados.coleta_amostras(n_features, jogos, rotulos)
 
 #{'Name': 'gini 151ms 3mw 30f', 'F1 Macro': np.float64(0.75), 'Win Precision': np.float64(0.73), 'Win Recall': np.float64(0.64), 'Accuracy': 0.77, 'Macro Precision': np.float64(0.76), 'Macro Recall': np.float64(0.74)}
-#ClassificaEstados.grid_cart(jogos, rotulos)
+ClassificaEstados.grid_cart(jogos, rotulos)
 
 #(jogos, rotulos, nome_modelo, criterion, profundidade)
 #ClassificaEstados.treinar_modelo(False, jogos, rotulos, modelo, criterion, min_samp, win_weigth, profundidade)
@@ -157,7 +157,7 @@ check_env(env)
 # experimento = Experimento(caminho)
 # experimento.treinar_modelo_mcts(600, 0) # Treinar modelo MCTS RL por 10min = 600s
 # print("Fim do treino MCTS")
-
+'''
 print("Início dos testes das estratégias")
 estrategias: list[Estrategia] = [EstrategiaAndrei(), EstrategiaDjonatan(), EstrategiaEduardo(),
                                  EstrategiaFelipe(), EstrategiaJean(), EstrategiaLuisII(),
@@ -196,6 +196,6 @@ for jogador, resultado in resultados_total.items():
         f'\n{jogador} - Vitórias: {vitoria} - Taxa de Vitórias: {taxa_vitoria:.2f}% - Pontuação Média: {pontuacao_media:.2f}\n\t'
         f'Primeiro: {taxa_vitoria:5.2f}%\n\tSegundo : {taxa_seg:5.2f}%\n\tTerceiro: {taxa_ter:5.2f}%\n\tQuarto  : {taxa_qua:5.2f}%\n\tQuinto  : {taxa_qui:5.2f}%')
 print("Fim dos testes das estratégias")
-
+'''
 # Imprime duração do experimento
 #print(f"Tempo da simulação = {(time.time() - startTime):.2f}s")

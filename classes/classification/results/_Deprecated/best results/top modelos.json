@@ -1,0 +1,148 @@
+[
+    {
+        "Top F1": {
+            "Tested Model": {
+                "Name": "gini 351ms 3mw 29f",
+                "F1 Macro": 0.71,
+                "Win Precision": 0.53,
+                "Win Recall": 0.53,
+                "Accuracy": 0.81,
+                "AUC": 0.71,
+                "Macro Precision": 0.7,
+                "Macro Recall": 0.71
+            },
+            "Adictional Information": {
+                "Features Importances": {
+                    "Round": 0.0051297583551362675,
+                    "Score P1": 0.007247083091308881,
+                    "Score P2": 0.041120369713268365,
+                    "Score P3": 0.032082776564271116,
+                    "Score P4": 0.007483758299289307,
+                    "Score P5": 0.006324463622420288,
+                    "Gold Amount (AP)": 0.015707221108431816,
+                    "Number of cards in Hand (AP)": 0.00233633642364042,
+                    "Number of Builded Districts (AP)": 0.5548841469364318,
+                    "Cost of citadel (AP)": 0.03702603533014957,
+                    "Cost of Hand (AP)": 0.0062659291101146925,
+                    "Builded District Types (AP)": 0.001028031035719675,
+                    "District Types in Hand (AP)": 0.00020878535580848442,
+                    "Low Cost District in Hand (AP)": 0.002098267845700926,
+                    "High Cost District in Hand (AP)": 0.0010604768351547941,
+                    "Special District in Hand (AP)": 0.0015232746145827948,
+                    "Special District Builded (AP)": 0.0010813945914067602,
+                    "Character Rank (AP)": 0.0018320578632502443,
+                    "Gold Amount (MVP)": 0.008450104990724894,
+                    "Number of Cards in Hand (MVP)": 0.0010440279808655187,
+                    "Number of Builded Districts (MVP)": 0.0024706230511967403,
+                    "Cost of citadel (MVP)": 0.000625752281050543,
+                    "Builded District Types (MVP)": 0.24959397741454717,
+                    "District Types in Hand (MVP)": 0.005126293953432045,
+                    "Low Cost District in Hand (MVP)": 0.0012803752019610367,
+                    "High Cost District in Hand (MVP)": 0.005052167699545656,
+                    "Special District in Hand (MVP)": 0.0001914439860673241,
+                    "Special District Builded (MVP)": 0.0004422497617568091,
+                    "Character Rank (MVP)": 0.001282816982766227
+                },
+                "Depth": 15,
+                "Node Number": 755,
+                "Leaves Number": 378
+            }
+        },
+        "Top Precision": {
+            "Tested Model": {
+                "Name": "gini 351ms 2mw 29f",
+                "F1 Macro": 0.66,
+                "Win Precision": 0.69,
+                "Win Recall": 0.31,
+                "Accuracy": 0.83,
+                "AUC": 0.64,
+                "Macro Precision": 0.77,
+                "Macro Recall": 0.64
+            },
+            "Adictional Information": {
+                "Features Importances": {
+                    "Round": 0.006369655460471683,
+                    "Score P1": 0.0035590665697038683,
+                    "Score P2": 0.025538800242392957,
+                    "Score P3": 0.03681737713082287,
+                    "Score P4": 0.006097160545558111,
+                    "Score P5": 0.007398883066779484,
+                    "Gold Amount (AP)": 0.018777529129407302,
+                    "Number of cards in Hand (AP)": 0.0008017542368177129,
+                    "Number of Builded Districts (AP)": 0.5926881290486662,
+                    "Cost of citadel (AP)": 0.0387059793883088,
+                    "Cost of Hand (AP)": 0.0034569300123698144,
+                    "Builded District Types (AP)": 0.00041871883686640766,
+                    "District Types in Hand (AP)": 0.0005538628536735005,
+                    "Low Cost District in Hand (AP)": 0.006349899393633248,
+                    "High Cost District in Hand (AP)": 0.0,
+                    "Special District in Hand (AP)": 0.003931541957371495,
+                    "Special District Builded (AP)": 0.0014026320030024835,
+                    "Character Rank (AP)": 0.002009792573018836,
+                    "Gold Amount (MVP)": 0.005343464993596428,
+                    "Number of Cards in Hand (MVP)": 0.00010570468437405126,
+                    "Number of Builded Districts (MVP)": 0.002424473145874138,
+                    "Cost of citadel (MVP)": 0.001526114344071792,
+                    "Builded District Types (MVP)": 0.22106627721499872,
+                    "District Types in Hand (MVP)": 0.009700452315336531,
+                    "Low Cost District in Hand (MVP)": 0.0023722100127853895,
+                    "High Cost District in Hand (MVP)": 0.0010092758080571247,
+                    "Special District in Hand (MVP)": 0.0004004266238434552,
+                    "Special District Builded (MVP)": 0.0008377568479542525,
+                    "Character Rank (MVP)": 0.0003361315602431937
+                },
+                "Depth": 18,
+                "Node Number": 751,
+                "Leaves Number": 376
+            }
+        },
+        "Top Recall": {
+            "Tested Model": {
+                "Name": "gini 251ms 5mw 29f",
+                "F1 Macro": 0.66,
+                "Win Precision": 0.39,
+                "Win Recall": 0.76,
+                "Accuracy": 0.72,
+                "AUC": 0.73,
+                "Macro Precision": 0.66,
+                "Macro Recall": 0.73
+            },
+            "Adictional Information": {
+                "Features Importances": {
+                    "Round": 0.008942638532280629,
+                    "Score P1": 0.01020195904914407,
+                    "Score P2": 0.05001518502381895,
+                    "Score P3": 0.025923310376289612,
+                    "Score P4": 0.011012388280966266,
+                    "Score P5": 0.004685258624319996,
+                    "Gold Amount (AP)": 0.015811322463205768,
+                    "Number of cards in Hand (AP)": 0.005577446936631083,
+                    "Number of Builded Districts (AP)": 0.5011327358446156,
+                    "Cost of citadel (AP)": 0.040750612005550316,
+                    "Cost of Hand (AP)": 0.009877816213359362,
+                    "Builded District Types (AP)": 0.0025273650775578414,
+                    "District Types in Hand (AP)": 0.0013623238718593743,
+                    "Low Cost District in Hand (AP)": 0.0025581624223607576,
+                    "High Cost District in Hand (AP)": 0.00027206334042370253,
+                    "Special District in Hand (AP)": 0.0030992761047895587,
+                    "Special District Builded (AP)": 0.0027420492907502918,
+                    "Character Rank (AP)": 0.0031559192963512305,
+                    "Gold Amount (MVP)": 0.009573217560328836,
+                    "Number of Cards in Hand (MVP)": 0.0009016784769968241,
+                    "Number of Builded Districts (MVP)": 0.0033479332269255755,
+                    "Cost of citadel (MVP)": 0.0024080595642566303,
+                    "Builded District Types (MVP)": 0.2700794619272337,
+                    "District Types in Hand (MVP)": 0.00745516694613186,
+                    "Low Cost District in Hand (MVP)": 0.0012737882939917228,
+                    "High Cost District in Hand (MVP)": 0.002908686111966248,
+                    "Special District in Hand (MVP)": 0.00010275731052493462,
+                    "Special District Builded (MVP)": 0.0007892219342033579,
+                    "Character Rank (MVP)": 0.0015121958931656858
+                },
+                "Depth": 16,
+                "Node Number": 1039,
+                "Leaves Number": 520
+            }
+        }
+    }
+]

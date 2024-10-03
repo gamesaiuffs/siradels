@@ -411,12 +411,12 @@ class ClassificaEstados:
         model_test_info = {
             "Name": model,
             "F1 Macro": macrof1,
-            "Win Precision": precisionv,
-            "Win Recall": recallv,
+            "Precision": precisionv,
+            "Recall": recallv,
             "Accuracy": accuracy,
             #"AUC": auc,
-            "Macro Precision": precisionm,
-            "Macro Recall": recallm
+            #"Macro Precision": precisionm,
+            #"Macro Recall": recallm
         }
 
         return model_test_info
@@ -427,40 +427,42 @@ class ClassificaEstados:
         X_train, X_test, Y_train, Y_test = ClassificaEstados.ler_amostras(jogos, rotulos, True)
 
         f1_macro_scorer = make_scorer(f1_score, average='macro')
+        precision_scorer = make_scorer(precision_score)
+        recall_scorer = make_scorer(recall_score)
+
+        metrics = (f1_macro_scorer, precision_scorer, recall_scorer)
+        metrics_names = ('Macro F1', 'Precision', 'Recall')
 
         # Definir a grade de hiperparâmetros
         param_grid = {
             #####
         }
 
-        # Configurar o GridSearchCV
-        grid_search = GridSearchCV(
-            estimator=GradientBoostingClassifier(random_state=42),
-            param_grid=param_grid,
-            cv=5,  # 5-fold cross-validation
-            n_jobs=-1,  # Use todos os núcleos disponíveis
-            scoring= f1_macro_scorer  # Métrica de avaliação
-        )
+        for i, metric in enumerate(metrics):
+            # Configurar o GridSearchCV
+            grid_search = GridSearchCV(
+                estimator=GradientBoostingClassifier(random_state=42),
+                param_grid=param_grid,
+                cv=10,  # 10-fold cross-validation
+                n_jobs=-1,  # Use todos os núcleos disponíveis
+                scoring= metric  # Métrica de avaliação
+            )
 
-        # Treinar o modelo
-        grid_search.fit(X_train, Y_train)
+            # Treinar o modelo
+            grid_search.fit(X_train, Y_train)
 
-        best_score = grid_search.best_score_
-        cv_results = grid_search.cv_results_
+            best_score = grid_search.best_score_
+            cv_results = grid_search.cv_results_
 
-        # Avaliar os melhores parâmetros encontrados
-        print(f"Melhores parâmetros: {grid_search.best_params_}")
-        print(f"Avaliação: {best_score}")
+            matching_models = [
+                (score, params) for score, params in zip(cv_results['mean_test_score'], cv_results['params']) if score == best_score
+            ]
 
-        joblib.dump(grid_search, f'./classes/classification/models/{'GB Best F1 Macro'}')
+            # Exibir os modelos com a mesma pontuação do melhor estimador
+            for score, params in matching_models:
+                print(f"Score: {score}, Parameters: {params}")
 
-        matching_models = [
-            (score, params) for score, params in zip(cv_results['mean_test_score'], cv_results['params']) if score == best_score
-        ]
-
-        # Exibir os modelos com a mesma pontuação do melhor estimador
-        for score, params in matching_models:
-            print(f"Score: {score}, Parameters: {params}")
+            joblib.dump(grid_search, f'./classes/classification/models/GB Best {metrics_names[i]}')
 
         return
 
@@ -470,40 +472,42 @@ class ClassificaEstados:
         X_train, X_test, Y_train, Y_test = ClassificaEstados.ler_amostras(jogos, rotulos, True)
 
         f1_macro_scorer = make_scorer(f1_score, average='macro')
+        precision_scorer = make_scorer(precision_score)
+        recall_scorer = make_scorer(recall_score)
+
+        metrics = (f1_macro_scorer, precision_scorer, recall_scorer)
+        metrics_names = ('Macro F1', 'Precision', 'Recall')
 
         # Definir a grade de hiperparâmetros
         param_grid = {
             #########
         }
 
-        # Configurar o GridSearchCV
-        grid_search = GridSearchCV(
-            estimator=RandomForestClassifier(random_state=42),
-            param_grid=param_grid,
-            cv=5,  # 5-fold cross-validation
-            n_jobs=-1,  # Use todos os núcleos disponíveis
-            scoring= f1_macro_scorer  # Métrica de avaliação
-        )
+        for i, metric in enumerate(metrics):
+            # Configurar o GridSearchCV
+            grid_search = GridSearchCV(
+                estimator=RandomForestClassifier(random_state=42),
+                param_grid=param_grid,
+                cv=10,  # 10-fold cross-validation
+                n_jobs=-1,  # Use todos os núcleos disponíveis
+                scoring=metric   # Métrica de avaliação
+            )
 
-        # Treinar o modelo
-        grid_search.fit(X_train, Y_train)
+            # Treinar o modelo
+            grid_search.fit(X_train, Y_train)
 
-        best_score = grid_search.best_score_
-        cv_results = grid_search.cv_results_
+            best_score = grid_search.best_score_
+            cv_results = grid_search.cv_results_
 
-        # Avaliar os melhores parâmetros encontrados
-        print(f"Melhores parâmetros: {grid_search.best_params_}")
-        print(f"Avaliação: {best_score}")
+            matching_models = [
+                (score, params) for score, params in zip(cv_results['mean_test_score'], cv_results['params']) if score == best_score
+            ]
 
-        joblib.dump(grid_search, f'./classes/classification/models/{'RF Best F1 Macro'}')
+            # Exibir os modelos com a mesma pontuação do melhor estimador
+            for score, params in matching_models:
+                print(f"Score: {score}, Parameters: {params}")
 
-        matching_models = [
-            (score, params) for score, params in zip(cv_results['mean_test_score'], cv_results['params']) if score == best_score
-        ]
-
-        # Exibir os modelos com a mesma pontuação do melhor estimador
-        for score, params in matching_models:
-            print(f"Score: {score}, Parameters: {params}")
+            joblib.dump(grid_search, f'./classes/classification/models/RF Best {metrics_names[i]}')
 
         return
 
@@ -513,48 +517,52 @@ class ClassificaEstados:
         X_train, X_test, Y_train, Y_test = ClassificaEstados.ler_amostras(jogos, rotulos, True)
 
         f1_macro_scorer = make_scorer(f1_score, average='macro')
+        precision_scorer = make_scorer(precision_score)
+        recall_scorer = make_scorer(recall_score)
 
-        # Definir a grade de hiperparâmetros
-        param_grid = {
-            'criterion': ["gini", "log_loss", "entropy"],
-            'min_samples_leaf': [1, 51, 101, 151, 201, 251, 301, 351, 401, 451, 501], # Talvez esse número devesse crescer em decorrência do aumento de número de amostras
-            'class_weight': [{0: 1, 1: 5}, {0: 1, 1: 4}, {0: 1, 1: 3}, {0: 1, 1: 2}, {0: 1, 1: 1}]
-        }
+        metrics = (f1_macro_scorer, precision_scorer, recall_scorer)
+        metrics_names = ('Macro F1', 'Precision', 'Recall')
 
-        # Configurar o GridSearchCV
-        grid_search = GridSearchCV(
-            estimator=DecisionTreeClassifier(random_state=42),
-            param_grid=param_grid,
-            cv=5,  # 5-fold cross-validation
-            n_jobs=-1,  # Use todos os núcleos disponíveis
-            scoring= f1_macro_scorer  # Métrica de avaliação
-        )
+        for i, metric in enumerate(metrics):
+            # Definir a grade de hiperparâmetros
+            param_grid = {
+                'criterion': ["gini", "log_loss", "entropy"],
+                'min_samples_leaf': [1, 51, 101, 151, 201, 251, 301, 351, 401, 451, 501], # Talvez esse número devesse crescer em decorrência do aumento de número de amostras
+                'class_weight': [{0: 1, 1: 5}, {0: 1, 1: 4}, {0: 1, 1: 3}, {0: 1, 1: 2}, {0: 1, 1: 1}]
+            }
 
-        # Treinar o modelo
-        grid_search.fit(X_train, Y_train)
+            # Configurar o GridSearchCV
+            grid_search = GridSearchCV(
+                estimator=DecisionTreeClassifier(random_state=42),
+                param_grid=param_grid,
+                cv=10,  # 10-fold cross-validation
+                n_jobs=-1,  # Use todos os núcleos disponíveis
+                scoring= metric  # Métrica de avaliação
+            )
 
-        best_score = grid_search.best_score_
-        cv_results = grid_search.cv_results_
+            # Treinar o modelo
+            grid_search.fit(X_train, Y_train)
 
-        # Avaliar os melhores parâmetros encontrados
-        print(f"Melhores parâmetros: {grid_search.best_params_}")
-        print(f"Avaliação: {best_score}")
+            best_score = grid_search.best_score_
+            cv_results = grid_search.cv_results_
 
-        joblib.dump(grid_search, f'./classes/classification/models/{'CART Best F1 Macro'}')
+            #print(cv_results)
+            
+            matching_models = [
+                (score, params) for score, params in zip(cv_results['mean_test_score'], cv_results['params']) if score == best_score
+            ]
 
-        matching_models = [
-            (score, params) for score, params in zip(cv_results['mean_test_score'], cv_results['params']) if score == best_score
-        ]
-
-        # Exibir os modelos com a mesma pontuação do melhor estimador
-        for score, params in matching_models:
-            print(f"Score: {score}, Parameters: {params}")
+            # Exibir os modelos com a mesma pontuação do melhor estimador
+            for score, params in matching_models:
+                print(f"Score: {score}, Parameters: {params}")
+            
+            joblib.dump(grid_search, f'./classes/classification/models/CART Best {metrics_names[i]}')
 
         return
 
     # Implementar o grid search e ciclar amostras e validação cruzada
     @staticmethod
-    def circuito_treino_teste(jogos: str, rotulos: str, n_features: int):
+    def circuito_treino_teste(jogos: str, rotulos: str, n_features: int):   # Substituído pelas funções de GridSearchCV
 
         criterion_range = ["gini", "log_loss", "entropy"]
         min_samples_range = 501
