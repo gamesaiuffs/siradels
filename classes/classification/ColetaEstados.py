@@ -20,7 +20,7 @@ from itertools import combinations, combinations_with_replacement
 from math import comb
 
 estrategias: list[Estrategia] = [EstrategiaAndrei(), EstrategiaDjonatan(), EstrategiaEduardo(),
-                                 EstrategiaFelipe(), EstrategiaJean(), EstrategiaLuisII(),
+                                 EstrategiaFelipe(), EstrategiaJean(), EstrategiaLuisII(), 
                                  EstrategiaTotalmenteAleatoria()] #MCTS e Agente off, levar para ColetaEstados e adaptar
 # estrategias: list[Estrategia] = [Agente(imprimir=True), EstrategiaTotalmenteAleatoria("B2"), EstrategiaTotalmenteAleatoria("B3"), EstrategiaTotalmenteAleatoria("B4"), EstrategiaTotalmenteAleatoria("B5")]
 combinacoes = list(combinations_with_replacement(estrategias, 5))
@@ -99,6 +99,7 @@ class ColetaEstados:
                 resultados_total[jogador] = (vitoria, seg, ter, qua, qui, pontuacao, resultados_total[jogador][6] + count)
 
         # Calcula estatísticas finais para cada jogador
+        resultados_jogadores = {}
         for jogador, resultado in resultados_total.items():
             (vitoria, seg, ter, qua, qui, pontuacao, qtd_simulacao_total) = resultado
             pontuacao_media = pontuacao / qtd_simulacao_total
@@ -107,14 +108,24 @@ class ColetaEstados:
             taxa_ter = 100 * ter / qtd_simulacao_total
             taxa_qua = 100 * qua / qtd_simulacao_total
             taxa_qui = 100 * qui / qtd_simulacao_total
-            
+            resultados_jogadores[jogador] = {
+                'Victories': vitoria,
+                'Win Rate': taxa_vitoria,
+                'Avg Ponctuation': pontuacao_media,
+                'First Rate': taxa_vitoria,
+                'Second Rate': taxa_seg,
+                'Third Rate': taxa_ter,
+                'Fourth Rate': taxa_qua,
+                'Fifth Rate': taxa_qui
+            }
             print(
                 f'\n{jogador} - Vitórias: {vitoria} - Taxa de Vitórias: {taxa_vitoria:.2f}% - Pontuação Média: {pontuacao_media:.2f}\n\t'
                 f'Primeiro: {taxa_vitoria:5.2f}%\n\tSegundo : {taxa_seg:5.2f}%\n\tTerceiro: {taxa_ter:5.2f}%\n\tQuarto  : {taxa_qua:5.2f}%\n\tQuinto  : {taxa_qui:5.2f}%'
             )
         print("Fim dos testes das estratégias")
-           
+
         # Remove primeira linha nula
         X = np.delete(X, 0, axis=0)
-        #ClassificaEstados.salvar_amostras(X, Y, jogos, rotulos)
+        ClassificaEstados.salva_testes(resultados_jogadores,"./classes/classification/results/Resultado da Coleta")
+        ClassificaEstados.salvar_amostras(X, Y, jogos, rotulos)
         #ClassificaEstados.treinar_modelo(X, Y)
