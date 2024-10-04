@@ -49,7 +49,7 @@ vscode = True
 
 feature_names = [
     # Board features
-        "Score P1", "Score P2", "Score P3", "Score P4", "Score P5", "Largest Number of Districts Built",
+        "Round", "Largest Number of Districts Built", "Score P1", "Score P2", "Score P3", "Score P4", "Score P5", 
 
         # AP features
         "Gold Amount (AP)", "Number of cards in Hand (AP)", "Number of Builded Districts (AP)", "Cost of citadel (AP)", "Cost of Hand (AP)", "Builded District Types (AP)", "District Types in Hand (AP)", "Low Cost District in Hand (AP)", "High Cost District in Hand (AP)", "Special District in Hand (AP)", "Special District Builded (AP)", "Character Rank (AP)",

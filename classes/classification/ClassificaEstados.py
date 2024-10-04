@@ -163,7 +163,7 @@ class ClassificaEstados:
         #print(ja.nome, jmp.nome, ja_custo_mao, ja.distritos_construidos)
 
         # OBS: vetores JA e JMP são assimétricos 
-        # Nº total de features atual: 23 
+        # Nº total de features atual: 30
         
         # Cria o vetor dos dois jogadores
         estado_tabuleiro = [rodada, num_max_dist_const, jogadores[4].pontuacao, jogadores[3].pontuacao, jogadores[2].pontuacao, jogadores[1].pontuacao, jogadores[0].pontuacao]
