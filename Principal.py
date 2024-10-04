@@ -58,24 +58,44 @@ feature_names = [
         "Gold Amount (MVP)", "Number of Cards in Hand (MVP)", "Number of Builded Districts (MVP)", "Cost of citadel (MVP)", "Builded District Types (MVP)", "District Types in Hand (MVP)", "Low Cost District in Hand (MVP)", "High Cost District in Hand (MVP)", "Special District in Hand (MVP)", "Special District Builded (MVP)", "Character Rank (MVP)",
 ]
 
-data = '02-10-2024'
 n_features = 30
-profundidade = 15
-qtd_simulacao = 10
-min_samp = 151
-win_weigth = {0: 1, 1: 1}
-criterion = "gini"
-ww = 3
+
+data = '04-10-2024'
+#ww = 3
 
 jogos = f"Jogos {n_features}f {data}"
 rotulos = f"Rótulos {n_features}f {data}" 
-modelo = f"{criterion} {min_samp}ms {ww}mw {n_features}f"
+#modelo = f"{criterion} {min_samp}ms {ww}mw {n_features}f"
+
+inicio = time.time()
 
 #(qtd_pts, n_features, nome_jogos, nome_rotulos, nome_modelo)
-#ColetaEstados.coleta_amostras(n_features, jogos, rotulos)
+ColetaEstados.coleta_amostras(n_features, jogos, rotulos)
+
+fim_coleta = time.time()
+
+print(f"Tempo para coletar amostras: {fim_coleta - inicio}")
 
 #{'Name': 'gini 151ms 3mw 30f', 'F1 Macro': np.float64(0.75), 'Win Precision': np.float64(0.73), 'Win Recall': np.float64(0.64), 'Accuracy': 0.77, 'Macro Precision': np.float64(0.76), 'Macro Recall': np.float64(0.74)}
 ClassificaEstados.grid_cart(jogos, rotulos)
+
+fim_cart = time.time()
+
+print(f"Tempo para treinar e testar CART: {fim_cart - fim_coleta}")
+
+ClassificaEstados.grid_rf(jogos, rotulos)
+
+fim_rf = time.time()
+
+print(f"Tempo para treinar e testar Random Forest: {fim_rf - fim_cart}")
+
+ClassificaEstados.grid_gb(jogos, rotulos)
+
+fim_gb = time.time()
+
+print(f"Tempo para treinar e testar Random Forest: {fim_gb - fim_rf}")
+
+print(f"Tempo total de execução: {fim_gb - inicio}")
 
 #(jogos, rotulos, nome_modelo, criterion, profundidade)
 #ClassificaEstados.treinar_modelo(False, jogos, rotulos, modelo, criterion, min_samp, win_weigth, profundidade)

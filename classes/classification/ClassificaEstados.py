@@ -424,7 +424,9 @@ class ClassificaEstados:
     @staticmethod
     def grid_gb(jogos, rotulos):
         
-        X_train, X_test, Y_train, Y_test = ClassificaEstados.ler_amostras(jogos, rotulos, True)
+        X, Y = ClassificaEstados.ler_amostras(jogos, rotulos, False)
+
+        resultados_grid = {}
 
         f1_macro_scorer = make_scorer(f1_score, average='macro')
         precision_scorer = make_scorer(precision_score)
@@ -434,22 +436,29 @@ class ClassificaEstados:
         metrics_names = ('Macro F1', 'Precision', 'Recall')
 
         # Definir a grade de hiperparâmetros
-        param_grid = {
-            #####
+        grid = {
+            'max_depth': [3, 5, 7, 10, 20],
+            'loss': ['log_loss', 'exponential'],
+            'n_estimators': [50, 100, 200],
+            'criterion': ['friedman_mse', 'squared_error'],
+            'class_weight': [{0: 1, 1: 5}, {0: 1, 1: 4}, {0: 1, 1: 3}, {0: 1, 1: 2}, {0: 1, 1: 1}],
+            'min_samples_leaf': [1, 101, 301, 501],
+            'min_samples_split': [2, 20, 100, 300],
+            'learnin_rate': [0.01, 0.1, 0.3, 0.5, 1],
         }
 
         for i, metric in enumerate(metrics):
             # Configurar o GridSearchCV
             grid_search = GridSearchCV(
                 estimator=GradientBoostingClassifier(random_state=42),
-                param_grid=param_grid,
+                param_grid=grid,
                 cv=10,  # 10-fold cross-validation
                 n_jobs=-1,  # Use todos os núcleos disponíveis
                 scoring= metric  # Métrica de avaliação
             )
 
             # Treinar o modelo
-            grid_search.fit(X_train, Y_train)
+            grid_search.fit(X, Y)
 
             best_score = grid_search.best_score_
             cv_results = grid_search.cv_results_
@@ -460,16 +469,25 @@ class ClassificaEstados:
 
             # Exibir os modelos com a mesma pontuação do melhor estimador
             for score, params in matching_models:
-                print(f"Score: {score}, Parameters: {params}")
+                print(f" Metric: {metric}, Score: {score}, Parameters: {params}")
+
+            resultados_grid[metric] = {
+                'best_score': best_score,
+                'matching_models': matching_models
+            }
 
             joblib.dump(grid_search, f'./classes/classification/models/GB Best {metrics_names[i]}')
+
+        ClassificaEstados.salva_testes(resultados_grid, './classes/classification/results/Gradient Boosting/gradient')
 
         return
 
     @staticmethod
     def grid_rf(jogos, rotulos):
         
-        X_train, X_test, Y_train, Y_test = ClassificaEstados.ler_amostras(jogos, rotulos, True)
+        X, Y = ClassificaEstados.ler_amostras(jogos, rotulos, False)
+
+        resultados_grid = {}
 
         f1_macro_scorer = make_scorer(f1_score, average='macro')
         precision_scorer = make_scorer(precision_score)
@@ -479,22 +497,27 @@ class ClassificaEstados:
         metrics_names = ('Macro F1', 'Precision', 'Recall')
 
         # Definir a grade de hiperparâmetros
-        param_grid = {
-            #########
+        grid = {
+            'max_depth': [15, 20, 30, 50],
+            'n_estimators': [50, 100, 200],
+            'criterion': ['gini', 'entropy', 'log_loss'],
+            'class_weight': [{0: 1, 1: 5}, {0: 1, 1: 4}, {0: 1, 1: 3}, {0: 1, 1: 2}, {0: 1, 1: 1}],
+            'min_samples_leaf': [1, 101, 301, 501],
+            'min_samples_split': [2, 20, 100, 300],
         }
 
         for i, metric in enumerate(metrics):
             # Configurar o GridSearchCV
             grid_search = GridSearchCV(
                 estimator=RandomForestClassifier(random_state=42),
-                param_grid=param_grid,
+                param_grid=grid,
                 cv=10,  # 10-fold cross-validation
                 n_jobs=-1,  # Use todos os núcleos disponíveis
                 scoring=metric   # Métrica de avaliação
             )
 
             # Treinar o modelo
-            grid_search.fit(X_train, Y_train)
+            grid_search.fit(X, Y)
 
             best_score = grid_search.best_score_
             cv_results = grid_search.cv_results_
@@ -505,16 +528,26 @@ class ClassificaEstados:
 
             # Exibir os modelos com a mesma pontuação do melhor estimador
             for score, params in matching_models:
-                print(f"Score: {score}, Parameters: {params}")
+                print(f" Metric: {metric}, Score: {score}, Parameters: {params}")
+
+            # Armazenar no dicionário com a métrica como chave
+            resultados_grid[metric] = {
+                'best_score': best_score,
+                'matching_models': matching_models
+            }
 
             joblib.dump(grid_search, f'./classes/classification/models/RF Best {metrics_names[i]}')
+        
+        ClassificaEstados.salva_testes(resultados_grid, './classes/classification/results/Random Forest/forest')
 
         return
 
     @staticmethod
     def grid_cart(jogos, rotulos):
         
-        X_train, X_test, Y_train, Y_test = ClassificaEstados.ler_amostras(jogos, rotulos, True)
+        X, Y = ClassificaEstados.ler_amostras(jogos, rotulos, False)
+
+        resultados_grid = {}
 
         f1_macro_scorer = make_scorer(f1_score, average='macro')
         precision_scorer = make_scorer(precision_score)
@@ -525,23 +558,25 @@ class ClassificaEstados:
 
         for i, metric in enumerate(metrics):
             # Definir a grade de hiperparâmetros
-            param_grid = {
+            grid = {
+                'max_depth': [15, 20, 30, 50],
                 'criterion': ["gini", "log_loss", "entropy"],
-                'min_samples_leaf': [1, 51, 101, 151, 201, 251, 301, 351, 401, 451, 501], # Talvez esse número devesse crescer em decorrência do aumento de número de amostras
-                'class_weight': [{0: 1, 1: 5}, {0: 1, 1: 4}, {0: 1, 1: 3}, {0: 1, 1: 2}, {0: 1, 1: 1}]
+                'min_samples_leaf': [1, 101, 301, 501],
+                'min_samples_split': [2, 20, 100, 300],
+                'class_weight': [{0: 1, 1: 5}, {0: 1, 1: 4}, {0: 1, 1: 3}, {0: 1, 1: 2}, {0: 1, 1: 1}],
             }
 
             # Configurar o GridSearchCV
             grid_search = GridSearchCV(
                 estimator=DecisionTreeClassifier(random_state=42),
-                param_grid=param_grid,
+                param_grid=grid,
                 cv=10,  # 10-fold cross-validation
                 n_jobs=-1,  # Use todos os núcleos disponíveis
                 scoring= metric  # Métrica de avaliação
             )
 
             # Treinar o modelo
-            grid_search.fit(X_train, Y_train)
+            grid_search.fit(X, Y)
 
             best_score = grid_search.best_score_
             cv_results = grid_search.cv_results_
@@ -554,9 +589,16 @@ class ClassificaEstados:
 
             # Exibir os modelos com a mesma pontuação do melhor estimador
             for score, params in matching_models:
-                print(f"Score: {score}, Parameters: {params}")
+                print(f" Metric: {metric}, Score: {score}, Parameters: {params}")
+
+            resultados_grid[metric] = {
+                'best_score': best_score,
+                'matching_models': matching_models
+            }
             
             joblib.dump(grid_search, f'./classes/classification/models/CART Best {metrics_names[i]}')
+        
+        ClassificaEstados.salva_testes(resultados_grid, './classes/classification/results/CART/cart')
 
         return
 
