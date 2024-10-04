@@ -26,8 +26,8 @@ gym.register(
 
 
 # Configurações gerais 
-DIR_NAME =              "aateste4"      # Diretório onde são salvos modelos intermediários e graficos 
-TRAIN_STEPS =           500000                 # Steps de treinamento
+DIR_NAME =              "aateste8"      # Diretório onde são salvos modelos intermediários e graficos 
+TRAIN_STEPS =           300000                 # Steps de treinamento
 MODEL_SAVE_FREQ =       10000                   # Frequência de salvamento de modelos 
 NOT_ALLOW_REUSE_DIRS =  True                  # impedir que arquivos com modelos salvos sejam sobrescritos
 ENV_RENDER_MODE =       None                #modo de renderização
@@ -523,6 +523,117 @@ if __name__ == "__main__":
     #         target_update_interval=3000,     # Intervalo de atualização do alvo
     # )
     
+    
+    # aateste04
+    # model = DQN(
+    #         "MlpPolicy",                     # Política de rede neural MLP
+    #         env=env,                         # Ambiente de OpenAI Gym
+    #         verbose=0,                       # Nível de detalhamento dos logs
+    #         tau=0.7,   
+    #         # Parâmetros de exploração
+    #         exploration_initial_eps=0.99,     # Taxa inicial de exploração alta
+    #         exploration_final_eps=0.5,       # Taxa final de exploração baixa
+    #         exploration_fraction=0.8,        # Fração do total de etapas dedicadas à exploração
+
+    #         # Parâmetros de treinamento e otimização
+    #         learning_rate= 1e-4,            # Taxa de aprendizado
+    #         learning_starts=5000,            # Número de etapas de aprendizado antes de começar a treinar
+    #         gradient_steps=1,               # Número de passos de gradiente (padrão usa -1, que é automático)
+    #         policy_kwargs=dict(net_arch=[32]),  # Arquitetura da rede neural
+
+    #         # Parâmetros de desconto e frequência de treinamento
+    #         gamma=0.95,                      # Fator de desconto
+    #         train_freq=1000,                    # Frequência de treinamento 
+
+    #         # Parâmetros do replay buffer
+    #         buffer_size=100000,               # Tamanho do buffer de replay
+    #         batch_size=256,                  # Tamanho do lote de amostras para o treinamento
+    #         target_update_interval=8000,     # Intervalo de atualização do alvo
+    # )
+    
+    # aateste05
+    # model = DQN(
+    #         "MlpPolicy",                     # Política de rede neural MLP
+    #         env=env,                         # Ambiente de OpenAI Gym
+    #         verbose=0,                       # Nível de detalhamento dos logs
+    #         tau=0.7,   
+    #         # Parâmetros de exploração
+    #         exploration_initial_eps=0.99,     # Taxa inicial de exploração alta
+    #         exploration_final_eps=0.5,       # Taxa final de exploração baixa
+    #         exploration_fraction=0.8,        # Fração do total de etapas dedicadas à exploração
+
+    #         # Parâmetros de treinamento e otimização
+    #         learning_rate= 1e-4,            # Taxa de aprendizado
+    #         learning_starts=5000,            # Número de etapas de aprendizado antes de começar a treinar
+    #         gradient_steps=1,               # Número de passos de gradiente (padrão usa -1, que é automático)
+    #         policy_kwargs=dict(net_arch=[32, 32]),  # Arquitetura da rede neural
+
+    #         # Parâmetros de desconto e frequência de treinamento
+    #         gamma=0.95,                      # Fator de desconto
+    #         train_freq=1000,                    # Frequência de treinamento 
+
+    #         # Parâmetros do replay buffer
+    #         buffer_size=100000,               # Tamanho do buffer de replay
+    #         batch_size=256,                  # Tamanho do lote de amostras para o treinamento
+    #         target_update_interval=8000,     # Intervalo de atualização do alvo
+    # )
+    
+    
+    # aateste06
+    # model = DQN(
+    #         "MlpPolicy",                     # Política de rede neural MLP
+    #         env=env,                         # Ambiente de OpenAI Gym
+    #         verbose=0,                       # Nível de detalhamento dos logs
+    #         tau=0.7,   
+    #         # Parâmetros de exploração
+    #         exploration_initial_eps=0.99,     # Taxa inicial de exploração alta
+    #         exploration_final_eps=0.5,       # Taxa final de exploração baixa
+    #         exploration_fraction=0.8,        # Fração do total de etapas dedicadas à exploração
+
+    #         # Parâmetros de treinamento e otimização
+    #         learning_rate= 1e-4,            # Taxa de aprendizado
+    #         learning_starts=5000,            # Número de etapas de aprendizado antes de começar a treinar
+    #         gradient_steps=1,               # Número de passos de gradiente (padrão usa -1, que é automático)
+    #         policy_kwargs=dict(net_arch=[64, 64]),  # Arquitetura da rede neural
+
+    #         # Parâmetros de desconto e frequência de treinamento
+    #         gamma=0.95,                      # Fator de desconto
+    #         train_freq=1000,                    # Frequência de treinamento 
+
+    #         # Parâmetros do replay buffer
+    #         buffer_size=100000,               # Tamanho do buffer de replay
+    #         batch_size=256,                  # Tamanho do lote de amostras para o treinamento
+    #         target_update_interval=8000,     # Intervalo de atualização do alvo
+    # )
+    
+    # aateste7
+    # model = DQN(
+    #         "MlpPolicy",                     # Política de rede neural MLP
+    #         env=env,                         # Ambiente de OpenAI Gym
+    #         verbose=0,                       # Nível de detalhamento dos logs
+    #         tau=0.7,   
+    #         # Parâmetros de exploração
+    #         exploration_initial_eps=0.99,     # Taxa inicial de exploração alta
+    #         exploration_final_eps=0.5,       # Taxa final de exploração baixa
+    #         exploration_fraction=0.8,        # Fração do total de etapas dedicadas à exploração
+
+    #         # Parâmetros de treinamento e otimização
+    #         learning_rate= 1e-4,            # Taxa de aprendizado
+    #         learning_starts=5000,            # Número de etapas de aprendizado antes de começar a treinar
+    #         gradient_steps=1,               # Número de passos de gradiente (padrão usa -1, que é automático)
+    #         policy_kwargs=dict(net_arch=[128]),  # Arquitetura da rede neural
+
+    #         # Parâmetros de desconto e frequência de treinamento
+    #         gamma=0.95,                      # Fator de desconto
+    #         train_freq=1000,                    # Frequência de treinamento 
+
+    #         # Parâmetros do replay buffer
+    #         buffer_size=100000,               # Tamanho do buffer de replay
+    #         batch_size=256,                  # Tamanho do lote de amostras para o treinamento
+    #         target_update_interval=8000,     # Intervalo de atualização do alvo
+    # )
+    
+    # aateste8
     model = DQN(
             "MlpPolicy",                     # Política de rede neural MLP
             env=env,                         # Ambiente de OpenAI Gym
@@ -537,7 +648,7 @@ if __name__ == "__main__":
             learning_rate= 1e-4,            # Taxa de aprendizado
             learning_starts=5000,            # Número de etapas de aprendizado antes de começar a treinar
             gradient_steps=1,               # Número de passos de gradiente (padrão usa -1, que é automático)
-            policy_kwargs=dict(net_arch=[32]),  # Arquitetura da rede neural
+            policy_kwargs=dict(net_arch=[32, 32, 32]),  # Arquitetura da rede neural
 
             # Parâmetros de desconto e frequência de treinamento
             gamma=0.95,                      # Fator de desconto
@@ -548,7 +659,6 @@ if __name__ == "__main__":
             batch_size=256,                  # Tamanho do lote de amostras para o treinamento
             target_update_interval=8000,     # Intervalo de atualização do alvo
     )
-    
     
     # Treinamento com callbacks
     model.learn(total_timesteps=TRAIN_STEPS, callback=[save_callback])
