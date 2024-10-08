@@ -55,13 +55,17 @@ class Citadels(gym.Env):
                 return idx
         raise Exception("Agente não encontrado!")
 
-    # Método usado para iniciar uma nova simulação a partir de um estado inicial até o turno do agente
-    def reset(self, *, seed: int | None = None, options: dict[str, Any] | None = None) -> tuple[ObsType, dict[str, Any]]:
-        super().reset(seed=seed)
-        self.simulacao.criar_estado_inicial(self.simulacao.num_personagens)
+    # Método que opera o fluxo inicial da rodada até a vez do agente
+    def fluxo_rodada(self) -> None:
         self.simulacao.iniciar_rodada()
         self.idx_jogador = self.identificar_idx_jogador()
         self.simulacao.executar_rodada(0, self.idx_jogador)
+
+    # Método usado para iniciar uma nova simulação a partir de um estado inicial até o turno do agente
+    def reset(self, *, seed: int | None = None, options: dict[str, Any] | None = None) -> tuple[ObsType, dict[str, Any]]:
+        super().reset(seed=seed)
+        self.simulacao = Simulacao(self.estrategias, treino_openaigym=True)
+        self.fluxo_rodada()
         # Marca pontuação atual do agente (usada para recompensa)
         self.pontuacao_atual = 0
         self.sucesso = 0
@@ -70,11 +74,6 @@ class Citadels(gym.Env):
 
     # Método usado para executar uma transição de estado a partir de uma ação do agente
     def step(self, action: ActType) -> tuple[ObsType, SupportsFloat, bool, bool, dict[str, Any]]:
-        if self.simulacao.nova_rodada:
-            self.simulacao.iniciar_rodada()
-            self.idx_jogador = self.identificar_idx_jogador()
-            self.simulacao.executar_rodada(0, self.idx_jogador)
-            return self.observation(), 0, self.simulacao.final_jogo, False, dict()
         recompensa = 0.0
         jogador_agente = None
         for jogador in self.simulacao.estado.jogadores:
@@ -93,6 +92,8 @@ class Citadels(gym.Env):
                 raise Exception("Personagem não encontrado!")
             # Executa escolha de personagem
             self.simulacao.executar_rodada(self.idx_jogador, self.simulacao.num_jogadores, idx_escolha_personagem)
+            self.fluxo_rodada()
+
         # Recompensa negativa ao escolher ação inválida
         else:
             #recompensa += -12.0
