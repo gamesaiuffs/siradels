@@ -1,37 +1,6 @@
-from classes.Experimento import Experimento
-import numpy as np
-import json
 from classes.classification.ClassificaEstados import ClassificaEstados
 from classes.classification.ColetaEstados import ColetaEstados
-from classes.classification.SimulacaoColeta import SimulacaoColeta 
-from sklearn.model_selection import train_test_split
-from classes.enum.TipoDistrito import TipoDistrito
-from sklearn.tree import DecisionTreeClassifier, export_text, plot_tree
-from sklearn.model_selection import train_test_split, cross_val_score
-from sklearn.metrics import f1_score, precision_score, recall_score, roc_auc_score, make_scorer, accuracy_score, confusion_matrix, log_loss, ConfusionMatrixDisplay
-from sklearn.model_selection import learning_curve
-from sklearn.decomposition import PCA
-from sklearn.model_selection import StratifiedGroupKFold
-import matplotlib.pyplot as plt
-from itertools import combinations, combinations_with_replacement
-from classes.Experimento import Experimento
-#from classes.openaigym_env.Citadels import Citadels
-#from classes.strategies.Agente import Agente
-from classes.strategies.Estrategia import Estrategia
-from classes.strategies.EstrategiaAllin import EstrategiaAllin
-from classes.strategies.EstrategiaAndrei import EstrategiaAndrei
-from classes.strategies.EstrategiaBuild import EstrategiaBuild
-from classes.strategies.EstrategiaDjonatan import EstrategiaDjonatan
-from classes.strategies.EstrategiaEduardo import EstrategiaEduardo
-from classes.strategies.EstrategiaFelipe import EstrategiaFelipe
-from classes.strategies.EstrategiaFrequency import EstrategiaFrequency
-from classes.strategies.EstrategiaGold import EstrategiaGold
-from classes.strategies.EstrategiaJean import EstrategiaJean
-from classes.strategies.EstrategiaLuis import EstrategiaLuisII
-from classes.strategies.EstrategiaManual import EstrategiaManual
-#from classes.strategies.EstrategiaMCTS import EstrategiaMCTS
-from classes.strategies.EstrategiaTotalmenteAleatoria import EstrategiaTotalmenteAleatoria
-import joblib
+
 '''
 import gymnasium as gym
 from classes.enum.TipoAcaoOpenAI import TipoAcaoOpenAI
@@ -41,8 +10,6 @@ from classes.strategies.Agente import Agente
 from stable_baselines3 import PPO
 from stable_baselines3.common.env_checker import check_env
 '''
-from classes.Experimento import Experimento
-from classes.Simulacao import Simulacao
 
 import time
 vscode = True
@@ -63,29 +30,31 @@ n_features = 30
 data = '04-10-2024'
 #ww = 3
 
-jogos = f"Jogos {n_features}f {data}"
-rotulos = f"Rótulos {n_features}f {data}" 
+x = f"Jogos {n_features}f {data}"
+y = f"Rótulos {n_features}f {data}" 
 #modelo = f"{criterion} {min_samp}ms {ww}mw {n_features}f"
+
 
 inicio = time.time()
 
 #(qtd_pts, n_features, nome_jogos, nome_rotulos, nome_modelo)
-ColetaEstados.coleta_amostras(n_features, jogos, rotulos)
+#ColetaEstados.coleta_amostras(n_features, x, y)
 
-fim_coleta = time.time()
+#fim_coleta = time.time() # 76 segundos = 1 minuto
 
-print(f"Tempo para coletar amostras: {fim_coleta - inicio}")
+#print(f"Tempo para coletar amostras: {fim_coleta - inicio}")
 
+jogos, rotulos = ClassificaEstados.ler_amostras(x, y, False)
 #{'Name': 'gini 151ms 3mw 30f', 'F1 Macro': np.float64(0.75), 'Win Precision': np.float64(0.73), 'Win Recall': np.float64(0.64), 'Accuracy': 0.77, 'Macro Precision': np.float64(0.76), 'Macro Recall': np.float64(0.74)}
 ClassificaEstados.grid_cart(jogos, rotulos)
 
-fim_cart = time.time()
+fim_cart = time.time() 
 
-print(f"Tempo para treinar e testar CART: {fim_cart - fim_coleta}")
+print(f"Tempo para treinar e testar CART: {fim_cart - inicio}")
 
 ClassificaEstados.grid_rf(jogos, rotulos)
 
-fim_rf = time.time()
+fim_rf = time.time() 
 
 print(f"Tempo para treinar e testar Random Forest: {fim_rf - fim_cart}")
 
@@ -93,7 +62,7 @@ ClassificaEstados.grid_gb(jogos, rotulos)
 
 fim_gb = time.time()
 
-print(f"Tempo para treinar e testar Random Forest: {fim_gb - fim_rf}")
+print(f"Tempo para treinar e testar Random Forest: {fim_gb - inicio}")
 
 print(f"Tempo total de execução: {fim_gb - inicio}")
 

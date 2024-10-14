@@ -423,25 +423,23 @@ class ClassificaEstados:
 
     @staticmethod
     def grid_gb(jogos, rotulos):
-        
-        X, Y = ClassificaEstados.ler_amostras(jogos, rotulos, False)
 
         resultados_grid = {}
 
         f1_macro_scorer = make_scorer(f1_score, average='macro')
         precision_scorer = make_scorer(precision_score)
         recall_scorer = make_scorer(recall_score)
+        accuracy_scorer = make_scorer(accuracy_score)
 
-        metrics = (f1_macro_scorer, precision_scorer, recall_scorer)
-        metrics_names = ('Macro F1', 'Precision', 'Recall')
+        metrics = (f1_macro_scorer, precision_scorer, recall_scorer, accuracy_scorer)
+        metrics_names = ('Macro F1', 'Precision', 'Recall', 'Accuracy')
 
         # Definir a grade de hiperparâmetros
         grid = {
-            'max_depth': [3, 5, 7, 10, 20],
+            'max_depth': [3, 5, 7, 10, 20, None],
             'loss': ['log_loss', 'exponential'],
             'n_estimators': [50, 100, 200],
             'criterion': ['friedman_mse', 'squared_error'],
-            'class_weight': [{0: 1, 1: 5}, {0: 1, 1: 4}, {0: 1, 1: 3}, {0: 1, 1: 2}, {0: 1, 1: 1}],
             'min_samples_leaf': [1, 101, 301, 501],
             'min_samples_split': [2, 20, 100, 300],
             'learnin_rate': [0.01, 0.1, 0.3, 0.5, 1],
@@ -458,7 +456,7 @@ class ClassificaEstados:
             )
 
             # Treinar o modelo
-            grid_search.fit(X, Y)
+            grid_search.fit(jogos, rotulos)
 
             best_score = grid_search.best_score_
             cv_results = grid_search.cv_results_
@@ -471,9 +469,9 @@ class ClassificaEstados:
             for score, params in matching_models:
                 print(f" Metric: {metric}, Score: {score}, Parameters: {params}")
 
-            resultados_grid[metric] = {
-                'best_score': best_score,
-                'matching_models': matching_models
+            resultados_grid[metrics_names] = {
+                "best_score": best_score,
+                "matching_models": matching_models
             }
 
             joblib.dump(grid_search, f'./classes/classification/models/GB Best {metrics_names[i]}')
@@ -484,21 +482,20 @@ class ClassificaEstados:
 
     @staticmethod
     def grid_rf(jogos, rotulos):
-        
-        X, Y = ClassificaEstados.ler_amostras(jogos, rotulos, False)
 
         resultados_grid = {}
 
         f1_macro_scorer = make_scorer(f1_score, average='macro')
         precision_scorer = make_scorer(precision_score)
         recall_scorer = make_scorer(recall_score)
+        accuracy_scorer = make_scorer(accuracy_score)
 
-        metrics = (f1_macro_scorer, precision_scorer, recall_scorer)
-        metrics_names = ('Macro F1', 'Precision', 'Recall')
+        metrics = (f1_macro_scorer, precision_scorer, recall_scorer, accuracy_scorer)
+        metrics_names = ('Macro F1', 'Precision', 'Recall', 'Accuracy')
 
         # Definir a grade de hiperparâmetros
         grid = {
-            'max_depth': [15, 20, 30, 50],
+            'max_depth': [15, 20, 30, 50, None],
             'n_estimators': [50, 100, 200],
             'criterion': ['gini', 'entropy', 'log_loss'],
             'class_weight': [{0: 1, 1: 5}, {0: 1, 1: 4}, {0: 1, 1: 3}, {0: 1, 1: 2}, {0: 1, 1: 1}],
@@ -517,7 +514,7 @@ class ClassificaEstados:
             )
 
             # Treinar o modelo
-            grid_search.fit(X, Y)
+            grid_search.fit(jogos, rotulos)
 
             best_score = grid_search.best_score_
             cv_results = grid_search.cv_results_
@@ -531,9 +528,9 @@ class ClassificaEstados:
                 print(f" Metric: {metric}, Score: {score}, Parameters: {params}")
 
             # Armazenar no dicionário com a métrica como chave
-            resultados_grid[metric] = {
-                'best_score': best_score,
-                'matching_models': matching_models
+            resultados_grid[metrics_names[i]] = {
+                "best_score": best_score,
+                "matching_models": matching_models
             }
 
             joblib.dump(grid_search, f'./classes/classification/models/RF Best {metrics_names[i]}')
@@ -544,22 +541,21 @@ class ClassificaEstados:
 
     @staticmethod
     def grid_cart(jogos, rotulos):
-        
-        X, Y = ClassificaEstados.ler_amostras(jogos, rotulos, False)
 
         resultados_grid = {}
 
         f1_macro_scorer = make_scorer(f1_score, average='macro')
         precision_scorer = make_scorer(precision_score)
         recall_scorer = make_scorer(recall_score)
+        accuracy_scorer = make_scorer(accuracy_score)
 
-        metrics = (f1_macro_scorer, precision_scorer, recall_scorer)
-        metrics_names = ('Macro F1', 'Precision', 'Recall')
+        metrics = (f1_macro_scorer, precision_scorer, recall_scorer, accuracy_scorer)
+        metrics_names = ('Macro F1', 'Precision', 'Recall', 'Accuracy')
 
         for i, metric in enumerate(metrics):
             # Definir a grade de hiperparâmetros
             grid = {
-                'max_depth': [15, 20, 30, 50],
+                'max_depth': [15, 20, 30, 50, None],
                 'criterion': ["gini", "log_loss", "entropy"],
                 'min_samples_leaf': [1, 101, 301, 501],
                 'min_samples_split': [2, 20, 100, 300],
@@ -576,7 +572,7 @@ class ClassificaEstados:
             )
 
             # Treinar o modelo
-            grid_search.fit(X, Y)
+            grid_search.fit(jogos, rotulos)
 
             best_score = grid_search.best_score_
             cv_results = grid_search.cv_results_
@@ -591,9 +587,9 @@ class ClassificaEstados:
             for score, params in matching_models:
                 print(f" Metric: {metric}, Score: {score}, Parameters: {params}")
 
-            resultados_grid[metric] = {
-                'best_score': best_score,
-                'matching_models': matching_models
+            resultados_grid[metrics_names[i]] = {
+                "best_score": best_score,
+                "matching_models": matching_models
             }
             
             joblib.dump(grid_search, f'./classes/classification/models/CART Best {metrics_names[i]}')

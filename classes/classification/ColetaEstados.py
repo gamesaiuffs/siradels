@@ -31,7 +31,7 @@ print("Quantidade de Combinações:", qtd_comb)
 
 class ColetaEstados:
     @staticmethod
-    def coleta_amostras(n_features: int, jogos: str, rotulos: str, nome_modelo: str = '', qtd_simulacao: int = 100):
+    def coleta_amostras(n_features: int, jogos: str, rotulos: str, nome_modelo: str = '', qtd_simulacao: int = 25):
         X_inicial = [np.zeros(n_features)]
         X = X_inicial
         Y = []
