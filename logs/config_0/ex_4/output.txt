@@ -1,0 +1,118 @@
+Parâmetros do experimento:
+{
+    "exploration_initial_eps": 1.0,
+    "exploration_final_eps": 0.05,
+    "exploration_fraction": 0.3,
+    "learning_rate": 0.0001,
+    "learning_starts": 2000,
+    "gradient_steps": -1,
+    "net_arch": [
+        256,
+        128,
+        64,
+        32
+    ],
+    "gamma": 0.9,
+    "train_freq": 10,
+    "buffer_size": 100000,
+    "batch_size": 256,
+    "target_update_interval": 300
+}
+
+Início do treino do modelo de IA
+Fim do treino do modelo de IA
+Fim do treino do modelo de IA
+Quantidade de Combinações: 1287
+
+Agente - Vitórias: 1454 - Taxa de Vitórias: 29.37% - Pontuação Média: 16.36
+	Primeiro: 29.37%
+	Segundo : 21.74%
+	Terceiro: 17.82%
+	Quarto  : 16.36%
+	Quinto  : 14.71%
+
+Allin - Vitórias: 1346 - Taxa de Vitórias: 27.19% - Pontuação Média: 17.00
+	Primeiro: 27.19%
+	Segundo : 24.95%
+	Terceiro: 20.93%
+	Quarto  : 16.85%
+	Quinto  : 10.08%
+
+Andrei - Vitórias: 858 - Taxa de Vitórias: 17.33% - Pontuação Média: 13.78
+	Primeiro: 17.33%
+	Segundo : 18.20%
+	Terceiro: 19.94%
+	Quarto  : 21.41%
+	Quinto  : 23.11%
+
+Build - Vitórias: 509 - Taxa de Vitórias: 10.28% - Pontuação Média: 12.40
+	Primeiro: 10.28%
+	Segundo : 15.62%
+	Terceiro: 20.24%
+	Quarto  : 24.81%
+	Quinto  : 29.05%
+
+Djonatan. - Vitórias: 1951 - Taxa de Vitórias: 39.41% - Pontuação Média: 18.97
+	Primeiro: 39.41%
+	Segundo : 24.99%
+	Terceiro: 16.46%
+	Quarto  : 11.70%
+	Quinto  :  7.43%
+
+Eduardo - Vitórias: 816 - Taxa de Vitórias: 16.48% - Pontuação Média: 14.16
+	Primeiro: 16.48%
+	Segundo : 19.64%
+	Terceiro: 21.15%
+	Quarto  : 20.79%
+	Quinto  : 21.94%
+
+Felipe - Vitórias: 992 - Taxa de Vitórias: 20.04% - Pontuação Média: 15.39
+	Primeiro: 20.04%
+	Segundo : 22.22%
+	Terceiro: 21.31%
+	Quarto  : 19.78%
+	Quinto  : 16.65%
+
+Frequency - Vitórias: 1296 - Taxa de Vitórias: 26.18% - Pontuação Média: 16.89
+	Primeiro: 26.18%
+	Segundo : 25.80%
+	Terceiro: 21.52%
+	Quarto  : 15.45%
+	Quinto  : 11.05%
+
+Gold - Vitórias: 520 - Taxa de Vitórias: 10.51% - Pontuação Média: 12.41
+	Primeiro: 10.51%
+	Segundo : 16.12%
+	Terceiro: 19.84%
+	Quarto  : 23.41%
+	Quinto  : 30.12%
+
+Jean - Vitórias: 796 - Taxa de Vitórias: 16.08% - Pontuação Média: 13.72
+	Primeiro: 16.08%
+	Segundo : 17.19%
+	Terceiro: 20.30%
+	Quarto  : 22.02%
+	Quinto  : 24.40%
+
+João Luis - Vitórias: 1234 - Taxa de Vitórias: 24.93% - Pontuação Média: 15.83
+	Primeiro: 24.93%
+	Segundo : 21.35%
+	Terceiro: 20.42%
+	Quarto  : 18.00%
+	Quinto  : 15.29%
+
+MCTS - Vitórias: 596 - Taxa de Vitórias: 12.04% - Pontuação Média: 12.85
+	Primeiro: 12.04%
+	Segundo : 16.59%
+	Terceiro: 19.86%
+	Quarto  : 24.48%
+	Quinto  : 27.03%
+
+Bot Random - Vitórias: 502 - Taxa de Vitórias: 10.14% - Pontuação Média: 12.32
+	Primeiro: 10.14%
+	Segundo : 15.60%
+	Terceiro: 20.20%
+	Quarto  : 24.93%
+	Quinto  : 29.13%
+Fim dos testes das estratégias
+Tempo de execução = 0h 23min 51.04s
