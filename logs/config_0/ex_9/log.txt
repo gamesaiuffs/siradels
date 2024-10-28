@@ -1,641 +1,673 @@
 Logging to ./logs/config_0/ex_9/
-----------------------------------
-| rollout/            |          |
-|    ep_len_mean      | 21.5     |
-|    ep_rew_mean      | -996     |
-|    exploration_rate | 0.85     |
-|    success_rate     | 0.19     |
-| time/               |          |
-|    episodes         | 1000     |
-|    fps              | 473      |
-|    time_elapsed     | 50       |
-|    total_timesteps  | 23695    |
-| train/              |          |
-|    learning_rate    | 0.0001   |
-|    loss             | 153      |
-|    n_updates        | 21690    |
-----------------------------------
-----------------------------------
-| rollout/            |          |
-|    ep_len_mean      | 18.6     |
-|    ep_rew_mean      | -696     |
-|    exploration_rate | 0.722    |
-|    success_rate     | 0.15     |
-| time/               |          |
-|    episodes         | 2000     |
-|    fps              | 453      |
-|    time_elapsed     | 96       |
-|    total_timesteps  | 43880    |
-| train/              |          |
-|    learning_rate    | 0.0001   |
-|    loss             | 134      |
-|    n_updates        | 41870    |
-----------------------------------
+-----------------------------------
+| rollout/            |           |
+|    ep_len_mean      | 21.4      |
+|    ep_rew_mean      | -1.01e+03 |
+|    exploration_rate | 0.848     |
+|    success_rate     | 0.21      |
+| time/               |           |
+|    episodes         | 1000      |
+|    fps              | 491       |
+|    time_elapsed     | 48        |
+|    total_timesteps  | 24019     |
+| train/              |           |
+|    learning_rate    | 0.0001    |
+|    loss             | 134       |
+|    n_updates        | 22010     |
+-----------------------------------
 ----------------------------------
 | rollout/            |          |
 |    ep_len_mean      | 18.1     |
-|    ep_rew_mean      | -629     |
-|    exploration_rate | 0.606    |
+|    ep_rew_mean      | -661     |
+|    exploration_rate | 0.726    |
+|    success_rate     | 0.2      |
+| time/               |          |
+|    episodes         | 2000     |
+|    fps              | 463      |
+|    time_elapsed     | 93       |
+|    total_timesteps  | 43288    |
+| train/              |          |
+|    learning_rate    | 0.0001   |
+|    loss             | 55.8     |
+|    n_updates        | 41280    |
+----------------------------------
+----------------------------------
+| rollout/            |          |
+|    ep_len_mean      | 16.4     |
+|    ep_rew_mean      | -497     |
+|    exploration_rate | 0.616    |
 |    success_rate     | 0.21     |
 | time/               |          |
 |    episodes         | 3000     |
-|    fps              | 438      |
-|    time_elapsed     | 142      |
-|    total_timesteps  | 62276    |
+|    fps              | 448      |
+|    time_elapsed     | 135      |
+|    total_timesteps  | 60638    |
 | train/              |          |
 |    learning_rate    | 0.0001   |
-|    loss             | 121      |
-|    n_updates        | 60270    |
+|    loss             | 24.8     |
+|    n_updates        | 58630    |
 ----------------------------------
 ----------------------------------
 | rollout/            |          |
-|    ep_len_mean      | 15.3     |
-|    ep_rew_mean      | -370     |
-|    exploration_rate | 0.502    |
-|    success_rate     | 0.12     |
+|    ep_len_mean      | 15.9     |
+|    ep_rew_mean      | -416     |
+|    exploration_rate | 0.514    |
+|    success_rate     | 0.3      |
 | time/               |          |
 |    episodes         | 4000     |
-|    fps              | 429      |
-|    time_elapsed     | 183      |
-|    total_timesteps  | 78602    |
+|    fps              | 440      |
+|    time_elapsed     | 174      |
+|    total_timesteps  | 76715    |
 | train/              |          |
 |    learning_rate    | 0.0001   |
-|    loss             | 112      |
-|    n_updates        | 76600    |
+|    loss             | 22       |
+|    n_updates        | 74710    |
 ----------------------------------
 ----------------------------------
 | rollout/            |          |
-|    ep_len_mean      | 16.2     |
-|    ep_rew_mean      | -504     |
-|    exploration_rate | 0.405    |
-|    success_rate     | 0.11     |
-| time/               |          |
-|    episodes         | 5000     |
-|    fps              | 423      |
-|    time_elapsed     | 222      |
-|    total_timesteps  | 93994    |
-| train/              |          |
-|    learning_rate    | 0.0001   |
-|    loss             | 80.6     |
-|    n_updates        | 91990    |
-----------------------------------
-----------------------------------
-| rollout/            |          |
-|    ep_len_mean      | 16.3     |
-|    ep_rew_mean      | -466     |
-|    exploration_rate | 0.309    |
+|    ep_len_mean      | 14       |
+|    ep_rew_mean      | -272     |
+|    exploration_rate | 0.422    |
 |    success_rate     | 0.29     |
 | time/               |          |
-|    episodes         | 6000     |
-|    fps              | 415      |
-|    time_elapsed     | 262      |
-|    total_timesteps  | 109140   |
+|    episodes         | 5000     |
+|    fps              | 432      |
+|    time_elapsed     | 211      |
+|    total_timesteps  | 91323    |
 | train/              |          |
 |    learning_rate    | 0.0001   |
-|    loss             | 49       |
-|    n_updates        | 107130   |
+|    loss             | 11.9     |
+|    n_updates        | 89320    |
 ----------------------------------
 ----------------------------------
 | rollout/            |          |
-|    ep_len_mean      | 18.8     |
-|    ep_rew_mean      | -696     |
-|    exploration_rate | 0.212    |
-|    success_rate     | 0.28     |
+|    ep_len_mean      | 13.2     |
+|    ep_rew_mean      | -196     |
+|    exploration_rate | 0.332    |
+|    success_rate     | 0.42     |
+| time/               |          |
+|    episodes         | 6000     |
+|    fps              | 427      |
+|    time_elapsed     | 246      |
+|    total_timesteps  | 105465   |
+| train/              |          |
+|    learning_rate    | 0.0001   |
+|    loss             | 9.57     |
+|    n_updates        | 103460   |
+----------------------------------
+----------------------------------
+| rollout/            |          |
+|    ep_len_mean      | 12.2     |
+|    ep_rew_mean      | -108     |
+|    exploration_rate | 0.251    |
+|    success_rate     | 0.42     |
 | time/               |          |
 |    episodes         | 7000     |
-|    fps              | 410      |
-|    time_elapsed     | 303      |
-|    total_timesteps  | 124391   |
+|    fps              | 421      |
+|    time_elapsed     | 280      |
+|    total_timesteps  | 118305   |
 | train/              |          |
 |    learning_rate    | 0.0001   |
-|    loss             | 44.2     |
-|    n_updates        | 122390   |
-----------------------------------
-----------------------------------
-| rollout/            |          |
-|    ep_len_mean      | 13.5     |
-|    ep_rew_mean      | -225     |
-|    exploration_rate | 0.12     |
-|    success_rate     | 0.24     |
-| time/               |          |
-|    episodes         | 8000     |
-|    fps              | 406      |
-|    time_elapsed     | 341      |
-|    total_timesteps  | 139025   |
-| train/              |          |
-|    learning_rate    | 0.0001   |
-|    loss             | 24.4     |
-|    n_updates        | 137020   |
+|    loss             | 8.78     |
+|    n_updates        | 116300   |
 ----------------------------------
 ----------------------------------
 | rollout/            |          |
 |    ep_len_mean      | 12       |
-|    ep_rew_mean      | -71      |
-|    exploration_rate | 0.05     |
-|    success_rate     | 0.23     |
-| time/               |          |
-|    episodes         | 9000     |
-|    fps              | 401      |
-|    time_elapsed     | 384      |
-|    total_timesteps  | 154414   |
-| train/              |          |
-|    learning_rate    | 0.0001   |
-|    loss             | 20.5     |
-|    n_updates        | 152410   |
-----------------------------------
-----------------------------------
-| rollout/            |          |
-|    ep_len_mean      | 11.6     |
-|    ep_rew_mean      | -25.2    |
-|    exploration_rate | 0.05     |
-|    success_rate     | 0.32     |
-| time/               |          |
-|    episodes         | 10000    |
-|    fps              | 398      |
-|    time_elapsed     | 419      |
-|    total_timesteps  | 167098   |
-| train/              |          |
-|    learning_rate    | 0.0001   |
-|    loss             | 11.9     |
-|    n_updates        | 165090   |
-----------------------------------
-----------------------------------
-| rollout/            |          |
-|    ep_len_mean      | 11.2     |
-|    ep_rew_mean      | 24       |
-|    exploration_rate | 0.05     |
-|    success_rate     | 0.4      |
-| time/               |          |
-|    episodes         | 11000    |
-|    fps              | 395      |
-|    time_elapsed     | 452      |
-|    total_timesteps  | 179062   |
-| train/              |          |
-|    learning_rate    | 0.0001   |
-|    loss             | 10.2     |
-|    n_updates        | 177060   |
-----------------------------------
-----------------------------------
-| rollout/            |          |
-|    ep_len_mean      | 11.3     |
-|    ep_rew_mean      | 31.7     |
-|    exploration_rate | 0.05     |
-|    success_rate     | 0.44     |
-| time/               |          |
-|    episodes         | 12000    |
-|    fps              | 392      |
-|    time_elapsed     | 484      |
-|    total_timesteps  | 190383   |
-| train/              |          |
-|    learning_rate    | 0.0001   |
-|    loss             | 9.06     |
-|    n_updates        | 188380   |
-----------------------------------
-----------------------------------
-| rollout/            |          |
-|    ep_len_mean      | 10.8     |
-|    ep_rew_mean      | 42.3     |
-|    exploration_rate | 0.05     |
-|    success_rate     | 0.47     |
-| time/               |          |
-|    episodes         | 13000    |
-|    fps              | 390      |
-|    time_elapsed     | 515      |
-|    total_timesteps  | 201497   |
-| train/              |          |
-|    learning_rate    | 0.0001   |
-|    loss             | 9.27     |
-|    n_updates        | 199490   |
-----------------------------------
-----------------------------------
-| rollout/            |          |
-|    ep_len_mean      | 10.9     |
-|    ep_rew_mean      | 38.6     |
-|    exploration_rate | 0.05     |
-|    success_rate     | 0.49     |
-| time/               |          |
-|    episodes         | 14000    |
-|    fps              | 388      |
-|    time_elapsed     | 546      |
-|    total_timesteps  | 212407   |
-| train/              |          |
-|    learning_rate    | 0.0001   |
-|    loss             | 8.87     |
-|    n_updates        | 210400   |
-----------------------------------
-----------------------------------
-| rollout/            |          |
-|    ep_len_mean      | 10.8     |
-|    ep_rew_mean      | 42.5     |
-|    exploration_rate | 0.05     |
-|    success_rate     | 0.48     |
-| time/               |          |
-|    episodes         | 15000    |
-|    fps              | 387      |
-|    time_elapsed     | 576      |
-|    total_timesteps  | 223170   |
-| train/              |          |
-|    learning_rate    | 0.0001   |
-|    loss             | 9.4      |
-|    n_updates        | 221160   |
-----------------------------------
-----------------------------------
-| rollout/            |          |
-|    ep_len_mean      | 10.8     |
-|    ep_rew_mean      | 38.6     |
-|    exploration_rate | 0.05     |
-|    success_rate     | 0.47     |
-| time/               |          |
-|    episodes         | 16000    |
-|    fps              | 386      |
-|    time_elapsed     | 606      |
-|    total_timesteps  | 233974   |
-| train/              |          |
-|    learning_rate    | 0.0001   |
-|    loss             | 9.4      |
-|    n_updates        | 231970   |
-----------------------------------
-----------------------------------
-| rollout/            |          |
-|    ep_len_mean      | 10.9     |
-|    ep_rew_mean      | 36.5     |
-|    exploration_rate | 0.05     |
-|    success_rate     | 0.52     |
-| time/               |          |
-|    episodes         | 17000    |
-|    fps              | 384      |
-|    time_elapsed     | 636      |
-|    total_timesteps  | 244812   |
-| train/              |          |
-|    learning_rate    | 0.0001   |
-|    loss             | 9.94     |
-|    n_updates        | 242810   |
-----------------------------------
-----------------------------------
-| rollout/            |          |
-|    ep_len_mean      | 10.9     |
-|    ep_rew_mean      | 41.8     |
-|    exploration_rate | 0.05     |
-|    success_rate     | 0.53     |
-| time/               |          |
-|    episodes         | 18000    |
-|    fps              | 383      |
-|    time_elapsed     | 666      |
-|    total_timesteps  | 255618   |
-| train/              |          |
-|    learning_rate    | 0.0001   |
-|    loss             | 10.4     |
-|    n_updates        | 253610   |
-----------------------------------
-----------------------------------
-| rollout/            |          |
-|    ep_len_mean      | 11       |
-|    ep_rew_mean      | 45.8     |
-|    exploration_rate | 0.05     |
-|    success_rate     | 0.51     |
-| time/               |          |
-|    episodes         | 19000    |
-|    fps              | 382      |
-|    time_elapsed     | 696      |
-|    total_timesteps  | 266420   |
-| train/              |          |
-|    learning_rate    | 0.0001   |
-|    loss             | 10.8     |
-|    n_updates        | 264410   |
-----------------------------------
-----------------------------------
-| rollout/            |          |
-|    ep_len_mean      | 10.9     |
-|    ep_rew_mean      | 39.3     |
-|    exploration_rate | 0.05     |
-|    success_rate     | 0.57     |
-| time/               |          |
-|    episodes         | 20000    |
-|    fps              | 381      |
-|    time_elapsed     | 726      |
-|    total_timesteps  | 277092   |
-| train/              |          |
-|    learning_rate    | 0.0001   |
-|    loss             | 10.8     |
-|    n_updates        | 275090   |
-----------------------------------
-----------------------------------
-| rollout/            |          |
-|    ep_len_mean      | 10.7     |
-|    ep_rew_mean      | 37.2     |
-|    exploration_rate | 0.05     |
+|    ep_rew_mean      | -49.6    |
+|    exploration_rate | 0.174    |
 |    success_rate     | 0.46     |
 | time/               |          |
-|    episodes         | 21000    |
-|    fps              | 380      |
-|    time_elapsed     | 757      |
-|    total_timesteps  | 287884   |
+|    episodes         | 8000     |
+|    fps              | 416      |
+|    time_elapsed     | 313      |
+|    total_timesteps  | 130422   |
 | train/              |          |
 |    learning_rate    | 0.0001   |
-|    loss             | 11.1     |
-|    n_updates        | 285880   |
-----------------------------------
-----------------------------------
-| rollout/            |          |
-|    ep_len_mean      | 10.7     |
-|    ep_rew_mean      | 40.6     |
-|    exploration_rate | 0.05     |
-|    success_rate     | 0.53     |
-| time/               |          |
-|    episodes         | 22000    |
-|    fps              | 379      |
-|    time_elapsed     | 786      |
-|    total_timesteps  | 298594   |
-| train/              |          |
-|    learning_rate    | 0.0001   |
-|    loss             | 10.9     |
-|    n_updates        | 296590   |
-----------------------------------
-----------------------------------
-| rollout/            |          |
-|    ep_len_mean      | 10.5     |
-|    ep_rew_mean      | 41.6     |
-|    exploration_rate | 0.05     |
-|    success_rate     | 0.54     |
-| time/               |          |
-|    episodes         | 23000    |
-|    fps              | 378      |
-|    time_elapsed     | 816      |
-|    total_timesteps  | 309358   |
-| train/              |          |
-|    learning_rate    | 0.0001   |
-|    loss             | 11.1     |
-|    n_updates        | 307350   |
-----------------------------------
-----------------------------------
-| rollout/            |          |
-|    ep_len_mean      | 10.7     |
-|    ep_rew_mean      | 44       |
-|    exploration_rate | 0.05     |
-|    success_rate     | 0.52     |
-| time/               |          |
-|    episodes         | 24000    |
-|    fps              | 378      |
-|    time_elapsed     | 846      |
-|    total_timesteps  | 320153   |
-| train/              |          |
-|    learning_rate    | 0.0001   |
-|    loss             | 11.2     |
-|    n_updates        | 318150   |
+|    loss             | 9.01     |
+|    n_updates        | 128420   |
 ----------------------------------
 ----------------------------------
 | rollout/            |          |
 |    ep_len_mean      | 11       |
-|    ep_rew_mean      | 41.5     |
-|    exploration_rate | 0.05     |
-|    success_rate     | 0.58     |
+|    ep_rew_mean      | -6.77    |
+|    exploration_rate | 0.101    |
+|    success_rate     | 0.47     |
 | time/               |          |
-|    episodes         | 25000    |
-|    fps              | 377      |
-|    time_elapsed     | 877      |
-|    total_timesteps  | 331034   |
+|    episodes         | 9000     |
+|    fps              | 412      |
+|    time_elapsed     | 344      |
+|    total_timesteps  | 141951   |
 | train/              |          |
 |    learning_rate    | 0.0001   |
-|    loss             | 11.3     |
-|    n_updates        | 329030   |
-----------------------------------
-----------------------------------
-| rollout/            |          |
-|    ep_len_mean      | 10.9     |
-|    ep_rew_mean      | 45       |
-|    exploration_rate | 0.05     |
-|    success_rate     | 0.57     |
-| time/               |          |
-|    episodes         | 26000    |
-|    fps              | 376      |
-|    time_elapsed     | 907      |
-|    total_timesteps  | 341834   |
-| train/              |          |
-|    learning_rate    | 0.0001   |
-|    loss             | 11.1     |
-|    n_updates        | 339830   |
-----------------------------------
-----------------------------------
-| rollout/            |          |
-|    ep_len_mean      | 10.7     |
-|    ep_rew_mean      | 39.4     |
-|    exploration_rate | 0.05     |
-|    success_rate     | 0.5      |
-| time/               |          |
-|    episodes         | 27000    |
-|    fps              | 375      |
-|    time_elapsed     | 937      |
-|    total_timesteps  | 352578   |
-| train/              |          |
-|    learning_rate    | 0.0001   |
-|    loss             | 10.7     |
-|    n_updates        | 350570   |
+|    loss             | 9.84     |
+|    n_updates        | 139950   |
 ----------------------------------
 ----------------------------------
 | rollout/            |          |
 |    ep_len_mean      | 10.7     |
 |    ep_rew_mean      | 42.9     |
 |    exploration_rate | 0.05     |
-|    success_rate     | 0.55     |
+|    success_rate     | 0.52     |
 | time/               |          |
-|    episodes         | 28000    |
-|    fps              | 375      |
-|    time_elapsed     | 967      |
-|    total_timesteps  | 363393   |
+|    episodes         | 10000    |
+|    fps              | 408      |
+|    time_elapsed     | 374      |
+|    total_timesteps  | 152929   |
 | train/              |          |
 |    learning_rate    | 0.0001   |
-|    loss             | 11.7     |
-|    n_updates        | 361390   |
-----------------------------------
-----------------------------------
-| rollout/            |          |
-|    ep_len_mean      | 11.1     |
-|    ep_rew_mean      | 42.8     |
-|    exploration_rate | 0.05     |
-|    success_rate     | 0.55     |
-| time/               |          |
-|    episodes         | 29000    |
-|    fps              | 374      |
-|    time_elapsed     | 998      |
-|    total_timesteps  | 374262   |
-| train/              |          |
-|    learning_rate    | 0.0001   |
-|    loss             | 11.5     |
-|    n_updates        | 372260   |
+|    loss             | 10.8     |
+|    n_updates        | 150920   |
 ----------------------------------
 ----------------------------------
 | rollout/            |          |
 |    ep_len_mean      | 10.9     |
-|    ep_rew_mean      | 56.3     |
+|    ep_rew_mean      | 45.6     |
 |    exploration_rate | 0.05     |
-|    success_rate     | 0.56     |
+|    success_rate     | 0.55     |
 | time/               |          |
-|    episodes         | 30000    |
-|    fps              | 374      |
-|    time_elapsed     | 1028     |
-|    total_timesteps  | 385023   |
+|    episodes         | 11000    |
+|    fps              | 404      |
+|    time_elapsed     | 403      |
+|    total_timesteps  | 163579   |
 | train/              |          |
 |    learning_rate    | 0.0001   |
-|    loss             | 11       |
-|    n_updates        | 383020   |
+|    loss             | 10.3     |
+|    n_updates        | 161570   |
 ----------------------------------
 ----------------------------------
 | rollout/            |          |
-|    ep_len_mean      | 10.4     |
-|    ep_rew_mean      | 46.9     |
+|    ep_len_mean      | 10.6     |
+|    ep_rew_mean      | 59.1     |
 |    exploration_rate | 0.05     |
-|    success_rate     | 0.57     |
+|    success_rate     | 0.6      |
 | time/               |          |
-|    episodes         | 31000    |
-|    fps              | 373      |
-|    time_elapsed     | 1058     |
-|    total_timesteps  | 395741   |
+|    episodes         | 12000    |
+|    fps              | 402      |
+|    time_elapsed     | 433      |
+|    total_timesteps  | 174204   |
 | train/              |          |
 |    learning_rate    | 0.0001   |
-|    loss             | 11.3     |
-|    n_updates        | 393740   |
-----------------------------------
-----------------------------------
-| rollout/            |          |
-|    ep_len_mean      | 10.7     |
-|    ep_rew_mean      | 42.3     |
-|    exploration_rate | 0.05     |
-|    success_rate     | 0.49     |
-| time/               |          |
-|    episodes         | 32000    |
-|    fps              | 373      |
-|    time_elapsed     | 1089     |
-|    total_timesteps  | 406568   |
-| train/              |          |
-|    learning_rate    | 0.0001   |
-|    loss             | 10.8     |
-|    n_updates        | 404560   |
+|    loss             | 10.1     |
+|    n_updates        | 172200   |
 ----------------------------------
 ----------------------------------
 | rollout/            |          |
 |    ep_len_mean      | 10.8     |
-|    ep_rew_mean      | 55.1     |
+|    ep_rew_mean      | 40.8     |
 |    exploration_rate | 0.05     |
-|    success_rate     | 0.6      |
+|    success_rate     | 0.51     |
 | time/               |          |
-|    episodes         | 33000    |
-|    fps              | 372      |
-|    time_elapsed     | 1119     |
-|    total_timesteps  | 417378   |
+|    episodes         | 13000    |
+|    fps              | 400      |
+|    time_elapsed     | 461      |
+|    total_timesteps  | 184911   |
 | train/              |          |
 |    learning_rate    | 0.0001   |
-|    loss             | 10.4     |
-|    n_updates        | 415370   |
+|    loss             | 10       |
+|    n_updates        | 182910   |
 ----------------------------------
 ----------------------------------
 | rollout/            |          |
-|    ep_len_mean      | 10.7     |
-|    ep_rew_mean      | 53       |
+|    ep_len_mean      | 10.9     |
+|    ep_rew_mean      | 35       |
+|    exploration_rate | 0.05     |
+|    success_rate     | 0.58     |
+| time/               |          |
+|    episodes         | 14000    |
+|    fps              | 398      |
+|    time_elapsed     | 490      |
+|    total_timesteps  | 195672   |
+| train/              |          |
+|    learning_rate    | 0.0001   |
+|    loss             | 10.1     |
+|    n_updates        | 193670   |
+----------------------------------
+----------------------------------
+| rollout/            |          |
+|    ep_len_mean      | 10.8     |
+|    ep_rew_mean      | 51       |
+|    exploration_rate | 0.05     |
+|    success_rate     | 0.59     |
+| time/               |          |
+|    episodes         | 15000    |
+|    fps              | 396      |
+|    time_elapsed     | 520      |
+|    total_timesteps  | 206467   |
+| train/              |          |
+|    learning_rate    | 0.0001   |
+|    loss             | 10.3     |
+|    n_updates        | 204460   |
+----------------------------------
+----------------------------------
+| rollout/            |          |
+|    ep_len_mean      | 10.8     |
+|    ep_rew_mean      | 42.6     |
 |    exploration_rate | 0.05     |
 |    success_rate     | 0.55     |
 | time/               |          |
-|    episodes         | 34000    |
-|    fps              | 372      |
-|    time_elapsed     | 1150     |
-|    total_timesteps  | 428142   |
+|    episodes         | 16000    |
+|    fps              | 394      |
+|    time_elapsed     | 550      |
+|    total_timesteps  | 217194   |
+| train/              |          |
+|    learning_rate    | 0.0001   |
+|    loss             | 10.3     |
+|    n_updates        | 215190   |
+----------------------------------
+----------------------------------
+| rollout/            |          |
+|    ep_len_mean      | 10.9     |
+|    ep_rew_mean      | 32.3     |
+|    exploration_rate | 0.05     |
+|    success_rate     | 0.49     |
+| time/               |          |
+|    episodes         | 17000    |
+|    fps              | 392      |
+|    time_elapsed     | 580      |
+|    total_timesteps  | 227876   |
 | train/              |          |
 |    learning_rate    | 0.0001   |
 |    loss             | 10.7     |
-|    n_updates        | 426140   |
+|    n_updates        | 225870   |
 ----------------------------------
 ----------------------------------
 | rollout/            |          |
 |    ep_len_mean      | 10.5     |
-|    ep_rew_mean      | 42.8     |
+|    ep_rew_mean      | 47       |
 |    exploration_rate | 0.05     |
-|    success_rate     | 0.54     |
+|    success_rate     | 0.58     |
 | time/               |          |
-|    episodes         | 35000    |
-|    fps              | 371      |
-|    time_elapsed     | 1180     |
-|    total_timesteps  | 438906   |
+|    episodes         | 18000    |
+|    fps              | 391      |
+|    time_elapsed     | 609      |
+|    total_timesteps  | 238512   |
 | train/              |          |
 |    learning_rate    | 0.0001   |
 |    loss             | 10.3     |
-|    n_updates        | 436900   |
+|    n_updates        | 236510   |
+----------------------------------
+----------------------------------
+| rollout/            |          |
+|    ep_len_mean      | 10.5     |
+|    ep_rew_mean      | 59.1     |
+|    exploration_rate | 0.05     |
+|    success_rate     | 0.6      |
+| time/               |          |
+|    episodes         | 19000    |
+|    fps              | 389      |
+|    time_elapsed     | 639      |
+|    total_timesteps  | 249083   |
+| train/              |          |
+|    learning_rate    | 0.0001   |
+|    loss             | 10.3     |
+|    n_updates        | 247080   |
 ----------------------------------
 ----------------------------------
 | rollout/            |          |
 |    ep_len_mean      | 10.6     |
-|    ep_rew_mean      | 49.1     |
+|    ep_rew_mean      | 38.7     |
 |    exploration_rate | 0.05     |
-|    success_rate     | 0.57     |
+|    success_rate     | 0.55     |
 | time/               |          |
-|    episodes         | 36000    |
-|    fps              | 371      |
-|    time_elapsed     | 1210     |
-|    total_timesteps  | 449758   |
+|    episodes         | 20000    |
+|    fps              | 388      |
+|    time_elapsed     | 669      |
+|    total_timesteps  | 259751   |
 | train/              |          |
 |    learning_rate    | 0.0001   |
-|    loss             | 10.5     |
-|    n_updates        | 447750   |
+|    loss             | 11.1     |
+|    n_updates        | 257750   |
 ----------------------------------
 ----------------------------------
 | rollout/            |          |
 |    ep_len_mean      | 10.7     |
-|    ep_rew_mean      | 42.7     |
+|    ep_rew_mean      | 35.6     |
 |    exploration_rate | 0.05     |
-|    success_rate     | 0.57     |
+|    success_rate     | 0.48     |
 | time/               |          |
-|    episodes         | 37000    |
-|    fps              | 371      |
-|    time_elapsed     | 1240     |
-|    total_timesteps  | 460513   |
+|    episodes         | 21000    |
+|    fps              | 387      |
+|    time_elapsed     | 698      |
+|    total_timesteps  | 270394   |
 | train/              |          |
 |    learning_rate    | 0.0001   |
-|    loss             | 10.9     |
-|    n_updates        | 458510   |
+|    loss             | 11       |
+|    n_updates        | 268390   |
+----------------------------------
+----------------------------------
+| rollout/            |          |
+|    ep_len_mean      | 10.7     |
+|    ep_rew_mean      | 36.3     |
+|    exploration_rate | 0.05     |
+|    success_rate     | 0.47     |
+| time/               |          |
+|    episodes         | 22000    |
+|    fps              | 386      |
+|    time_elapsed     | 727      |
+|    total_timesteps  | 281150   |
+| train/              |          |
+|    learning_rate    | 0.0001   |
+|    loss             | 11.5     |
+|    n_updates        | 279140   |
+----------------------------------
+----------------------------------
+| rollout/            |          |
+|    ep_len_mean      | 10.4     |
+|    ep_rew_mean      | 47.5     |
+|    exploration_rate | 0.05     |
+|    success_rate     | 0.56     |
+| time/               |          |
+|    episodes         | 23000    |
+|    fps              | 385      |
+|    time_elapsed     | 756      |
+|    total_timesteps  | 291803   |
+| train/              |          |
+|    learning_rate    | 0.0001   |
+|    loss             | 10.8     |
+|    n_updates        | 289800   |
+----------------------------------
+----------------------------------
+| rollout/            |          |
+|    ep_len_mean      | 10.1     |
+|    ep_rew_mean      | 46.2     |
+|    exploration_rate | 0.05     |
+|    success_rate     | 0.58     |
+| time/               |          |
+|    episodes         | 24000    |
+|    fps              | 384      |
+|    time_elapsed     | 785      |
+|    total_timesteps  | 302334   |
+| train/              |          |
+|    learning_rate    | 0.0001   |
+|    loss             | 10.8     |
+|    n_updates        | 300330   |
+----------------------------------
+----------------------------------
+| rollout/            |          |
+|    ep_len_mean      | 10.3     |
+|    ep_rew_mean      | 42.5     |
+|    exploration_rate | 0.05     |
+|    success_rate     | 0.53     |
+| time/               |          |
+|    episodes         | 25000    |
+|    fps              | 384      |
+|    time_elapsed     | 814      |
+|    total_timesteps  | 312950   |
+| train/              |          |
+|    learning_rate    | 0.0001   |
+|    loss             | 11.1     |
+|    n_updates        | 310940   |
+----------------------------------
+----------------------------------
+| rollout/            |          |
+|    ep_len_mean      | 10.4     |
+|    ep_rew_mean      | 52.2     |
+|    exploration_rate | 0.05     |
+|    success_rate     | 0.59     |
+| time/               |          |
+|    episodes         | 26000    |
+|    fps              | 383      |
+|    time_elapsed     | 843      |
+|    total_timesteps  | 323526   |
+| train/              |          |
+|    learning_rate    | 0.0001   |
+|    loss             | 10.6     |
+|    n_updates        | 321520   |
+----------------------------------
+----------------------------------
+| rollout/            |          |
+|    ep_len_mean      | 10.6     |
+|    ep_rew_mean      | 28.9     |
+|    exploration_rate | 0.05     |
+|    success_rate     | 0.51     |
+| time/               |          |
+|    episodes         | 27000    |
+|    fps              | 382      |
+|    time_elapsed     | 873      |
+|    total_timesteps  | 334201   |
+| train/              |          |
+|    learning_rate    | 0.0001   |
+|    loss             | 10.4     |
+|    n_updates        | 332200   |
+----------------------------------
+----------------------------------
+| rollout/            |          |
+|    ep_len_mean      | 10.4     |
+|    ep_rew_mean      | 41.1     |
+|    exploration_rate | 0.05     |
+|    success_rate     | 0.5      |
+| time/               |          |
+|    episodes         | 28000    |
+|    fps              | 382      |
+|    time_elapsed     | 901      |
+|    total_timesteps  | 344735   |
+| train/              |          |
+|    learning_rate    | 0.0001   |
+|    loss             | 10.3     |
+|    n_updates        | 342730   |
+----------------------------------
+----------------------------------
+| rollout/            |          |
+|    ep_len_mean      | 10.9     |
+|    ep_rew_mean      | 49.9     |
+|    exploration_rate | 0.05     |
+|    success_rate     | 0.54     |
+| time/               |          |
+|    episodes         | 29000    |
+|    fps              | 381      |
+|    time_elapsed     | 930      |
+|    total_timesteps  | 355375   |
+| train/              |          |
+|    learning_rate    | 0.0001   |
+|    loss             | 10.5     |
+|    n_updates        | 353370   |
+----------------------------------
+----------------------------------
+| rollout/            |          |
+|    ep_len_mean      | 10.5     |
+|    ep_rew_mean      | 40.7     |
+|    exploration_rate | 0.05     |
+|    success_rate     | 0.52     |
+| time/               |          |
+|    episodes         | 30000    |
+|    fps              | 381      |
+|    time_elapsed     | 960      |
+|    total_timesteps  | 366081   |
+| train/              |          |
+|    learning_rate    | 0.0001   |
+|    loss             | 10.7     |
+|    n_updates        | 364080   |
+----------------------------------
+----------------------------------
+| rollout/            |          |
+|    ep_len_mean      | 10.6     |
+|    ep_rew_mean      | 57.5     |
+|    exploration_rate | 0.05     |
+|    success_rate     | 0.66     |
+| time/               |          |
+|    episodes         | 31000    |
+|    fps              | 380      |
+|    time_elapsed     | 988      |
+|    total_timesteps  | 376682   |
+| train/              |          |
+|    learning_rate    | 0.0001   |
+|    loss             | 10.3     |
+|    n_updates        | 374680   |
+----------------------------------
+----------------------------------
+| rollout/            |          |
+|    ep_len_mean      | 10.6     |
+|    ep_rew_mean      | 62.1     |
+|    exploration_rate | 0.05     |
+|    success_rate     | 0.64     |
+| time/               |          |
+|    episodes         | 32000    |
+|    fps              | 380      |
+|    time_elapsed     | 1017     |
+|    total_timesteps  | 387331   |
+| train/              |          |
+|    learning_rate    | 0.0001   |
+|    loss             | 10.4     |
+|    n_updates        | 385330   |
+----------------------------------
+----------------------------------
+| rollout/            |          |
+|    ep_len_mean      | 10.9     |
+|    ep_rew_mean      | 44       |
+|    exploration_rate | 0.05     |
+|    success_rate     | 0.64     |
+| time/               |          |
+|    episodes         | 33000    |
+|    fps              | 380      |
+|    time_elapsed     | 1047     |
+|    total_timesteps  | 398072   |
+| train/              |          |
+|    learning_rate    | 0.0001   |
+|    loss             | 10.3     |
+|    n_updates        | 396070   |
+----------------------------------
+----------------------------------
+| rollout/            |          |
+|    ep_len_mean      | 10.3     |
+|    ep_rew_mean      | 46       |
+|    exploration_rate | 0.05     |
+|    success_rate     | 0.55     |
+| time/               |          |
+|    episodes         | 34000    |
+|    fps              | 379      |
+|    time_elapsed     | 1077     |
+|    total_timesteps  | 408627   |
+| train/              |          |
+|    learning_rate    | 0.0001   |
+|    loss             | 10.5     |
+|    n_updates        | 406620   |
+----------------------------------
+----------------------------------
+| rollout/            |          |
+|    ep_len_mean      | 10.6     |
+|    ep_rew_mean      | 42.3     |
+|    exploration_rate | 0.05     |
+|    success_rate     | 0.51     |
+| time/               |          |
+|    episodes         | 35000    |
+|    fps              | 378      |
+|    time_elapsed     | 1107     |
+|    total_timesteps  | 419406   |
+| train/              |          |
+|    learning_rate    | 0.0001   |
+|    loss             | 10.2     |
+|    n_updates        | 417400   |
+----------------------------------
+----------------------------------
+| rollout/            |          |
+|    ep_len_mean      | 10.5     |
+|    ep_rew_mean      | 31.5     |
+|    exploration_rate | 0.05     |
+|    success_rate     | 0.47     |
+| time/               |          |
+|    episodes         | 36000    |
+|    fps              | 378      |
+|    time_elapsed     | 1136     |
+|    total_timesteps  | 429976   |
+| train/              |          |
+|    learning_rate    | 0.0001   |
+|    loss             | 10.3     |
+|    n_updates        | 427970   |
+----------------------------------
+----------------------------------
+| rollout/            |          |
+|    ep_len_mean      | 10.6     |
+|    ep_rew_mean      | 44.5     |
+|    exploration_rate | 0.05     |
+|    success_rate     | 0.58     |
+| time/               |          |
+|    episodes         | 37000    |
+|    fps              | 377      |
+|    time_elapsed     | 1165     |
+|    total_timesteps  | 440612   |
+| train/              |          |
+|    learning_rate    | 0.0001   |
+|    loss             | 10.4     |
+|    n_updates        | 438610   |
 ----------------------------------
 ----------------------------------
 | rollout/            |          |
 |    ep_len_mean      | 11       |
-|    ep_rew_mean      | 34       |
+|    ep_rew_mean      | 34.3     |
 |    exploration_rate | 0.05     |
-|    success_rate     | 0.52     |
+|    success_rate     | 0.49     |
 | time/               |          |
 |    episodes         | 38000    |
-|    fps              | 370      |
-|    time_elapsed     | 1271     |
-|    total_timesteps  | 471519   |
+|    fps              | 377      |
+|    time_elapsed     | 1195     |
+|    total_timesteps  | 451311   |
 | train/              |          |
 |    learning_rate    | 0.0001   |
-|    loss             | 10.8     |
-|    n_updates        | 469510   |
+|    loss             | 10.7     |
+|    n_updates        | 449310   |
 ----------------------------------
 ----------------------------------
 | rollout/            |          |
 |    ep_len_mean      | 10.7     |
-|    ep_rew_mean      | 44.3     |
+|    ep_rew_mean      | 46.9     |
 |    exploration_rate | 0.05     |
-|    success_rate     | 0.55     |
+|    success_rate     | 0.54     |
 | time/               |          |
 |    episodes         | 39000    |
-|    fps              | 370      |
-|    time_elapsed     | 1301     |
-|    total_timesteps  | 482352   |
+|    fps              | 377      |
+|    time_elapsed     | 1225     |
+|    total_timesteps  | 462117   |
 | train/              |          |
 |    learning_rate    | 0.0001   |
-|    loss             | 10.5     |
-|    n_updates        | 480350   |
+|    loss             | 10       |
+|    n_updates        | 460110   |
+----------------------------------
+----------------------------------
+| rollout/            |          |
+|    ep_len_mean      | 10.9     |
+|    ep_rew_mean      | 23.8     |
+|    exploration_rate | 0.05     |
+|    success_rate     | 0.52     |
+| time/               |          |
+|    episodes         | 40000    |
+|    fps              | 376      |
+|    time_elapsed     | 1254     |
+|    total_timesteps  | 472725   |
+| train/              |          |
+|    learning_rate    | 0.0001   |
+|    loss             | 10.4     |
+|    n_updates        | 470720   |
+----------------------------------
+----------------------------------
+| rollout/            |          |
+|    ep_len_mean      | 10.9     |
+|    ep_rew_mean      | 49       |
+|    exploration_rate | 0.05     |
+|    success_rate     | 0.58     |
+| time/               |          |
+|    episodes         | 41000    |
+|    fps              | 376      |
+|    time_elapsed     | 1283     |
+|    total_timesteps  | 483431   |
+| train/              |          |
+|    learning_rate    | 0.0001   |
+|    loss             | 9.84     |
+|    n_updates        | 481430   |
 ----------------------------------
 ----------------------------------
 | rollout/            |          |
 |    ep_len_mean      | 10.6     |
-|    ep_rew_mean      | 39.4     |
+|    ep_rew_mean      | 51.5     |
 |    exploration_rate | 0.05     |
-|    success_rate     | 0.51     |
+|    success_rate     | 0.65     |
 | time/               |          |
-|    episodes         | 40000    |
-|    fps              | 370      |
-|    time_elapsed     | 1331     |
-|    total_timesteps  | 493093   |
+|    episodes         | 42000    |
+|    fps              | 376      |
+|    time_elapsed     | 1313     |
+|    total_timesteps  | 494186   |
 | train/              |          |
 |    learning_rate    | 0.0001   |
-|    loss             | 10.1     |
-|    n_updates        | 491090   |
+|    loss             | 10       |
+|    n_updates        | 492180   |
 ----------------------------------
