@@ -130,8 +130,10 @@ class Simulacao:
                 escolha_personagem = idx_escolha_personagem
             else:
                 escolha_personagem = self.estrategias[self.estado.jogador_atual].escolher_personagem(self.estado)
+            
             self.estado.jogador_atual.personagem = self.estado.tabuleiro.baralho_personagens[escolha_personagem]
             self.estado.tabuleiro.baralho_personagens.remove(self.estado.jogador_atual.personagem)
+            
         # Finaliza fase de personagens e segue para fase de ações
         if self.num_jogadores == idx_final:
             self.executar_turno_jogador()

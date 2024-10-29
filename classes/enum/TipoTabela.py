@@ -44,3 +44,7 @@ class TipoTabela(Enum):
     # JmQtdOuro = 12, 7
     # PersonagemDisponivel = 14, 256
     # PersonagemDescartado = 15, 9
+
+    # Sugestões
+    # MediaValorCartasAdversarios
+    # Personagens que tem carta descartada para cima

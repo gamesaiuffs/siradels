@@ -84,16 +84,20 @@ check_env(env)
 # experimento.treinar_modelo_mcts(600, 0) # Treinar modelo MCTS RL por 10min = 600s
 # print("Fim do treino MCTS")
 
+model = DQN.load("./teste_modelo_nicolas3/exp_0/10.zip")
+
 print("Início dos testes das estratégias")
-estrategias: list[Estrategia] = [Agente(), EstrategiaAllin("Allin"), EstrategiaAndrei(), EstrategiaBuild("Build"), EstrategiaDjonatan(), EstrategiaEduardo(),
-                                 EstrategiaFelipe(), EstrategiaFrequency("Frequency"), EstrategiaGold("Gold"), EstrategiaJean(), EstrategiaLuisII(),
-                                 EstrategiaMCTS(caminho), EstrategiaTotalmenteAleatoria()]
+estrategias: list[Estrategia] = [Agente(model=model),
+                                 EstrategiaTotalmenteAleatoria("Rand 1"), EstrategiaTotalmenteAleatoria("Rand 2"), EstrategiaTotalmenteAleatoria("Rand 3"), EstrategiaTotalmenteAleatoria("Rand 4")]
+# estrategias: list[Estrategia] = [Agente(model=model), EstrategiaAllin("Allin"), EstrategiaAndrei(), EstrategiaBuild("Build"), EstrategiaDjonatan(), EstrategiaEduardo(),
+#                                  EstrategiaFelipe(), EstrategiaFrequency("Frequency"), EstrategiaGold("Gold"), EstrategiaJean(), EstrategiaLuisII(),
+#                                  EstrategiaTotalmenteAleatoria()]
 # estrategias: list[Estrategia] = [Agente(imprimir=True), EstrategiaTotalmenteAleatoria("B2"), EstrategiaTotalmenteAleatoria("B3"), EstrategiaTotalmenteAleatoria("B4"), EstrategiaTotalmenteAleatoria("B5")]
 comb = list(combinations(estrategias, 5))
 qtd_comb = len(comb)
 print("Quantidade de Combinações:", qtd_comb)
 
-qtd_simulacao: int = 10
+qtd_simulacao: int = 100
 resultados_total: dict[str, (int, int, int, int, int, int, int)] = dict()
 for e in estrategias:
     resultados_total[e.nome] = (0, 0, 0, 0, 0, 0, 0)

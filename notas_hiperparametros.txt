@@ -1,0 +1,316 @@
+MODELOS QUE FUNCIONARAM MUITO BEM: 
+
+modelo 1 - otimizou muito bem a função de recompensas e atingiu um dos melhores resultados dos testes
+    tau: 0.5
+    exploration_initial_eps: 0.99
+    exploration_final_eps: 0.4
+    exploration_fraction: 0.4
+    learning_rate: 0.005
+    learning_starts: 1000
+    gradient_steps: 10
+    policy_net_arch: [32]
+    gamma: 0.8
+    train_freq: 2000
+    buffer_size: 50000
+    batch_size: 128
+    target_update_interval: 1000
+
+modelo 2 - também otimizou bem a recompensa, mas não atingiu resultados tão altos quanto o modelo 1 dos excelentes
+    tau: 0.7
+    exploration_initial_eps: 0.7
+    exploration_final_eps: 0.4
+    exploration_fraction: 0.3
+    learning_rate: 0.0001
+    learning_starts: 3000
+    gradient_steps: -1
+    policy_net_arch: [48, 48]
+    gamma: 0.95
+    train_freq: 1000
+    buffer_size: 25000
+    batch_size: 128
+    target_update_interval: 300
+
+modelo 3 - aprendeu bem, mas deu uma leve desaprendida no meio do treinamento. Um dos que melhor maximizou a recompensa
+    tau: 0.5
+    exploration_initial_eps: 0.9
+    exploration_final_eps: 0.5
+    exploration_fraction: 0.3
+    learning_rate: 0.0001
+    learning_starts: 5000
+    gradient_steps: -1
+    policy_net_arch: [16, 16]
+    gamma: 0.75
+    train_freq: 500
+    buffer_size: 50000
+    batch_size: 512
+    target_update_interval: 150
+
+modelo 4 - o que melhor aprendeu até agora, porém é mais lento no treinamento
+    exploration_initial_eps: 1.0
+    exploration_final_eps: 0.05
+    exploration_fraction: 0.5
+    learning_rate: 0.0001
+    learning_starts: 2000
+    gradient_steps: -1
+    policy_net_arch: [256, 128, 64, 32]
+    gamma: 0.9
+    train_freq: 10
+    buffer_size: 100000
+    batch_size: 256
+    target_update_interval: 300
+
+
+
+NÃO APRENDERAM NADA: 
+modelo 1
+    tau: 0.9
+    exploration_initial_eps: 0.9
+    exploration_final_eps: 0.4
+    exploration_fraction: 0.4
+    learning_rate: 0.005
+    learning_starts: 1000
+    gradient_steps: 10
+    policy_net_arch: [64, 64]
+    gamma: 0.95
+    train_freq: 3000
+    buffer_size: 50000
+    batch_size: 512
+    target_update_interval: 500
+
+modelo 2
+    tau: 0.5
+    exploration_initial_eps: 0.99
+    exploration_final_eps: 0.5
+    exploration_fraction: 0.6
+    learning_rate: 0.0001
+    learning_starts: 3000
+    gradient_steps: 10
+    policy_net_arch: [32]
+    gamma: 0.99
+    train_freq: 2500
+    buffer_size: 100000
+    batch_size: 128
+    target_update_interval: 1000
+
+modelo 3
+    tau: 0.5
+    exploration_initial_eps: 0.8
+    exploration_final_eps: 0.4
+    exploration_fraction: 0.5
+    learning_rate: 0.001
+    learning_starts: 5000
+    gradient_steps: 1
+    policy_net_arch: [64, 64]
+    gamma: 0.99
+    train_freq: 2500
+    buffer_size: 50000
+    batch_size: 256
+    target_update_interval: 100
+
+modelo 4 - este não aprendeu absolutamente NADA
+    tau: 0.9
+    exploration_initial_eps: 0.9
+    exploration_final_eps: 0.5
+    exploration_fraction: 0.2
+    learning_rate: 0.001
+    learning_starts: 5000
+    gradient_steps: 1
+    policy_net_arch: [32, 32]
+    gamma: 0.75
+    train_freq: 500
+    buffer_size: 100000
+    batch_size: 512
+    target_update_interval: 500
+
+modelo 5
+    tau: 0.5
+    exploration_initial_eps: 0.9
+    exploration_final_eps: 0.1
+    exploration_fraction: 0.6
+    learning_rate: 0.005
+    learning_starts: 5000
+    gradient_steps: 10
+    policy_net_arch: [16]
+    gamma: 0.95
+    train_freq: 3000
+    buffer_size: 100000
+    batch_size: 128
+    target_update_interval: 100
+
+modelo 6 - pior de todos
+    tau: 0.7
+    exploration_initial_eps: 0.7
+    exploration_final_eps: 0.1
+    exploration_fraction: 0.2
+    learning_rate: 0.0005
+    learning_starts: 5000
+    gradient_steps: 10
+    policy_net_arch: [64]
+    gamma: 0.95
+    train_freq: 2000
+    buffer_size: 50000
+    batch_size: 64
+    target_update_interval: 300
+
+modelo 7 - horrivel, desaprendeu o pouco que sabia
+    tau: 0.7
+    exploration_initial_eps: 0.9
+    exploration_final_eps: 0.4
+    exploration_fraction: 0.6
+    learning_rate: 0.0001
+    learning_starts: 1000
+    gradient_steps: 1
+    policy_net_arch: [64]
+    gamma: 0.95
+    train_freq: 500
+    buffer_size: 25000
+    batch_size: 512
+    target_update_interval: 1000
+
+modelo 8 
+    tau: 0.9
+    exploration_initial_eps: 0.9
+    exploration_final_eps: 0.2
+    exploration_fraction: 0.5
+    learning_rate: 0.005
+    learning_starts: 1000
+    gradient_steps: 1
+    policy_net_arch: [32]
+    gamma: 0.95
+    train_freq: 500
+    buffer_size: 100000
+    batch_size: 512
+    target_update_interval: 500
+
+modelo 9 - também desaprendeu o que sabia
+    tau: 0.7
+    exploration_initial_eps: 0.9
+    exploration_final_eps: 0.4
+    exploration_fraction: 0.3
+    learning_rate: 0.005
+    learning_starts: 3000
+    gradient_steps: 1
+    policy_net_arch: [32]
+    gamma: 0.8
+    train_freq: 2500
+    buffer_size: 50000
+    batch_size: 128
+    target_update_interval: 150
+
+modelo 10 - não aprendeu nada 
+    tau: 0.5
+    exploration_initial_eps: 0.7
+    exploration_final_eps: 0.2
+    exploration_fraction: 0.5
+    learning_rate: 0.005
+    learning_starts: 1000
+    gradient_steps: 1
+    policy_net_arch: [128, 128]
+    gamma: 0.8
+    train_freq: 1000
+    buffer_size: 50000
+    batch_size: 256
+    target_update_interval: 1000
+
+
+
+
+MAIS OU MENOS (Aprenderam mas tiveram resultados inferiores ou variações altas no desempenho)
+modelo 1
+    tau: 0.5
+    exploration_initial_eps: 0.8
+    exploration_final_eps: 0.5
+    exploration_fraction: 0.5
+    learning_rate: 0.005
+    learning_starts: 3000
+    gradient_steps: -1
+    policy_net_arch: [128, 128]
+    gamma: 0.95
+    train_freq: 1000
+    buffer_size: 50000
+    batch_size: 512
+    target_update_interval: 300
+
+
+modelo 2 - aprendeu, mas variou bastante
+    tau: 0.5
+    exploration_initial_eps: 0.7
+    exploration_final_eps: 0.2
+    exploration_fraction: 0.4
+    learning_rate: 0.0001
+    learning_starts: 1000
+    gradient_steps: -1
+    policy_net_arch: [16, 16]
+    gamma: 0.75
+    train_freq: 2000
+    buffer_size: 50000
+    batch_size: 64
+    target_update_interval: 150
+
+modelo 3 - aprendizado um pouco instável. Aprendeu por um tempo e começõu a regredir no final
+    tau: 0.5
+    exploration_initial_eps: 0.99
+    exploration_final_eps: 0.3
+    exploration_fraction: 0.3
+    learning_rate: 0.001
+    learning_starts: 5000
+    gradient_steps: -1
+    policy_net_arch: [32]
+    gamma: 0.99
+    train_freq: 3000
+    buffer_size: 50000
+    batch_size: 512
+    target_update_interval: 300
+
+modelo 4 - variou bastante no meio do treinamento e resultado máximo atindido bastante abaixo de outros
+    tau: 0.9
+    exploration_initial_eps: 0.99
+    exploration_final_eps: 0.2
+    exploration_fraction: 0.2
+    learning_rate: 0.001
+    learning_starts: 1000
+    gradient_steps: -1
+    policy_net_arch: [32]
+    gamma: 0.99
+    train_freq: 1000
+    buffer_size: 25000
+    batch_size: 128
+    target_update_interval: 150
+
+modelo 5 - conseguiu otimizar bem a função de recompensas, mas o resultado dos testes ficou um pouco instável
+    tau: 0.5
+    exploration_initial_eps: 0.7
+    exploration_final_eps: 0.4
+    exploration_fraction: 0.5
+    learning_rate: 0.0005
+    learning_starts: 5000
+    gradient_steps: -1
+    policy_net_arch: [16, 16]
+    gamma: 0.95
+    train_freq: 2000
+    buffer_size: 50000
+    batch_size: 64
+    target_update_interval: 150
+
+
+-- modelo ideal 1 - chat gpt
+tau: 0.5
+exploration_initial_eps: 0.9
+exploration_final_eps: 0.2
+exploration_fraction: 0.5
+learning_rate: 0.001
+learning_starts: 2000
+gradient_steps: -1
+policy_net_arch: [48, 48]
+gamma: 0.9
+train_freq: 500
+buffer_size: 75000
+batch_size: 256
+target_update_interval: 750
+
+
+
+
+
+
+

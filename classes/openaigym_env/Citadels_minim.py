@@ -60,27 +60,23 @@ class Citadels(gym.Env):
         super().reset(seed=seed)
         # self.simulacao.criar_estado_inicial(self.simulacao.num_personagens)
         # self.simulacao.iniciar_rodada()
-        self.simulacao = Simulacao(estrategias=self.estrategias, treino_openaigym=True)
-        self.simulacao.iniciar_rodada()
         self.idx_jogador = self.identificar_idx_jogador()
-        self.simulacao.executar_rodada(0, self.idx_jogador)
+        # self.simulacao.executar_rodada(0, self.idx_jogador)
         # Marca pontuação atual do agente (usada para recompensa)
+        self.simulacao: Simulacao = Simulacao(self.estrategias, treino_openaigym=True)
         self.pontuacao_atual = 0
         self.sucesso = 0
-        # print("Reset")
         # O segundo argumento refere-se a alguma informação adicional repassada para o agente
         return self.observation(), dict()
 
     # Método usado para executar uma transição de estado a partir de uma ação do agente
     def step(self, action: ActType) -> tuple[ObsType, SupportsFloat, bool, bool, dict[str, Any]]:
-        # print(self.observation())
         if self.simulacao.nova_rodada:
             self.simulacao.iniciar_rodada()
             self.idx_jogador = self.identificar_idx_jogador()
             self.simulacao.executar_rodada(0, self.idx_jogador)
-            # print("----- Nova rodada ============================")
+            # print("="*20, " Nova rodada ", "="*20)
             return self.observation(), 0, self.simulacao.final_jogo, False, dict()
-        
         recompensa = 0.0
         jogador_agente = None
         for jogador in self.simulacao.estado.jogadores:
@@ -88,7 +84,6 @@ class Citadels(gym.Env):
                 jogador_agente = jogador
         if jogador_agente is None:
             raise Exception("Agente não encontrado!")
-        
         # Verifica e executa a ação no ambiente simulado
         if self.observation()[self.idx_enum_personagem_rank1 + action] == 1:
             # Identificar índice do personagem escolhido
@@ -100,16 +95,10 @@ class Citadels(gym.Env):
                 raise Exception("Personagem não encontrado!")
             # Executa escolha de personagem
             self.simulacao.executar_rodada(self.idx_jogador, self.simulacao.num_jogadores, idx_escolha_personagem)
-            self.simulacao.iniciar_rodada()
-            self.idx_jogador = self.identificar_idx_jogador()
-            self.simulacao.executar_rodada(0, self.idx_jogador)
-            
         # Recompensa negativa ao escolher ação inválida
         else:
             #recompensa += -12.0
             recompensa += -100
-            # print("----- Ação errada: -100")
-            
             return self.observation(), recompensa, self.simulacao.final_jogo, False, dict()
 
         # Rotina executada se chegou no final do jogo após a ação
@@ -120,24 +109,19 @@ class Citadels(gym.Env):
             if self.simulacao.estado.jogadores[0].nome == 'Agente':
                 recompensa += 100
                 self.sucesso = 1
-            
-            # print("Fim de jogo -------------- ")
+            # print("fim de jogo +100")
             
         else:
             for jogador in self.simulacao.estado.jogadores:
                 if jogador == jogador_agente:
                     # Recompensa ao aumentar pontuação parcial = delta pontuacao parcial + ou -
-                    recompensa = recompensa + (jogador.pontuacao - self.pontuacao_atual) * 10
-                    # print("Pontos parcial", recompensa)
+                    recompensa = recompensa + (jogador.pontuacao - self.pontuacao_atual)*10
+                    # print("Variacao: ", recompensa)
                     self.pontuacao_atual = jogador.pontuacao
-            
-            # print("Pontuação parcial - ", recompensa)
-            
 
         # Retorna uma tupla contendo:
         # a observação do próximo estado, a recompensa imediata obtida, se o estado é final,
         # se a simulação deve ser encerrada (estado inválido, mas não final) e informações adicionais
-        # print("Ganhouu ==================================")
         return self.observation(), recompensa, self.simulacao.final_jogo, False, {"is_success": self.sucesso}
 
     # Método (opcional) que implementa interface gráfica
