@@ -5,6 +5,8 @@ from classes.model.Tabuleiro import Tabuleiro
 from classes.model.Jogador import Jogador
 
 
+
+
 class Estado:
     # Construtor
     def __init__(self, tabuleiro: Tabuleiro, jogadores: list[Jogador]):
@@ -46,6 +48,11 @@ class Estado:
                     and self.jogadores[i].personagem.rank < self.jogadores[i+1].personagem.rank):
                 self.jogadores[i], self.jogadores[i+1] = self.jogadores[i+1], self.jogadores[i]
 
+    
+    # Geração do espaço o observavel do jogo 
+    
+    
+    
     def converter_estado(self, openaigym: bool = False) -> list[int]:
         # Controle de quem ve o estado
         jogador_visao = None
@@ -259,3 +266,20 @@ class Estado:
         '''
         return estado_vetor
         
+
+# class RepresentacaoEstado: 
+#     def __init__(self, tabuleiro: Tabuleiro, jogadores: list[Jogador], turno: int, rodada: int, jogador_atual: Jogador | None):
+#         self.tabuleiro = tabuleiro 
+#         self.jogadores = jogadores 
+#         self.turno = turno 
+#         self.rodada = rodada
+#         self.jogador_atual = jogador_atual
+        
+
+    
+    
+# self.tabuleiro: Tabuleiro = tabuleiro
+# self.jogadores: list[Jogador] = jogadores
+# self.turno: int = 0
+# self.rodada: int = 0
+# self.jogador_atual: Jogador | None = None
