@@ -1,0 +1,127 @@
+Parâmetros do experimento:
+{
+    "exploration_initial_eps": 1.0,
+    "exploration_final_eps": 0.05,
+    "exploration_fraction": 0.5,
+    "learning_rate": 0.0001,
+    "learning_starts": 2000,
+    "gradient_steps": -1,
+    "net_arch": [
+        128,
+        64
+    ],
+    "gamma": 0.9,
+    "train_freq": 10,
+    "buffer_size": 100000,
+    "batch_size": 256,
+    "target_update_interval": 300
+}
+
+Início do treino do modelo de IA
+Fim do treino do modelo de IA
+Início dos testes das estratégias Especialistas
+Quantidade de Combinações: 126
+
+Agente - Partidas 700 - Vitórias: 186 - Taxa de Vitórias: 26.57% - Pontuação Média: 15.64
+	Primeiro: 26.57%
+	Segundo : 17.14%
+	Terceiro: 16.43%
+	Quarto  : 18.57%
+	Quinto  : 21.29%
+
+Allin - Partidas 700 - Vitórias: 148 - Taxa de Vitórias: 21.14% - Pontuação Média: 16.10
+	Primeiro: 21.14%
+	Segundo : 26.00%
+	Terceiro: 22.00%
+	Quarto  : 18.14%
+	Quinto  : 12.71%
+
+Andrei - Partidas 700 - Vitórias: 73 - Taxa de Vitórias: 10.43% - Pontuação Média: 11.63
+	Primeiro: 10.43%
+	Segundo : 14.71%
+	Terceiro: 16.71%
+	Quarto  : 24.43%
+	Quinto  : 33.71%
+
+Djonatan. - Partidas 700 - Vitórias: 257 - Taxa de Vitórias: 36.71% - Pontuação Média: 18.81
+	Primeiro: 36.71%
+	Segundo : 24.86%
+	Terceiro: 18.29%
+	Quarto  : 12.14%
+	Quinto  :  8.00%
+
+Eduardo - Partidas 700 - Vitórias: 94 - Taxa de Vitórias: 13.43% - Pontuação Média: 13.57
+	Primeiro: 13.43%
+	Segundo : 19.43%
+	Terceiro: 22.00%
+	Quarto  : 21.71%
+	Quinto  : 23.43%
+
+Felipe - Partidas 700 - Vitórias: 118 - Taxa de Vitórias: 16.86% - Pontuação Média: 14.59
+	Primeiro: 16.86%
+	Segundo : 19.57%
+	Terceiro: 21.43%
+	Quarto  : 23.29%
+	Quinto  : 18.86%
+
+Frequency - Partidas 700 - Vitórias: 141 - Taxa de Vitórias: 20.14% - Pontuação Média: 15.78
+	Primeiro: 20.14%
+	Segundo : 24.71%
+	Terceiro: 24.57%
+	Quarto  : 14.71%
+	Quinto  : 15.86%
+
+Jean - Partidas 700 - Vitórias: 107 - Taxa de Vitórias: 15.29% - Pontuação Média: 13.08
+	Primeiro: 15.29%
+	Segundo : 14.57%
+	Terceiro: 18.43%
+	Quarto  : 24.71%
+	Quinto  : 27.00%
+
+João Luis - Partidas 700 - Vitórias: 136 - Taxa de Vitórias: 19.43% - Pontuação Média: 14.73
+	Primeiro: 19.43%
+	Segundo : 19.00%
+	Terceiro: 20.14%
+	Quarto  : 22.29%
+	Quinto  : 19.14%
+Fim dos testes das estratégias Especialistas
+Tempo de execução = 0h 0min 4.76s
+Início dos testes das estratégias Random
+Quantidade de Combinações: 1
+
+Agente - Partidas 700 - Vitórias: 308 - Taxa de Vitórias: 44.00% - Pontuação Média: 18.95
+	Primeiro: 44.00%
+	Segundo : 20.29%
+	Terceiro: 14.57%
+	Quarto  : 12.43%
+	Quinto  :  8.71%
+
+B2 - Partidas 700 - Vitórias: 95 - Taxa de Vitórias: 13.57% - Pontuação Média: 13.17
+	Primeiro: 13.57%
+	Segundo : 19.86%
+	Terceiro: 20.86%
+	Quarto  : 22.43%
+	Quinto  : 23.29%
+
+B3 - Partidas 700 - Vitórias: 88 - Taxa de Vitórias: 12.57% - Pontuação Média: 13.15
+	Primeiro: 12.57%
+	Segundo : 20.57%
+	Terceiro: 20.86%
+	Quarto  : 24.29%
+	Quinto  : 21.71%
+
+B4 - Partidas 700 - Vitórias: 103 - Taxa de Vitórias: 14.71% - Pontuação Média: 13.26
+	Primeiro: 14.71%
+	Segundo : 19.86%
+	Terceiro: 20.00%
+	Quarto  : 20.43%
+	Quinto  : 25.00%
+
+B5 - Partidas 700 - Vitórias: 106 - Taxa de Vitórias: 15.14% - Pontuação Média: 13.60
+	Primeiro: 15.14%
+	Segundo : 19.43%
+	Terceiro: 23.71%
+	Quarto  : 20.43%
+	Quinto  : 21.29%
+Fim dos testes das estratégias Random
+Tempo de execução = 0h 0min 4.10s
