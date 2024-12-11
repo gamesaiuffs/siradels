@@ -53,7 +53,7 @@ class Experimento:
             
             
         while qtd_simulacao < qtd_simulacao_maximo:
-            print("ptds: ", qtd_simulacao, end="\r")
+            # print("ptds: ", qtd_simulacao, end="\r")
             qtd_simulacao += 1
             # Cria simulação
             simulacao = Simulacao(estrategias, automatico=automatico)
@@ -78,6 +78,60 @@ class Experimento:
         #return resposta, pontuacao_media, vitoria
 
         return resultados["Agente"][0], resultados["Agente"][1]/qtd_simulacao
+
+    @staticmethod
+    def testar_estrategias_analise(estrategias: list[Estrategia], qtd_simulacao_maximo: int = 1000, automatico: bool = True):
+        qtd_simulacao = 1
+        resultados: dict[str, (int, int)] = dict()
+        # Cria simulação
+        simulacao = Simulacao(estrategias, automatico=automatico)
+        # Executa simulação
+        estado_final = simulacao.rodar_simulacao()
+        for jogador in estado_final.jogadores:
+            resultados[jogador.nome] = (int(jogador.vencedor), jogador.pontuacao_final)
+            
+        # vitorias = []
+        vitorias = 0
+        pontuacoes = []
+        while qtd_simulacao < qtd_simulacao_maximo:
+            # print("ptds: ", qtd_simulacao, end="\r")
+            qtd_simulacao += 1
+            # Cria simulação
+            simulacao = Simulacao(estrategias, automatico=automatico)
+            # Executa simulação
+            
+
+            
+            estado_final = simulacao.rodar_simulacao()
+            for jogador in estado_final.jogadores:
+                (vitoria, pontuacao) = resultados[jogador.nome]
+                if jogador.nome == "Agente": 
+                    if jogador.vencedor: vitorias += 1
+                    print("Vitória: ", vitorias, "   Pontuação: ", jogador.pontuacao_final, jogador.ouro, jogador.terminou)
+                    pontuacoes.append(jogador.pontuacao_final)
+                    
+                # resultados[jogador.nome] = (int(jogador.vencedor) + vitoria, jogador.pontuacao_final + pontuacao)
+                
+                # if jogador.nome == "Agente": vitorias.append()
+
+        resposta = ""
+        pontuacao_media = 0
+        # for jogador, resultado in resultados.items():
+        #     (vitoria, pontuacao) = resultado
+        #     pontuacao_media = pontuacao / qtd_simulacao
+            
+        #     # if jogador.nome == "Agente": pontos += pontuacao
+            
+        #     resposta +=  f'{jogador} - Vitórias: {vitoria} - Porcento Vitorias: {vitoria / qtd_simulacao * 100:.2f}% - Pontuação Média: {pontuacao_media}\n'
+
+            # print(
+            #     f'{jogador} - Vitórias: {vitoria} - Porcento Vitorias: {vitoria / qtd_simulacao * 100:.2f}% - Pontuação Média: {pontuacao_media}')
+        
+        #return resposta, pontuacao_media, vitoria
+        return vitorias, pontuacoes
+        
+        # print(resultados["Agente"][0])
+        # return resultados["Agente"][0], resultados["Agente"][1]/qtd_simulacao
 
     # Inicializa o treinamento do modelo do zero e treina durante o tempo limite em segundos
     def treinar_modelo_mcts(self, tempo_limite: int, tipo_treino):
