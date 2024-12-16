@@ -24,14 +24,14 @@ gym.register(
 )
 
 # Configurações gerais 
-DIR_NAME = "experimentos/teste_experimentos"
-TRAIN_STEPS = 1000000
-MODEL_SAVE_FREQ = 25000
+DIR_NAME = "testes/testes_exp"
+TRAIN_STEPS = 50000
+MODEL_SAVE_FREQ = 10000
 NOT_ALLOW_REUSE_DIRS = False
 
 EVAL_LOG_FILE = os.path.join(DIR_NAME, "evaluations.txt")
 NUM_EVAL_EPISODES = 100
-NUM_INITS = 10
+NUM_INITS = 2
 
 LEARN_ENV = gym.make(ENV_ID)
 TEST_ENV = gym.make(ENV_ID)
@@ -42,7 +42,7 @@ class SaveOnTrainStepsNumCallback(BaseCallback):
         super().__init__(verbose)  # 0 -> verbose
         self.log_dir = DIR_NAME + "/in_" + str(num_init)     # gera um nome para a inicialização
         self.num_saves = 1
-        self.num_process = num_init
+        self.num_init = num_init
         self.db = database                      # conexão com o banco
         self.idexp = idexp
         
@@ -59,39 +59,8 @@ class SaveOnTrainStepsNumCallback(BaseCallback):
         
         if not os.path.isdir(self.log_dir): 
             os.makedirs(self.log_dir)
-            
-        # self.cria_inicializacao()    
-        
-        print("Process ", num_init, " started")
         
         if (num_init == 0): print()
-
-    # def plot_performance(self) -> None:
-    #     plt.figure(figsize=(10, 6))
-    #     plt.xlabel("Learn steps")
-    #     plt.ylabel("Average Score")
-    #     plt.title("Model performance in training")
-    #     plt.grid(True)
-    #     plt.plot(self.pontos_de_ref, self.historico_vitorias, label="Win percentage")
-    #     plt.plot(self.pontos_de_ref, self.pontos_media, label="Average Score")
-    #     plt.ylim(0, 100)
-    #     plt.legend()
-    #     save_path = os.path.join(self.log_dir, f"performance_plot{self.num_saves}.png")
-    #     plt.savefig(save_path)
-        
-    # def plot_av_reward(self):
-    #     if len(self.eva_rew_moments) == len(self.mean_rewards) and len(self.mean_rewards) > 0:
-    #         plt.figure(figsize=(10, 6))
-    #         plt.title("Average Reward")
-    #         plt.xlabel("Step")
-    #         plt.ylabel("Reward")
-    #         plt.grid(True)
-    #         plt.plot(self.eva_rew_moments, self.mean_rewards, label="Mean Reward")
-    #         plt.legend()
-    #         save_path = os.path.join(self.log_dir, f"av_reward{self.num_saves}.png")
-    #         plt.savefig(save_path)
-    #     else:
-    #         print("Tamanhos diferentes entre 'eva_rew_moments' e 'mean_rewards' ou lista vazia. Gráfico não gerado.")
 
     def cria_inicializacao(self): 
         self.db = Conexao()
@@ -108,17 +77,14 @@ class SaveOnTrainStepsNumCallback(BaseCallback):
     def _on_step(self) -> bool:
         print(f"Step: {self.n_calls}", end="\r")
         if self.n_calls % MODEL_SAVE_FREQ == 0:
-            print("Process", self.num_process, " saving...")
+            # print("Process", self.num_process, " saving...")
 
             self.model.save(self.log_dir + "/"+str(self.num_saves))
             
             # Teste do modelo atual
             local_model = DQN.load(self.log_dir + "/"+str(self.num_saves))
             
-            self.evaluate_model_policy(local_model) 
-            
-            # self.plot_av_reward()
-            
+            self.evaluate_model_policy(local_model)
             
             file = open(os.path.join(self.log_dir, "evaluations.txt"), "a+")
             file.write("-"*30+"\n")
@@ -138,8 +104,8 @@ class SaveOnTrainStepsNumCallback(BaseCallback):
             file.write(f"Rodadas: {NUM_EVAL_EPISODES} Steps: {self.n_calls} Vitorias: {vitoria} Media de pontos {pontuacao_media}"+"\n")
             file.close()
             
-            # if self.n_calls % PLOT_FREQUENCY == 0: 
-            #     self.plot_performance()
+            # cria registro no banco 
+            self.db.executar(f"INSERT INTO round (idround, idin, idexp, avscore, avrew, tsteps, nwins) values ({self.num_saves}, {self.num_init}, {self.idexp}, {pontuacao_media}, 0, {self.num_timesteps}, {vitoria})")
             
             # atualiza o valor para o proximo salvamento 
             self.num_saves += 1
@@ -148,12 +114,8 @@ class SaveOnTrainStepsNumCallback(BaseCallback):
         return True
     
 
-# env = Monitor(LEARN_ENV, DIR_NAME)
-# test = 0
-
 env = gym.make(ENV_ID)
 
-# envs = [gym.make(ENV_ID) for _ in range(NUM_PROCESSES)]
 
 database = Conexao()
 idexp = 1
@@ -171,16 +133,17 @@ if __name__ == "__main__":
     start_time = time.time()
     
     while experimento: 
-        
+        print(f"Novo experimento: {idexp}\n\n")
         # Cria experimento no banco
-        database.executar(f"insert into experiment (idexp, title, numpt, status) values ({idexp}, 'titulo', {NUM_EVAL_EPISODES}, 1)")
-        
+        database.executar(f"insert into experiment(idexp, title, numpt, status) values ({idexp}, 'titulo', {NUM_EVAL_EPISODES}, 1);")
+        num_init = 1
         while num_init <= NUM_INITS: 
+            print(f"Nova inicialização: {num_init}\n\n")
             try: 
                 
                 # cria a inicialização no banco 
                 
-                database.executar(f"insert into initialize (status, idexp) values ('{idexp}', {NUM_EVAL_EPISODES}, 1)")
+                database.executar(f"insert into initialize (idexp, idin, status) values ({idexp}, {num_init}, 1);")
                 
                 model = DQN(
                     "MlpPolicy",                     
@@ -188,24 +151,24 @@ if __name__ == "__main__":
                     verbose=0,                       
 
                     # Parâmetros de exploração
-                    exploration_initial_eps=1.0,    
-                    exploration_final_eps=0.05,      
-                    exploration_fraction=0.5,       
+                    # exploration_initial_eps=1.0,    
+                    # exploration_final_eps=0.05,      
+                    # exploration_fraction=0.5,       
 
-                    # Parâmetros de treinamento e otimização
-                    learning_rate=1e-4,             
-                    learning_starts=2000,           
-                    gradient_steps=-1,            
-                    policy_kwargs=dict(net_arch=[256, 128, 64, 32]),  
+                    # # Parâmetros de treinamento e otimização
+                    # learning_rate=1e-4,             
+                    # learning_starts=2000,           
+                    # gradient_steps=-1,            
+                    # policy_kwargs=dict(net_arch=[256, 128, 64, 32]),  
 
-                    # Parâmetros de desconto e frequência de treinamento
-                    gamma=0.9,                     
-                    train_freq=10,                   
+                    # # Parâmetros de desconto e frequência de treinamento
+                    # gamma=0.9,                     
+                    # train_freq=10,                   
 
-                    # Parâmetros do replay buffer
-                    buffer_size=100000,             
-                    batch_size=256,                 
-                    target_update_interval=300,         
+                    # # Parâmetros do replay buffer
+                    # buffer_size=100000,             
+                    # batch_size=256,                 
+                    # target_update_interval=300,         
                 )
     
     
@@ -214,7 +177,7 @@ if __name__ == "__main__":
                 model.learn(total_timesteps=TRAIN_STEPS, callback=callback)
                 
                 # atualiza status da inicialização
-                
+                database.executar(f"UPDATE initialize SET status=2 WHERE idin='{num_init}' AND idexp='{idexp}';")
                 
                 num_init += 1
 
@@ -234,6 +197,13 @@ if __name__ == "__main__":
             #     continue
         
         # atualiza status do experimento
+        
+        if experimento: database.executar(f"UPDATE experiment SET status=2 WHERE idexp={idexp};")
+        
+        # atualiza id 
+        idexp = idexp + 1
+        if idexp == 4:
+            experimento = False
         
         
         
