@@ -23,7 +23,6 @@ gym.register(
     entry_point=ENV_ENTRY_POINT
 )
 
-
 # Configurações gerais 
 DIR_NAME = "experimentos/teste_experimentos"
 TRAIN_STEPS = 1000000
