@@ -118,7 +118,11 @@ env = gym.make(ENV_ID)
 
 
 database = Conexao()
-idexp = 1
+num_exp_saved = database.consultar("SELECT count(*) from experiment;")
+# print(num_exp_saved[0][0])
+# Se o exp atual tem o numero de inicializações - inicia direto no proximo
+# Se não: Começa no num_exp_saved e num_init recebe a contagem "select count(*) from initialize where idexp=num_exp_saved[0][0]"
+idexp = num_exp_saved[0][0] + 1
 num_init = 1
 
 experimento = True
@@ -140,7 +144,6 @@ if __name__ == "__main__":
         while num_init <= NUM_INITS: 
             print(f"Nova inicialização: {num_init}\n\n")
             try: 
-                
                 # cria a inicialização no banco 
                 
                 database.executar(f"insert into initialize (idexp, idin, status) values ({idexp}, {num_init}, 1);")
@@ -168,7 +171,7 @@ if __name__ == "__main__":
                     # # Parâmetros do replay buffer
                     # buffer_size=100000,             
                     # batch_size=256,                 
-                    # target_update_interval=300,         
+                    # target_update_interval=300
                 )
     
     
@@ -183,18 +186,19 @@ if __name__ == "__main__":
 
                 
             except KeyboardInterrupt: 
-                experimento = False
                 # remove a inicialização correspondente do banco 
-                
+                experimento = False
+                database.executar(f"DELETE FROM initialize WHERE idin={num_init} AND idexp={idexp};")
                 
                 break
             
-            # except: 
-            #     print("Erro no experimento ...")
+            except: 
+                # remove a inicialização correspondente do banco para iniciar outra
+                print("Erro no experimento ...")
+                database.executar(f"DELETE FROM initialize WHERE idin={num_init} AND idexp={idexp};")
                 
-            #     # remove a inicialização correspondente do banco para iniciar outra
                 
-            #     continue
+                continue
         
         # atualiza status do experimento
         
@@ -205,10 +209,7 @@ if __name__ == "__main__":
         if idexp == 4:
             experimento = False
         
-        
-        
-        
-    
+
     end_time = time.time()  
     execution_time = end_time - start_time
     print(f"Tempo de execução: {execution_time} segundos")
