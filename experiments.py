@@ -1,6 +1,7 @@
 from stable_baselines3 import DQN
 import gymnasium as gym
 import os
+import shutil
 import matplotlib.pyplot as plt
 from stable_baselines3.common.monitor import Monitor
 from stable_baselines3.common.callbacks import BaseCallback
@@ -40,7 +41,7 @@ TEST_ENV = gym.make(ENV_ID)
 class SaveOnTrainStepsNumCallback(BaseCallback):
     def __init__(self, verbose: int, num_init: int, database: Conexao, idexp: int):
         super().__init__(verbose)  # 0 -> verbose
-        self.log_dir = DIR_NAME + "/in_" + str(num_init)     # gera um nome para a inicialização
+        self.log_dir = DIR_NAME + "/" + str(idexp) + "/in_" + str(num_init)     # gera um nome para a inicialização
         self.num_saves = 1
         self.num_init = num_init
         self.db = database                      # conexão com o banco
@@ -114,18 +115,6 @@ class SaveOnTrainStepsNumCallback(BaseCallback):
         return True
     
 
-env = gym.make(ENV_ID)
-
-
-database = Conexao()
-num_exp_saved = database.consultar("SELECT count(*) from experiment;")
-# print(num_exp_saved[0][0])
-# Se o exp atual tem o numero de inicializações - inicia direto no proximo
-# Se não: Começa no num_exp_saved e num_init recebe a contagem "select count(*) from initialize where idexp=num_exp_saved[0][0]"
-idexp = num_exp_saved[0][0] + 1
-num_init = 1
-
-experimento = True
 
 if __name__ == "__main__": 
     if not os.path.isdir(DIR_NAME): 
@@ -136,11 +125,57 @@ if __name__ == "__main__":
 
     start_time = time.time()
     
+    
+    env = gym.make(ENV_ID)
+    
+    experimento = True
+    novo_exp = True
+
+
+    database = Conexao()
+    last_exp_id = database.consultar("SELECT count(*) from experiment;")
+    last_exp_status = database.consultar(f"SELECT status from experiment where idexp={last_exp_id[0][0]};")
+    print("Ultimo exp: ", last_exp_id)
+    print("Ultimo status: ", last_exp_status)
+
+    idexp = -1
+    num_init = -1
+
+    if len(last_exp_status) == 0:
+        print("Experimentos iniciados do zero...")
+        idexp = 1
+        num_init = 1
+        
+    elif last_exp_status[0][0] == 1: 
+        # Completar as inicializações do experimento incompleto
+        # 1 - determinar quantas faltaram para completar 
+        novo_exp = False
+        complete_inits = database.consultar(f"select count(*) from initialize where idexp={last_exp_id[0][0]};")
+        print("Inicializações completas: ", complete_inits)
+        
+        # 2 - ajustar as variáveis
+        idexp = last_exp_id[0][0]
+        print("Novo init: ", complete_inits[0][0] + 1)
+        num_init = complete_inits[0][0] + 1
+        
+    # print(num_exp_saved[0][0])
+    # Se o exp atual tem o numero de inicializações - inicia direto no proximo
+    # Se não: Começa no num_exp_saved e num_init recebe a contagem "select count(*) from initialize where idexp=num_exp_saved[0][0]
+    else: 
+        # Experimento anterior completo - inicia um novo 
+        idexp = last_exp_id[0][0] + 1
+        num_init = 1
+
+
+
+    
     while experimento: 
         print(f"Novo experimento: {idexp}\n\n")
         # Cria experimento no banco
-        database.executar(f"insert into experiment(idexp, title, numpt, status) values ({idexp}, 'titulo', {NUM_EVAL_EPISODES}, 1);")
-        num_init = 1
+        if novo_exp: 
+            database.executar(f"insert into experiment(idexp, title, numpt, status) values ({idexp}, 'titulo', {NUM_EVAL_EPISODES}, 1);")
+            num_init = 1
+            
         while num_init <= NUM_INITS: 
             print(f"Nova inicialização: {num_init}\n\n")
             try: 
@@ -190,12 +225,18 @@ if __name__ == "__main__":
                 experimento = False
                 database.executar(f"DELETE FROM initialize WHERE idin={num_init} AND idexp={idexp};")
                 
+                # Apagar modelos salvos no diretório: DIR_NAME + "/in_" + str(idexp) + str(num_init)
+                shutil.rmtree(DIR_NAME + "/" + str(idexp) + "/in_" + str(num_init))
+                
                 break
             
             except: 
                 # remove a inicialização correspondente do banco para iniciar outra
-                print("Erro no experimento ...")
+                print(f"Erro no experimento {idexp}")
+                print(f"Deletado do experimento : inicialização {num_init} ")
                 database.executar(f"DELETE FROM initialize WHERE idin={num_init} AND idexp={idexp};")
+                
+                # Apagar modelos salvos no diretório: DIR_NAME + "/in_" + str(idexp) + str(num_init)
                 
                 
                 continue
@@ -203,6 +244,7 @@ if __name__ == "__main__":
         # atualiza status do experimento
         
         if experimento: database.executar(f"UPDATE experiment SET status=2 WHERE idexp={idexp};")
+        novo_exp = True
         
         # atualiza id 
         idexp = idexp + 1
