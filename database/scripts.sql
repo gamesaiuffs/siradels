@@ -13,17 +13,62 @@ create table initialize (
     constraint pk_init_exp FOREIGN KEY (idexp) REFERENCES experiment(idexp) on delete cascade
 );
 
-create table round (
-    idround numeric not null,
+create table sample (
+    id_sample numeric not null,
     idin numeric not null,
     idexp numeric not null, 
     avscore NUMERIC(5, 2) not null,
     avrew NUMERIC not null,
     tsteps numeric not null,
     nwins numeric not null,
-    constraint pk_round PRIMARY KEY (idround, idin, idexp),
-    constraint fk_round_init FOREIGN KEY (idin, idexp) REFERENCES initialize(idin, idexp) on delete cascade
+    constraint pk_sample PRIMARY KEY (id_sample, idin, idexp),
+    constraint fk_sample_init FOREIGN KEY (idin, idexp) REFERENCES initialize(idin, idexp) on delete cascade
 );
+
+
+
+--------------------------------------------------------
+
+
+
+CREATE TABLE variable (
+    id_variable SERIAL PRIMARY KEY,
+    description VARCHAR(100) NOT NULL
+);
+
+CREATE TABLE variable_representation (
+    id_representation SERIAL PRIMARY KEY,
+    description VARCHAR(100) NOT NULL,
+    id_variable INT NOT NULL,
+    FOREIGN KEY (id_variable) REFERENCES variable(id_variable) ON DELETE CASCADE
+);
+
+CREATE TABLE permutation_representation (
+    id_permutation INT NOT NULL,
+    id_representation INT NOT NULL,
+    PRIMARY KEY (id_permutation, id_representation),
+    FOREIGN KEY (id_permutation) REFERENCES experiment_permutation(id_permutation) ON DELETE CASCADE,
+    FOREIGN KEY (id_representation) REFERENCES variable_representation(id_representation) ON DELETE CASCADE
+);
+
+
+-- Pós calculada 
+CREATE TABLE experiment_statistics (
+    -- id_experiment SERIAL PRIMARY KEY, -- Identificador único do experimento
+    id_permutation INT NOT NULL, -- Identificador da permutação associada ao experimento
+    mean_score NUMERIC(5, 2), -- Média das pontuações obtidas em todas as amostras
+    std_score NUMERIC(5, 2), -- Desvio padrão das pontuações
+    ci_score NUMERIC(5, 2), -- Intervalo de confiança das pontuações
+    mean_reward NUMERIC(5, 2), -- Média das recompensas obtidas em todas as amostras
+    std_reward NUMERIC(5, 2), -- Desvio padrão das recompensas
+    ci_reward NUMERIC(5, 2), -- Intervalo de confiança das recompensas
+    mean_t_steps NUMERIC(5, 2), -- Média dos passos realizados em todas as amostras
+    std_t_steps NUMERIC(5, 2), -- Desvio padrão dos passos realizados
+    ci_t_steps NUMERIC(5, 2), -- Intervalo de confiança dos passos realizados
+    FOREIGN KEY (id_permutation) REFERENCES experiment_permutation(id_permutation) ON DELETE CASCADE -- Relacionamento com a permutação associada
+);
+
+
 
 drop table round;
 drop table initialize;

@@ -34,7 +34,7 @@ gym.register(
 
 # Configurações gerais 
 DIR_NAME = "experimentos/testeUmProc"
-TRAIN_STEPS = 100000
+TRAIN_STEPS = 300000
 MODEL_SAVE_FREQ = 10000
 NOT_ALLOW_REUSE_DIRS = False
 ENV_RENDER_MODE = None
@@ -247,7 +247,7 @@ def model_train(num_process: int):
     #     batch_size=512,
     #     target_update_interval=2000
     # )
-    model = DQN("MlpPolicy",  env=envs[num_process])
+    # model = DQN("MlpPolicy",  env=envs[num_process])
   
   
     callback = SaveOnTrainStepsNumCallback(MODEL_SAVE_FREQ, verbose=0, num_process=num_process)  

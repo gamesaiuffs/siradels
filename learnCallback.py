@@ -1,6 +1,7 @@
 from stable_baselines3 import DQN
 import gymnasium as gym
 import os
+import time 
 import matplotlib.pyplot as plt
 from stable_baselines3.common import results_plotter
 from stable_baselines3.common.monitor import Monitor
@@ -26,7 +27,7 @@ gym.register(
 
 
 # Configurações gerais 
-DIR_NAME =              "aateste"      # Diretório onde são salvos modelos intermediários e graficos 
+DIR_NAME =              "testedefogo"      # Diretório onde são salvos modelos intermediários e graficos 
 TRAIN_STEPS =           300000                 # Steps de treinamento
 MODEL_SAVE_FREQ =       10000                   # Frequência de salvamento de modelos 
 NOT_ALLOW_REUSE_DIRS =  False                  # impedir que arquivos com modelos salvos sejam sobrescritos
@@ -95,7 +96,7 @@ class SaveOnTrainStepsNumCallback(BaseCallback):
             local_env.reset()
             
             estrategias = [Agente(imprimir=False, model=local_model), EstrategiaTotalmenteAleatoria('Bot 1'), EstrategiaTotalmenteAleatoria('Bot 2'), EstrategiaTotalmenteAleatoria('Bot 3'), EstrategiaTotalmenteAleatoria('Bot 4')]
-            resposta, pontuacao_media, vitoria = Experimento.testar_estrategias_graficos(estrategias, NUM_EVAL_EPISODES, True)
+            vitoria, pontuacao_media = Experimento.testar_estrategias_graficos(estrategias, NUM_EVAL_EPISODES, True)
 
             self.historico_vitorias.append(vitoria)
             self.pontos_de_ref.append(self.n_calls)
@@ -130,6 +131,8 @@ if __name__ == "__main__":
         id=ENV_ID,
         entry_point=ENV_ENTRY_POINT
     )
+    
+    start_time = time.time()
     
     env = Monitor(LEARN_ENV, DIR_NAME)
     
@@ -179,10 +182,38 @@ if __name__ == "__main__":
     #         batch_size=128,                     # Tamanho do lote de amostras para o treinamento
     #         target_update_interval=500,         # Intervalo de atualização do alvo
     # )
+    model = DQN(
+            "MlpPolicy",                     # Política de rede neural MLP
+            env=env,                         # Ambiente de OpenAI Gym
+            verbose=0,                       # Nível de detalhamento dos logs
+            # Parâmetros de exploração
+            exploration_initial_eps=1.0,    
+            exploration_final_eps=0.05,      
+            exploration_fraction=0.5,       
+
+            # # Parâmetros de treinamento e otimização
+            learning_rate=1e-4,             
+            learning_starts=2000,           
+            gradient_steps=-1,            
+            policy_kwargs=dict(net_arch=[256, 128, 64, 32]),  
+
+            # # Parâmetros de desconto e frequência de treinamento
+            gamma=0.9,                     
+            train_freq=10,                   
+
+            # # Parâmetros do replay buffer
+            buffer_size=100000,             
+            batch_size=256,                 
+            target_update_interval=300
+    )
     
-    model = DQN("MlpPolicy",  env=env)
+    # model = DQN("MlpPolicy",  env=env)
     
     # Treinamento com callbacks
     model.learn(total_timesteps=TRAIN_STEPS, callback=[save_callback])
+    
+    end_time = time.time()  
+    execution_time = end_time - start_time
+    print(f"Tempo de execução: {execution_time} segundos")
     
     # plot_performance(save_callback)
