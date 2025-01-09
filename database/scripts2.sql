@@ -1,27 +1,38 @@
+drop table experiment_statistics;
+drop table sample;
+drop table initialize;
+drop table permutation_representation;
+drop table experiment_permutation;
+drop table experiment;
+drop table variable_representation;
+drop table variable;
+
+
 CREATE TABLE variable (
-    id SERIAL PRIMARY KEY,
+    id NUMERIC PRIMARY KEY,
     description VARCHAR(100) NOT NULL
 );
 
 CREATE TABLE variable_representation (
     id SERIAL PRIMARY KEY,
+    title VARCHAR(100) not null,
     description VARCHAR(100) NOT NULL,
-    id_variable INT NOT NULL,
+    id_variable NUMERIC NOT NULL,
     FOREIGN KEY (id_variable) REFERENCES variable(id) ON DELETE CASCADE
 );
 
 create table if not exists experiment (
     id NUMERIC PRIMARY KEY,
-    title varchar(40),
+    title varchar(40) not null,
     numpt numeric not NULL
 );
 
 create table if not exists experiment_permutation (
     id SERIAL PRIMARY KEY,
     id_exp numeric not null,
-    status varchar(10) not null check (status in ('nao_iniciado', 'rodando', 'concluido')),
+    status varchar(10) not null check (status in ('pendente', 'rodando', 'concluido')),
     constraint fk_exp FOREIGN KEY (id_exp) REFERENCES experiment(id)
-)
+);
 
 CREATE TABLE permutation_representation (
     id_permutation INT NOT NULL,
@@ -66,23 +77,43 @@ CREATE TABLE experiment_statistics (
     FOREIGN KEY (id_permutation) REFERENCES experiment_permutation(id) ON DELETE CASCADE -- Relacionamento com a permutação associada
 );
 
-drop table experiment_statistics;
-drop table sample;
-drop table initialize;
-drop table permutation_representation;
-drop table experiment_permutation;
-drop table experiment;
-drop table variable_representation;
-drop table variable;
 
 
 
--- Pré requisito - variáveis cadastradas 
+-- Pré requisito - variáveis cadastradas - scripts separados 
+insert into variable(id, description) values (1, 'Ouros do personagem');
 
+insert into 
+variable_representation(title, description, id_variable) 
+values ('ouro_personagens_classes', 'Ouro do personagem em classes pouco, medio ou muito', 1);
 
+insert into 
+variable_representation(title, description, id_variable) 
+values ('ouro_personagens_padrao', 'Ouro do personagem em valor real - 0 a 5+', 1);
 
+-- Cadastro de experimento 
+insert into experiment(id, numpt, title) values (1, 300000, 'Grid Search Completo');
 
+-- na implementação 
+-- Em cada rodada
+--      Temos uma permutação (pré cadastrada) que será executada 
+insert into experiment_permutation(id_exp, status) values (1, 'pendente');
 
+--      Para cada permutação: Faremos 10 inicializações
+insert into initialize (id, status, id_permutation) values 
+(1, 'pendente', 1),
+(2, 'pendente', 1),
+(3, 'pendente', 1),
+(4, 'pendente', 1),
+(5, 'pendente', 1),
+(6, 'pendente', 1),
+(7, 'pendente', 1),
+(8, 'pendente', 1),
+(9, 'pendente', 1),
+(10, 'pendente', 1);
+
+insert into sample(id, id_initialize, id_permutation, avscore, avrew, tsteps, nwins)
+values (1, 1, 1, 12.8, -234, 300000, 22);
 
 
 
