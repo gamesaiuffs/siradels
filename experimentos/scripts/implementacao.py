@@ -1,5 +1,44 @@
 # from experimentos.scripts.transformações import * 
 from itertools import product
+# from database.Postgres import *
+
+import psycopg2
+
+class Conexao(object):
+    _db=None
+    def __init__(self):
+        self._db = psycopg2.connect(host='localhost', database='ia', user='postgres', password='admin')
+    
+    def executar(self, sql):
+        cur=self._db.cursor()
+        cur.execute(sql)
+        cur.close()
+        self._db.commit()
+        # try:
+        #     cur=self._db.cursor()
+        #     cur.execute(sql)
+        #     cur.close()
+        #     self._db.commit()
+        # except:
+        #     return False
+        # return True
+    
+    def consultar(self, sql):
+        rs=None
+        cur=self._db.cursor()
+        cur.execute(sql)
+        rs=cur.fetchall()
+        # try:
+        #     cur=self._db.cursor()
+        #     cur.execute(sql)
+        #     rs=cur.fetchall()
+        # except:
+        #     return None
+        return rs
+    
+    def fechar(self):
+        self._db.close()
+        
 
 def discretizar(valor, intervalos):
     """
@@ -70,6 +109,19 @@ def intervalors_em_classes(valor, limites):
         
     raise Exception("Classe não encontrada")
 
+conexao = Conexao()
+
+
+def variaveis_por_permutacao(permutacao): 
+    retorno = conexao.consultar(f"""
+                    select vr.title from experiment_permutation ep
+                    join permutation_representation pe on ep.id = pe.id_permutation
+                    join variable_representation vr on pe.id_representation=vr.id
+                    where ep.id = {permutacao};
+                    """)
+    return [item[0] for item in retorno]
+
+
 # exemplo 
 # metodos_por_variavel = {
 #     "ouro": [lambda x: discretizar(x, [1, 3, 5]), lambda x: escalar(x, 0, 10)],
@@ -106,7 +158,53 @@ metodos_por_variavel = {
 }
 
 
-print(metodos_por_variavel["qtd_dist_const_padrao"]([-2, -1, 0, 1, 2, 3, 4, 5, 6, 7, 8, 9]))
+permutacoes_id = [
+    [2, 3], # ouro_personagem
+    [5], # cartas_dist
+    [7, 8], # carta_mais_cara
+    [10, 11], # carta_mais_barata
+    [13, 14], # qtd_dist_const
+    [16], # qtd_dist_cada_tipo
+    [18], # dist_const_jogador_mais_construiu
+    [20], # jogador_mais_cartas_mao
+    [22]  # ouro_oponentes
+]
+
+# produto = list(
+#     product(
+#         permutacoes_id[0], 
+#         permutacoes_id[1], 
+#         permutacoes_id[2], 
+#         permutacoes_id[3], 
+#         permutacoes_id[4], 
+#         permutacoes_id[5], 
+#         permutacoes_id[6], 
+#         permutacoes_id[7], 
+#         permutacoes_id[8]  
+#     ))
 
 
-# combinacoes = list(product(*metodos_por_variavel.values()))
+# for idx, item in enumerate(produto):
+#     print(idx + 2, "  ", item)
+#     conexao.executar(f"INSERT INTO experiment_permutation(id, id_exp, status) VALUES ({idx + 2}, 1, 'pendente');")
+    
+#     for var in item:
+#         conexao.executar(f"INSERT INTO permutation_representation(id_permutation, id_representation) VALUES ({idx + 2}, {var});")
+       
+       
+
+# Pesquisar lista de variáveis por permutação
+# print(metodos_por_variavel["qtd_dist_const_padrao"]([-2, -1, 0, 1, 2, 3, 4, 5, 6, 7, 8, 9]))
+
+# [
+#     "ouro_personagem_padrao",
+#     "cartas_dist_mao_padrao",
+#     "carta_mais_cara_classes",vat
+#     "..."
+# ]
+
+resposta = variaveis_por_permutacao(31)
+print(resposta)
+
+
+# # combinacoes = list(product(*metodos_por_variavel.values()))
