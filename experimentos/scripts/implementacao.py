@@ -196,6 +196,8 @@ permutacoes_id = [
 # Pesquisar lista de variáveis por permutação
 # print(metodos_por_variavel["qtd_dist_const_padrao"]([-2, -1, 0, 1, 2, 3, 4, 5, 6, 7, 8, 9]))
 
+print(variaveis_por_permutacao(1))
+
 # [
 #     "ouro_personagem_padrao",
 #     "cartas_dist_mao_padrao",

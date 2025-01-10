@@ -3,7 +3,7 @@ from more_itertools import sort_together
 from classes.enum.TipoDistrito import TipoDistrito
 from classes.model.Tabuleiro import Tabuleiro
 from classes.model.Jogador import Jogador
-
+from experimentos.scripts.transformações import * 
 
 
 
@@ -15,6 +15,77 @@ class Estado:
         self.turno: int = 0
         self.rodada: int = 0
         self.jogador_atual: Jogador | None = None
+        
+        # self.metodos_por_variavel = {
+        #     "ouro_personagem_padrao": {"funcao": lambda x: limitar_valores(x["jogador_visao"].ouro, [0, 6]), "tamanho": 1},
+        #     "ouro_personagem_classes": lambda x: intervalos_em_classes(x["jogador_visao"].ouro, [(1, 0, 2), (2, 3, 5), (3, 6, 10000)]),
+        #     "ouro_personagem_proporcao": "",
+            
+        #     "cartas_dist_mao_padrao": lambda x: limitar_valores(len(x["jogador_visao"].cartas_distrito_mao), [0, 5]),
+        #     "cartas_dist_mao_classes": lambda x: intervalos_em_classes(len(x["jogador_visao"].cartas_distrito_mao), [(1, 0, 2), (2, 3, 5), (3, 6, 10000)]),
+            
+        #     "carta_mais_cara_padrao": lambda x: limitar_valores(encontra_carta_mais_cara(x), [0, 6]),
+        #     "carta_mais_cara_classes": lambda x: intervalos_em_classes(encontra_carta_mais_cara(x), [(1, 0, 2), (2, 3, 5), (3, 6, 10000)]),
+        #     "carta_mais_cara_proporcao": "",
+            
+        #     "carta_mais_barata_padrao": lambda x: limitar_valores(encontra_carta_mais_barata(x), [0, 6]),
+        #     "carta_mais_barata_classe": lambda x: intervalos_em_classes(encontra_carta_mais_barata(x), [(1, 0, 2), (2, 3, 5), (3, 6, 10000)]),
+        #     "carta_mais_barata_proporcao": "",
+            
+        #     "qtd_dist_const_padrao": lambda x: limitar_valores(len(x["jogador_visao"].distritos_construidos), [0, 7]),
+        #     "qtd_dist_const_percent": "",
+        #     "qtd_dist_const_proporcao": "",
+            
+        #     "qtd_dist_cada_tipo_padrao": lambda x: limitar_valores_vetor(conta_tipos_distritos(x), [0, 3]),
+        #     "qtd_dist_cada_tipo_vetor_bin": "",
+        #     "qtd_dist_cada_tipo_bin": "",
+            
+        #     "dist_const_jog_mais_const_padrao": lambda x: limitar_valores(max(conta_distritos_construidos(x)), [0, 7]),
+        #     "dist_const_jog_mais_const_proporcao": "",
+            
+        #     "jog_mais_cartas_mao_padrao": lambda x: limitar_valores(max(conta_cartas_mao(x)), [0, 5]),
+        #     "jog_mais_cartas_mao_proporcao": "",
+            
+        #     "ouro_oponentes_padrao": lambda x: limitar_valores((sum(conta_ouros_adversarios(x)) // (len(x["jogadores"]) - 1)), [0, 4]),
+        #     "ouro_oponentes_vetor": ""
+        # }
+        
+        self.metodos_por_variavel = {
+        "ouro_personagem_padrao": {"funcao": lambda x: limitar_valores(x["jogador_visao"].ouro, [0, 6]), "tamanho": 1},
+        "ouro_personagem_classes": {"funcao": lambda x: intervalos_em_classes(x["jogador_visao"].ouro, [(1, 0, 2), (2, 3, 5), (3, 6, 10000)]), "tamanho": 1},
+        "ouro_personagem_proporcao": {"funcao": "", "tamanho": 1},
+        
+        "cartas_dist_mao_padrao": {"funcao": lambda x: limitar_valores(len(x["jogador_visao"].cartas_distrito_mao), [0, 5]), "tamanho": 1},
+        "cartas_dist_mao_classes": {"funcao": lambda x: intervalos_em_classes(len(x["jogador_visao"].cartas_distrito_mao), [(1, 0, 2), (2, 3, 5), (3, 6, 10000)]), "tamanho": 1},
+        
+        "carta_mais_cara_padrao": {"funcao": lambda x: limitar_valores(encontra_carta_mais_cara(x), [0, 6]), "tamanho": 1},
+        "carta_mais_cara_classes": {"funcao": lambda x: intervalos_em_classes(encontra_carta_mais_cara(x), [(1, 0, 2), (2, 3, 5), (3, 6, 10000)]), "tamanho": 1},
+        "carta_mais_cara_proporcao": {"funcao": "", "tamanho": 1},
+        
+        "carta_mais_barata_padrao": {"funcao": lambda x: limitar_valores(encontra_carta_mais_barata(x), [0, 6]), "tamanho": 1},
+        "carta_mais_barata_classe": {"funcao": lambda x: intervalos_em_classes(encontra_carta_mais_barata(x), [(1, 0, 2), (2, 3, 5), (3, 6, 10000)]), "tamanho": 1},
+        "carta_mais_barata_proporcao": {"funcao": "", "tamanho": 1},
+        
+        "qtd_dist_const_padrao": {"funcao": lambda x: limitar_valores(len(x["jogador_visao"].distritos_construidos), [0, 7]), "tamanho": 1},
+        "qtd_dist_const_percent": {"funcao": "", "tamanho": 1},
+        "qtd_dist_const_proporcao": {"funcao": "", "tamanho": 1},
+        
+        "qtd_dist_cada_tipo_padrao": {"funcao": lambda x: limitar_valores_vetor(conta_tipos_distritos(x), [0, 3]), "tamanho": 5},
+        "qtd_dist_cada_tipo_vetor_bin": {"funcao": "", "tamanho": 5},
+        "qtd_dist_cada_tipo_bin": {"funcao": "", "tamanho": 1},
+        
+        "dist_const_jog_mais_const_padrao": {"funcao": lambda x: limitar_valores(max(conta_distritos_construidos(x)), [0, 7]), "tamanho": 1},
+        "dist_const_jog_mais_const_proporcao": {"funcao": "", "tamanho": 1},
+        
+        "jog_mais_cartas_mao_padrao": {"funcao": lambda x: limitar_valores(max(conta_cartas_mao(x)), [0, 5]), "tamanho": 1},
+        "jog_mais_cartas_mao_proporcao": {"funcao": "", "tamanho": 1},
+        
+        "ouro_oponentes_padrao": {"funcao": lambda x: limitar_valores((sum(conta_ouros_adversarios(x)) // (len(x["jogadores"]) - 1)), [0, 4]), "tamanho": 1},
+        "ouro_oponentes_vetor": {"funcao": "", "tamanho": 4}
+}
+        
+        self.variaveis_padrao = ['ouro_personagem_padrao', 'cartas_dist_mao_padrao', 'carta_mais_cara_padrao', 'carta_mais_barata_padrao', 'qtd_dist_const_padrao', 'qtd_dist_cada_tipo_padrao', 'dist_const_jog_mais_const_padrao', 'jog_mais_cartas_mao_padrao', 'ouro_oponentes_padrao']
+        # self.variaveis_padrao = ['ouro_personagem_padrao', 'cartas_dist_mao_padrao', 'carta_mais_cara_padrao', 'carta_mais_barata_padrao', 'qtd_dist_const_padrao', 'qtd_dist_cada_tipo_padrao', 'dist_const_jog_mais_const_padrao', 'jog_mais_cartas_mao_padrao', 'ouro_oponentes_padrao']
 
     # To String
     def __str__(self):
@@ -64,12 +135,36 @@ class Estado:
             jogador_visao = self.jogador_atual
 
         estado_vetor = []
+        
+        # Variaveis usadas 
+        estado = {
+            "jogador_visao": jogador_visao,
+            "jogadores": self.jogadores,
+            "tabuleiro": self.tabuleiro
+        }
+        
+        estado_vetor_teste = []
+        
+        for var in self.variaveis_padrao: 
+            representacao = self.metodos_por_variavel[var](estado)
+            
+            if isinstance(representacao, list):
+                for item in representacao: estado_vetor_teste.append(item) 
+            else: estado_vetor_teste.append(representacao)
+            
+        
 
         # Qtd ouro [0,1,2,3,4,5,>=6]
         if jogador_visao.ouro >= 6:
             estado_vetor.append(6)
         else:
             estado_vetor.append(jogador_visao.ouro)
+        
+        # print(f"""original: {jogador_visao.ouro}, 
+        #       padrão: {self.metodos_por_variavel["ouro_personagem_padrao"](estado)}
+        #       classes: {self.metodos_por_variavel["ouro_personagem_classes"](estado)}
+        #       """)
+        
         
         # Qtd carta mão [0,1,2,3,4,>=5]
         if len(jogador_visao.cartas_distrito_mao) >= 5:
@@ -143,7 +238,7 @@ class Estado:
 
         # Rank do personagem do jogador atual [0 a 8]
         # Rank 0 quando o jogador não possui personagem selecionado ainda
-        estado_vetor.append(jogador_visao.personagem.rank)
+        # estado_vetor.append(jogador_visao.personagem.rank)
 
         # Qtd distrito construido [0 a 7+]
         qtd_distritos = 0
@@ -196,9 +291,16 @@ class Estado:
             elif carta.rank == 8:
                 p8 = 1
         estado_vetor.extend([p1, p2, p3, p4, p5, p6, p7, p8])
+        estado_vetor_teste.extend([p1, p2, p3, p4, p5, p6, p7, p8])
 
         # Flag que indica se é o turno do agente
         estado_vetor.append(0 if self.jogador_atual is None or self.jogador_atual.nome != "Agente" else 1)
+        estado_vetor_teste.append(0 if self.jogador_atual is None or self.jogador_atual.nome != "Agente" else 1)
+
+        if estado_vetor_teste != estado_vetor: print(f"""
+              vetor padrao: {estado_vetor}, 
+                      novo: {estado_vetor_teste}
+              """)
 
         ''' Observações retiradas
         # Qtd personagens disponíveis [2,3,4,5,6]
@@ -283,3 +385,4 @@ class Estado:
 # self.turno: int = 0
 # self.rodada: int = 0
 # self.jogador_atual: Jogador | None = None
+

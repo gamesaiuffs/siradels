@@ -1,33 +1,163 @@
+from classes.enum.TipoDistrito import TipoDistrito
+
 def discretizar(valor, intervalos):
     """
-    Recebe uma lista com valores de intervalos e um valor, 
+    Recebe uma lista com valores de intervalos e um valor, \n
     e então retorna o a classe (intervalo) ao qual o valor pertence. 
     """
     for i, limite in enumerate(intervalos):
         if valor <= limite:
-            return i
+            return limite
     return len(intervalos)
 
 def binarizar(valor, limite):
     """
-    Recebe um valor de entrada e um valor de limite.
+    Recebe um valor de entrada e um valor de limite.\n
     retorna 1 se valor > limite, senão 0.  
     """
     return 1 if valor > limite else 0
 
 def escalar(valor, min_val, max_val):
     """
-    Recebe um valor de entrada e o valor mínimo e máximo de escala. 
+    Recebe um valor de entrada e o valor mínimo e máximo de escala. \n
     Retorna o valor de entrada normalizado de acordo com o intervalo.
     """
     return (valor - min_val) / (max_val - min_val)
 
 def codificar_one_hot(valor, categorias):
     """
-    Recebe um valor e uma lista com as categorias de valores.
+    Recebe um valor e uma lista com as categorias de valores.\n
     Retorna a entrada codificada em one hot.
     """
     vetor = [0] * len(categorias)
     if valor in categorias:
         vetor[categorias.index(valor)] = 1
     return vetor
+
+# Novos metodos 
+def limitar_valores(valor: int, limites: list):
+    """
+    Recebe um valor e os limites [inferior, superior]\n
+    Retorna o valor dentro dos limites
+    """
+    if valor < limites[0]: return limites[0]
+    elif valor > limites[1]: return limites[1]
+    else: return valor
+    
+def limitar_valores_vetor(valores: list, limites: list):
+    """
+    Recebe um vetor de valores e os limites [inferior, superior]\n
+    Retorna um vetor com os valores dentro dos limites
+    """
+    lista = []
+    for val in valores:
+        if val < limites[0]: lista.append(limites[0])
+        elif val > limites[1]: lista.append(limites[1])
+        else: lista.append(val)
+        
+    return lista
+
+def intervalos_em_classes(valor, limites):
+    """
+    Recebe um valor e as classes, com limite inferior e superior \n
+        [(classe, lim_inf, lim_sup), (classe, lim_inf, lim_sup)] \n
+        [(1, 0, 2), (2, 3, 4), (3, 5, 10000)]\n
+    Retorna a classe ao qual o valor pertence
+    """
+    for classe, lim_inf, lim_sup in limites:
+        if valor >= lim_inf and valor <= lim_sup: return classe
+        
+    raise Exception("Classe não encontrada")
+
+
+# Funções especificas 
+def encontra_carta_mais_cara(estado): 
+    """
+    Recebe a variável com os componentes do estado\n
+    Retorna a carta mais cara da lista
+    """
+    # print(estado)
+    maior_custo = 0
+    for distrito in estado["jogador_visao"].cartas_distrito_mao:
+        # descobre o distrito mais caro da mao
+        if distrito.valor_do_distrito > maior_custo:
+            maior_custo = distrito.valor_do_distrito
+    
+    return maior_custo
+
+
+def encontra_carta_mais_barata(estado): 
+    """
+    Recebe a variável com os componentes do estado\n
+    Retorna a carta mais barata da lista
+    """
+    menor_custo = 10
+    for distrito in estado["jogador_visao"].cartas_distrito_mao:
+        # descobre o distrito mais barato da mao
+        if distrito.valor_do_distrito < menor_custo:
+            menor_custo = distrito.valor_do_distrito
+            
+    if menor_custo == 10:
+        menor_custo = 0
+
+    return menor_custo
+
+def conta_tipos_distritos(estado): 
+    """
+    Recebe a variável com os componentes do estado\n
+    Retorna uma lista de 5 posicoes com as quantidades totais de distritos de cada tipo
+    """
+    nobre = 0
+    religioso = 0
+    militar = 0
+    comercial = 0
+    especial = 0
+    for distrito in estado["jogador_visao"].distritos_construidos:
+        if distrito.tipo_de_distrito == TipoDistrito.Nobre:
+            nobre += 1
+        elif distrito.tipo_de_distrito == TipoDistrito.Religioso:
+            religioso += 1
+        elif distrito.tipo_de_distrito == TipoDistrito.Militar:
+            militar += 1
+        elif distrito.tipo_de_distrito == TipoDistrito.Comercial:
+            comercial += 1
+        elif distrito.tipo_de_distrito == TipoDistrito.Especial:
+            especial += 1 
+            
+    return [nobre, religioso, militar, comercial, especial]
+
+
+def conta_distritos_construidos(estado): 
+    """
+    Recebe a variável com os componentes do estado\n
+    Retorna uma lista de 5 posicoes com o numero de distritos construidos de cada jogador
+    """
+    construidos = []
+    for jogador in estado["jogadores"]:
+        construidos.append(len(jogador.distritos_construidos))
+        
+    return construidos
+
+
+def conta_cartas_mao(estado): 
+    """
+    Recebe a variável com os componentes do estado\n
+    Retorna uma lista de 5 posicoes com o numero de cartas de cada jogador
+    """
+    cartas = []
+    for jogador in estado["jogadores"]:
+        cartas.append(len(jogador.cartas_distrito_mao))
+        
+    return cartas
+
+def conta_ouros_adversarios(estado): 
+    """
+    Recebe a variável com os componentes do estado\n
+    Retorna uma lista de 4 posicoes com o numero de ouros dos jogadores adversarios
+    """
+    ouros = []
+    for jogador in estado["jogadores"]:
+        if estado["jogador_visao"] != jogador:
+            ouros.append(jogador.ouro)
+
+    return ouros

@@ -33,7 +33,7 @@ gym.register(
 
 
 # Configurações gerais 
-DIR_NAME = "experimentos/testeUmProc"
+DIR_NAME = "experimentos/testagem"
 TRAIN_STEPS = 300000
 MODEL_SAVE_FREQ = 10000
 NOT_ALLOW_REUSE_DIRS = False
