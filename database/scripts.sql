@@ -2,12 +2,12 @@ create table if not exists experiment (
     idexp NUMERIC PRIMARY KEY,
     title varchar(40),
     numpt numeric not NULL,
-    status numeric not null check (status in (1, 2, 3))
+    status varchar(10) not null check (status in ('pendente', 'concluido'))
 );
 
 create table initialize (
     idin numeric not null,
-    status numeric not null check (status in (1, 2, 3)),
+    status varchar(10) not null check (status in ('pendente', 'concluido')),
     idexp numeric not null,
     constraint pk_init PRIMARY KEY (idin, idexp),
     constraint pk_init_exp FOREIGN KEY (idexp) REFERENCES experiment(idexp) on delete cascade
@@ -25,6 +25,22 @@ create table sample (
     constraint fk_sample_init FOREIGN KEY (idin, idexp) REFERENCES initialize(idin, idexp) on delete cascade
 );
 
+insert into experiment(idexp, title, numpt, status) values (2, 'Entradas padrao - originais do ambiente', 300000, 'pendente');
+
+-- CREATE TABLE experiment_statistics (
+--     id SERIAL PRIMARY KEY, -- Identificador único do experimento
+--     id_permutation INT NOT NULL, -- Identificador da permutação associada ao experimento
+--     mean_score NUMERIC(5, 2), -- Média das pontuações obtidas em todas as amostras
+--     std_score NUMERIC(5, 2), -- Desvio padrão das pontuações
+--     ci_score NUMERIC(5, 2), -- Intervalo de confiança das pontuações
+--     mean_reward NUMERIC(5, 2), -- Média das recompensas obtidas em todas as amostras
+--     std_reward NUMERIC(5, 2), -- Desvio padrão das recompensas
+--     ci_reward NUMERIC(5, 2), -- Intervalo de confiança das recompensas
+--     mean_t_steps NUMERIC(5, 2), -- Média dos passos realizados em todas as amostras
+--     std_t_steps NUMERIC(5, 2), -- Desvio padrão dos passos realizados
+--     ci_t_steps NUMERIC(5, 2), -- Intervalo de confiança dos passos realizados
+--     FOREIGN KEY (id_permutation) REFERENCES experiment_permutation(id) ON DELETE CASCADE -- Relacionamento com a permutação associada
+-- );
 
 
 --------------------------------------------------------

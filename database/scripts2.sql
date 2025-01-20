@@ -13,13 +13,13 @@ CREATE TABLE variable (
     description VARCHAR(100) NOT NULL
 );
 
-CREATE TABLE variable_representation (
-    id SERIAL PRIMARY KEY,
-    title VARCHAR(100) not null,
-    description VARCHAR(100) NOT NULL,
-    id_variable NUMERIC NOT NULL,
-    FOREIGN KEY (id_variable) REFERENCES variable(id) ON DELETE CASCADE
-);
+-- CREATE TABLE variable_representation (
+--     id SERIAL PRIMARY KEY,
+--     title VARCHAR(100) not null,
+--     description VARCHAR(100) NOT NULL,
+--     id_variable NUMERIC NOT NULL,
+--     FOREIGN KEY (id_variable) REFERENCES variable(id) ON DELETE CASCADE
+-- );
 
 create table if not exists experiment (
     id NUMERIC PRIMARY KEY,
@@ -34,13 +34,13 @@ create table if not exists experiment_permutation (
     constraint fk_exp FOREIGN KEY (id_exp) REFERENCES experiment(id)
 );
 
-CREATE TABLE permutation_representation (
-    id_permutation INT NOT NULL,
-    id_representation INT NOT NULL,
-    PRIMARY KEY (id_permutation, id_representation),
-    FOREIGN KEY (id_permutation) REFERENCES experiment_permutation(id) ON DELETE CASCADE,
-    FOREIGN KEY (id_representation) REFERENCES variable_representation(id) ON DELETE CASCADE
-);
+-- CREATE TABLE permutation_representation (
+--     id_permutation INT NOT NULL,
+--     id_representation INT NOT NULL,
+--     PRIMARY KEY (id_permutation, id_representation),
+--     FOREIGN KEY (id_permutation) REFERENCES experiment_permutation(id) ON DELETE CASCADE,
+--     FOREIGN KEY (id_representation) REFERENCES variable_representation(id) ON DELETE CASCADE
+-- );
 
 create table initialize (
     id numeric not null,
@@ -127,7 +127,7 @@ values
 
 
 -- Cadastro de experimento 
-insert into experiment(id, numpt, title) values (1, 300000, 'Grid Search Completo');
+insert into experiment(id, numpt, title) values (1, 300000, '1 - entradas originais ');
 
 -- na implementação 
 -- Em cada rodada

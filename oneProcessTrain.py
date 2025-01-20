@@ -34,7 +34,7 @@ gym.register(
 
 # Configurações gerais 
 DIR_NAME = "experimentos/testagem"
-TRAIN_STEPS = 300000
+TRAIN_STEPS = 200000
 MODEL_SAVE_FREQ = 10000
 NOT_ALLOW_REUSE_DIRS = False
 ENV_RENDER_MODE = None
@@ -45,7 +45,7 @@ SAVE_FILE = ""
 EVAL_FREQUENCY = MODEL_SAVE_FREQ
 NUM_EVAL_EPISODES = 100
 PLOT_FREQUENCY = 10000
-NUM_PROCESSES = 10
+NUM_PROCESSES = 1
 
 LEARN_ENV = gym.make(ENV_ID)
 TEST_ENV = gym.make(ENV_ID)
@@ -162,118 +162,6 @@ class SaveOnTrainStepsNumCallback(BaseCallback):
 env = Monitor(LEARN_ENV, DIR_NAME)
 test = 0
 
-# if __name__ == "__main__":
-    
-#     if not os.path.isdir(DIR_NAME): 
-#             os.makedirs(DIR_NAME)
-#     else: 
-#         print(f"Diretório '{DIR_NAME}' já existe. Usá-lo pode afetar o conteúdo pré-existente.")
-#         if NOT_ALLOW_REUSE_DIRS: exit(0)
-
-
-#     SAVE_FILE = os.path.join(DIR_NAME, f"{BASE_EVAL_LOG_FILE}{test}")
-#     callback = SaveOnTrainStepsNumCallback(MODEL_SAVE_FREQ, verbose=0)
-    
-
-    
-#     # Teste 4 - modelo com ajuste mais amortecido 
-#     # model = DQN(
-#     #     policy="MlpPolicy",
-#     #     env=env,
-#     #     verbose=0,
-
-#     #     tau=0.2,
-
-#     #     # Parâmetros de exploração
-#     #     exploration_initial_eps=1.0,
-#     #     exploration_final_eps=0.2,
-#     #     exploration_fraction=0.8,
-
-#     #     # Parâmetros de treinamento e otimização
-#     #     learning_rate=0.0001,
-#     #     learning_starts=2000,
-#     #     gradient_steps=-1,
-#     #     policy_kwargs=dict(net_arch=[64, 64]),
-
-#     #     # Parâmetros de desconto e frequência de treinamento
-#     #     gamma=0.9,
-#     #     train_freq=1500,
-
-#     #     # Parâmetros do replay buffer
-#     #     buffer_size=100000,
-#     #     batch_size=512,
-#     #     target_update_interval=2000
-#     # )
-#     model = DQN("MlpPolicy",  env=env)
-    
-    
-#     try: 
-#         model.learn(total_timesteps=TRAIN_STEPS, callback=callback)
-#     except Exception as e: 
-#         print("ERRO:", e)
-    
-#     test += 1
-
-# env = gym.make(ENV_ID)
-
-# envs = [gym.make(ENV_ID) for _ in range(NUM_PROCESSES)]
-
-# @ray.remote
-def model_train(num_process: int):
-    # model = DQN(
-    #     policy="MlpPolicy",
-    #     env=env,
-    #     verbose=0,
-
-    #     tau=0.2,
-
-    #     # Parâmetros de exploração
-    #     exploration_initial_eps=1.0,
-    #     exploration_final_eps=0.2,
-    #     exploration_fraction=0.8,
-
-    #     # Parâmetros de treinamento e otimização
-    #     learning_rate=0.0001,
-    #     learning_starts=2000,
-    #     gradient_steps=-1,
-    #     policy_kwargs=dict(net_arch=[64, 64]),
-
-    #     # Parâmetros de desconto e frequência de treinamento
-    #     gamma=0.9,
-    #     train_freq=1500,
-
-    #     # Parâmetros do replay buffer
-    #     buffer_size=100000,
-    #     batch_size=512,
-    #     target_update_interval=2000
-    # )
-    # model = DQN("MlpPolicy",  env=envs[num_process])
-  
-  
-    callback = SaveOnTrainStepsNumCallback(MODEL_SAVE_FREQ, verbose=0, num_process=num_process)  
-    
-    model.learn(total_timesteps=TRAIN_STEPS, callback=callback)
-
-    
-
-# if __name__ == "__main__": 
-#     if not os.path.isdir(DIR_NAME): 
-#             os.makedirs(DIR_NAME)
-#     else: 
-#         print(f"Diretório '{DIR_NAME}' já existe. Usá-lo pode afetar o conteúdo pré-existente.")
-#         if NOT_ALLOW_REUSE_DIRS: exit(0)
-
-#     start_time = time.time()
-
-#     processes = [Process(target=model_train, args=(idx_proc,)) for idx_proc in range(NUM_PROCESSES)]
-    
-#     for proc in processes: proc.start()
-#     for proc in processes: proc.join()
-
-#     end_time = time.time()
-    
-#     execution_time = end_time - start_time
-#     print(f"Tempo de execução: {execution_time} segundos")
 
 if __name__ == "__main__": 
     if not os.path.isdir(DIR_NAME): 
@@ -283,29 +171,39 @@ if __name__ == "__main__":
         if NOT_ALLOW_REUSE_DIRS: exit(0)
 
     start_time = time.time()
-
-    # processes = [Process(target=model_train, args=(idx_proc,)) for idx_proc in range(NUM_PROCESSES)]
     
     for train in range(NUM_PROCESSES): 
         env = gym.make(ENV_ID)
         callback = SaveOnTrainStepsNumCallback(MODEL_SAVE_FREQ, verbose=0, num_process=train)  
-        model = DQN("MlpPolicy",  env=env)
+        # model = DQN("MlpPolicy",  env=env)
+        model = DQN(
+            "MlpPolicy",                     
+            env=env,                         
+            verbose=0,                       
+
+            # Parâmetros de exploração
+            exploration_initial_eps=1.0,    
+            exploration_final_eps=0.05,      
+            exploration_fraction=0.5,       
+
+            # Parâmetros de treinamento e otimização
+            learning_rate=1e-4,             
+            learning_starts=2000,           
+            gradient_steps=-1,            
+            policy_kwargs=dict(net_arch=[256, 128, 64, 32]),  
+
+            # Parâmetros de desconto e frequência de treinamento
+            gamma=0.9,                     
+            train_freq=10,                   
+
+            # Parâmetros do replay buffer
+            buffer_size=100000,             
+            batch_size=256,                 
+            target_update_interval=300,         
+        )
         
         model.learn(total_timesteps=TRAIN_STEPS, callback=callback)
-        
-        
-        
-    
-    # for proc in processes: proc.start()
-    # for proc in processes: proc.join()
-    
-    # processes = [model_train.remote(idx_proc) for idx_proc in range(NUM_PROCESSES)]
-    # ray.get(processes)
-    
-    # ray.shutdown()
 
-
-    
     end_time = time.time()    
     execution_time = end_time - start_time
     print(f"Tempo de execução: {execution_time} segundos")

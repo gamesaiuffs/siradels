@@ -122,6 +122,25 @@ def variaveis_por_permutacao(permutacao):
     return [item[0] for item in retorno]
 
 
+def proporcao_ouros(ouros_personagem, ouros_todos):
+    """
+    Calcula a proporção de ouros de um personagem em relação ao total de ouros na mesa.
+
+    recebe ouros_personagem: int, quantidade de ouros do personagem.\n
+    recebe ouros_todos: list, lista contendo os ouros de todos os personagens (incluindo o do próprio personagem).\n
+    retorna: float, proporção de ouros do personagem em relação ao total na mesa.
+    """
+    total_ouros = sum(ouros_todos)
+    
+    # Evitar divisão por zero caso ninguém tenha ouro
+    if total_ouros == 0:
+        return 0.0
+    
+    return ouros_personagem / total_ouros
+
+
+
+
 # exemplo 
 # metodos_por_variavel = {
 #     "ouro": [lambda x: discretizar(x, [1, 3, 5]), lambda x: escalar(x, 0, 10)],
@@ -130,45 +149,45 @@ def variaveis_por_permutacao(permutacao):
 # }
 
 
-metodos_por_variavel = {
-    "ouro_personagem_padrao": lambda x: limitar_valores(x, [0, 6]),
-    "ouro_personagem_classes": lambda x: intervalors_em_classes(x, [("pouco", 0, 2), ("medio", 3, 5), ("muito", 6, 10000)]),
-    "ouro_personagem_proporcao": "",
-    "cartas_dist_mao_padrao": lambda x: limitar_valores(x, [0, 5]),
-    "cartas_dist_mao_classes": "",
-    "carta_mais_cara_padrao": lambda x: limitar_valores(x, [0, 6]),
-    "carta_mais_cara_classes": "",
-    "carta_mais_cara_proporcao": "",
-    "carta_mais_barata_padrao": lambda x: limitar_valores(x, [0, 6]),
-    "carta_mais_barata_classe": "",
-    "carta_mais_barata_proporcao": "",
-    "qtd_dist_const_padrao": lambda x: limitar_valores_vetor(x, [0, 3]),
-    "qtd_dist_const_percent": "",
-    "qtd_dist_const_proporcao": "",
-    "qtd_dist_cada_tipo_padrao": lambda x: limitar_valores_vetor(x, [0, 3]),
-    "qtd_dist_cada_tipo_vetor_bin": "",
-    "qtd_dist_cada_tipo_bin": "",
-    "dist_const_jog_mais_const_padrao": lambda x: limitar_valores(x, [0, 7]),
-    "dist_const_jog_mais_const_proporcao": "",
-    "jog_mais_cartas_mao_padrao": lambda x: limitar_valores(x, [0, 5]),
-    "jog_mais_cartas_mao_proporcao": "",
-    "ouro_oponentes_padrao": lambda x: limitar_valores(x, [0, 4]),
-    "ouro_oponentes_vetor": "",
-    "ouro_oponentes_media": "",
-}
+# metodos_por_variavel = {
+#     "ouro_personagem_padrao": lambda x: limitar_valores(x, [0, 6]),
+#     "ouro_personagem_classes": lambda x: intervalors_em_classes(x, [("pouco", 0, 2), ("medio", 3, 5), ("muito", 6, 10000)]),
+#     "ouro_personagem_proporcao": "",
+#     "cartas_dist_mao_padrao": lambda x: limitar_valores(x, [0, 5]),
+#     "cartas_dist_mao_classes": "",
+#     "carta_mais_cara_padrao": lambda x: limitar_valores(x, [0, 6]),
+#     "carta_mais_cara_classes": "",
+#     "carta_mais_cara_proporcao": "",
+#     "carta_mais_barata_padrao": lambda x: limitar_valores(x, [0, 6]),
+#     "carta_mais_barata_classe": "",
+#     "carta_mais_barata_proporcao": "",
+#     "qtd_dist_const_padrao": lambda x: limitar_valores_vetor(x, [0, 3]),
+#     "qtd_dist_const_percent": "",
+#     "qtd_dist_const_proporcao": "",
+#     "qtd_dist_cada_tipo_padrao": lambda x: limitar_valores_vetor(x, [0, 3]),
+#     "qtd_dist_cada_tipo_vetor_bin": "",
+#     "qtd_dist_cada_tipo_bin": "",
+#     "dist_const_jog_mais_const_padrao": lambda x: limitar_valores(x, [0, 7]),
+#     "dist_const_jog_mais_const_proporcao": "",
+#     "jog_mais_cartas_mao_padrao": lambda x: limitar_valores(x, [0, 5]),
+#     "jog_mais_cartas_mao_proporcao": "",
+#     "ouro_oponentes_padrao": lambda x: limitar_valores(x, [0, 4]),
+#     "ouro_oponentes_vetor": "",
+#     "ouro_oponentes_media": "",
+# }
 
 
-permutacoes_id = [
-    [2, 3], # ouro_personagem
-    [5], # cartas_dist
-    [7, 8], # carta_mais_cara
-    [10, 11], # carta_mais_barata
-    [13, 14], # qtd_dist_const
-    [16], # qtd_dist_cada_tipo
-    [18], # dist_const_jogador_mais_construiu
-    [20], # jogador_mais_cartas_mao
-    [22]  # ouro_oponentes
-]
+# permutacoes_id = [
+#     [2, 3], # ouro_personagem
+#     [5], # cartas_dist
+#     [7, 8], # carta_mais_cara
+#     [10, 11], # carta_mais_barata
+#     [13, 14], # qtd_dist_const
+#     [16], # qtd_dist_cada_tipo
+#     [18], # dist_const_jogador_mais_construiu
+#     [20], # jogador_mais_cartas_mao
+#     [22]  # ouro_oponentes
+# ]
 
 # produto = list(
 #     product(
@@ -196,7 +215,7 @@ permutacoes_id = [
 # Pesquisar lista de variáveis por permutação
 # print(metodos_por_variavel["qtd_dist_const_padrao"]([-2, -1, 0, 1, 2, 3, 4, 5, 6, 7, 8, 9]))
 
-print(variaveis_por_permutacao(1))
+# print(variaveis_por_permutacao(1))
 
 # [
 #     "ouro_personagem_padrao",
@@ -205,8 +224,12 @@ print(variaveis_por_permutacao(1))
 #     "..."
 # ]
 
-resposta = variaveis_por_permutacao(31)
-print(resposta)
+# resposta = variaveis_por_permutacao(31)
+# print(resposta)
 
 
 # # combinacoes = list(product(*metodos_por_variavel.values()))
+
+
+if __name__ == "__main__":
+    print(proporcao_ouros(4, [1, 3, 6, 3]))

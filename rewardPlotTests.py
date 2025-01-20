@@ -29,10 +29,10 @@ gym.register(
 
 
 # Configurações gerais 
-DIR_NAME = "teste2_modelo_padrao"
-TRAIN_STEPS = 100000
+DIR_NAME = "aa_rpt_nic_2"
+TRAIN_STEPS = 200000
 MODEL_SAVE_FREQ = 10000
-NOT_ALLOW_REUSE_DIRS = True
+NOT_ALLOW_REUSE_DIRS = False
 ENV_RENDER_MODE = None
 
 EVAL_LOG_FILE = os.path.join(DIR_NAME, "evaluations.txt")
@@ -195,7 +195,7 @@ if __name__ == "__main__":
         if NOT_ALLOW_REUSE_DIRS: exit(0)
 
 
-    hyperparams = sample_hyperparams()
+    # hyperparams = sample_hyperparams()
     SAVE_FILE = os.path.join(DIR_NAME, f"{BASE_EVAL_LOG_FILE}{test}")
     callback = SaveOnTrainStepsNumCallback(MODEL_SAVE_FREQ, verbose=0)
     
@@ -375,17 +375,98 @@ if __name__ == "__main__":
     #     batch_size=512,
     #     target_update_interval=2000
     # )
-    model = DQN("MlpPolicy",  env=env)
+    # model = DQN("MlpPolicy",  env=env)
     
-    log_hyperparams(EVAL_LOG_FILE, hyperparams, test)
-    
-    try: 
-        model.learn(total_timesteps=TRAIN_STEPS, callback=callback)
-    except Exception as e: 
-        print("ERRO:", e)
-    
-    test += 1
+    # Nicolas antigo
+    # model = DQN(
+    #         "MlpPolicy",                     
+    #         env=env,                         
+    #         verbose=0,                       
 
+    #         # Parâmetros de exploração
+    #         exploration_initial_eps=1.0,    
+    #         exploration_final_eps=0.05,      
+    #         exploration_fraction=0.5,       
+
+    #         # Parâmetros de treinamento e otimização
+    #         learning_rate=1e-4,             
+    #         learning_starts=2000,           
+    #         gradient_steps=-1,            
+    #         policy_kwargs=dict(net_arch=[256, 128, 64, 32]),  
+
+    #         # Parâmetros de desconto e frequência de treinamento
+    #         gamma=0.9,                     
+    #         train_freq=10,                   
+
+    #         # Parâmetros do replay buffer
+    #         buffer_size=100000,             
+    #         batch_size=256,                 
+    #         target_update_interval=300,         
+    #     )
+    
+    # Nicolas novo 
+    model = DQN(
+        "MlpPolicy",                     
+        env=env,                         
+        verbose=0,                       
+
+        # Parâmetros de exploração
+        exploration_initial_eps=1.0,    
+        exploration_final_eps=0.05,      
+        exploration_fraction=0.5,       
+
+        # Parâmetros de treinamento e otimização
+        learning_rate=1e-5,             
+        learning_starts=2000,           
+        gradient_steps=-1,            
+        # policy_kwargs=dict(net_arch=[256, 128, 64, 32]),  
+        policy_kwargs=dict(net_arch=[256, 256]),  
+
+        # Parâmetros de desconto e frequência de treinamento
+        gamma=0.9,                     
+        train_freq=10,                   
+
+        # Parâmetros do replay buffer
+        buffer_size=100000,             
+        batch_size=256,                 
+        target_update_interval=300,         
+    )
+    
+    # model = DQN(
+    #     "MlpPolicy",                     # Política de rede neural MLP
+    #     env=env,                         # Ambiente de OpenAI Gym
+    #     verbose=0,                       # Nível de detalhamento dos logs
+    #     # Parâmetros de exploração
+    #     exploration_initial_eps=0.9,    
+    #     exploration_final_eps=0.5,      
+    #     exploration_fraction=0.4,       
+
+    #     # # Parâmetros de treinamento e otimização
+    #     learning_rate=0.0005,             
+    #     learning_starts=5000,           
+    #     gradient_steps=10,            
+    #     policy_kwargs=dict(net_arch=[32]),  
+
+    #     # # Parâmetros de desconto e frequência de treinamento
+    #     gamma=0.95,                     
+    #     train_freq=1000,                   
+
+    #     # # Parâmetros do replay buffer
+    #     buffer_size=100000,             
+    #     batch_size=128,                 
+    #     target_update_interval=3000
+    # )
+    
+    # log_hyperparams(EVAL_LOG_FILE, hyperparams, test)
+    
+    # try: 
+    #     model.learn(total_timesteps=TRAIN_STEPS, callback=callback)
+    # except Exception as e: 
+    #     print("ERRO:", e)
+    
+    # test += 1
+
+    model.learn(total_timesteps=TRAIN_STEPS, callback=callback)
 
 
 
@@ -426,3 +507,4 @@ if __name__ == "__main__":
 #         self.plot_av_reward()
 #         # Continue salvando o modelo e testando...
 #         # ...
+

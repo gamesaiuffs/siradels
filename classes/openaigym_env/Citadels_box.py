@@ -43,10 +43,13 @@ class Citadels(gym.Env):
         for tipo_tabela in TipoTabela:
             self.estado_vetor.append(tipo_tabela.tamanho)
         self.observation_space: Space[ObsType] = spaces.MultiDiscrete(self.estado_vetor)
+        # self.observation_space = spaces.Box(low=-np.inf, high=np.inf, shape=(len(self.estado_vetor),), dtype=np.float32)
 
     # Mapeia estado atual na estrutura do espaço observacional (observação do agente do ambiente do problema)
     def observation(self) -> np.array:
         return np.array(self.simulacao.estado.converter_estado(openaigym=True))
+        # np.array([dx, dy, dist_comida, dir_x, dir_y, np_x_1_y_0, np_x_0_y_1, np_x_m1_y_0, np_x_0_y_m1], dtype=np.float32)
+        # return np.array(self.simulacao.estado.converter_estado(openaigym=True), dtype=np.float32)
 
     # Método que identificar e retorna o idx referente a vez do jogador na escolha de personagens
     def identificar_idx_jogador(self) -> int:
@@ -58,16 +61,37 @@ class Citadels(gym.Env):
     # Método usado para iniciar uma nova simulação a partir de um estado inicial até o turno do agente
     def reset(self, *, seed: int | None = None, options: dict[str, Any] | None = None) -> tuple[ObsType, dict[str, Any]]:
         super().reset(seed=seed)
-        # self.simulacao.criar_estado_inicial(self.simulacao.num_personagens)
-        # self.simulacao.iniciar_rodada()
+        self.simulacao = Simulacao(estrategias=self.estrategias, treino_openaigym=True)
+        self.simulacao.iniciar_rodada()
         self.idx_jogador = self.identificar_idx_jogador()
-        # self.simulacao.executar_rodada(0, self.idx_jogador)
+        self.simulacao.executar_rodada(0, self.idx_jogador)
         # Marca pontuação atual do agente (usada para recompensa)
-        self.simulacao: Simulacao = Simulacao(self.estrategias, treino_openaigym=True)
         self.pontuacao_atual = 0
         self.sucesso = 0
         # O segundo argumento refere-se a alguma informação adicional repassada para o agente
         return self.observation(), dict()
+    
+    def personagem_disponivel(self, rank: int) -> int: 
+        p1 = p2 = p3 = p4 = p5 = p6 = p7 = p8 = 0
+        for carta in self.simulacao.estado.tabuleiro.baralho_personagens:
+            if carta.rank == 1:
+                p1 = 1
+            elif carta.rank == 2:
+                p2 = 1
+            elif carta.rank == 3:
+                p3 = 1
+            elif carta.rank == 4:
+                p4 = 1
+            elif carta.rank == 5:
+                p5 = 1
+            elif carta.rank == 6:
+                p6 = 1
+            elif carta.rank == 7:
+                p7 = 1
+            elif carta.rank == 8:
+                p8 = 1
+        personagens = [p1, p2, p3, p4, p5, p6, p7, p8]
+        return personagens[rank]
 
     # Método usado para executar uma transição de estado a partir de uma ação do agente
     def step(self, action: ActType) -> tuple[ObsType, SupportsFloat, bool, bool, dict[str, Any]]:
@@ -75,8 +99,8 @@ class Citadels(gym.Env):
             self.simulacao.iniciar_rodada()
             self.idx_jogador = self.identificar_idx_jogador()
             self.simulacao.executar_rodada(0, self.idx_jogador)
-            # print("="*20, " Nova rodada ", "="*20)
             return self.observation(), 0, self.simulacao.final_jogo, False, dict()
+        
         recompensa = 0.0
         jogador_agente = None
         for jogador in self.simulacao.estado.jogadores:
@@ -84,8 +108,9 @@ class Citadels(gym.Env):
                 jogador_agente = jogador
         if jogador_agente is None:
             raise Exception("Agente não encontrado!")
-        # Verifica e executa a ação no ambiente simulado
-        if self.observation()[self.idx_enum_personagem_rank1 + action] == 1:
+        
+        
+        if self.personagem_disponivel(action) == 1: 
             # Identificar índice do personagem escolhido
             idx_escolha_personagem = -1
             for idx, personagem in enumerate(self.simulacao.estado.tabuleiro.baralho_personagens):
@@ -95,9 +120,12 @@ class Citadels(gym.Env):
                 raise Exception("Personagem não encontrado!")
             # Executa escolha de personagem
             self.simulacao.executar_rodada(self.idx_jogador, self.simulacao.num_jogadores, idx_escolha_personagem)
+            self.simulacao.iniciar_rodada()
+            self.idx_jogador = self.identificar_idx_jogador()
+            self.simulacao.executar_rodada(0, self.idx_jogador)
+            
         # Recompensa negativa ao escolher ação inválida
         else:
-            #recompensa += -12.0
             recompensa += -100
             return self.observation(), recompensa, self.simulacao.final_jogo, False, dict()
 
@@ -109,15 +137,14 @@ class Citadels(gym.Env):
             if self.simulacao.estado.jogadores[0].nome == 'Agente':
                 recompensa += 100
                 self.sucesso = 1
-            # print("fim de jogo +100")
             
         else:
             for jogador in self.simulacao.estado.jogadores:
                 if jogador == jogador_agente:
                     # Recompensa ao aumentar pontuação parcial = delta pontuacao parcial + ou -
-                    recompensa = recompensa + (jogador.pontuacao - self.pontuacao_atual)*10
-                    # print("Variacao: ", recompensa)
+                    recompensa = recompensa + (jogador.pontuacao - self.pontuacao_atual) * 10
                     self.pontuacao_atual = jogador.pontuacao
+            
 
         # Retorna uma tupla contendo:
         # a observação do próximo estado, a recompensa imediata obtida, se o estado é final,

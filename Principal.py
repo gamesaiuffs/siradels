@@ -3,7 +3,7 @@ import time
 from itertools import combinations
 
 from classes.Experimento import Experimento
-from classes.openaigym_env.Citadels import Citadels
+from classes.openaigym_env.Citadels_box import Citadels
 
 from classes.strategies.Agente import Agente
 from classes.strategies.Estrategia import Estrategia

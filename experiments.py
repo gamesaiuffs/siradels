@@ -189,24 +189,25 @@ if __name__ == "__main__":
                     verbose=0,                       
 
                     # Parâmetros de exploração
-                    # exploration_initial_eps=1.0,    
-                    # exploration_final_eps=0.05,      
-                    # exploration_fraction=0.5,       
+                    exploration_initial_eps=1.0,    
+                    exploration_final_eps=0.05,      
+                    exploration_fraction=0.5,       
 
-                    # # Parâmetros de treinamento e otimização
-                    # learning_rate=1e-4,             
-                    # learning_starts=2000,           
-                    # gradient_steps=-1,            
+                    # Parâmetros de treinamento e otimização
+                    learning_rate=1e-5,             
+                    learning_starts=2000,           
+                    gradient_steps=-1,            
                     # policy_kwargs=dict(net_arch=[256, 128, 64, 32]),  
+                    policy_kwargs=dict(net_arch=[256, 256]),  
 
-                    # # Parâmetros de desconto e frequência de treinamento
-                    # gamma=0.9,                     
-                    # train_freq=10,                   
+                    # Parâmetros de desconto e frequência de treinamento
+                    gamma=0.9,                     
+                    train_freq=10,                   
 
-                    # # Parâmetros do replay buffer
-                    # buffer_size=100000,             
-                    # batch_size=256,                 
-                    # target_update_interval=300
+                    # Parâmetros do replay buffer
+                    buffer_size=100000,             
+                    batch_size=256,                 
+                    target_update_interval=300,         
                 )
     
     
