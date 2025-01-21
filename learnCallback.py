@@ -18,7 +18,7 @@ from classes.Experimento import Experimento
 
 
 ENV_ID = "Citadels"
-ENV_ENTRY_POINT = 'classes.openaigym_env.Citadels:Citadels'
+ENV_ENTRY_POINT = 'classes.openaigym_env.Citadels_box:Citadels'
 
 gym.register(
     id=ENV_ID,
@@ -27,8 +27,8 @@ gym.register(
 
 
 # Configurações gerais 
-DIR_NAME =              "aa_lcb_nico_1_naomodenv_novomont"      # Diretório onde são salvos modelos intermediários e graficos 
-TRAIN_STEPS =           300000                 # Steps de treinamento
+DIR_NAME =              "testes/teste"      # Diretório onde são salvos modelos intermediários e graficos 
+TRAIN_STEPS =           50000                 # Steps de treinamento
 MODEL_SAVE_FREQ =       10000                   # Frequência de salvamento de modelos 
 NOT_ALLOW_REUSE_DIRS =  False                  # impedir que arquivos com modelos salvos sejam sobrescritos
 ENV_RENDER_MODE =       None                #modo de renderização
@@ -74,7 +74,7 @@ class SaveOnTrainStepsNumCallback(BaseCallback):
 
     def _on_step(self) -> bool:
         
-        print(f"steps: {self.n_calls}/{TRAIN_STEPS}", end="\r")
+        # print(f"steps: {self.n_calls}/{TRAIN_STEPS}", end="\r")
         
         if self.n_calls % self.save_freq == 0:
             print(f"Salvando modelo: {self.save_path}")

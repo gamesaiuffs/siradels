@@ -24,13 +24,15 @@ class Citadels(gym.Env):
         self.pontuacao_atual: int = 0
         # Marca posição do agente na ordem de turno para escolha de personagem
         self.idx_jogador: int = -1
+        
         # Descobre index do Enumerador que marca a disponibilidade de cartas de personagem
-        self.idx_enum_personagem_rank1: int | None = None
-        for e in TipoTabela:
-            if e == TipoTabela.Rank1Disponivel:
-                self.idx_enum_personagem_rank1 = e.idx - len(TipoTabela)
-                break
-
+        # self.idx_enum_personagem_rank1: int | None = None
+        # for e in TipoTabela:
+        #     if e == TipoTabela.Rank1Disponivel:
+        #         self.idx_enum_personagem_rank1 = e.idx - len(TipoTabela)
+        #         break
+        
+        
         # Marca se o agente venceu a partida
         self.sucesso: int = 0
 
@@ -40,10 +42,14 @@ class Citadels(gym.Env):
         self.action_space: Space[ActType] = spaces.Discrete(8)
         # Mapeado estado conforme implementado em método Estado.converter_estado() e TipoTabela
         self.estado_vetor: list[int] = []
-        for tipo_tabela in TipoTabela:
-            self.estado_vetor.append(tipo_tabela.tamanho)
-        self.observation_space: Space[ObsType] = spaces.MultiDiscrete(self.estado_vetor)
-        # self.observation_space = spaces.Box(low=-np.inf, high=np.inf, shape=(len(self.estado_vetor),), dtype=np.float32)
+        # for tipo_tabela in TipoTabela:
+        #     self.estado_vetor.append(tipo_tabela.tamanho)
+        self.estado_vetor = self.simulacao.estado.calcula_tamanho_vetor_obsercacao()
+        # self.observation_space: Space[ObsType] = spaces.MultiDiscrete(self.estado_vetor)
+        self.observation_space = spaces.Box(low=-np.inf, high=np.inf, shape=(len(self.estado_vetor),), dtype=np.float32)
+
+        print("Vetor tipo tabela: ", self.estado_vetor, len(self.estado_vetor))
+        print("Vetor tipo novo  : ", self.simulacao.estado.calcula_tamanho_vetor_obsercacao(), len(self.simulacao.estado.calcula_tamanho_vetor_obsercacao()))
 
     # Mapeia estado atual na estrutura do espaço observacional (observação do agente do ambiente do problema)
     def observation(self) -> np.array:

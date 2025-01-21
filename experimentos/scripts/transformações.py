@@ -161,3 +161,29 @@ def conta_ouros_adversarios(estado):
             ouros.append(jogador.ouro)
 
     return ouros
+
+
+def disponibilidade_personagens(baralho_personagens):
+    """
+    Recebe a lista contendo o baralho de personagens disponíveis para a escolha
+    Retorna um vetor binário de representação da dispoibilidade (8 posições)
+    """
+    p1 = p2 = p3 = p4 = p5 = p6 = p7 = p8 = 0
+    for carta in baralho_personagens:
+        if carta.rank == 1:
+            p1 = 1
+        elif carta.rank == 2:
+            p2 = 1
+        elif carta.rank == 3:
+            p3 = 1
+        elif carta.rank == 4:
+            p4 = 1
+        elif carta.rank == 5:
+            p5 = 1
+        elif carta.rank == 6:
+            p6 = 1
+        elif carta.rank == 7:
+            p7 = 1
+        elif carta.rank == 8:
+            p8 = 1
+    return [p1, p2, p3, p4, p5, p6, p7, p8]

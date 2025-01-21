@@ -17,7 +17,7 @@ import ray
 from database.Postgres import Conexao
 
 ENV_ID = "Citadels"
-ENV_ENTRY_POINT = 'classes.openaigym_env.Citadels:Citadels'
+ENV_ENTRY_POINT = 'classes.openaigym_env.Citadels_box:Citadels'
 
 gym.register(
     id=ENV_ID,
@@ -27,7 +27,7 @@ gym.register(
 # Configurações gerais 
 TRAIN_STEPS = 300000
 MODEL_SAVE_FREQ = 10000
-EXP_ATUAL = 2
+EXP_ATUAL = 1
 NUM_INITS = 10
 NUM_EVAL_EPISODES = 100
 

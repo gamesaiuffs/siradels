@@ -43,6 +43,8 @@ class Citadels(gym.Env):
         self.estado_vetor: list[int] = []
         for tipo_tabela in TipoTabela:
             self.estado_vetor.append(tipo_tabela.tamanho)
+            
+        
         self.observation_space: Space[ObsType] = spaces.MultiDiscrete(self.estado_vetor)
 
     # Mapeia estado atual na estrutura do espaço observacional (observação do agente do ambiente do problema)

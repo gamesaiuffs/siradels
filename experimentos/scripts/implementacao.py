@@ -141,6 +141,7 @@ def proporcao_ouros(ouros_personagem, ouros_todos):
 
 
 
+
 # exemplo 
 # metodos_por_variavel = {
 #     "ouro": [lambda x: discretizar(x, [1, 3, 5]), lambda x: escalar(x, 0, 10)],
