@@ -18,7 +18,7 @@ from classes.Experimento import Experimento
 
 
 ENV_ID = "Citadels"
-ENV_ENTRY_POINT = 'classes.openaigym_env.Citadels_box:Citadels'
+ENV_ENTRY_POINT = 'classes.openaigym_env.Citadels_mb:Citadels'
 
 gym.register(
     id=ENV_ID,
@@ -27,7 +27,7 @@ gym.register(
 
 
 # Configurações gerais 
-DIR_NAME =              "testes/teste"      # Diretório onde são salvos modelos intermediários e graficos 
+DIR_NAME =              "testes/teste_classes"      # Diretório onde são salvos modelos intermediários e graficos 
 TRAIN_STEPS =           50000                 # Steps de treinamento
 MODEL_SAVE_FREQ =       10000                   # Frequência de salvamento de modelos 
 NOT_ALLOW_REUSE_DIRS =  False                  # impedir que arquivos com modelos salvos sejam sobrescritos

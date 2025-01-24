@@ -69,6 +69,20 @@ def intervalos_em_classes(valor, limites):
         
     raise Exception("Classe não encontrada")
 
+def intervalos_em_classes_vetor(lista_valores: list, limites):
+    """
+    Recebe uma lista de valores e as classes, com limite inferior e superior \n
+        [(classe, lim_inf, lim_sup), (classe, lim_inf, lim_sup)] \n
+        [(1, 0, 2), (2, 3, 4), (3, 5, 10000)]\n
+    Retorna um vetor com todos os valores do original adequados às classes
+    """
+    nova_lista = []
+    for valor in lista_valores:
+        for classe, lim_inf, lim_sup in limites:
+            if valor >= lim_inf and valor <= lim_sup: 
+                nova_lista.append(classe)
+            
+    return nova_lista
 
 # Funções especificas 
 def encontra_carta_mais_cara(estado): 

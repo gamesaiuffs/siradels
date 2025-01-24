@@ -25,7 +25,7 @@ create table sample (
     constraint fk_sample_init FOREIGN KEY (idin, idexp) REFERENCES initialize(idin, idexp) on delete cascade
 );
 
-insert into experiment(idexp, title, numpt, status) values (1, 'Entradas originais -  sem transformacao', 300000, 'pendente');
+insert into experiment(idexp, title, numpt, status) values (5, 'Entradas em 2 classes - bin', 300000, 'pendente');
 
 -- CREATE TABLE experiment_statistics (
 --     id SERIAL PRIMARY KEY, -- Identificador único do experimento
@@ -95,8 +95,8 @@ insert into experiments values (1, 100, '2024-12-12', )
 
 select idin, max(nwins)
 from sample
-where idexp=1
+where idexp=4
 group by idin
 order by idin;
 
-select avg(max) from (select idin, max(nwins) from sample where idexp=2 group by idin order by idin);
+select avg(max) from (select idin, max(nwins) from sample where idexp=4 group by idin order by idin);
