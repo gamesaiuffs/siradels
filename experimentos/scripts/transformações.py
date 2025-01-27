@@ -116,17 +116,17 @@ def encontra_carta_mais_barata(estado):
 
     return menor_custo
 
-def conta_tipos_distritos(estado): 
+def conta_tipos_distritos(jogador): 
     """
-    Recebe a variável com os componentes do estado\n
-    Retorna uma lista de 5 posicoes com as quantidades totais de distritos de cada tipo
+    Recebe o jogador do qual serão contados os tipos de distritos\n
+    Retorna uma lista de 5 posicoes com as quantidades totais de distritos de cada tipo do agente na ordem [nobre, religioso, militar, comercial, especial]
     """
     nobre = 0
     religioso = 0
     militar = 0
     comercial = 0
     especial = 0
-    for distrito in estado["jogador_visao"].distritos_construidos:
+    for distrito in jogador.distritos_construidos:
         if distrito.tipo_de_distrito == TipoDistrito.Nobre:
             nobre += 1
         elif distrito.tipo_de_distrito == TipoDistrito.Religioso:
@@ -138,6 +138,32 @@ def conta_tipos_distritos(estado):
         elif distrito.tipo_de_distrito == TipoDistrito.Especial:
             especial += 1 
             
+    return [nobre, religioso, militar, comercial, especial]
+
+
+def conta_tipos_distritos_mesa(estado): 
+    """
+    Recebe o jogador do qual serão contados os tipos de distritos\n
+    Retorna uma lista de 5 posicoes com as quantidades totais de distritos de cada tipo dos oponentes na ordem [nobre, religioso, militar, comercial, especial]
+    """
+    nobre = 0
+    religioso = 0
+    militar = 0
+    comercial = 0
+    especial = 0
+    for jogador in estado["jogadores"]:
+        for distrito in jogador.distritos_construidos:
+            if distrito.tipo_de_distrito == TipoDistrito.Nobre:
+                nobre += 1
+            elif distrito.tipo_de_distrito == TipoDistrito.Religioso:
+                religioso += 1
+            elif distrito.tipo_de_distrito == TipoDistrito.Militar:
+                militar += 1
+            elif distrito.tipo_de_distrito == TipoDistrito.Comercial:
+                comercial += 1
+            elif distrito.tipo_de_distrito == TipoDistrito.Especial:
+                especial += 1 
+                    
     return [nobre, religioso, militar, comercial, especial]
 
 
@@ -201,3 +227,53 @@ def disponibilidade_personagens(baralho_personagens):
         elif carta.rank == 8:
             p8 = 1
     return [p1, p2, p3, p4, p5, p6, p7, p8]
+
+
+def total_ouros_mesa(estado):
+    """
+    Recebe a variável de estado montada 
+    Retorna uma lista com o ouro de todos os jogadores da mesa 
+    """
+    ouros = []
+    for jogador in estado["jogadores"]:
+        ouros.append(jogador.ouro)
+        
+    return ouros
+
+
+
+
+
+# Funções de calculo da proporção 
+
+def ouro_personagem_proporcao(x):
+    soma = sum(total_ouros_mesa(x))
+    if soma == 0: return 0.0
+    return x["jogador_visao"].ouro / soma
+
+
+def cartas_dist_mao_proporcao(x):
+    maximo = max(conta_cartas_mao(x))
+    if maximo == 0: return 0.0
+    return len(x["jogador_visao"].cartas_distrito_mao) / maximo
+
+def qtd_dist_const_proporcao(x):
+    maximo = max(conta_distritos_construidos(x))
+    if maximo == 0: return 0.0
+    return len(x["jogador_visao"].distritos_construidos) / maximo
+
+def qtd_dist_cada_tipo_proporcao(x):
+    qtd_oponentes = conta_tipos_distritos_mesa(x)
+    qtd_agente = conta_tipos_distritos(x["jogador_visao"])
+    return [agente / oponente if oponente != 0 else 0.0 for oponente, agente in zip(qtd_oponentes, qtd_agente)]
+        
+def jog_mais_cartas_mao_proporcao(x): 
+    media = sum(conta_cartas_mao(x)) / 5
+    if media == 0: return 0.0
+    return max(conta_cartas_mao(x)) / media
+
+def ouro_oponentes_proporcao(x):
+    ouro_agente = x["jogador_visao"].ouro
+    ouro_adversarios = conta_ouros_adversarios(x)
+    if ouro_agente == 0: return ouro_adversarios
+    return [ouro / ouro_agente for ouro in ouro_adversarios]

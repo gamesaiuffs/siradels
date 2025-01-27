@@ -95,7 +95,7 @@ insert into experiments values (1, 100, '2024-12-12', )
 
 select idin, max(nwins)
 from sample
-where idexp=4
+where idexp=2
 group by idin
 order by idin;
 

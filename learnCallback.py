@@ -18,7 +18,7 @@ from classes.Experimento import Experimento
 
 
 ENV_ID = "Citadels"
-ENV_ENTRY_POINT = 'classes.openaigym_env.Citadels_mb:Citadels'
+ENV_ENTRY_POINT = 'classes.openaigym_env.Citadels_box:Citadels'
 
 gym.register(
     id=ENV_ID,
