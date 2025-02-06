@@ -203,16 +203,16 @@ class Estado:
         }
         
         estado_vetor = []
-        estado_vetor_teste = []
+        # estado_vetor_teste = []
         
-        # Gera variáveis de teste 
-        for var in self.variaveis_original: 
-            representacao = self.metodos_por_variavel[var]["funcao"](estado)
+        # # Gera variáveis de teste 
+        # for var in self.variaveis_original: 
+        #     representacao = self.metodos_por_variavel[var]["funcao"](estado)
             
-            if isinstance(representacao, list):
-                # for item in representacao: estado_vetor_teste.append(item) 
-                estado_vetor_teste.extend(representacao)
-            else: estado_vetor_teste.append(representacao)
+        #     if isinstance(representacao, list):
+        #         # for item in representacao: estado_vetor_teste.append(item) 
+        #         estado_vetor_teste.extend(representacao)
+        #     else: estado_vetor_teste.append(representacao)
         
         
         
@@ -227,7 +227,7 @@ class Estado:
             
         # print(estado_vetor_teste)    
         
-        self.print_estado(estado, estado_vetor_teste, estado_vetor)
+        # self.print_estado(estado, estado_vetor_teste, estado_vetor)
         # print(estado_vetor)
         return estado_vetor
         
