@@ -107,9 +107,58 @@ select avg(max) from (select idin, max(nwins) from sample where idexp=5 group by
 # Pegar vitorias de cada inicialização em 300000 steps
 select idin, nwins 
 from sample 
-where idexp=3 and tsteps = 300000;
+where idexp=1 and tsteps = 300000;
 
 select avg(nwins) from (select idin, nwins 
 from sample 
 where idexp=5 and tsteps = 300000
 );
+
+# Médias das inicializações de cada experimento
+# experimento   % win
+# 1             54.5%
+# 2             55.40             
+# 3             53.20
+# 4             54.00
+# 5             52.30
+
+
+# Media do valor de todas as inicializações para cada timestep 
+select tsteps, avg(nwins) as vitorias
+from sample 
+where idexp=3
+GROUP BY tsteps
+order by tsteps;
+
+
+# Media da recompensa de todas as inicializações para cada timestep 
+select tsteps, avg(avrew) as recompensas
+from sample 
+where idexp=5
+GROUP BY tsteps
+order by tsteps;
+
+
+select * from sample where idexp=3 and tsteps = 100000;
+
+# Resultados dos experimentos 
+
+# experimento   % vitoria   representação               ambiente
+# 1             54.5%       originais                   box
+# 2             55.40       original limitado           multidiscreto
+# 3             53.20       proporções                  box
+# 4             54.00       3 classes                   multidiscreto
+# 5             52.30       2 classes (binario)         binario
+
+
+# Experimento variando variáveis usadas (com representação binária) - preliminares 
+
+# Ambiente binario sem alteraçõe 
+# 53%
+
+# Só as 9 ultimas (sem num de ouros e cartas distrito do personagem)
+# 35% 
+
+# Sem o vetor de disponibilidade 
+# 26%
+

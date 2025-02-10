@@ -32,6 +32,8 @@ class Simulacao:
 
     # Cria o estado inicial do tabuleiro
     def criar_estado_inicial(self, num_personagens: int) -> Estado:
+        
+        # print("Estado criado")
         # Constrói o tabuleiro
         tabuleiro = Tabuleiro(num_personagens)
         jogadores = self.criar_jogadores()
