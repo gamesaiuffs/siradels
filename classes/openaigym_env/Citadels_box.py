@@ -101,6 +101,7 @@ class Citadels(gym.Env):
 
     # Método usado para executar uma transição de estado a partir de uma ação do agente
     def step(self, action: ActType) -> tuple[ObsType, SupportsFloat, bool, bool, dict[str, Any]]:
+        # print(self.observation())
         if self.simulacao.nova_rodada:
             self.simulacao.iniciar_rodada()
             self.idx_jogador = self.identificar_idx_jogador()

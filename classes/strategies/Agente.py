@@ -13,7 +13,9 @@ import numpy as np
 class Agente(Estrategia):
     def __init__(self, nome: str = 'Agente', imprimir: bool = False, model = None):
         super().__init__(nome, imprimir)
-        if model == None: self.model = DQN.load("citadels_agent")
+        if model == None: 
+            self.model = DQN.load("aaa_experimentos_final/1/in_2/30.zip")
+            print("Modelo carregado")
         else: self.model = model
 
     # Estratégia usada na fase de escolha dos personagens
