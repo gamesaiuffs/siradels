@@ -27,7 +27,7 @@ gym.register(
 
 
 # Configurações gerais 
-DIR_NAME =              "testes/teste_entradaBinario_ambienteBox"      # Diretório onde são salvos modelos intermediários e graficos 
+DIR_NAME =              "testes/teste_entradaPadrao_ambienteBox"      # Diretório onde são salvos modelos intermediários e graficos 
 TRAIN_STEPS =           300000                 # Steps de treinamento
 MODEL_SAVE_FREQ =       10000                   # Frequência de salvamento de modelos 
 NOT_ALLOW_REUSE_DIRS =  False                  # impedir que arquivos com modelos salvos sejam sobrescritos

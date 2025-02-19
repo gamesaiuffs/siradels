@@ -85,10 +85,10 @@ check_env(env)
 # print("Fim do treino MCTS")
 
 print("Início dos testes das estratégias")
-# estrategias: list[Estrategia] = [Agente(), EstrategiaAllin("Allin"), EstrategiaAndrei(), EstrategiaBuild("Build"), EstrategiaDjonatan(), EstrategiaEduardo(),
-#                                  EstrategiaFelipe(), EstrategiaFrequency("Frequency"), EstrategiaGold("Gold"), EstrategiaJean(), EstrategiaLuisII(), EstrategiaTotalmenteAleatoria()]
+estrategias: list[Estrategia] = [Agente(), EstrategiaAllin("Allin"), EstrategiaAndrei(), EstrategiaBuild("Build"), EstrategiaDjonatan(), EstrategiaEduardo(),
+                                 EstrategiaFelipe(), EstrategiaFrequency("Frequency"), EstrategiaGold("Gold"), EstrategiaJean(), EstrategiaLuisII(), EstrategiaTotalmenteAleatoria()]
 
-estrategias: list[Estrategia] = [Agente(model=None), EstrategiaTotalmenteAleatoria(),EstrategiaTotalmenteAleatoria(),EstrategiaTotalmenteAleatoria(),EstrategiaTotalmenteAleatoria()]
+# estrategias: list[Estrategia] = [Agente(model=None), EstrategiaTotalmenteAleatoria(), EstrategiaTotalmenteAleatoria(),EstrategiaTotalmenteAleatoria(),EstrategiaTotalmenteAleatoria()]
 
 
 # estrategias: list[Estrategia] = [Agente(imprimir=True), EstrategiaTotalmenteAleatoria("B2"), EstrategiaTotalmenteAleatoria("B3"), EstrategiaTotalmenteAleatoria("B4"), EstrategiaTotalmenteAleatoria("B5")]
@@ -96,7 +96,7 @@ comb = list(combinations(estrategias, 5))
 qtd_comb = len(comb)
 print("Quantidade de Combinações:", qtd_comb)
 
-qtd_simulacao: int = 30
+qtd_simulacao: int = 20
 resultados_total: dict[str, (int, int, int, int, int, int, int)] = dict()
 for e in estrategias:
     resultados_total[e.nome] = (0, 0, 0, 0, 0, 0, 0)
@@ -114,16 +114,17 @@ for i, p in enumerate(comb):
         pontuacao += resultados_total[jogador][5]
         resultados_total[jogador] = (vitoria, seg, ter, qua, qui, pontuacao, resultados_total[jogador][6] + qtd_simulacao)
 for jogador, resultado in resultados_total.items():
-    (vitoria, seg, ter, qua, qui, pontuacao, qtd_simulacao_total) = resultado
-    pontuacao_media = pontuacao / qtd_simulacao_total
-    taxa_vitoria = 100 * vitoria / qtd_simulacao_total
-    taxa_seg = 100 * seg / qtd_simulacao_total
-    taxa_ter = 100 * ter / qtd_simulacao_total
-    taxa_qua = 100 * qua / qtd_simulacao_total
-    taxa_qui = 100 * qui / qtd_simulacao_total
-    print(
-        f'\n{jogador} - Vitórias: {vitoria} - Taxa de Vitórias: {taxa_vitoria:.2f}% - Pontuação Média: {pontuacao_media:.2f}\n\t'
-        f'Primeiro: {taxa_vitoria:5.2f}%\n\tSegundo : {taxa_seg:5.2f}%\n\tTerceiro: {taxa_ter:5.2f}%\n\tQuarto  : {taxa_qua:5.2f}%\n\tQuinto  : {taxa_qui:5.2f}%')
+    if jogador == "Agente":    
+        (vitoria, seg, ter, qua, qui, pontuacao, qtd_simulacao_total) = resultado
+        pontuacao_media = pontuacao / qtd_simulacao_total
+        taxa_vitoria = 100 * vitoria / qtd_simulacao_total
+        taxa_seg = 100 * seg / qtd_simulacao_total
+        taxa_ter = 100 * ter / qtd_simulacao_total
+        taxa_qua = 100 * qua / qtd_simulacao_total
+        taxa_qui = 100 * qui / qtd_simulacao_total
+        print(
+            f'\n{jogador} - Vitórias: {vitoria} - Taxa de Vitórias: {taxa_vitoria:.2f}% - Pontuação Média: {pontuacao_media:.2f}\n\t'
+            f'Primeiro: {taxa_vitoria:5.2f}%\n\tSegundo : {taxa_seg:5.2f}%\n\tTerceiro: {taxa_ter:5.2f}%\n\tQuarto  : {taxa_qua:5.2f}%\n\tQuinto  : {taxa_qui:5.2f}%')
 print("Fim dos testes das estratégias")
 
 # Imprime duração do experimento

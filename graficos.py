@@ -128,8 +128,8 @@ if __name__ == "__main__":
         
         plt.figure(figsize=(10, 6))
         plt.xlabel('Timesteps')
-        plt.ylabel('Win Rate')
-        plt.title('Relation between timesteps and win avarage')
+        plt.ylabel('Mean Reward')
+        plt.title('')
         plt.grid(True)
         
         plt.plot([float(valor[0]) for valor in exp1], [float(valor[1]) for valor in exp1], marker='o', label="Experimento 1")
@@ -142,4 +142,4 @@ if __name__ == "__main__":
         plt.legend()
         # plt.show()
         # plt.ylim(0, 100)
-        plt.savefig("graficos/geral.png")
+        plt.savefig("graficos/recompensas.png")

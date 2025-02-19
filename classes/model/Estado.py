@@ -89,7 +89,7 @@ class Estado:
         "carta_mais_barata_classes_bin": {"funcao": lambda x: intervalos_em_classes(encontra_carta_mais_barata(x), [(0, 0, 3), (1, 4, 10000)]), "tamanho": 1, "largura": 2},
         "carta_mais_barata_proporcao": {"funcao": lambda x: encontra_carta_mais_barata(x), "tamanho": 1, "largura": None},
         
-        "qtd_dist_const_padrao": {"funcao": lambda x: limitar_valores(len(x["jogador_visao"].distritos_construidos), [0, 7]), "tamanho": 1, "largura": 8},          # Logica quebrada 
+        "qtd_dist_const_padrao": {"funcao": lambda x: limitar_valores(len(x["jogador_visao"].distritos_construidos), [0, 7]), "tamanho": 1, "largura": 8},
         "qtd_dist_const_original": {"funcao": lambda x: len(x["jogador_visao"].distritos_construidos), "tamanho": 1, "largura": INF},
         "qtd_dist_const_classes": {"funcao": lambda x: intervalos_em_classes(len(x["jogador_visao"].distritos_construidos), [(0, 0, 3), (1, 4, 6), (2, 7, 10000)]), "tamanho": 1, "largura": 3},
         "qtd_dist_const_classes_bin": {"funcao": lambda x: intervalos_em_classes(len(x["jogador_visao"].distritos_construidos), [(0, 0, 6), (1, 7, 10000)]), "tamanho": 1, "largura": 2},
@@ -130,7 +130,7 @@ class Estado:
         self.variaveis_classes_bin = ["ouro_personagem_classes_bin","cartas_dist_mao_classes_bin","carta_mais_cara_classes_bin","carta_mais_barata_classes_bin","qtd_dist_const_classes_bin","qtd_dist_cada_tipo_classes_bin","dist_const_jog_mais_const_classes_bin","jog_mais_cartas_mao_classes_bin","ouro_oponentes_classes_bin", "disponibilidade_personagens", "turno_agente"]
         self.variaveis_classes_bin_teste = ["ouro_personagem_classes_bin","cartas_dist_mao_classes_bin","carta_mais_cara_classes_bin","carta_mais_barata_classes_bin","qtd_dist_const_classes_bin","qtd_dist_cada_tipo_classes_bin","dist_const_jog_mais_const_classes_bin","jog_mais_cartas_mao_classes_bin","ouro_oponentes_classes_bin", "turno_agente"]
         self.proporcoes = ["ouro_personagem_proporcao", "cartas_dist_mao_proporcao", "carta_mais_cara_proporcao", "carta_mais_barata_proporcao", "qtd_dist_const_proporcao", "qtd_dist_cada_tipo_proporcao", "dist_const_jog_mais_const_proporcao", "jog_mais_cartas_mao_proporcao", "ouro_oponentes_proporcao", "disponibilidade_personagens", "turno_agente"]
-        self.variaveis = self.variaveis_classes_bin
+        self.variaveis = self.variaveis_original
         
         
     def print_estado(self, estado, estado_vetor_teste, estado_vetor):
