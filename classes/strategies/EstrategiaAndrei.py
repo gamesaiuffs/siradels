@@ -69,25 +69,10 @@ class EstrategiaAndrei(Estrategia):
     # Estratégia usada na fase de escolha das ações no turno
     @staticmethod
     def escolher_acao(estado: Estado, acoes_disponiveis: list[TipoAcao]) -> int:
-        # acao_escolhida = random.randint(0, len(acoes_disponiveis) - 1)
-
-        # Sempre coleta ouro, se possível
-        try:
-            return acoes_disponiveis.index(TipoAcao.ColetarOuro)
-        except:
-            pass
-
-        # Deixa passar turno por último, não usa a habilidade do senhor da guerra e de nenhum distrito especial
-        lista_acoes = []
-        for i in range(len(acoes_disponiveis)):
-            if acoes_disponiveis[i] != TipoAcao.PassarTurno and acoes_disponiveis[i] != TipoAcao.HabilidadeSenhorDaGuerraDestruir and acoes_disponiveis[i] != TipoAcao.Forja and acoes_disponiveis[i] != TipoAcao.Laboratorio:
-            # if acoes_disponiveis[i] != TipoAcao.PassarTurno and acoes_disponiveis[i] != TipoAcao.Forja and acoes_disponiveis[i] != TipoAcao.Laboratorio:
-                lista_acoes.append(i)
-
-        if len(lista_acoes) != 0:
-            acao_escolhida = random.sample(lista_acoes, 1)[0]
-        else:
-            acao_escolhida = acoes_disponiveis.index(TipoAcao.PassarTurno)
+        # Deixa passar turno por último
+        acao_escolhida = random.randint(0, len(acoes_disponiveis) - 1)
+        while len(acoes_disponiveis) > 1 and acoes_disponiveis[acao_escolhida] == TipoAcao.PassarTurno:
+            acao_escolhida = random.randint(0, len(acoes_disponiveis) - 1)
         return acao_escolhida
 
     # Estratégia usada na ação de coletar cartas
@@ -100,14 +85,6 @@ class EstrategiaAndrei(Estrategia):
     def construir_distrito(estado: Estado, distritos_para_construir: list[CartaDistrito],
                            distritos_para_construir_covil_ladroes: list[(CartaDistrito, int, int)]) -> int:
         tamanho_maximo = len(distritos_para_construir) + len(distritos_para_construir_covil_ladroes)
-        # Escolhe sempre construir o distrito mais caro da mão sempre que possível
-        maior_valor_mao = 0
-        for distrito in estado.jogador_atual.cartas_distrito_mao:
-            if distrito.valor_do_distrito > maior_valor_mao:
-                maior_valor_mao = distrito.valor_do_distrito
-        for i, distrito in enumerate(distritos_para_construir):
-            if distrito == maior_valor_mao:
-                return i
         return random.randint(0, tamanho_maximo - 1)
 
     # Estratégia usada na ação de construir distritos (efeito Covil dos Ladrões)
@@ -118,6 +95,7 @@ class EstrategiaAndrei(Estrategia):
     # Estratégia usada na habilidade da Assassina
     @staticmethod
     def habilidade_assassina(estado: Estado, opcoes_personagem: list[CartaPersonagem]) -> int:
+        return random.randint(0, len(opcoes_personagem) - 1)
         # Retira opções de personagens descartados
         opcoes = []
         for personagem in opcoes_personagem:
@@ -128,6 +106,7 @@ class EstrategiaAndrei(Estrategia):
     # Estratégia usada na habilidade do Ladrão
     @staticmethod
     def habilidade_ladrao(estado: Estado, opcoes_personagem: list[CartaPersonagem]) -> int:
+        return random.randint(0, len(opcoes_personagem) - 1)
         # Retira opções de personagens descartados
         opcoes = []
         for personagem in opcoes_personagem:
@@ -138,6 +117,7 @@ class EstrategiaAndrei(Estrategia):
     # Estratégia usada na habilidade da Ilusionista (escolha do jogador alvo)
     @staticmethod
     def habilidade_ilusionista_trocar(estado: Estado, opcoes_jogadores: list[Jogador]) -> int:
+        return random.randint(0, len(opcoes_jogadores) - 1)
         # Ilusionista sempre troca de mão com o adversário que possui mais cartas, o desempate é uma escolha aleatória entre empatados
         mais_cartas = 0
         for jogador in opcoes_jogadores:

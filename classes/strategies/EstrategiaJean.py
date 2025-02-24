@@ -85,24 +85,7 @@ class EstrategiaJean(Estrategia):
     # Estratégia usada na fase de escolha das ações no turno
     @staticmethod
     def escolher_acao(estado: Estado, acoes_disponiveis: list[TipoAcao]) -> int:
-        if estado.jogador_atual.ouro < 3:
-            if TipoAcao.HabilidadeRei in acoes_disponiveis:
-                return acoes_disponiveis.index(TipoAcao.HabilidadeRei)
-            if TipoAcao.HabilidadeLadrao in acoes_disponiveis:
-                return acoes_disponiveis.index(TipoAcao.HabilidadeLadrao)
-            if TipoAcao.HabilidadeBispo in acoes_disponiveis:
-                return acoes_disponiveis.index(TipoAcao.HabilidadeBispo)
-            if TipoAcao.HabilidadeComerciante in acoes_disponiveis:
-                return acoes_disponiveis.index(TipoAcao.HabilidadeComerciante)
-            if TipoAcao.HabilidadeSenhorDaGuerraColetar in acoes_disponiveis:
-                return acoes_disponiveis.index(TipoAcao.HabilidadeSenhorDaGuerraColetar)                                    
-        else:
-            if estado.jogador_atual.ouro > 4 and TipoAcao.ColetarCartas in acoes_disponiveis:
-                return acoes_disponiveis.index(TipoAcao.ColetarCartas)
         # Deixa passar turno por último
-        if TipoAcao.HabilidadeIlusionistaDescartar in acoes_disponiveis and len(estado.jogador_atual.cartas_distrito_mao)>0:
-            return acoes_disponiveis.index(TipoAcao.HabilidadeIlusionistaDescartar)
-
         acao_escolhida = random.randint(0, len(acoes_disponiveis) - 1)
         while len(acoes_disponiveis) > 1 and acoes_disponiveis[acao_escolhida] == TipoAcao.PassarTurno:
             acao_escolhida = random.randint(0, len(acoes_disponiveis) - 1)
@@ -118,15 +101,6 @@ class EstrategiaJean(Estrategia):
     def construir_distrito(estado: Estado, distritos_para_construir: list[CartaDistrito],
                            distritos_para_construir_covil_ladroes: list[(CartaDistrito, int, int)]) -> int:
         tamanho_maximo = len(distritos_para_construir) + len(distritos_para_construir_covil_ladroes)
-        # Escolhe sempre construir o distrito mais caro da mão sempre que possível
-        maior_valor_mao = 0
-        for distrito in estado.jogador_atual.cartas_distrito_mao:
-            if distrito.valor_do_distrito > maior_valor_mao:
-                maior_valor_mao = distrito.valor_do_distrito
-        for i, distrito in enumerate(distritos_para_construir):
-            if distrito == maior_valor_mao:
-                return i
-
         return random.randint(0, tamanho_maximo - 1)
 
     # Estratégia usada na ação de construir distritos (efeito Covil dos Ladrões)
@@ -137,18 +111,18 @@ class EstrategiaJean(Estrategia):
     # Estratégia usada na habilidade da Assassina
     @staticmethod
     def habilidade_assassina(estado: Estado, opcoes_personagem: list[CartaPersonagem]) -> int:
+        return random.randint(0, len(opcoes_personagem) - 1)
         # Retira opções de personagens descartados
         opcoes = []
         for personagem in opcoes_personagem:
             if personagem not in estado.tabuleiro.cartas_visiveis:
                 opcoes.append(personagem)
-        if TipoPersonagem.Comerciante in opcoes:
-            return opcoes.index(TipoPersonagem.Comerciante)
         return random.randint(0, len(opcoes) - 1)
 
     # Estratégia usada na habilidade do Ladrão
     @staticmethod
     def habilidade_ladrao(estado: Estado, opcoes_personagem: list[CartaPersonagem]) -> int:
+        return random.randint(0, len(opcoes_personagem) - 1)
         # Retira opções de personagens descartados
         opcoes = []
         for personagem in opcoes_personagem:
@@ -174,15 +148,7 @@ class EstrategiaJean(Estrategia):
     # Estratégia usada na habilidade da Ilusionista (escolha de quantas cartas serão descartadas)
     @staticmethod
     def habilidade_ilusionista_descartar_qtd_cartas(estado: Estado, qtd_maxima: int) -> int:
-        menor_valor_mao = 10
-        for distrito in estado.jogador_atual.cartas_distrito_mao:
-            if distrito.valor_do_distrito < menor_valor_mao:
-                menor_valor_mao = distrito.valor_do_distrito
-        if len(estado.jogador_atual.cartas_distrito_mao) > 0:
-            for i, distrito in enumerate(estado.jogador_atual.cartas_distrito_mao):
-                if distrito == menor_valor_mao:
-                    return i
-        return random.randint(0, len(estado.jogador_atual.cartas_distrito_mao) - 1)
+        return random.randint(1, qtd_maxima)
 
     # Estratégia usada na habilidade da Ilusionista (escolha de qual carta descartar)
     @staticmethod

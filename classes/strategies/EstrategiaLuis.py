@@ -113,186 +113,22 @@ class EstrategiaLuisII(Estrategia):
     # Estratégia usada na fase de escolha das ações no turno
     @staticmethod
     def escolher_acao(estado: Estado, acoes_disponiveis: list[TipoAcao]) -> int:
-        # constantes
-        taxa_construcao = 4
-        grande_incentivo = 3
-        medio_incentivo = 2
-        pequeno_incentivo = 1
-        certeza = 1000
-
-        jogador = estado.jogador_atual
-        tabuleiro = estado.tabuleiro
-        personagens = estado.tabuleiro.personagens
-        pode_construir = [distrito for distrito in tabuleiro.baralho_distritos]
-        pode_construir.sort(key=lambda distrito: distrito.valor_do_distrito)
-
-        def decisao(peso):
-            # Ação final da tomada de ação selecionando a carta mais benéfica
-            melhor_escolha = max(peso.items(), key=lambda item: item[1])
-            for index, acao in enumerate(acoes_disponiveis):
-                if acao.name == melhor_escolha[0]:
-                    return index
-            return random.randint(0, len(acoes_disponiveis) - 1)
-
-        custo_distritos = sum(distrito.valor_do_distrito for distrito in jogador.cartas_distrito_mao)
-        peso_escolha = {acao.name: 0 for acao in acoes_disponiveis}
-        sentimento = {
-            'avareza': 0,  # Foca em ganhar ouro e construir
-            'violencia': 0,  # Foca em prejudicar outros jogadores
-            'socorro': 0,  # Foca em prejudicar outros jogadores
-            'gasto': 0,  # Gasta tudo
-        }
-        if len(jogador.distritos_construidos) < 5:
-            sentimento['avareza'] += grande_incentivo
-        if len(jogador.cartas_distrito_mao) == 0:
-            sentimento['socorro'] += certeza + 1
-        if jogador.ouro > 0:
-            if custo_distritos // jogador.ouro >= taxa_construcao:
-                sentimento['avareza'] += medio_incentivo
-        else:
-            if jogador.ouro <= 5:
-                sentimento['avareza'] += pequeno_incentivo
-
-        if any(inimigo.pontuacao > estado.jogador_atual.pontuacao for inimigo in estado.jogadores):
-            sentimento['violencia'] += medio_incentivo
-
-        if jogador.ouro >= 4:
-            sentimento['gasto'] += certeza
-        sentimento_atual = max(sentimento.items(), key=lambda item: item[1])[0]
-        distritos_construidos = [distrito for distrito in estado.jogador_atual.distritos_construidos]
-        tipos_distritos = []
-
-        for tipo in distritos_construidos:
-            tipos_distritos.append(tipo.tipo_de_distrito)
-
-        if sentimento_atual == 'avareza':
-            for move in acoes_disponiveis:
-                if TipoDistrito.Nobre in tipos_distritos and move == TipoAcao.HabilidadeRei:
-                    peso_escolha[move.name] += medio_incentivo
-                if TipoDistrito.Religioso in tipos_distritos and move == TipoAcao.HabilidadeBispo:
-                    peso_escolha[move.name] += medio_incentivo
-                if TipoDistrito.Comercial in tipos_distritos and move == TipoAcao.HabilidadeComerciante:
-                    peso_escolha[move.name] += medio_incentivo
-                if TipoDistrito.Militar in tipos_distritos and move == TipoAcao.HabilidadeSenhorDaGuerraColetar:
-                    peso_escolha[move.name] += medio_incentivo
-
-                # Global actions
-                if move == TipoAcao.PassarTurno and len(acoes_disponiveis) > 1:
-                    peso_escolha[move.name] -= certeza
-                elif move == TipoAcao.ConstruirDistrito:
-                    peso_escolha[move.name] += pequeno_incentivo
-                if move == TipoAcao.ColetarOuro:
-                    peso_escolha[move.name] += grande_incentivo
-
-        elif sentimento_atual == 'violencia':
-            for move in acoes_disponiveis:
-                if move == TipoAcao.HabilidadeSenhorDaGuerraDestruir and any(
-                        inimigo.pontuacao > estado.jogador_atual.pontuacao for inimigo in estado.jogadores):
-                    peso_escolha[move.name] += pequeno_incentivo
-                if move == TipoAcao.HabilidadeAssassina:
-                    peso_escolha[move.name] += pequeno_incentivo
-                if move == TipoAcao.HabilidadeLadrao and (jogador.ouro <= 5 or any(
-                        inimigo.pontuacao > estado.jogador_atual.pontuacao for inimigo in estado.jogadores)):
-                    peso_escolha[move.name] += grande_incentivo
-
-                # Global actions
-                if move == TipoAcao.PassarTurno and len(acoes_disponiveis) > 1:
-                    peso_escolha[move.name] -= certeza
-
-        elif sentimento_atual == 'gasto':
-            for move in acoes_disponiveis:
-                if move == TipoAcao.ConstruirDistrito:
-                    peso_escolha[move.name] += certeza
-                if move == TipoAcao.PassarTurno:
-                    peso_escolha[move.name] -= pequeno_incentivo
-                if TipoDistrito.Nobre in tipos_distritos and move == TipoAcao.HabilidadeRei:
-                    peso_escolha[move.name] += grande_incentivo
-                if TipoDistrito.Religioso in tipos_distritos and move == TipoAcao.HabilidadeBispo:
-                    peso_escolha[move.name] += grande_incentivo
-                if TipoDistrito.Comercial in tipos_distritos and move == TipoAcao.HabilidadeComerciante:
-                    peso_escolha[move.name] += grande_incentivo
-                if TipoDistrito.Militar in tipos_distritos and move == TipoAcao.HabilidadeSenhorDaGuerraColetar:
-                    peso_escolha[move.name] += grande_incentivo
-                else:
-                    peso_escolha[move.name] -= 1
-                if move == TipoAcao.PassarTurno and len(acoes_disponiveis) > 1:
-                    peso_escolha[move.name] -= certeza
-
-        elif sentimento_atual == 'socorro':
-            for move in acoes_disponiveis:
-                if move == TipoAcao.ColetarCartas:
-                    peso_escolha[move.name] += grande_incentivo
-                if move == TipoAcao.HabilidadeIlusionistaTrocar:
-                    peso_escolha[move.name] += certeza
-                if move == TipoAcao.HabilidadeAssassina:
-                    peso_escolha[move.name] += pequeno_incentivo
-                if move == TipoAcao.HabilidadeIlusionistaDescartar:
-                    peso_escolha[move.name] += pequeno_incentivo
-                if move == TipoAcao.HabilidadeRei:
-                    peso_escolha[move.name] += medio_incentivo
-                if move == TipoAcao.PassarTurno and len(acoes_disponiveis) > 1:
-                    peso_escolha[move.name] -= certeza
-
-        return decisao(peso_escolha)
+        # Deixa passar turno por último
+        acao_escolhida = random.randint(0, len(acoes_disponiveis) - 1)
+        while len(acoes_disponiveis) > 1 and acoes_disponiveis[acao_escolhida] == TipoAcao.PassarTurno:
+            acao_escolhida = random.randint(0, len(acoes_disponiveis) - 1)
+        return acao_escolhida
 
     # Estratégia usada na ação de coletar cartas
     @staticmethod
     def coletar_cartas(estado: Estado, cartas_compradas: list[CartaDistrito], qtd_cartas: int) -> int:
-        peso_escolha = {carta.nome_do_distrito: 0 for carta in cartas_compradas}
-        jogador = estado.jogador_atual
-
-        # Pesos
-        grande_incentivo = 3
-        medio_incentivo = 2
-        pequeno_incentivo = 1
-        certeza = 1000
-
-        # Média dos custos das cartas na mão
-        media_de_custos = [carta.valor_do_distrito for carta in jogador.cartas_distrito_mao]
-        media_de_custos = sum(media_de_custos) / len(media_de_custos) if media_de_custos else 0
-
-        # Quantidade de distritos restantes para vencer
-        distancias_para_vitoria = 6 - len(jogador.distritos_construidos)
-
-        for carta in cartas_compradas:
-            # Incentivo para distritos já construídos
-            if carta.tipo_de_distrito in [distrito.tipo_de_distrito for distrito in jogador.distritos_construidos]:
-                peso_escolha[carta.nome_do_distrito] += pequeno_incentivo
-
-            # Alta prioridade se estiver perto de completar os 7 distritos
-            if len(jogador.distritos_construidos) == 6 and carta.valor_do_distrito <= jogador.ouro:
-                peso_escolha[carta.nome_do_distrito] += certeza
-
-            # Priorizar distritos especiais
-            if carta.tipo_de_distrito == 4:
-                peso_escolha[carta.nome_do_distrito] += grande_incentivo
-
-            # Incentivo baseado na diferença do custo da carta em relação à média
-            diferenca = carta.valor_do_distrito - media_de_custos
-            peso_escolha[carta.nome_do_distrito] += (
-                pequeno_incentivo if -pequeno_incentivo <= diferenca <= pequeno_incentivo else
-                -grande_incentivo
-            )
-
-            # Multiplicador de desespero, quanto mais próximo de ganhar mais quer construir coisas baratas
-            if carta.valor_do_distrito <= jogador.ouro:
-                incentivo_por_proximidade = pequeno_incentivo * (7 - distancias_para_vitoria)
-                peso_escolha[carta.nome_do_distrito] += incentivo_por_proximidade
-
+        return random.randint(0, qtd_cartas - 1)
 
     # Estratégia usada na ação de construir distritos
     @staticmethod
     def construir_distrito(estado: Estado, distritos_para_construir: list[CartaDistrito],
                            distritos_para_construir_covil_ladroes: list[(CartaDistrito, int, int)]) -> int:
         tamanho_maximo = len(distritos_para_construir) + len(distritos_para_construir_covil_ladroes)
-        # Escolhe sempre construir o distrito mais caro da mão sempre que possível
-        maior_valor_mao = 0
-        for distrito in estado.jogador_atual.cartas_distrito_mao:
-            if distrito.valor_do_distrito > maior_valor_mao:
-                maior_valor_mao = distrito.valor_do_distrito
-        for i, distrito in enumerate(distritos_para_construir):
-            if distrito == maior_valor_mao:
-                return i
         return random.randint(0, tamanho_maximo - 1)
 
     # Estratégia usada na ação de construir distritos (efeito Covil dos Ladrões)
@@ -349,18 +185,10 @@ class EstrategiaLuisII(Estrategia):
 
     # Estratégia usada na habilidade do Senhor da Guerra
     @staticmethod
-    def habilidade_senhor_da_guerra_destruir(estado: Estado,
-                                             distritos_para_destruir: list[(CartaDistrito, Jogador)]) -> int:
+    def habilidade_senhor_da_guerra_destruir(estado: Estado, distritos_para_destruir: list[(CartaDistrito, Jogador)]) -> int:
         return random.randint(0, len(distritos_para_destruir) - 1)
 
     # Estratégia usada na ação do Laboratório
     @staticmethod
     def laboratorio(estado: Estado) -> int:
-        # Descarta o distrito de menor valor da mão
-        menor_valor = 9
-        distrito_escolhido = 0
-        for i, distrito in enumerate(estado.jogador_atual.cartas_distrito_mao):
-            if distrito.valor_do_distrito < menor_valor:
-                menor_valor = distrito.valor_do_distrito
-                distrito_escolhido = i
-        return distrito_escolhido
+        return random.randint(0, len(estado.jogador_atual.cartas_distrito_mao) - 1)
