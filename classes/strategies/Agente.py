@@ -1,4 +1,5 @@
 from stable_baselines3 import DQN
+import os
 
 from classes.enum.TipoAcao import TipoAcao
 from classes.model.CartaDistrito import CartaDistrito
@@ -117,12 +118,15 @@ class Agente(Estrategia):
     
     
 class AgenteTestes(Estrategia):
-    def __init__(self, nome: str = 'Agente', imprimir: bool = False, model: str = None):
+    def __init__(self, exp="sem_nome", nome: str = 'Agente', imprimir: bool = False, model: str = None):
         super().__init__(nome, imprimir)
         self.model = DQN.load(model)
+        
+        self.escolhas_erradas = ContaEscolhasErradas(exp)
 
     # Estratégia usada na fase de escolha dos personagens
     def escolher_personagem(self, estado: Estado) -> int:
+        self.escolhas_erradas.reset()
         while True:
             action, _ = self.model.predict(np.array(estado.converter_estado(openaigym=True)), deterministic=False)
             # Verifica se o personagem escolhido está disponível e identifica o seu índice
@@ -132,6 +136,10 @@ class AgenteTestes(Estrategia):
                     idx_escolha_personagem = idx
             if idx_escolha_personagem != -1:
                 break
+            
+            self.escolhas_erradas.incrementa()
+        
+        self.escolhas_erradas.gravar_resultado_round()
         return idx_escolha_personagem
 
     # Estratégia usada na fase de escolha das ações no turno
@@ -216,3 +224,35 @@ class AgenteTestes(Estrategia):
     @staticmethod
     def laboratorio(estado: Estado) -> int:
         return random.randint(0, len(estado.jogador_atual.cartas_distrito_mao) - 1)
+    
+    
+    
+class ContaEscolhasErradas:
+    def __init__(self, experimento):
+        self.escolhas_erradas_partida = []
+        self.escolhas_erradas_round = 0
+        self.experimento = experimento
+        self.path = f"aaa_teste_acoes_erradas/{self.experimento}"
+        self.file_path = self.path + "/" + f"escolhas_erradas_exp{self.experimento}.txt"
+        
+        if not os.path.isdir(self.path): 
+            os.makedirs(self.path)
+            
+        file = open(self.file_path, "a+")
+        file.write("\nNova partida!")
+        file.close()
+        
+    def incrementa(self):
+        self.escolhas_erradas_round += 1
+        
+    def gravar_resultado_round(self):
+        self.escolhas_erradas_partida.append(self.escolhas_erradas_round)
+    
+    def reset(self):
+        self.escolhas_erradas_round = 0 
+        
+    def salvar_dados(self):
+        file = open(self.file_path, "a+")
+        file.write("\n"+str(self.escolhas_erradas_partida))
+        file.close()
+        self.escolhas_erradas_partida = []

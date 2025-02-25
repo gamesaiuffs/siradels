@@ -25,7 +25,7 @@ create table sample (
     constraint fk_sample_init FOREIGN KEY (idin, idexp) REFERENCES initialize(idin, idexp) on delete cascade
 );
 
-insert into experiment(idexp, title, numpt, status) values (3, 'Entradas em proporcoes', 300000, 'pendente');
+insert into experiment(idexp, title, numpt, status) values (6, 'entradas padrao - substitui o exp2', 300000, 'pendente');
 -- delete from experiment where idexp = 3;
 
 -- CREATE TABLE experiment_statistics (

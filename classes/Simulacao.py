@@ -4,7 +4,7 @@ from classes.model.Acao import *
 from classes.model.Tabuleiro import Tabuleiro
 from classes.model.Jogador import Jogador
 from classes.strategies import Estrategia
-
+from classes.strategies.Agente import AgenteTestes
 
 class Simulacao:
     # Construtor
@@ -29,6 +29,9 @@ class Simulacao:
         self.treino_openaigym = treino_openaigym
         # Flag para indicar início de nova rodada
         self.nova_rodada = True
+        
+        # Flag de controle de experimento com escolhas erradas
+        self.escolhas_erradas = True
 
     # Cria o estado inicial do tabuleiro
     def criar_estado_inicial(self, num_personagens: int) -> Estado:
@@ -264,6 +267,15 @@ class Simulacao:
 
     # Computa a pontuação final de cada jogador para definir vencedor
     def computar_pontuacao_final(self):
+        
+        # Define final de partida nos experimentos de contagem de erros na escolha de ações
+        if self.escolhas_erradas:
+            for jogador in self.estado.jogadores:
+                if isinstance(self.estrategias[jogador], AgenteTestes):
+                    self.estrategias[jogador].escolhas_erradas.salvar_dados()
+                
+        
+        
         for jogador in self.estado.jogadores:
             # Contabiliza pontuação parcial
             # Aqui já é contabilizado 1 ponto/moeda nos seus distritos
