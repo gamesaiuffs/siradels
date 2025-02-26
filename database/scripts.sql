@@ -111,13 +111,13 @@ where idexp=1 and tsteps = 300000;
 
 select avg(nwins) from (select idin, nwins 
 from sample 
-where idexp=5 and tsteps = 300000
+where idexp=6 and tsteps = 300000
 );
 
 # Médias das inicializações de cada experimento
 # experimento   % win
 # 1             54.5%
-# 2             55.40             
+# 2             52.80             
 # 3             53.20
 # 4             54.00
 # 5             52.30

@@ -130,7 +130,7 @@ class Estado:
         self.variaveis_classes_bin = ["ouro_personagem_classes_bin","cartas_dist_mao_classes_bin","carta_mais_cara_classes_bin","carta_mais_barata_classes_bin","qtd_dist_const_classes_bin","qtd_dist_cada_tipo_classes_bin","dist_const_jog_mais_const_classes_bin","jog_mais_cartas_mao_classes_bin","ouro_oponentes_classes_bin", "disponibilidade_personagens", "turno_agente"]
         self.variaveis_classes_bin_teste = ["ouro_personagem_classes_bin","cartas_dist_mao_classes_bin","carta_mais_cara_classes_bin","carta_mais_barata_classes_bin","qtd_dist_const_classes_bin","qtd_dist_cada_tipo_classes_bin","dist_const_jog_mais_const_classes_bin","jog_mais_cartas_mao_classes_bin","ouro_oponentes_classes_bin", "turno_agente"]
         self.proporcoes = ["ouro_personagem_proporcao", "cartas_dist_mao_proporcao", "carta_mais_cara_proporcao", "carta_mais_barata_proporcao", "qtd_dist_const_proporcao", "qtd_dist_cada_tipo_proporcao", "dist_const_jog_mais_const_proporcao", "jog_mais_cartas_mao_proporcao", "ouro_oponentes_proporcao", "disponibilidade_personagens", "turno_agente"]
-        self.variaveis = self.variaveis_classes_bin
+        self.variaveis = self.variaveis_padrao
         
         
     def print_estado(self, estado, estado_vetor_teste, estado_vetor):

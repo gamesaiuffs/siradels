@@ -122,7 +122,7 @@ class AgenteTestes(Estrategia):
         super().__init__(nome, imprimir)
         self.model = DQN.load(model)
         
-        self.escolhas_erradas = ContaEscolhasErradas(exp)
+        self.escolhas_erradas = ContaEscolhasErradas(exp, contar=True)
 
     # Estratégia usada na fase de escolha dos personagens
     def escolher_personagem(self, estado: Estado) -> int:
@@ -228,31 +228,37 @@ class AgenteTestes(Estrategia):
     
     
 class ContaEscolhasErradas:
-    def __init__(self, experimento):
+    def __init__(self, experimento, contar=True):
         self.escolhas_erradas_partida = []
         self.escolhas_erradas_round = 0
         self.experimento = experimento
         self.path = f"aaa_teste_acoes_erradas/{self.experimento}"
         self.file_path = self.path + "/" + f"escolhas_erradas_exp{self.experimento}.txt"
+        self.contar = contar
         
-        if not os.path.isdir(self.path): 
-            os.makedirs(self.path)
-            
-        file = open(self.file_path, "a+")
-        file.write("\nNova partida!")
-        file.close()
+        if self.contar:
+            if not os.path.isdir(self.path): 
+                os.makedirs(self.path)
+                
+            file = open(self.file_path, "a+")
+            file.write("\nNova partida!")
+            file.close()
         
     def incrementa(self):
-        self.escolhas_erradas_round += 1
+        if self.contar:
+            self.escolhas_erradas_round += 1
         
     def gravar_resultado_round(self):
-        self.escolhas_erradas_partida.append(self.escolhas_erradas_round)
+        if self.contar:
+            self.escolhas_erradas_partida.append(self.escolhas_erradas_round)
     
     def reset(self):
-        self.escolhas_erradas_round = 0 
+        if self.contar:
+            self.escolhas_erradas_round = 0 
         
     def salvar_dados(self):
-        file = open(self.file_path, "a+")
-        file.write("\n"+str(self.escolhas_erradas_partida))
-        file.close()
-        self.escolhas_erradas_partida = []
+        if self.contar:
+            file = open(self.file_path, "a+")
+            file.write("\n"+str(self.escolhas_erradas_partida))
+            file.close()
+            self.escolhas_erradas_partida = []

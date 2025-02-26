@@ -22,7 +22,7 @@ start_time = time.time()
 
 print("Início dos testes das estratégias")
 
-exp = 5 
+exp = 6
 print(f"\n\nExperimento {exp}:")
 
 for init in range(1, 11):
