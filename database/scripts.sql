@@ -126,7 +126,7 @@ where idexp=6 and tsteps = 300000
 # Media do valor de todas as inicializações para cada timestep 
 select tsteps, avg(nwins) as vitorias
 from sample 
-where idexp=3
+where idexp=6
 GROUP BY tsteps
 order by tsteps;
 
@@ -162,3 +162,17 @@ select * from sample where idexp=3 and tsteps = 100000;
 # Sem o vetor de disponibilidade 
 # 26%
 
+# Media da recompensa de todas as inicializações para cada timestep 
+select avscore as recompensas
+from sample 
+where idexp=1 and tsteps=300000
+order by tsteps;
+
+# exp 1 - tstep 300000 - pontuação média
+# 20.29, 19.99, 20.58, 23.19, 22.08, 21.93, 22.14, 21.86, 22.15, 22.33
+# Média:  21.654
+# Desvio padrão: 1.020971215
+# Variação: 1.042382222 
+# Lim inferior 21.123
+# Lim superior: 22.185
+#Margem de erro: 0.53106
