@@ -20,7 +20,7 @@ ENV_ID = "Citadels"
 
 # Mudar
 ENV_ENTRY_POINT = 'classes.openaigym_env.Citadels_box:Citadels'
-EXP_ATUAL = 10
+EXP_ATUAL = 31
 EXP_TITLE='menos:ouro_personagem_original'
 
 
@@ -33,6 +33,10 @@ gym.register(
 # Experimento 2 - variável mais importante - pastas de 10 a 19
 #   Remoção em ordem - 10 = menos a primeira variável 
 #                      19 = menos a ultima variavel 
+
+
+
+
 
 # Configurações gerais 
 

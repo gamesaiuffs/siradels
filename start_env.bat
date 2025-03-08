@@ -1,5 +1,3 @@
-REM Inicia rapidamente o ambiente virtual
-
 @echo off
 set "DIR_ATUAL=%CD%"
 cd /d venv\Scripts

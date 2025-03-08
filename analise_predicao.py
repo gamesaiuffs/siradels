@@ -2,6 +2,8 @@ import argparse
 import gymnasium as gym
 from stable_baselines3 import DQN  # Altere para o algoritmo usado no treinamento
 from stable_baselines3.common.env_util import make_vec_env
+import random as rd
+import matplotlib.pyplot as plt
 
 # def load_model(model_path, env_id):
 #     """Carrega um modelo treinado e o ambiente correspondente."""
@@ -46,7 +48,7 @@ import numpy as np
 if __name__ == "__main__":
     ENV_ID = "Citadels"
     ENV_ENTRY_POINT = 'classes.openaigym_env.Citadels_box:Citadels'
-    MODEL_PATH="./aaa_experimentos_final/30/in_1/30.zip"
+    MODEL_PATH="./aaa_experimentos_final/1/in_1/30.zip"
 
     gym.register(
         id=ENV_ID,
@@ -55,30 +57,70 @@ if __name__ == "__main__":
     
     model = DQN.load(MODEL_PATH)
     env = gym.make(ENV_ID)
+    escolhas = [0, 0, 0, 0, 0, 0, 0, 0]
     
-    for _ in range(100):
+    for _ in range(100000):
+        if _ % 5000 == 0: print(f"Rodando teste: {(_/100000)*100:.2f}%", end="\r")
+        
+        # Array com tamanho para a representação de estado original 
         external_input = np.array([
-            1.0,    # ouro_personagem
-            1.0,    # cartas_dist_mao
-            1.0,    # carta_mais_cara
-            1.0,    # carta_mais_barata
-            1.0,    # qtd_dist_const
-            1.0,    # qtd_dist_cada_tipo
-            1.0,    # ||
-            1.0,    # ||
-            1.0,    # ||
-            1.0,    # ||
-            1.0,    # dist_const_jog_mais_const
-            1.0,    # jog_mais_cartas_mao
-            1.0,    # 
-            1.0,    # 
-            1.0,    # 
-            2, 2, 2, 2, 2, 2, 2, 2, 2])
+            rd.randint(0, 6),    # ouro_personagem
+            rd.randint(0, 10),    # cartas_dist_mao
+            rd.randint(0, 6),    # carta_mais_cara
+            rd.randint(0, 6),    # carta_mais_barata
+            rd.randint(0, 7),    # qtd_dist_const
+            rd.randint(0, 6),    # qtd_dist_cada_tipo
+            rd.randint(0, 6),    # ||
+            rd.randint(0, 6),    # ||
+            rd.randint(0, 6),    # ||
+            rd.randint(0, 6),    # ||
+            rd.randint(0, 7),    # dist_const_jog_mais_const
+            rd.randint(0, 10),    # jog_mais_cartas_mao
+            rd.randint(0, 10),    # ouro_oponentes
+            rd.randint(0, 10),    # ||
+            rd.randint(0, 10),    # ||
+            rd.randint(0, 10),    # ||
+            
+            rd.randint(0, 1),     # personagem rank 1
+            rd.randint(0, 1),     # personagem rank 2
+            rd.randint(0, 1),     # personagem rank 3
+            rd.randint(0, 1),     # personagem rank 4
+            rd.randint(0, 1),     # personagem rank 5
+            rd.randint(0, 1),     # personagem rank 6
+            rd.randint(0, 1),     # personagem rank 7
+            rd.randint(0, 1),      # personagem rank 8
+            
+            # Turno jogador 
+            0
+            ])
         
         action, _states = model.predict(external_input, deterministic=True)
-        print("Ação prevista:", action, _states)
+        escolhas[action - 1] += 1
+        # print(external_input[0], action)
+        
+    plt.figure(figsize=(10, 6))
+    plt.xlabel('Possibles Actions')
+    plt.ylabel('Number of Choices')
+    plt.title(f'Action Choices in 100000 Random Tests')
+    labels = ["1", "2", "3", "4", "5", "6", "7", "8"]
+
+    plt.bar(labels, escolhas, color="lightgreen")
+    for i in range(len(escolhas)):
+        plt.text(i, escolhas[i] + 0.5, str(escolhas[i]), ha='center', va='bottom')
     
-    
+    plt.savefig(f"graficos_atualizado/teste_escolhas.png")
+        
+        
+# cartas_dist_mao_original 4
+# carta_mais_cara_original 5
+# carta_mais_barata_original 3
+# qtd_dist_const_original 0
+# qtd_dist_cada_tipo_original [0, 0, 0, 0, 0]
+# dist_const_jog_mais_const_original 1
+# jog_mais_cartas_mao_original 4
+# ouro_oponentes_original [0, 2, 0, 0]
+# disponibilidade_personagens [1, 1, 0, 0, 0, 0, 1, 1]
+# turno_agente 0
     
     
     

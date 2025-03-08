@@ -235,7 +235,7 @@ class Estado:
         # Gera variáveis para ambiente 
         for var in self.variaveis: 
             representacao = self.metodos_por_variavel[var]["funcao"](estado)
-            
+            # print(var, representacao)
             if isinstance(representacao, list):
                 # for item in representacao: estado_vetor_teste.append(item) 
                 estado_vetor.extend(representacao)
@@ -460,4 +460,5 @@ class Estado:
     #         estado_vetor.append(0)
     #     '''
     #     return estado_vetor
+        
         

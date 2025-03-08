@@ -7,12 +7,15 @@ def extrair_porcentagens(linhas):
     for linha in linhas:
         match = re.match(r"\s*(Primeiro|Segundo|Terceiro|Quarto|Quinto)\s*:\s*([\d.]+)%", linha)
         if match:
+            # print("linha")
+            # print(match.groups())
             posicao, valor = match.groups()
             posicoes[posicao].append(float(valor))
     
+    print(posicoes)
     return posicoes
 
-def calcular_media_porcentagens(arquivo):
+def calcul_media_porcentagens(arquivo):
     with open(arquivo, 'r', encoding='utf-8') as f:
         linhas = f.readlines()
     
@@ -26,7 +29,7 @@ if __name__ == "__main__":
     num_experimento = sys.argv[1]
     arquivo = f"../../aaa_experimentos_final/{num_experimento}/resultado_contra_personais.txt"
     
-    medias = calcular_media_porcentagens(arquivo)
+    medias = calcul_media_porcentagens(arquivo)
 
     for posicao, media in medias.items():
         print(f"{posicao}: {media:.2f}%")
