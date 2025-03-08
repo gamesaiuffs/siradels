@@ -17,18 +17,28 @@ import ray
 from database.Postgres import Conexao
 
 ENV_ID = "Citadels"
-ENV_ENTRY_POINT = 'classes.openaigym_env.Citadels_md:Citadels'
+
+# Mudar
+ENV_ENTRY_POINT = 'classes.openaigym_env.Citadels_box:Citadels'
+EXP_ATUAL = 10
+EXP_TITLE='menos:ouro_personagem_original'
+
 
 gym.register(
     id=ENV_ID,
     entry_point=ENV_ENTRY_POINT
 )
 
+# Experimento 1 - salvos nas pastas de 1 a 6 
+# Experimento 2 - variável mais importante - pastas de 10 a 19
+#   Remoção em ordem - 10 = menos a primeira variável 
+#                      19 = menos a ultima variavel 
+
 # Configurações gerais 
+
+NUM_INITS = 10
 TRAIN_STEPS = 300000
 MODEL_SAVE_FREQ = 10000
-EXP_ATUAL = 6
-NUM_INITS = 10
 NUM_EVAL_EPISODES = 100
 
 DIR_NAME = f"aaa_experimentos_final/{EXP_ATUAL}"
@@ -42,10 +52,10 @@ TEST_ENV = gym.make(ENV_ID)
 class SaveOnTrainStepsNumCallback(BaseCallback):
     def __init__(self, verbose: int, num_init: int, database: Conexao, idexp: int):
         super().__init__(verbose)  # 0 -> verbose
-        self.log_dir = DIR_NAME + "/in_" + str(num_init)     # gera um nome para a inicialização
+        self.log_dir = DIR_NAME + "/in_" + str(num_init)
         self.num_saves = 1
         self.num_init = num_init
-        self.db = database                      # conexão com o banco
+        self.db = database                   
         self.idexp = idexp
         
         self.episode_rewards = []
@@ -125,23 +135,24 @@ if __name__ == "__main__":
     else: 
         print(f"Diretório '{DIR_NAME}' já existe. Usá-lo pode afetar o conteúdo pré-existente.")
         if NOT_ALLOW_REUSE_DIRS: exit(0)
-
-    start_time = time.time()
-    
-    
+        
+    database = Conexao()
     env = gym.make(ENV_ID)
     
     experimento = True
     novo_exp = True
     num_init = 1
+    
+    
+    if novo_exp:
+        database.executar(f"insert into experiment(idexp, title, numpt, status) values ({EXP_ATUAL}, '{EXP_TITLE}', {TRAIN_STEPS}, 'pendente');")
 
-    database = Conexao()
     
             
+    start_time = time.time()
     while num_init <= NUM_INITS: 
         print(f"Nova inicialização: {num_init}\n\n")
         
-            
         # cria a inicialização no banco 
         database.executar(f"insert into initialize (idexp, idin, status) values ({EXP_ATUAL}, {num_init}, 'pendente');")
         

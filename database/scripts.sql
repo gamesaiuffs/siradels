@@ -139,10 +139,11 @@ GROUP BY tsteps
 order by tsteps;
 
 
-select * from sample where idexp=3 and tsteps = 100000;
+select avg(nwins) as media_vitorias from sample where idexp=10 and tsteps = 300000;
 
 # Resultados dos experimentos 
 
+#Experimento 1
 # experimento   % vitoria   representação               ambiente
 # 1             54.5%       originais                   box
 # 2             55.40       original limitado           multidiscreto
@@ -161,6 +162,20 @@ select * from sample where idexp=3 and tsteps = 100000;
 
 # Sem o vetor de disponibilidade 
 # 26%
+
+# Experimento 2 - removendo variáveis - representação original 
+
+# variavel removida        media vitorias (%)                                                       
+# ouro_personagem          54.8
+
+
+
+
+
+
+
+
+
 
 # Media da recompensa de todas as inicializações para cada timestep 
 select avscore as recompensas

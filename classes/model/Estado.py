@@ -130,7 +130,22 @@ class Estado:
         self.variaveis_classes_bin = ["ouro_personagem_classes_bin","cartas_dist_mao_classes_bin","carta_mais_cara_classes_bin","carta_mais_barata_classes_bin","qtd_dist_const_classes_bin","qtd_dist_cada_tipo_classes_bin","dist_const_jog_mais_const_classes_bin","jog_mais_cartas_mao_classes_bin","ouro_oponentes_classes_bin", "disponibilidade_personagens", "turno_agente"]
         self.variaveis_classes_bin_teste = ["ouro_personagem_classes_bin","cartas_dist_mao_classes_bin","carta_mais_cara_classes_bin","carta_mais_barata_classes_bin","qtd_dist_const_classes_bin","qtd_dist_cada_tipo_classes_bin","dist_const_jog_mais_const_classes_bin","jog_mais_cartas_mao_classes_bin","ouro_oponentes_classes_bin", "turno_agente"]
         self.proporcoes = ["ouro_personagem_proporcao", "cartas_dist_mao_proporcao", "carta_mais_cara_proporcao", "carta_mais_barata_proporcao", "qtd_dist_const_proporcao", "qtd_dist_cada_tipo_proporcao", "dist_const_jog_mais_const_proporcao", "jog_mais_cartas_mao_proporcao", "ouro_oponentes_proporcao", "disponibilidade_personagens", "turno_agente"]
-        self.variaveis = self.variaveis_padrao
+
+        
+        # Experimento 2 - remoção de variáveis uma a uma - em ordem
+        self.menos_ouro_personagem_original = [ "cartas_dist_mao_original", "carta_mais_cara_original", "carta_mais_barata_original", "qtd_dist_const_original", "qtd_dist_cada_tipo_original", "dist_const_jog_mais_const_original", "jog_mais_cartas_mao_original", "ouro_oponentes_original", "disponibilidade_personagens", "turno_agente"]
+        self.menos_cartas_dist_mao_original = ["ouro_personagem_original", "carta_mais_cara_original", "carta_mais_barata_original", "qtd_dist_const_original", "qtd_dist_cada_tipo_original", "dist_const_jog_mais_const_original", "jog_mais_cartas_mao_original", "ouro_oponentes_original", "disponibilidade_personagens", "turno_agente"]
+        self.menos_carta_mais_cara_original = ["ouro_personagem_original", "cartas_dist_mao_original", "carta_mais_barata_original", "qtd_dist_const_original", "qtd_dist_cada_tipo_original", "dist_const_jog_mais_const_original", "jog_mais_cartas_mao_original", "ouro_oponentes_original", "disponibilidade_personagens", "turno_agente"]
+        self.menos_carta_mais_barata_original = ["ouro_personagem_original", "cartas_dist_mao_original", "carta_mais_cara_original", "qtd_dist_const_original", "qtd_dist_cada_tipo_original", "dist_const_jog_mais_const_original", "jog_mais_cartas_mao_original", "ouro_oponentes_original", "disponibilidade_personagens", "turno_agente"]
+        self.menos_qtd_dist_const_original = ["ouro_personagem_original", "cartas_dist_mao_original", "carta_mais_cara_original", "carta_mais_barata_original", "qtd_dist_cada_tipo_original", "dist_const_jog_mais_const_original", "jog_mais_cartas_mao_original", "ouro_oponentes_original", "disponibilidade_personagens", "turno_agente"]
+        self.menos_qtd_dist_cada_tipo_original = ["ouro_personagem_original", "cartas_dist_mao_original", "carta_mais_cara_original", "carta_mais_barata_original", "qtd_dist_const_original",  "dist_const_jog_mais_const_original", "jog_mais_cartas_mao_original", "ouro_oponentes_original", "disponibilidade_personagens", "turno_agente"]
+        self.menos_dist_const_jog_mais_const_original = ["ouro_personagem_original", "cartas_dist_mao_original", "carta_mais_cara_original", "carta_mais_barata_original", "qtd_dist_const_original", "qtd_dist_cada_tipo_original", "jog_mais_cartas_mao_original", "ouro_oponentes_original", "disponibilidade_personagens", "turno_agente"]
+        self.menos_jog_mais_cartas_mao_original = ["ouro_personagem_original", "cartas_dist_mao_original", "carta_mais_cara_original", "carta_mais_barata_original", "qtd_dist_const_original", "qtd_dist_cada_tipo_original", "dist_const_jog_mais_const_original", "ouro_oponentes_original", "disponibilidade_personagens", "turno_agente"]
+        self.menos_ouro_oponentes_original = ["ouro_personagem_original", "cartas_dist_mao_original", "carta_mais_cara_original", "carta_mais_barata_original", "qtd_dist_const_original", "qtd_dist_cada_tipo_original", "dist_const_jog_mais_const_original", "jog_mais_cartas_mao_original", "disponibilidade_personagens", "turno_agente"]
+        
+        
+        
+        self.variaveis = self.menos_ouro_personagem_original
         
         
     def print_estado(self, estado, estado_vetor_teste, estado_vetor):
