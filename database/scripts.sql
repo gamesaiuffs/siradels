@@ -139,7 +139,7 @@ GROUP BY tsteps
 order by tsteps;
 
 
-select avg(nwins) as media_vitorias from sample where idexp=10 and tsteps = 300000;
+select avg(nwins) as media_vitorias from sample where idexp=11 and tsteps = 300000;
 
 # Resultados dos experimentos 
 
@@ -167,7 +167,7 @@ select avg(nwins) as media_vitorias from sample where idexp=10 and tsteps = 3000
 
 # variavel removida        media vitorias (%)                                                       
 # ouro_personagem          54.8
-
+# cartas_personagem        51.6
 
 
 

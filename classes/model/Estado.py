@@ -145,7 +145,7 @@ class Estado:
         
         
         
-        self.variaveis = self.menos_ouro_personagem_original
+        self.variaveis = self.menos_carta_mais_cara_original
         
         
     def print_estado(self, estado, estado_vetor_teste, estado_vetor):

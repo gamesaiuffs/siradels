@@ -46,11 +46,11 @@ class Citadels(gym.Env):
         #     self.estado_vetor.append(tipo_tabela.tamanho)
         self.estado_vetor = self.simulacao.estado.calcula_tamanho_vetor_obsercacao()
         # self.observation_space: Space[ObsType] = spaces.MultiDiscrete(self.estado_vetor)
-        print("Largura: ", len(self.estado_vetor))
+        print("Ambiente: Box" ,"Largura: ", len(self.estado_vetor))
         self.observation_space = spaces.Box(low=-np.inf, high=np.inf, shape=(len(self.estado_vetor),), dtype=np.float32)
 
-        print("Vetor tipo tabela: ", self.estado_vetor, len(self.estado_vetor))
-        print("Vetor tipo novo  : ", self.simulacao.estado.calcula_tamanho_vetor_obsercacao(), len(self.simulacao.estado.calcula_tamanho_vetor_obsercacao()))
+        # print("Vetor tipo tabela: ", self.estado_vetor, len(self.estado_vetor))
+        # print("Vetor tipo novo  : ", self.simulacao.estado.calcula_tamanho_vetor_obsercacao(), len(self.simulacao.estado.calcula_tamanho_vetor_obsercacao()))
 
     # Mapeia estado atual na estrutura do espaço observacional (observação do agente do ambiente do problema)
     def observation(self) -> np.array:
