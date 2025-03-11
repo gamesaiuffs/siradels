@@ -20,8 +20,8 @@ ENV_ID = "Citadels"
 
 # Mudar
 ENV_ENTRY_POINT = 'classes.openaigym_env.Citadels_box:Citadels'
-EXP_ATUAL = 12
-EXP_TITLE='menos:menos_carta_mais_cara_original'
+EXP_ATUAL = 14
+EXP_TITLE='menos:menos_qtd_dist_const_original'
 
 
 gym.register(
