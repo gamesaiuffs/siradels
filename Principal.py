@@ -1,4 +1,4 @@
-import gymnasium as gym
+# import gymnasium as gym
 import time
 
 from classes.Experimento import Experimento
@@ -17,8 +17,8 @@ from classes.strategies.EstrategiaJean import EstrategiaJean
 from classes.strategies.EstrategiaDjonatan import EstrategiaDjonatan
 
 
-from stable_baselines3.common.env_checker import check_env
-from stable_baselines3 import DQN
+# from stable_baselines3.common.env_checker import check_env
+# from stable_baselines3 import DQN
 
 # Marca tempo de início para computar duração do experimento
 start_time = time.time()
@@ -42,9 +42,9 @@ else:  # PyCharm
 
 
 # Método que checa se o Ambiente segue os padrões da OpeanAI Gym
-'''
-check_env(env)
-'''
+# '''
+# check_env(env)
+# '''
 
 # Cria, treina e salva instância de modelo de RL da biblioteca Stable-Baseline
 
@@ -78,10 +78,9 @@ check_env(env)
 
 # Cria uma instância experimento para gerar estatítisticas e comparar o desempenho dos modelos
 # Treinar modelo MCTS RL por 10min = 600s
-'''
-experimento = Experimento(caminho)
-experimento.treinar_modelo_mcts(600, 0)
-'''
+
+# experimento = Experimento(caminho)
+# experimento.treinar_modelo_mcts(600, 0)
 
 # Testar treino contra outras estratégias
 estrategias = [EstrategiaAndrei(), EstrategiaFelipe(), EstrategiaEduardo(), EstrategiaJean(), EstrategiaDjonatan()]
