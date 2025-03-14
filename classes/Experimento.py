@@ -7,6 +7,11 @@ from classes.strategies.Estrategia import Estrategia
 from classes.strategies.EstrategiaMCTS import EstrategiaMCTS
 from classes.strategies.EstrategiaTotalmenteAleatoria import EstrategiaTotalmenteAleatoria
 
+from classes.strategies.EstrategiaFelipe import EstrategiaFelipe
+from classes.strategies.EstrategiaAndrei import EstrategiaAndrei
+from classes.strategies.EstrategiaEduardo import EstrategiaEduardo
+from classes.strategies.EstrategiaJean import EstrategiaJean
+from classes.strategies.EstrategiaDjonatan import EstrategiaDjonatan
 
 class Experimento:
 
@@ -40,14 +45,22 @@ class Experimento:
                 f'{jogador} - Vitórias: {vitoria} - Porcento Vitorias: {vitoria / qtd_simulacao * 100:.2f}% - Pontuação Média: {pontuacao_media}')
 
     # Inicializa o treinamento do modelo do zero e treina durante o tempo limite em segundos
-    def treinar_modelo_mcts(self, tempo_limite: int, tipo_treino):
-        inicio = time.time()
+    def treinar_modelo_mcts(self, tempo_limite: int, tipo_treino, estrategias: list[Estrategia] = []):
         # Fixado quantidade de jogadores em 5
         qtd_jogadores = 5
+        # Limita a quantidade de estratégias a quantidade de jogadores - 1
+        if len(estrategias) >= qtd_jogadores:
+            estrategias = estrategias[:qtd_jogadores - 1]
+        # Adiciona a estratégia MCTS
         mcts = EstrategiaMCTS(self.caminho, tipo_treino)
-        estrategias = [mcts]
-        for i in range(qtd_jogadores - 1):
-            estrategias.append(EstrategiaTotalmenteAleatoria(str(i + 1)))
+        estrategias.append(mcts)
+        # Preenche os espaços restantes com estratégias aleatórias
+        if len(estrategias) < 5:
+            for i in range(qtd_jogadores - len(estrategias)):
+                estrategias.append(EstrategiaTotalmenteAleatoria(str(i + 1)))
+
+        contador_simulacoes = 0
+        inicio = time.time()
         while tempo_limite > time.time() - inicio:
             for tipo_tabela in TipoTabela:
                 # Treinamento individual por tipo de tabela
@@ -57,6 +70,12 @@ class Experimento:
                 simulacao = Simulacao(estrategias)
                 # Executa simulação
                 estado_final = simulacao.rodar_simulacao()
+                
+                contador_simulacoes += 1
+                # Adiciona prints de depuração
+                tempo_decorrido = time.time() - inicio
+                print(f'\rTempo decorrido: {tempo_decorrido:.2f} segundos, Simulações realizadas: {contador_simulacoes}', end='')
+                
                 # Atualizar modelo com vitórias e ações escolhidas
                 for jogador in estado_final.jogadores:
                     if jogador.nome == 'MCTS':

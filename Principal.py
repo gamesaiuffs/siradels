@@ -2,12 +2,12 @@ import time
 
 from classes.Experimento import Experimento
 from classes.enum.TipoAcaoOpenAI import TipoAcaoOpenAI
-from classes.strategies.EstrategiaFelipe import EstrategiaFelipe
 from classes.strategies.EstrategiaMCTS import EstrategiaMCTS
 from classes.strategies.EstrategiaManual import EstrategiaManual
 from classes.strategies.EstrategiaTotalmenteAleatoria import EstrategiaTotalmenteAleatoria
 from classes.strategies.EstrategiaGold import EstrategiaGold
 from classes.strategies.EstrategiaAllin import EstrategiaAllin
+from classes.strategies.EstrategiaFelipe import EstrategiaFelipe
 from classes.strategies.EstrategiaAndrei import EstrategiaAndrei
 from classes.strategies.EstrategiaEduardo import EstrategiaEduardo
 from classes.strategies.EstrategiaJean import EstrategiaJean
@@ -19,7 +19,7 @@ start_time = time.time()
 # Flag que modifica caminhos para salvar/ler arquivos dependendo da IDE utilizada
 vscode = True
 if vscode:
-    caminho = './classes'
+    caminho = './treinos/EstrategiaAndrei'
 else:  # PyCharm
     caminho = '.'
 
@@ -27,7 +27,10 @@ else:  # PyCharm
 # Treinar modelo MCTS RL por 10min = 600s
 
 experimento = Experimento(caminho)
-experimento.treinar_modelo_mcts(600, 0)
+# estrategiasTreino = [EstrategiaAllin(), EstrategiaAllin(), EstrategiaAllin(), EstrategiaAllin()]
+# estrategiasTreino = [EstrategiaFelipe(), EstrategiaFelipe(), EstrategiaFelipe(), EstrategiaFelipe()]
+estrategiasTreino = [EstrategiaAndrei(), EstrategiaAndrei(), EstrategiaAndrei(), EstrategiaAndrei()]
+experimento.treinar_modelo_mcts(540, 1, estrategiasTreino)
 
 # Testar treino contra outras estratégias
 # estrategias = [EstrategiaAndrei(), EstrategiaFelipe(), EstrategiaEduardo(), EstrategiaJean(), EstrategiaDjonatan()]
