@@ -12,8 +12,8 @@ class EstrategiaEduardo(Estrategia):
         "qtd_tipos_distritos": {}       # quantos distritos de cada tipo foram construídos
     }
 
-    def __init__(self):
-        super().__init__("Eduardo")
+    def __init__(self, nome: str = '1'):
+        super().__init__('Eduardo - ' + nome)
 
     # Estratégia usada na fase de escolha dos personagens
     @staticmethod

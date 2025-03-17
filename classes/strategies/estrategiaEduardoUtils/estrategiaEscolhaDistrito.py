@@ -34,8 +34,9 @@ def estrategiaEscolhaDistrito(estado: Estado, distritos_para_construir: list[Car
     if index_jogador == -1:
         debug("ERRO----------------------------------------------------------------------------------------")
         if debugTime: 
-            print("Debug time - estrategiaEscolhaDistrito - 37")
-            time.sleep(150)
+            # print("Debug time - estrategiaEscolhaDistrito - 37")
+            # time.sleep(150)
+            pass
 
     if estado.jogador_atual.nome == estado.jogadores[index_jogador].nome:
         debug(f"Nome jogador: {estado.jogador_atual.nome} Ouros: {estado.jogador_atual.ouro}")

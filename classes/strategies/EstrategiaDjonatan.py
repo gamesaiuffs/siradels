@@ -10,8 +10,8 @@ import random
 
 
 class EstrategiaDjonatan(Estrategia):
-    def __init__(self):
-        super().__init__('Djonatan.')
+    def __init__(self, nome: str = '1'):
+        super().__init__('Djonatan - ' + nome)
     
     # Estratégia usada na fase de escolha dos personagens
     @staticmethod
