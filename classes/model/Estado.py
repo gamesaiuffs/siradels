@@ -145,7 +145,7 @@ class Estado:
         
         
         
-        self.variaveis = self.menos_qtd_dist_const_original
+        self.variaveis = self.menos_ouro_oponentes_original
         
         
     def print_estado(self, estado, estado_vetor_teste, estado_vetor):

@@ -111,7 +111,7 @@ where idexp=1 and tsteps = 300000;
 
 select avg(nwins) from (select idin, nwins 
 from sample 
-where idexp=6 and tsteps = 300000
+where idexp=18 and tsteps = 300000
 );
 
 # Médias das inicializações de cada experimento
@@ -126,7 +126,7 @@ where idexp=6 and tsteps = 300000
 # Media do valor de todas as inicializações para cada timestep 
 select tsteps, avg(nwins) as vitorias
 from sample 
-where idexp=6
+where idexp=10
 GROUP BY tsteps
 order by tsteps;
 
@@ -146,7 +146,7 @@ select avg(nwins) as media_vitorias from sample where idexp=11 and tsteps = 3000
 #Experimento 1
 # experimento   % vitoria   representação               ambiente
 # 1             54.5%       originais                   box
-# 2             55.40       original limitado           multidiscreto
+# 2             52.80       original limitado           multidiscreto
 # 3             53.20       proporções                  box
 # 4             54.00       3 classes                   multidiscreto
 # 5             52.30       2 classes (binario)         binario
@@ -191,3 +191,13 @@ order by tsteps;
 # Lim inferior 21.123
 # Lim superior: 22.185
 #Margem de erro: 0.53106
+
+
+
+# Verificar se todas as inicializações foram concluídas
+select exp.title as title, exp.idexp, count(*) as inits
+from experiment exp right join initialize init on exp.idexp = init.idexp
+group by exp.title, exp.idexp
+order by exp.idexp;
+ 
+ delete from experiment where idexp = 16;

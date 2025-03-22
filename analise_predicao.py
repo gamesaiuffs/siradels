@@ -8,11 +8,12 @@ import numpy as np
 if __name__ == "__main__":
     ENV_ID = "Citadels"
     ENV_ENTRY_POINT = 'classes.openaigym_env.Citadels_box:Citadels'
-    MODEL_PATH="./aaa_experimentos_final/1/in_1/30.zip"
     NUM_EPISODES = 10000
     
-    VARIABLE_NAME = "gold_and_character_cards"
-    VARIABLE_VALUE = 5
+    VARIABLE_NAME = "dist_const_jog_mais_const"
+    VARIABLE_VALUE = 0
+    EXP_NUM = 1
+    INIT_NUM = 2
 
     EXP_NAME=f"Action choices in {NUM_EPISODES} timesteps - variable: {VARIABLE_NAME} - Value: {VARIABLE_VALUE}"
     
@@ -22,6 +23,7 @@ if __name__ == "__main__":
         entry_point=ENV_ENTRY_POINT
     )
     
+    MODEL_PATH=f"./aaa_experimentos_final/{EXP_NUM}/in_{INIT_NUM}/30.zip"
     model = DQN.load(MODEL_PATH)
     env = gym.make(ENV_ID)
     escolhas = [0, 0, 0, 0, 0, 0, 0, 0]
@@ -31,8 +33,8 @@ if __name__ == "__main__":
         
         # Array com tamanho para a representação de estado original 
         external_input = np.array([
-            VARIABLE_VALUE,    # ouro_personagem (0 a 6)
-            VARIABLE_VALUE,    # cartas_dist_mao (0 a 10)
+            rd.randint(0, 6),    # ouro_personagem (0 a 6)
+            rd.randint(0, 10),    # cartas_dist_mao (0 a 10)
             rd.randint(0, 6),    # carta_mais_cara
             rd.randint(0, 6),    # carta_mais_barata
             rd.randint(0, 7),    # qtd_dist_const
@@ -41,7 +43,7 @@ if __name__ == "__main__":
             rd.randint(0, 6),    # ||
             rd.randint(0, 6),    # ||
             rd.randint(0, 6),    # ||
-            rd.randint(0, 7),    # dist_const_jog_mais_const
+            VARIABLE_VALUE,    # dist_const_jog_mais_const
             rd.randint(0, 10),    # jog_mais_cartas_mao
             rd.randint(0, 10),    # ouro_oponentes
             rd.randint(0, 10),    # ||
@@ -75,7 +77,7 @@ if __name__ == "__main__":
     for i in range(len(escolhas)):
         plt.text(i, escolhas[i] + 0.5, f"{((escolhas[i] / NUM_EPISODES) * 100):.2f}%", ha='center', va='bottom')
     
-    plt.savefig(f"graficos_atualizado/predicao/ouro_e_carta/{VARIABLE_NAME}_var={VARIABLE_VALUE}.png")
+    plt.savefig(f"graficos_atualizado/predicao/{VARIABLE_NAME}/{VARIABLE_NAME}_var={VARIABLE_VALUE}_exp={EXP_NUM}_init={INIT_NUM}.png")
         
         
 # cartas_dist_mao_original 4
@@ -91,5 +93,15 @@ if __name__ == "__main__":
     
     
     
-    
-    
+#  [
+#     [0, 0, 0, 0, 0, 0, 0, 0],
+#     [0, 0, 0, 0, 0, 0, 0, 0],
+#     [0, 0, 0, 0, 0, 0, 0, 0],
+#     [0, 0, 0, 0, 0, 0, 0, 0],
+#     [0, 0, 0, 0, 0, 0, 0, 0],
+#     [0, 0, 0, 0, 0, 0, 0, 0],
+#     [0, 0, 0, 0, 0, 0, 0, 0],
+#     [0, 0, 0, 0, 0, 0, 0, 0],
+#     [0, 0, 0, 0, 0, 0, 0, 0],
+#     [0, 0, 0, 0, 0, 0, 0, 0]
+# ]

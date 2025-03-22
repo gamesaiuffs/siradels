@@ -12,7 +12,6 @@ from classes.Experimento import Experimento
 from stable_baselines3.common.evaluation import evaluate_policy
 
 import time
-import ray
 
 from database.Postgres import Conexao
 
@@ -20,8 +19,8 @@ ENV_ID = "Citadels"
 
 # Mudar
 ENV_ENTRY_POINT = 'classes.openaigym_env.Citadels_box:Citadels'
-EXP_ATUAL = 14
-EXP_TITLE='menos:menos_qtd_dist_const_original'
+EXP_ATUAL = 18
+EXP_TITLE='menos:menos_ouro_oponentes_original'
 
 
 gym.register(

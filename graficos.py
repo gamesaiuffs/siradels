@@ -16,15 +16,15 @@ class TipoGrafico(Enum):
 if __name__ == "__main__":
     conexao = Conexao()
     
-    tipo = TipoGrafico.BARRAS_WINRATE
+    tipo = TipoGrafico.VITORIAS
     
     
-    if tipo == TipoGrafico.RECOMPENSA:
+    if tipo == TipoGrafico.VITORIAS:
         exp1 = conexao.consultar(
             """
             select tsteps, avg(nwins) as recompensas
             from sample 
-            where idexp=1
+            where idexp=12
             GROUP BY tsteps
             order by tsteps;
             """)
@@ -32,7 +32,7 @@ if __name__ == "__main__":
             """
             select tsteps, avg(nwins) as recompensas
             from sample 
-            where idexp=6
+            where idexp=13
             GROUP BY tsteps
             order by tsteps;
             """)
@@ -40,7 +40,7 @@ if __name__ == "__main__":
             """
             select tsteps, avg(nwins) as recompensas
             from sample 
-            where idexp=3
+            where idexp=14
             GROUP BY tsteps
             order by tsteps;
             """)
@@ -48,7 +48,7 @@ if __name__ == "__main__":
             """
             select tsteps, avg(nwins) as recompensas
             from sample 
-            where idexp=4
+            where idexp=15
             GROUP BY tsteps
             order by tsteps;
             """)
@@ -56,7 +56,7 @@ if __name__ == "__main__":
             """
             select tsteps, avg(nwins) as recompensas
             from sample 
-            where idexp=5
+            where idexp=17
             GROUP BY tsteps
             order by tsteps;
             """)
@@ -73,17 +73,17 @@ if __name__ == "__main__":
         plt.title('Relation between timesteps and win average')
         plt.grid(True)
         
-        plt.plot([float(valor[0]) for valor in exp1], [float(valor[1]) for valor in exp1], marker='o', label="Experiment 1")
-        plt.plot([float(valor[0]) for valor in exp2], [float(valor[1]) for valor in exp2], marker='o', label="Experiment 2")
-        plt.plot([float(valor[0]) for valor in exp3], [float(valor[1]) for valor in exp3], marker='o', label="Experiment 3")
-        plt.plot([float(valor[0]) for valor in exp4], [float(valor[1]) for valor in exp4], marker='o', label="Experiment 4")
-        plt.plot([float(valor[0]) for valor in exp5], [float(valor[1]) for valor in exp5], marker='o', label="Experiment 5")
+        plt.plot([float(valor[0]) for valor in exp1], [float(valor[1]) for valor in exp1], marker='o', label="Experiment 12")
+        plt.plot([float(valor[0]) for valor in exp2], [float(valor[1]) for valor in exp2], marker='o', label="Experiment 13")
+        plt.plot([float(valor[0]) for valor in exp3], [float(valor[1]) for valor in exp3], marker='o', label="Experiment 14")
+        plt.plot([float(valor[0]) for valor in exp4], [float(valor[1]) for valor in exp4], marker='o', label="Experiment 15")
+        plt.plot([float(valor[0]) for valor in exp5], [float(valor[1]) for valor in exp5], marker='o', label="Experiment 17")
         
-        plt.ylim(35, 65)
-        plt.xlim(75000, 300000)
+        plt.ylim(0, 65)
+        plt.xlim(0, 300000)
         plt.legend()
         # plt.show()
-        plt.savefig("graficos_atualizado/exp_1a5_media_vitorias_35_65.png")
+        plt.savefig("graficos_atualizado/teste_exps_12_13_14_15_16.png")
 
 
     elif tipo == TipoGrafico.RECOMPENSA:
