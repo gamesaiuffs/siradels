@@ -31,7 +31,7 @@ class Simulacao:
         self.nova_rodada = True
         
         # Flag de controle de experimento com escolhas erradas
-        self.escolhas_erradas = False
+        self.escolhas_erradas = True
 
     # Cria o estado inicial do tabuleiro
     def criar_estado_inicial(self, num_personagens: int) -> Estado:

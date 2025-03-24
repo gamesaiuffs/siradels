@@ -143,9 +143,10 @@ class Estado:
         self.menos_jog_mais_cartas_mao_original = ["ouro_personagem_original", "cartas_dist_mao_original", "carta_mais_cara_original", "carta_mais_barata_original", "qtd_dist_const_original", "qtd_dist_cada_tipo_original", "dist_const_jog_mais_const_original", "ouro_oponentes_original", "disponibilidade_personagens", "turno_agente"]
         self.menos_ouro_oponentes_original = ["ouro_personagem_original", "cartas_dist_mao_original", "carta_mais_cara_original", "carta_mais_barata_original", "qtd_dist_const_original", "qtd_dist_cada_tipo_original", "dist_const_jog_mais_const_original", "jog_mais_cartas_mao_original", "disponibilidade_personagens", "turno_agente"]
         
+        self.menos_18_17_13 = ["ouro_personagem_original", "cartas_dist_mao_original", "carta_mais_cara_original", "qtd_dist_const_original", "qtd_dist_cada_tipo_original", "dist_const_jog_mais_const_original", "disponibilidade_personagens", "turno_agente"]
+        self.menos_18_17_13_14_12 = ["ouro_personagem_original", "cartas_dist_mao_original",  "qtd_dist_cada_tipo_original", "dist_const_jog_mais_const_original", "disponibilidade_personagens", "turno_agente"]
         
-        
-        self.variaveis = self.menos_ouro_oponentes_original
+        self.variaveis = self.menos_18_17_13_14_12
         
         
     def print_estado(self, estado, estado_vetor_teste, estado_vetor):

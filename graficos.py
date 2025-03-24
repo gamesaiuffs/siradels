@@ -7,7 +7,7 @@ class TipoGrafico(Enum):
     VITORIAS=1,
     RECOMPENSA=2,
     PONTUACAO=3,
-    BARRAS_WINRATE=4,
+    INTERVALO_CONFIANCA_VITORIAS=4,
     BARRAS_RECOMPENSA=5,
     
 
@@ -16,7 +16,7 @@ class TipoGrafico(Enum):
 if __name__ == "__main__":
     conexao = Conexao()
     
-    tipo = TipoGrafico.VITORIAS
+    tipo = TipoGrafico.INTERVALO_CONFIANCA_VITORIAS
     
     
     if tipo == TipoGrafico.VITORIAS:
@@ -145,7 +145,7 @@ if __name__ == "__main__":
         plt.savefig("graficos_atualizado/exp_1a5_media_recompensas.png")
 
 
-    elif tipo == TipoGrafico.BARRAS_WINRATE:
+    elif tipo == TipoGrafico.INTERVALO_CONFIANCA_VITORIAS:
         
         timestep = 300000
         
@@ -199,12 +199,13 @@ if __name__ == "__main__":
         
         experiments = [float(exp1[timestep // 10000 - 1][1]), float(exp2[timestep // 10000 - 1][1]), float(exp3[timestep // 10000 - 1][1]), float(exp4[timestep // 10000 - 1][1]), float(exp5[timestep // 10000 - 1][1])]
         labels = ["exp1", "exp2", "exp3", "exp4", "exp5"]
+        
+        print("valores usados nos itervalos:")
                 
         # Videos de referência:
         # https://www.youtube.com/watch?v=CGF9YnkNul8
         # https://www.youtube.com/watch?v=nrl--O0c9SI
-
-        # Experimento 1
+        
         error_values_exp1 = conexao.consultar(
             """
             select avscore as recompensas
@@ -212,14 +213,14 @@ if __name__ == "__main__":
             where idexp=1 and tsteps=300000
             order by tsteps;
             """)
-        
-        # error_values_exp1 = [20.29, 19.99, 20.58, 23.19, 22.08, 21.93, 22.14, 21.86, 22.15, 22.33]
         error_values_exp1 = [float(value[0]) for value in error_values_exp1]
+        print("1: ", error_values_exp1)
         media_exp1 = np.mean(error_values_exp1)
         dp_exp1 = np.std(error_values_exp1, ddof=1)
         n_exp1 = len(error_values_exp1)
-        intv_exp1 = stats.norm.interval(0.90, media_exp1, scale=dp_exp1/np.sqrt(n_exp1))
-        
+        sem_exp1 = dp_exp1 / np.sqrt(n_exp1)
+        intv_exp1 = stats.norm.interval(0.90, loc=media_exp1, scale=sem_exp1)
+
         # Experimento 2 (retreinado e identificado na base como idexp=6)
         error_values_exp2 = conexao.consultar(
             """
@@ -228,13 +229,14 @@ if __name__ == "__main__":
             where idexp=6 and tsteps=300000
             order by tsteps;
             """)
-        
         error_values_exp2 = [float(value[0]) for value in error_values_exp2]
+        print("2: ", error_values_exp2)
         media_exp2 = np.mean(error_values_exp2)
         dp_exp2 = np.std(error_values_exp2, ddof=1)
         n_exp2 = len(error_values_exp2)
-        intv_exp2 = stats.norm.interval(0.90, media_exp2, scale=dp_exp2/np.sqrt(n_exp2))
-        
+        sem_exp2 = dp_exp2 / np.sqrt(n_exp2)
+        intv_exp2 = stats.norm.interval(0.90, loc=media_exp2, scale=sem_exp2)
+
         # Experimento 3 
         error_values_exp3 = conexao.consultar(
             """
@@ -243,13 +245,14 @@ if __name__ == "__main__":
             where idexp=3 and tsteps=300000
             order by tsteps;
             """)
-        
         error_values_exp3 = [float(value[0]) for value in error_values_exp3]
+        print("3: ", error_values_exp3)
         media_exp3 = np.mean(error_values_exp3)
         dp_exp3 = np.std(error_values_exp3, ddof=1)
         n_exp3 = len(error_values_exp3)
-        intv_exp3 = stats.norm.interval(0.90, media_exp3, scale=dp_exp3/np.sqrt(n_exp3))
-        
+        sem_exp3 = dp_exp3 / np.sqrt(n_exp3)
+        intv_exp3 = stats.norm.interval(0.90, loc=media_exp3, scale=sem_exp3)
+
         # Experimento 4 
         error_values_exp4 = conexao.consultar(
             """
@@ -258,13 +261,14 @@ if __name__ == "__main__":
             where idexp=4 and tsteps=300000
             order by tsteps;
             """)
-        
         error_values_exp4 = [float(value[0]) for value in error_values_exp4]
+        print("4: ", error_values_exp4)
         media_exp4 = np.mean(error_values_exp4)
         dp_exp4 = np.std(error_values_exp4, ddof=1)
         n_exp4 = len(error_values_exp4)
-        intv_exp4 = stats.norm.interval(0.90, media_exp4, scale=dp_exp4/np.sqrt(n_exp4))
-        
+        sem_exp4 = dp_exp4 / np.sqrt(n_exp4)
+        intv_exp4 = stats.norm.interval(0.90, loc=media_exp4, scale=sem_exp4)
+
         # Experimento 5
         error_values_exp5 = conexao.consultar(
             """
@@ -273,12 +277,13 @@ if __name__ == "__main__":
             where idexp=5 and tsteps=300000
             order by tsteps;
             """)
-        
         error_values_exp5 = [float(value[0]) for value in error_values_exp5]
+        print("5: ", error_values_exp5)
         media_exp5 = np.mean(error_values_exp5)
         dp_exp5 = np.std(error_values_exp5, ddof=1)
         n_exp5 = len(error_values_exp5)
-        intv_exp5 = stats.norm.interval(0.90, media_exp5, scale=dp_exp5/np.sqrt(n_exp5))
+        sem_exp5 = dp_exp5 / np.sqrt(n_exp5)
+        intv_exp5 = stats.norm.interval(0.90, loc=media_exp5, scale=sem_exp5)
         
         # print(media_exp1)
         # print(dp_exp1)
@@ -292,8 +297,11 @@ if __name__ == "__main__":
             media_exp5 - intv_exp5[0], 
         ]
         
+        print("intervalos de confiança:")
+        print(dy)
+        
         plt.bar(labels, experiments, yerr=dy, color="lightgray", ec="black", ecolor="red", capsize=5)
-        plt.ylim(0, 65)
+        plt.ylim(50, 57)
         # plt.plot([0, 6], [54, 54], "-k")
         
         # print(dy)

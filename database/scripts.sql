@@ -109,9 +109,9 @@ select idin, nwins
 from sample 
 where idexp=1 and tsteps = 300000;
 
-select avg(nwins) from (select idin, nwins 
+select stddev(nwins) from (select idin, nwins 
 from sample 
-where idexp=18 and tsteps = 300000
+where idexp=6 and tsteps = 300000
 );
 
 # Médias das inicializações de cada experimento

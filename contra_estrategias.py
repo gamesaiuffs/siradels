@@ -22,8 +22,11 @@ start_time = time.time()
 
 print("Início dos testes das estratégias")
 
-exp = 6
-print(f"\n\nExperimento {exp}:")
+exp = 18
+# Mudar representação em Estado 
+
+
+print(f"\nExperimento {exp}:")
 
 for init in range(1, 11):
 
