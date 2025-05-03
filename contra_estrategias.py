@@ -22,7 +22,7 @@ start_time = time.time()
 
 print("Início dos testes das estratégias")
 
-exp = 18
+exp = 21
 # Mudar representação em Estado 
 
 

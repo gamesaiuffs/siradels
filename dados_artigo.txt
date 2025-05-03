@@ -1,0 +1,25 @@
+% RESULTADOS DOS TESTES AGENTE X aleatórios 
+
+% experimento   % vitoria   representação          nterv.conf.    ambiente
+% 1             54.50%       originais             2.93           box
+% 2             52.80       original limitado      3.18           multidiscreto
+% 3             53.20       proporções             1.94           box
+% 4             54.00       3 classes              3.75           multidiscreto     
+% 5             52.30       2 classes (binario)    2.89           binario            
+
+
+% resultados testes agente X personal - 
+% Experimento       % primeiro          int.con
+% 1                 39.43               1.28        coluna com intervalo de conf.
+% 2                 38.48               1.05
+% 3                 35.82               1.74
+% 4                 35.15               1.57
+% 5                 31.86               1.80
+
+% Experimento       representação           random(%)      int. conf.(%)        personal(%)         int. conf. (%)      % de erros (300k)   int.conf(%)
+% 1                 originais               54.50          2.93                 39.43               1.28                2.47                0.082 
+% 2                 original limitado       52.80          3.18                 38.48               1.05                2.47                0.083     
+% 3                 proporções              53.20          1.94                 35.82               1.74                2.38                0.111 
+% 4                 3 classes               54.00          3.75                 35.15               1.57                2.38                0.096 
+% 5                 2 classes (binario)     52.30          2.89                 31.86               1.80                2.44                0.100 
+

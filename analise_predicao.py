@@ -8,14 +8,14 @@ import numpy as np
 if __name__ == "__main__":
     ENV_ID = "Citadels"
     ENV_ENTRY_POINT = 'classes.openaigym_env.Citadels_box:Citadels'
-    NUM_EPISODES = 10000
+    NUM_EPISODES = 100000
     
-    VARIABLE_NAME = "dist_const_jog_mais_const"
+    VARIABLE_NAME = "district_cards_in_hand"
     VARIABLE_VALUE = 0
     EXP_NUM = 1
-    INIT_NUM = 2
+    INIT_NUM = 1
 
-    EXP_NAME=f"Action choices in {NUM_EPISODES} timesteps - variable: {VARIABLE_NAME} - Value: {VARIABLE_VALUE}"
+    EXP_NAME=f""
     
     
     gym.register(
@@ -34,21 +34,21 @@ if __name__ == "__main__":
         # Array com tamanho para a representação de estado original 
         external_input = np.array([
             rd.randint(0, 6),    # ouro_personagem (0 a 6)
-            rd.randint(0, 10),    # cartas_dist_mao (0 a 10)
+            rd.randint(0, 8),    # cartas_dist_mao (0 a 8)
             rd.randint(0, 6),    # carta_mais_cara
             rd.randint(0, 6),    # carta_mais_barata
             rd.randint(0, 7),    # qtd_dist_const
-            rd.randint(0, 6),    # qtd_dist_cada_tipo
-            rd.randint(0, 6),    # ||
-            rd.randint(0, 6),    # ||
-            rd.randint(0, 6),    # ||
-            rd.randint(0, 6),    # ||
-            VARIABLE_VALUE,    # dist_const_jog_mais_const
+            rd.randint(0, 7),    # qtd_dist_cada_tipo
+            rd.randint(0, 7),    # ||
+            rd.randint(0, 7),    # ||
+            rd.randint(0, 7),    # ||
+            rd.randint(0, 7),    # ||
+            rd.randint(0, 7),    # dist_const_jog_mais_const
             rd.randint(0, 10),    # jog_mais_cartas_mao
-            rd.randint(0, 10),    # ouro_oponentes
-            rd.randint(0, 10),    # ||
-            rd.randint(0, 10),    # ||
-            rd.randint(0, 10),    # ||
+            rd.randint(0, 7),    # ouro_oponentes
+            rd.randint(0, 7),    # ||
+            rd.randint(0, 7),    # ||
+            rd.randint(0, 7),    # ||
             
             rd.randint(0, 1),     # personagem rank 1
             rd.randint(0, 1),     # personagem rank 2

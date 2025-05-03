@@ -122,6 +122,7 @@ class AgenteTestes(Estrategia):
         super().__init__(nome, imprimir)
         self.model = DQN.load(model)
         
+        # para ativar: Alterar também a flag self.escolhas_erradas para True em Simulacao
         self.escolhas_erradas = ContaEscolhasErradas(exp, contar=True)
 
     # Estratégia usada na fase de escolha dos personagens

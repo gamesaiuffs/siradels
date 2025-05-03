@@ -107,7 +107,9 @@ select avg(max) from (select idin, max(nwins) from sample where idexp=5 group by
 # Pegar vitorias de cada inicialização em 300000 steps
 select idin, nwins 
 from sample 
-where idexp=1 and tsteps = 300000;
+where idexp=5 and tsteps = 300000;
+
+55 52 47 47 51 49 62 58 45 57
 
 select stddev(nwins) from (select idin, nwins 
 from sample 
@@ -139,7 +141,7 @@ GROUP BY tsteps
 order by tsteps;
 
 
-select avg(nwins) as media_vitorias from sample where idexp=11 and tsteps = 300000;
+select avg(nwins) as media_vitorias from sample where idexp=21 and tsteps = 300000;
 
 # Resultados dos experimentos 
 
@@ -171,7 +173,7 @@ select avg(nwins) as media_vitorias from sample where idexp=11 and tsteps = 3000
 
 
 
-
+select * from sample where idexp=5; 
 
 
 
