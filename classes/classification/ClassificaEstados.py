@@ -1035,7 +1035,6 @@ class ClassificaEstados:
     
     @staticmethod
     def optuna_CART(jogos, rotulos):
-
         resultados_optuna = {}
 
         scorers = {
@@ -1060,13 +1059,7 @@ class ClassificaEstados:
                 'criterion': ['gini', 'entropy', 'log_loss']
             }
 
-            best_model = None  # modelo com melhor score
-            best_score = -1
-            best_params = {}
-
             def objective(trial):
-                nonlocal best_model, best_score, best_params
-
                 max_depth = None if trial.suggest_categorical("use_none_max_depth", [True, False]) \
                     else int(trial.suggest_float('max_depth', *param_space['max_depth']))
 
@@ -1085,31 +1078,35 @@ class ClassificaEstados:
                                     cart__min_samples_split=params['min_samples_split'],
                                     cart__class_weight=params['class_weight'])
 
-                score = cross_val_score(pipeline, jogos, rotulos, cv=5, scoring=scorer, n_jobs=-1).mean()
-
-                if score > best_score:
-                    best_score = score
-                    best_params = params
-                    pipeline.fit(jogos, rotulos)
-                    best_model = pipeline
-
-                return score
+                return cross_val_score(pipeline, jogos, rotulos, cv=5, scoring=scorer, n_jobs=-1).mean()
 
             study = optuna.create_study(direction='maximize')
             study.optimize(objective, n_trials=1000, n_jobs=1)
 
-            print(f"Metric: {metric_name}, Score: {best_score:.4f}, Parameters: {best_params}")
+            best_score = study.best_value
+            best_trials = [t for t in study.trials if t.value == best_score]
 
-            # salva modelo com melhor score
-            model_path = os.path.join(save_path, f'CART_{metric_name.replace(" ", "_")}_BestModel.joblib')
-            joblib.dump(best_model, model_path)
+            print(f"Metric: {metric_name}, Best Score: {best_score:.4f}, Trials: {len(best_trials)}")
 
-            # salva study
-            joblib.dump(study, f'./classes/classification/models/CART_Best_{metric_name.replace(" ", "_")}.pkl')
+            for i, trial in enumerate(best_trials):
+                params = trial.params
+                max_depth = None if params.get("use_none_max_depth") else int(params['max_depth'])
+
+                pipeline = clone(base_pipeline)
+                pipeline.set_params(cart__max_depth=max_depth,
+                                    cart__criterion=params['criterion'],
+                                    cart__min_samples_leaf=int(params['min_samples_leaf']),
+                                    cart__min_samples_split=int(params['min_samples_split']),
+                                    cart__class_weight=ast.literal_eval(params['class_weight']))
+                pipeline.fit(jogos, rotulos)
+
+                joblib.dump(pipeline, os.path.join(save_path, f'CART_{metric_name.replace(" ", "_")}_BestModel_{i}.joblib'))
+
+            joblib.dump(study, os.path.join(save_path, f'CART_Best_{metric_name.replace(" ", "_")}.pkl'))
 
             resultados_optuna[metric_name] = {
                 "best_score": best_score,
-                "best_params": best_params
+                "n_models_saved": len(best_trials)
             }
 
         ClassificaEstados.salva_testes(resultados_optuna, './classes/classification/results/CART/cart')
@@ -1117,7 +1114,6 @@ class ClassificaEstados:
     
     @staticmethod
     def optuna_RF(jogos, rotulos):
-
         resultados_optuna = {}
 
         scorers = {
@@ -1134,13 +1130,7 @@ class ClassificaEstados:
                 ('rf', RandomForestClassifier(random_state=42))
             ])
 
-            best_model = None
-            best_score = -1
-            best_params = {}
-
             def objective(trial):
-                nonlocal best_model, best_score, best_params
-
                 max_depth = None if trial.suggest_categorical("use_none_max_depth", [True, False]) \
                     else int(trial.suggest_float('max_depth', 15, 50))
 
@@ -1161,27 +1151,36 @@ class ClassificaEstados:
                                     rf__min_samples_split=params['min_samples_split'],
                                     rf__class_weight=params['class_weight'])
 
-                score = cross_val_score(pipeline, jogos, rotulos, cv=5, scoring=scorer, n_jobs=-1).mean()
-
-                if score > best_score:
-                    best_score = score
-                    best_params = params
-                    pipeline.fit(jogos, rotulos)
-                    best_model = pipeline
-
-                return score
+                return cross_val_score(pipeline, jogos, rotulos, cv=5, scoring=scorer, n_jobs=-1).mean()
 
             study = optuna.create_study(direction='maximize')
             study.optimize(objective, n_trials=1000, n_jobs=1)
 
-            print(f"Metric: {metric_name}, Score: {best_score:.4f}, Parameters: {best_params}")
+            best_score = study.best_value
+            best_trials = [t for t in study.trials if t.value == best_score]
 
-            joblib.dump(best_model, os.path.join(save_path, f'RF_{metric_name.replace(" ", "_")}_BestModel.joblib'))
-            joblib.dump(study, f'./classes/classification/models/RF_Best_{metric_name.replace(" ", "_")}.pkl')
+            print(f"Metric: {metric_name}, Best Score: {best_score:.4f}, Trials: {len(best_trials)}")
+
+            for i, trial in enumerate(best_trials):
+                params = trial.params
+                max_depth = None if params.get("use_none_max_depth") else int(params['max_depth'])
+
+                pipeline = clone(base_pipeline)
+                pipeline.set_params(rf__n_estimators=int(params['n_estimators']),
+                                    rf__criterion=params['criterion'],
+                                    rf__max_depth=max_depth,
+                                    rf__min_samples_leaf=int(params['min_samples_leaf']),
+                                    rf__min_samples_split=int(params['min_samples_split']),
+                                    rf__class_weight=params['class_weight'])
+                pipeline.fit(jogos, rotulos)
+
+                joblib.dump(pipeline, os.path.join(save_path, f'RF_{metric_name.replace(" ", "_")}_BestModel_{i}.joblib'))
+
+            joblib.dump(study, os.path.join(save_path, f'RF_Best_{metric_name.replace(" ", "_")}.pkl'))
 
             resultados_optuna[metric_name] = {
                 "best_score": best_score,
-                "best_params": best_params
+                "n_models_saved": len(best_trials)
             }
 
         ClassificaEstados.salva_testes(resultados_optuna, './classes/classification/results/RF/rf')
