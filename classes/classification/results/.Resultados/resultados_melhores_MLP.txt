@@ -1,0 +1,15 @@
+Modelo: MLP-A1
+Score Accuracy: 0.7744
+Hiperpar�metros: {'hidden_layer_sizes': (100,), 'activation': 'tanh', 'solver': 'sgd', 'alpha': 0.0001, 'learning_rate': 'adaptive'}
+----------------------------------------
+Modelo: MLP-P1
+Score Precision: 0.7339
+Hiperpar�metros: {'hidden_layer_sizes': (100,), 'activation': 'relu', 'solver': 'sgd', 'alpha': 0.001, 'learning_rate': 'constant'}
+----------------------------------------
+Modelo: MLP-F1
+Score F1: 0.6925
+Hiperpar�metros: {'hidden_layer_sizes': (50, 50), 'activation': 'relu', 'solver': 'sgd', 'alpha': 0.001, 'learning_rate': 'adaptive'}
+----------------------------------------
+
+
+

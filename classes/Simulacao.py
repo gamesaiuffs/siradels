@@ -3,7 +3,7 @@ from random import shuffle
 from classes.model.Acao import *
 from classes.model.Tabuleiro import Tabuleiro
 from classes.model.Jogador import Jogador
-from classes.strategies import Estrategia
+from classes.strategies.Estrategia import Estrategia
 from classes.classification.ClassificaEstados import ClassificaEstados
 
 class Simulacao:
@@ -182,6 +182,7 @@ class Simulacao:
                             print('/--------------------------/', end='')
                             print(self.estado)
                             print(f'Turno atual: {jogador.nome}, {jogador.personagem}')
+                        #input("Pressione Enter para continuar...")
                             # Mostra a chance de vitoria
                             #X = ClassificaEstados.coleta_features(self.estado, jogador.nome, 0, X, model)
                         # Mostra apenas ações disponíveis segundo regras do jogo

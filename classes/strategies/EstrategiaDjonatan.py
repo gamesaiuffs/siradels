@@ -90,7 +90,6 @@ class EstrategiaDjonatan(Estrategia):
             senhor_da_guerra = -1
 
         if len(estado.jogador_atual.distritos_construidos) >= 6\
-            and estado.jogador_atual.ouro > 1\
             and len(estado.jogador_atual.cartas_distrito_mao)\
             and (tem_ouro and tem_distrito):
             if assassina != -1:
@@ -106,12 +105,10 @@ class EstrategiaDjonatan(Estrategia):
             if ilusionista != -1:
                 return ilusionista
             if rei != -1:
-                return rei
-            
+                return rei    
+        '''  
         # Preciso encontrar o tipo de distrito com o maior número de distritos construídos
         # Preciso controlar se vou ou não construir distritos, para construir algum específico
-
-        '''  
         vetor_de_ganhos = [religioso, militar, nobre, comercial+1]
         if max(vetor_de_ganhos) > 0:
             if max(vetor_de_ganhos) == vetor_de_ganhos[1] and comerciante != -1:
@@ -123,7 +120,6 @@ class EstrategiaDjonatan(Estrategia):
             if max(vetor_de_ganhos) == vetor_de_ganhos[1] and rei != -1:
                 return rei
         '''
-
         if comerciante != -1:
             return comerciante
         if rei != -1 and nobre > 0:
@@ -266,10 +262,13 @@ class EstrategiaDjonatan(Estrategia):
         tamanho_maximo = len(distritos_para_construir) + len(distritos_para_construir_covil_ladroes)
    
         contador_tipos = 0
-        maior_valor_mao = 0
+        ouro_mao = estado.jogador_atual.ouro
+        maior_valor_mao, menor_valor_mao = 0, 6
         for distrito in estado.jogador_atual.cartas_distrito_mao:
-            if distrito.valor_do_distrito > maior_valor_mao:
+            if distrito.valor_do_distrito > maior_valor_mao and distrito.valor_do_distrito <= ouro_mao:
                 maior_valor_mao = distrito.valor_do_distrito
+            if distrito.valor_do_distrito < menor_valor_mao:
+                menor_valor_mao = distrito.valor_do_distrito
 
         # Rever lógica de fechar tipos de distrito
         tipos = set()
@@ -287,7 +286,6 @@ class EstrategiaDjonatan(Estrategia):
         #for i, distrito in enumerate(estado.jogador_atual.cartas_distrito_mao): # Tenta construir especial
         #    if distrito.tipo_de_distrito == 4:
         #        return i
-            
         if len(tipos) == 3:
             for i, distrito in enumerate(estado.jogador_atual.cartas_distrito_mao):
                 if distrito.tipo_de_distrito not in tipos:    
@@ -300,6 +298,7 @@ class EstrategiaDjonatan(Estrategia):
         for i, distrito in enumerate(distritos_para_construir):
             if distrito == maior_valor_mao:
                 return i
+
         return random.randint(0, tamanho_maximo - 1)
 
     # Estratégia usada na ação de construir distritos (efeito Covil dos Ladrões)

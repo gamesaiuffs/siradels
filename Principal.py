@@ -1,5 +1,19 @@
-from classes.classification.ClassificaEstados import ClassificaEstados
+from itertools import combinations, combinations_with_replacement
+from classes. Experimento import Experimento
 from classes.classification.ColetaEstados import ColetaEstados
+from classes.classification.ClassificaEstados import ClassificaEstados
+from classes.strategies.Estrategia import Estrategia
+from classes.strategies.EstrategiaAllin import EstrategiaAllin
+from classes.strategies.EstrategiaAndrei import EstrategiaAndrei
+from classes.strategies.EstrategiaBuild import EstrategiaBuild
+from classes.strategies.EstrategiaDjonatan import EstrategiaDjonatan
+from classes.strategies.EstrategiaEduardo import EstrategiaEduardo
+from classes.strategies.EstrategiaFelipe import EstrategiaFelipe
+from classes.strategies.EstrategiaFrequency import EstrategiaFrequency
+from classes.strategies.EstrategiaGold import EstrategiaGold
+from classes.strategies.EstrategiaJean import EstrategiaJean
+from classes.strategies.EstrategiaLuis import EstrategiaLuisII
+from classes.strategies.EstrategiaTotalmenteAleatoria import EstrategiaTotalmenteAleatoria
 
 '''
 import gymnasium as gym
@@ -25,6 +39,8 @@ feature_names = [
         "Gold Amount (MVP)", "Number of Cards in Hand (MVP)", "Number of Builded Districts (MVP)", "Cost of citadel (MVP)", "Builded District Types (MVP)", "District Types in Hand (MVP)", "Low Cost District in Hand (MVP)", "High Cost District in Hand (MVP)", "Special District in Hand (MVP)", "Special District Builded (MVP)", "Character Rank (MVP)",
 ]
 
+#print(feature_names[8])
+
 n_features = 30
 
 data = '04-10-2024'
@@ -34,37 +50,51 @@ x = f"Jogos {n_features}f {data}"
 y = f"Rótulos {n_features}f {data}" 
 #modelo = f"{criterion} {min_samp}ms {ww}mw {n_features}f"
 
+jogos, rotulos = ClassificaEstados.ler_amostras(x, y, False)
 
-inicio = time.time()
+#inicio = time.time()
+diretorio_studies = './classes/classification/models/'
+
+# Caminho onde o relatório será salvo
+caminho_saida_txt = './classes/classification/results/resultados_melhores_MLP.txt'
+
+ClassificaEstados.optuna_CART(jogos, rotulos)
+ClassificaEstados.optuna_RF(jogos, rotulos)
+
+#ClassificaEstados.carregar_melhores_parametros('./classes/classification/models/MLP Best Precision')
+#ClassificaEstados.gerar_relatorio_melhores_models(diretorio_studies, caminho_saida_txt, modelo_desejado='MLP')
+#ClassificaEstados.avaliar_melhores_modelos(jogos, rotulos, './classes/classification/results/resultados_melhores_MLP.txt', './classes/classification/results/MLP/evaluation.txt', modelo='MLP')
+#ClassificaEstados.avaliar_melhores_modelos(jogos, rotulos, './classes/classification/results/resultados_melhores_GB.txt', './classes/classification/results/GB/evaluation.txt', modelo='GB')
+#ColetaEstados.correlacao()
+#fim_coleta = time.time()
 
 #(qtd_pts, n_features, nome_jogos, nome_rotulos, nome_modelo)
-#ColetaEstados.coleta_amostras(n_features, x, y)
-
-#fim_coleta = time.time() # 76 segundos = 1 minuto
+#ColetaEstados.coleta_amostras(n_features, jogos, rotulos)
 
 #print(f"Tempo para coletar amostras: {fim_coleta - inicio}")
 
-jogos, rotulos = ClassificaEstados.ler_amostras(x, y, False)
+#ClassificaEstados.optuna_GB(jogos, rotulos)
+
 #{'Name': 'gini 151ms 3mw 30f', 'F1 Macro': np.float64(0.75), 'Win Precision': np.float64(0.73), 'Win Recall': np.float64(0.64), 'Accuracy': 0.77, 'Macro Precision': np.float64(0.76), 'Macro Recall': np.float64(0.74)}
-ClassificaEstados.grid_cart(jogos, rotulos)
+#ClassificaEstados.grid_cart(jogos, rotulos)
 
-fim_cart = time.time() 
+#fim_cart = time.time()
 
-print(f"Tempo para treinar e testar CART: {fim_cart - inicio}")
+#print(f"Tempo para treinar e testar CART: {fim_cart - fim_coleta}")
 
-ClassificaEstados.grid_rf(jogos, rotulos)
+#ClassificaEstados.grid_rf(jogos, rotulos)
 
-fim_rf = time.time() 
+#fim_rf = time.time()
 
-print(f"Tempo para treinar e testar Random Forest: {fim_rf - fim_cart}")
+#print(f"Tempo para treinar e testar Random Forest: {fim_rf - fim_cart}")
 
-ClassificaEstados.grid_gb(jogos, rotulos)
+#ClassificaEstados.grid_gb(jogos, rotulos)
 
-fim_gb = time.time()
+#fim_gb = time.time()
 
-print(f"Tempo para treinar e testar Random Forest: {fim_gb - inicio}")
+#print(f"Tempo para treinar e testar Random Forest: {fim_gb - fim_rf}")
 
-print(f"Tempo total de execução: {fim_gb - inicio}")
+#print(f"Tempo total de execução: {fim_gb - inicio}")
 
 #(jogos, rotulos, nome_modelo, criterion, profundidade)
 #ClassificaEstados.treinar_modelo(False, jogos, rotulos, modelo, criterion, min_samp, win_weigth, profundidade)
@@ -146,6 +176,7 @@ check_env(env)
 # experimento = Experimento(caminho)
 # experimento.treinar_modelo_mcts(600, 0) # Treinar modelo MCTS RL por 10min = 600s
 # print("Fim do treino MCTS")
+
 '''
 print("Início dos testes das estratégias")
 estrategias: list[Estrategia] = [EstrategiaAndrei(), EstrategiaDjonatan(), EstrategiaEduardo(),
@@ -153,16 +184,18 @@ estrategias: list[Estrategia] = [EstrategiaAndrei(), EstrategiaDjonatan(), Estra
                                  EstrategiaTotalmenteAleatoria()] #MCTS e Agente off, levar para ColetaEstados e adaptar
 # estrategias: list[Estrategia] = [Agente(imprimir=True), EstrategiaTotalmenteAleatoria("B2"), EstrategiaTotalmenteAleatoria("B3"), EstrategiaTotalmenteAleatoria("B4"), EstrategiaTotalmenteAleatoria("B5")]
 comb = list(combinations_with_replacement(estrategias, 5))
+combSR = list(combinations(estrategias, 5))
 qtd_comb = len(comb)
 print("Quantidade de Combinações:", qtd_comb)
 
-qtd_simulacao: int = 10
+qtd_simulacao: int = 25
 resultados_total: dict[str, (int, int, int, int, int, int, int)] = dict()
 for e in estrategias:
     resultados_total[e.nome] = (0, 0, 0, 0, 0, 0, 0)
 for i, p in enumerate(comb):
     if (i+1) % 100 == 0 or i+1 == qtd_comb:
         print(f"{i+1}/{qtd_comb} - {((i+1)*100/qtd_comb):.2f}%")
+    #print(combSR, list(p))
     resultados = Experimento.testar_estrategias(list(p), qtd_simulacao)
     for jogador, resultado in resultados.items():
         (vitoria, seg, ter, qua, qui, pontuacao) = resultado
@@ -185,6 +218,7 @@ for jogador, resultado in resultados_total.items():
         f'\n{jogador} - Vitórias: {vitoria} - Taxa de Vitórias: {taxa_vitoria:.2f}% - Pontuação Média: {pontuacao_media:.2f}\n\t'
         f'Primeiro: {taxa_vitoria:5.2f}%\n\tSegundo : {taxa_seg:5.2f}%\n\tTerceiro: {taxa_ter:5.2f}%\n\tQuarto  : {taxa_qua:5.2f}%\n\tQuinto  : {taxa_qui:5.2f}%')
 print("Fim dos testes das estratégias")
-'''
+
 # Imprime duração do experimento
 #print(f"Tempo da simulação = {(time.time() - startTime):.2f}s")
+'''

@@ -1,0 +1,34 @@
+[
+    {
+        "F1": {
+            "best_score": 0.6937831416261696,
+            "best_params": {
+                "n_estimators": 100,
+                "learning_rate": 0.2,
+                "max_depth": 5,
+                "min_samples_split": 50,
+                "min_samples_leaf": 50
+            }
+        },
+        "Precision": {
+            "best_score": 0.8417525023382201,
+            "best_params": {
+                "n_estimators": 50,
+                "learning_rate": 0.01,
+                "max_depth": 5,
+                "min_samples_split": 5,
+                "min_samples_leaf": 50
+            }
+        },
+        "Accuracy": {
+            "best_score": 0.778241327996015,
+            "best_params": {
+                "n_estimators": 100,
+                "learning_rate": 0.2,
+                "max_depth": 5,
+                "min_samples_split": 50,
+                "min_samples_leaf": 5
+            }
+        }
+    }
+]

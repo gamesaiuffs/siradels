@@ -1,3 +1,5 @@
+from matplotlib import pyplot as plt
+import seaborn as sns
 from classes.classification.ClassificaEstados import ClassificaEstados
 from classes.Simulacao import Simulacao
 from classes.classification.SimulacaoColeta import SimulacaoColeta
@@ -14,6 +16,7 @@ from classes.strategies.EstrategiaGold import EstrategiaGold
 from classes.strategies.EstrategiaJean import EstrategiaJean
 from classes.strategies.EstrategiaLuis import EstrategiaLuisII
 from classes.Experimento import Experimento
+import pandas as pd
 import numpy as np
 import random
 from itertools import combinations, combinations_with_replacement
@@ -27,7 +30,7 @@ combinacoes = list(combinations_with_replacement(estrategias, 5))
 
 qtd_comb = len(combinacoes)
 
-print("Quantidade de Combinações:", qtd_comb)
+#print("Quantidade de Combinações:", qtd_comb)
 
 class ColetaEstados:
     @staticmethod
@@ -129,3 +132,37 @@ class ColetaEstados:
         ClassificaEstados.salva_testes(resultados_jogadores,"./classes/classification/results/Resultado da Coleta")
         ClassificaEstados.salvar_amostras(X, Y, jogos, rotulos)
         #ClassificaEstados.treinar_modelo(X, Y)
+
+    @staticmethod
+    def correlacao():
+        dados = pd.read_csv('./classes/classification/samples/Jogos 30f 04-10-2024.csv', header=None)
+        rotulos = pd.read_csv('./classes/classification/samples/Rótulos 30f 04-10-2024.csv', header=None, names=['label'])
+
+        dados['label'] = rotulos['label']
+
+        correlacoes = dados.corr()['label'].drop('label')
+        '''
+        matriz_corr = dados.corr()
+
+        # Salvar correlacoes + linha em branco + matriz_corr
+        with open('./classes/classification/samples/correlação/correlação.csv', 'w') as f:
+            correlacoes.to_csv(f)
+            f.write('\n')  # linha em branco
+            matriz_corr.to_csv(f)
+            
+        # Heatmap
+        plt.figure(figsize=(12,10))
+        sns.heatmap(matriz_corr, cmap='coolwarm', center=0, annot=False)
+        plt.title('Heatmap da Matriz de Correlação')
+        plt.tight_layout()
+        plt.savefig('./classes/classification/samples/correlação/heatmap_correlacao.png')
+        plt.close()
+        '''
+
+        # Heatmap só das correlações com o label
+        plt.figure(figsize=(3,12))
+        sns.heatmap(pd.DataFrame(correlacoes), cmap='coolwarm', center=0, annot=True, cbar=True)
+        plt.title('Correlação de cada feature com o label')
+        plt.tight_layout()
+        plt.savefig('./classes/classification/samples/correlação/heatmap_correlacao_label.png')
+        plt.close()

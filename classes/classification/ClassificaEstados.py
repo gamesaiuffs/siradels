@@ -1,7 +1,15 @@
 # -*- coding: utf-8 -*-
+import ast
+import os
+import traceback
 from more_itertools import sort_together
 import numpy as np
 import json
+import optuna
+from sklearn.base import clone
+from sklearn.discriminant_analysis import StandardScaler
+from sklearn.neural_network import MLPClassifier
+from sklearn.pipeline import Pipeline
 from classes.strategies.EstrategiaDjonatan import EstrategiaDjonatan
 from classes.strategies.EstrategiaFelipe import EstrategiaFelipe
 from classes.strategies.EstrategiaAndrei import EstrategiaAndrei
@@ -224,8 +232,8 @@ class ClassificaEstados:
         #X = jogos
         #Y = rotulos
         if div == True:
-            X_train, X_test, Y_train, Y_test = train_test_split(X, Y, test_size=0.33, random_state=42)
-            return X_train, X_test, Y_train, Y_test
+            X_train, X_test, y_train, y_test = train_test_split(X, Y, test_size=0.33, random_state=42)
+            return X_train, X_test, y_train, y_test
         else:
             return X, Y
        
@@ -485,6 +493,7 @@ class ClassificaEstados:
 
         resultados_grid = {}
 
+        f1_binary = make_scorer(f1_score, pos_label=1)
         f1_macro_scorer = make_scorer(f1_score, average='macro')
         precision_scorer = make_scorer(precision_score)
         recall_scorer = make_scorer(recall_score)
@@ -503,39 +512,39 @@ class ClassificaEstados:
             'min_samples_split': [2, 20, 100, 300],
         }
 
-        for i, metric in enumerate(metrics):
+        #for i, metric in enumerate(metrics):
             # Configurar o GridSearchCV
-            grid_search = GridSearchCV(
-                estimator=RandomForestClassifier(random_state=42),
-                param_grid=grid,
-                cv=10,  # 10-fold cross-validation
-                n_jobs=-1,  # Use todos os núcleos disponíveis
-                scoring=metric   # Métrica de avaliação
-            )
+        grid_search = GridSearchCV(
+            estimator=RandomForestClassifier(random_state=42),
+            param_grid=grid,
+            cv=10,  # 10-fold cross-validation
+            n_jobs=-1,  # Use todos os núcleos disponíveis
+            scoring=f1_binary   # Métrica de avaliação
+        )
 
-            # Treinar o modelo
-            grid_search.fit(jogos, rotulos)
+        # Treinar o modelo
+        grid_search.fit(jogos, rotulos)
 
-            best_score = grid_search.best_score_
-            cv_results = grid_search.cv_results_
+        best_score = grid_search.best_score_
+        cv_results = grid_search.cv_results_
 
-            matching_models = [
-                (score, params) for score, params in zip(cv_results['mean_test_score'], cv_results['params']) if score == best_score
-            ]
+        matching_models = [
+            (score, params) for score, params in zip(cv_results['mean_test_score'], cv_results['params']) if score == best_score
+        ]
 
-            # Exibir os modelos com a mesma pontuação do melhor estimador
-            for score, params in matching_models:
-                print(f" Metric: {metric}, Score: {score}, Parameters: {params}")
+        # Exibir os modelos com a mesma pontuação do melhor estimador
+        for score, params in matching_models:
+            print(f" Metric: {f1_binary}, Score: {score}, Parameters: {params}")
 
             # Armazenar no dicionário com a métrica como chave
-            resultados_grid[metrics_names[i]] = {
+            resultados_grid["F1 score"] = {
                 "best_score": best_score,
                 "matching_models": matching_models
             }
 
-            joblib.dump(grid_search, f'./classes/classification/models/RF Best {metrics_names[i]}')
+        joblib.dump(grid_search, f'./classes/classification/models/RF Best {metrics_names[3]}')
         
-        ClassificaEstados.salva_testes(resultados_grid, './classes/classification/results/Random Forest/forest')
+        ClassificaEstados.salva_testes(resultados_grid, './classes/classification/results/Random Forest/forest_f1')
 
         return
 
@@ -543,12 +552,21 @@ class ClassificaEstados:
     def grid_cart(jogos, rotulos):
 
         resultados_grid = {}
-
+        f1_binary = make_scorer(f1_score, pos_label=1)
         f1_macro_scorer = make_scorer(f1_score, average='macro')
         precision_scorer = make_scorer(precision_score)
         recall_scorer = make_scorer(recall_score)
         accuracy_scorer = make_scorer(accuracy_score)
 
+        metrics = (f1_macro_scorer, precision_scorer, recall_scorer)
+        metrics_names = ('Macro F1', 'Precision', 'Recall', 'F1 Score')
+        grid = {
+            'max_depth': [15, 20, 30, 50],
+            'criterion': ["gini", "log_loss", "entropy"],
+            'min_samples_leaf': [1, 101, 301, 501],
+            'min_samples_split': [2, 20, 100, 300],
+            'class_weight': [{0: 1, 1: 5}, {0: 1, 1: 4}, {0: 1, 1: 3}, {0: 1, 1: 2}, {0: 1, 1: 1}],
+        }
         metrics = (f1_macro_scorer, precision_scorer, recall_scorer, accuracy_scorer)
         metrics_names = ('Macro F1', 'Precision', 'Recall', 'Accuracy')
 
@@ -562,30 +580,33 @@ class ClassificaEstados:
                 'class_weight': [{0: 1, 1: 5}, {0: 1, 1: 4}, {0: 1, 1: 3}, {0: 1, 1: 2}, {0: 1, 1: 1}],
             }
 
-            # Configurar o GridSearchCV
-            grid_search = GridSearchCV(
-                estimator=DecisionTreeClassifier(random_state=42),
-                param_grid=grid,
-                cv=10,  # 10-fold cross-validation
-                n_jobs=-1,  # Use todos os núcleos disponíveis
-                scoring= metric  # Métrica de avaliação
-            )
+        #for i, metric in enumerate(metrics):
+            # Definir a grade de hiperparâmetros
 
-            # Treinar o modelo
-            grid_search.fit(jogos, rotulos)
+        # Configurar o GridSearchCV
+        grid_search = GridSearchCV(
+            estimator=DecisionTreeClassifier(random_state=42),
+            param_grid=grid,
+            cv=10,  # 10-fold cross-validation
+            n_jobs=-1,  # Use todos os núcleos disponíveis
+            scoring= f1_binary  # Métrica de avaliação
+        )
 
-            best_score = grid_search.best_score_
-            cv_results = grid_search.cv_results_
+        # Treinar o modelo
+        grid_search.fit(jogos, rotulos)
 
-            #print(cv_results)
-            
-            matching_models = [
-                (score, params) for score, params in zip(cv_results['mean_test_score'], cv_results['params']) if score == best_score
-            ]
+        best_score = grid_search.best_score_
+        cv_results = grid_search.cv_results_
 
-            # Exibir os modelos com a mesma pontuação do melhor estimador
-            for score, params in matching_models:
-                print(f" Metric: {metric}, Score: {score}, Parameters: {params}")
+        #print(cv_results)
+        
+        matching_models = [
+            (score, params) for score, params in zip(cv_results['mean_test_score'], cv_results['params']) if score == best_score
+        ]
+
+        # Exibir os modelos com a mesma pontuação do melhor estimador
+        for score, params in matching_models:
+            print(f" Metric: {f1_binary}, Score: {score}, Parameters: {params}")
 
             resultados_grid[metrics_names[i]] = {
                 "best_score": best_score,
@@ -594,7 +615,7 @@ class ClassificaEstados:
             
             joblib.dump(grid_search, f'./classes/classification/models/CART Best {metrics_names[i]}')
         
-        ClassificaEstados.salva_testes(resultados_grid, './classes/classification/results/CART/cart')
+        ClassificaEstados.salva_testes(resultados_grid, './classes/classification/results/CART/cart_f1')
 
         return
 
@@ -829,3 +850,482 @@ class ClassificaEstados:
         print(win_probability)  # Probabilidade estimada de vitória
 
         return 
+    
+    # Trabalho de IA
+    @staticmethod
+    def grid_gb(jogos, rotulos):
+
+        resultados_grid = {}
+
+        f1_macro_scorer = make_scorer(f1_score, average='macro')
+        f1_scorer = make_scorer(f1_score)
+        precision_scorer = make_scorer(precision_score)
+        recall_scorer = make_scorer(recall_score)
+        accuracy_scorer = make_scorer(accuracy_score)
+
+        metrics = (f1_macro_scorer, f1_scorer, precision_scorer, recall_scorer, accuracy_scorer)
+        metrics_names = ('Macro F1', 'F1', 'Precision', 'Recall', 'Accuracy')
+
+        grid = {
+            'max_depth': [3, 5, 7, 10, 20, None],
+            'loss': ['log_loss', 'exponential'],
+            'n_estimators': [20, 50, 100],
+            'criterion': ['friedman_mse', 'squared_error'],
+            'min_samples_leaf': [1, 101, 301, 501],
+            'min_samples_split': [2, 20, 100, 300],
+            'learning_rate': [0.01, 0.1, 0.3, 0.5, 1],  
+        }
+
+        for i, metric in enumerate(metrics):
+            grid_search = GridSearchCV(
+                estimator=GradientBoostingClassifier(random_state=42),
+                param_grid=grid,
+                cv=5,
+                n_jobs=-1,
+                scoring=metric,
+                verbose=2
+            )
+
+            grid_search.fit(jogos, rotulos)
+
+            best_score = grid_search.best_score_
+            cv_results = grid_search.cv_results_
+
+            matching_models = [
+                (score, params) for score, params in zip(cv_results['mean_test_score'], cv_results['params']) if score == best_score
+            ]
+
+            for score, params in matching_models:
+                print(f"Metric: {metrics_names[i]}, Score: {score:.4f}, Parameters: {params}")
+
+            resultados_grid[metrics_names[i]] = {
+                "best_score": best_score,
+                "matching_models": matching_models
+            }
+
+            joblib.dump(grid_search, f'./classes/classification/models/GB Best {metrics_names[i]}')
+
+        ClassificaEstados.salva_testes(resultados_grid, './classes/classification/results/Gradient Boosting/gradient')
+
+        return
+    
+    @staticmethod
+    def optuna_MLP(jogos, rotulos):
+
+        resultados_optuna = {}
+
+        # Scorers
+        scorers = {
+            'F1': make_scorer(f1_score),
+            'Precision': make_scorer(precision_score),
+            'Accuracy': make_scorer(accuracy_score)
+        }
+
+        # Pipeline
+        pipeline = Pipeline([
+            ('scaler', StandardScaler()),
+            ('mlp', MLPClassifier(max_iter=500, random_state=42))
+        ])
+
+        param_space = {
+            'hidden_layer_sizes': [(50,), (100,), (50, 50)],
+            'activation': ['tanh', 'relu'],
+            'solver': ['adam', 'sgd'],
+            'alpha': [0.0001, 0.001],
+            'learning_rate': ['constant', 'adaptive']
+        }
+
+        for metric_name, scorer in scorers.items():
+            def objective(trial):
+                params = {
+                    'hidden_layer_sizes': trial.suggest_categorical('hidden_layer_sizes', param_space['hidden_layer_sizes']),
+                    'activation': trial.suggest_categorical('activation', param_space['activation']),
+                    'solver': trial.suggest_categorical('solver', param_space['solver']),
+                    'alpha': trial.suggest_categorical('alpha', param_space['alpha']),
+                    'learning_rate': trial.suggest_categorical('learning_rate', param_space['learning_rate'])
+                }
+                pipeline.set_params(mlp__hidden_layer_sizes=params['hidden_layer_sizes'],
+                                    mlp__activation=params['activation'],
+                                    mlp__solver=params['solver'],
+                                    mlp__alpha=params['alpha'],
+                                    mlp__learning_rate=params['learning_rate'])
+
+                score = cross_val_score(pipeline, jogos, rotulos, cv=5, scoring=scorer, n_jobs=-1)
+                return score.mean()
+
+            study = optuna.create_study(direction='maximize')
+            study.optimize(objective, n_trials=50, n_jobs=-1)
+
+            best_score = study.best_value
+            best_params = study.best_params
+
+            print(f"Metric: {metric_name}, Score: {best_score:.4f}, Parameters: {best_params}")
+
+            resultados_optuna[metric_name] = {
+                "best_score": best_score,
+                "best_params": best_params
+            }
+
+            joblib.dump(study, f'./classes/classification/models/MLP Best {metric_name}')
+
+        ClassificaEstados.salva_testes(resultados_optuna, './classes/classification/results/MLP/mlp')
+
+        return
+    
+    @staticmethod
+    def optuna_GB(jogos, rotulos):
+
+        resultados_optuna = {}
+
+        scorers = {
+            'F1': make_scorer(f1_score),
+            'Precision': make_scorer(precision_score),
+            'Accuracy': make_scorer(accuracy_score)
+        }
+
+        pipeline = Pipeline([
+            ('gb', GradientBoostingClassifier(random_state=42))
+        ])
+
+        param_space = {
+            'n_estimators': [50, 100, 150],
+            'learning_rate': [0.01, 0.1, 0.2],
+            'max_depth': [5, 10, 15],
+            'min_samples_split': [5, 20, 50],
+            'min_samples_leaf': [5, 20, 50],
+        }
+
+        for metric_name, scorer in scorers.items():
+            def objective(trial):
+                params = {
+                    'n_estimators': trial.suggest_categorical('n_estimators', param_space['n_estimators']),
+                    'learning_rate': trial.suggest_categorical('learning_rate', param_space['learning_rate']),
+                    'max_depth': trial.suggest_categorical('max_depth', param_space['max_depth']),
+                    'min_samples_split': trial.suggest_categorical('min_samples_split', param_space['min_samples_split']),
+                    'min_samples_leaf': trial.suggest_categorical('min_samples_leaf', param_space['min_samples_leaf'])
+                }
+
+                pipeline.set_params(gb__n_estimators=params['n_estimators'],
+                                    gb__learning_rate=params['learning_rate'],
+                                    gb__max_depth=params['max_depth'],
+                                    gb__min_samples_split=params['min_samples_split'],
+                                    gb__min_samples_leaf=params['min_samples_leaf'])
+
+                score = cross_val_score(pipeline, jogos, rotulos, cv=5, scoring=scorer, n_jobs=-1)
+                return score.mean()
+
+            study = optuna.create_study(direction='maximize')
+            study.optimize(objective, n_trials=50, n_jobs=-1)
+
+            best_score = study.best_value
+            best_params = study.best_params
+
+            print(f"Metric: {metric_name}, Score: {best_score:.4f}, Parameters: {best_params}")
+
+            resultados_optuna[metric_name] = {
+                "best_score": best_score,
+                "best_params": best_params
+            }
+
+            joblib.dump(study, f'./classes/classification/models/GB Best {metric_name}')
+
+        ClassificaEstados.salva_testes(resultados_optuna, './classes/classification/results/GB/gb')
+
+        return
+    
+    @staticmethod
+    def optuna_CART(jogos, rotulos):
+
+        resultados_optuna = {}
+
+        scorers = {
+            'Accuracy': make_scorer(accuracy_score),
+            'Precision': make_scorer(precision_score),
+            'F1 Score': make_scorer(f1_score)
+        }
+
+        save_path = './classes/classification/models/CART'
+        os.makedirs(save_path, exist_ok=True)
+
+        for metric_name, scorer in scorers.items():
+            base_pipeline = Pipeline([
+                ('cart', DecisionTreeClassifier(random_state=42))
+            ])
+
+            param_space = {
+                'max_depth': (15, 50),
+                'min_samples_leaf': (1, 501),
+                'min_samples_split': (2, 300),
+                'class_weight': ['{0: 1, 1: 5}', '{0: 1, 1: 4}', '{0: 1, 1: 3}', '{0: 1, 1: 2}', '{0: 1, 1: 1}'],
+                'criterion': ['gini', 'entropy', 'log_loss']
+            }
+
+            best_model = None  # modelo com melhor score
+            best_score = -1
+            best_params = {}
+
+            def objective(trial):
+                nonlocal best_model, best_score, best_params
+
+                max_depth = None if trial.suggest_categorical("use_none_max_depth", [True, False]) \
+                    else int(trial.suggest_float('max_depth', *param_space['max_depth']))
+
+                params = {
+                    'max_depth': max_depth,
+                    'criterion': trial.suggest_categorical('criterion', param_space['criterion']),
+                    'min_samples_leaf': int(trial.suggest_float('min_samples_leaf', *param_space['min_samples_leaf'])),
+                    'min_samples_split': int(trial.suggest_float('min_samples_split', *param_space['min_samples_split'])),
+                    'class_weight': ast.literal_eval(trial.suggest_categorical('class_weight', param_space['class_weight']))
+                }
+
+                pipeline = clone(base_pipeline)
+                pipeline.set_params(cart__max_depth=params['max_depth'],
+                                    cart__criterion=params['criterion'],
+                                    cart__min_samples_leaf=params['min_samples_leaf'],
+                                    cart__min_samples_split=params['min_samples_split'],
+                                    cart__class_weight=params['class_weight'])
+
+                score = cross_val_score(pipeline, jogos, rotulos, cv=5, scoring=scorer, n_jobs=-1).mean()
+
+                if score > best_score:
+                    best_score = score
+                    best_params = params
+                    pipeline.fit(jogos, rotulos)
+                    best_model = pipeline
+
+                return score
+
+            study = optuna.create_study(direction='maximize')
+            study.optimize(objective, n_trials=1000, n_jobs=1)
+
+            print(f"Metric: {metric_name}, Score: {best_score:.4f}, Parameters: {best_params}")
+
+            # salva modelo com melhor score
+            model_path = os.path.join(save_path, f'CART_{metric_name.replace(" ", "_")}_BestModel.joblib')
+            joblib.dump(best_model, model_path)
+
+            # salva study
+            joblib.dump(study, f'./classes/classification/models/CART_Best_{metric_name.replace(" ", "_")}.pkl')
+
+            resultados_optuna[metric_name] = {
+                "best_score": best_score,
+                "best_params": best_params
+            }
+
+        ClassificaEstados.salva_testes(resultados_optuna, './classes/classification/results/CART/cart')
+        return
+    
+    @staticmethod
+    def optuna_RF(jogos, rotulos):
+
+        resultados_optuna = {}
+
+        scorers = {
+            'Accuracy': make_scorer(accuracy_score),
+            'Precision': make_scorer(precision_score),
+            'F1 Score': make_scorer(f1_score)
+        }
+
+        save_path = './classes/classification/models/RF'
+        os.makedirs(save_path, exist_ok=True)
+
+        for metric_name, scorer in scorers.items():
+            base_pipeline = Pipeline([
+                ('rf', RandomForestClassifier(random_state=42))
+            ])
+
+            best_model = None
+            best_score = -1
+            best_params = {}
+
+            def objective(trial):
+                nonlocal best_model, best_score, best_params
+
+                max_depth = None if trial.suggest_categorical("use_none_max_depth", [True, False]) \
+                    else int(trial.suggest_float('max_depth', 15, 50))
+
+                params = {
+                    'n_estimators': int(trial.suggest_float('n_estimators', 50, 200)),
+                    'criterion': trial.suggest_categorical('criterion', ['gini', 'entropy', 'log_loss']),
+                    'max_depth': max_depth,
+                    'min_samples_leaf': int(trial.suggest_float('min_samples_leaf', 1, 501)),
+                    'min_samples_split': int(trial.suggest_float('min_samples_split', 2, 300)),
+                    'class_weight': trial.suggest_categorical('class_weight', [{0: 1, 1: w} for w in [5, 4, 3, 2, 1]])
+                }
+
+                pipeline = clone(base_pipeline)
+                pipeline.set_params(rf__n_estimators=params['n_estimators'],
+                                    rf__criterion=params['criterion'],
+                                    rf__max_depth=params['max_depth'],
+                                    rf__min_samples_leaf=params['min_samples_leaf'],
+                                    rf__min_samples_split=params['min_samples_split'],
+                                    rf__class_weight=params['class_weight'])
+
+                score = cross_val_score(pipeline, jogos, rotulos, cv=5, scoring=scorer, n_jobs=-1).mean()
+
+                if score > best_score:
+                    best_score = score
+                    best_params = params
+                    pipeline.fit(jogos, rotulos)
+                    best_model = pipeline
+
+                return score
+
+            study = optuna.create_study(direction='maximize')
+            study.optimize(objective, n_trials=1000, n_jobs=1)
+
+            print(f"Metric: {metric_name}, Score: {best_score:.4f}, Parameters: {best_params}")
+
+            joblib.dump(best_model, os.path.join(save_path, f'RF_{metric_name.replace(" ", "_")}_BestModel.joblib'))
+            joblib.dump(study, f'./classes/classification/models/RF_Best_{metric_name.replace(" ", "_")}.pkl')
+
+            resultados_optuna[metric_name] = {
+                "best_score": best_score,
+                "best_params": best_params
+            }
+
+        ClassificaEstados.salva_testes(resultados_optuna, './classes/classification/results/RF/rf')
+        return
+
+    @staticmethod
+    def carregar_melhores_parametros(caminho_study):
+        study = joblib.load(caminho_study)
+        best_params = study.best_params
+        return best_params
+
+    @staticmethod
+    def treinar_e_avaliar_MLP(jogos, rotulos, best_params):
+        # monta o pipeline com os melhores hiperparâmetros
+        pipeline = Pipeline([
+            ('scaler', StandardScaler()),
+            ('mlp', MLPClassifier(max_iter=500, random_state=42, **best_params))
+        ])
+
+        # métricas
+        scorers = {
+            'accuracy': make_scorer(accuracy_score),
+            'precision': make_scorer(precision_score),
+            'recall': make_scorer(recall_score),
+            'f1_score': make_scorer(f1_score)
+        }
+
+        resultados = {}
+        for nome, scorer in scorers.items():
+            scores = cross_val_score(pipeline, jogos, rotulos, cv=5, scoring=scorer, n_jobs=-1)
+            resultados[nome] = np.mean(scores)
+
+        return resultados
+        
+    @staticmethod
+    def treinar_e_avaliar_GB(jogos, rotulos, best_params):
+        pipeline = Pipeline([
+            ('gb', GradientBoostingClassifier(random_state=42, **best_params))
+        ])
+
+        scorers = {
+            'accuracy': make_scorer(accuracy_score),
+            'precision': make_scorer(precision_score),
+            'recall': make_scorer(recall_score),
+            'f1_score': make_scorer(f1_score)
+        }
+
+        resultados = {}
+        for nome, scorer in scorers.items():
+            scores = cross_val_score(pipeline, jogos, rotulos, cv=5, scoring=scorer, n_jobs=-1)
+            resultados[nome] = np.mean(scores)
+
+        return resultados
+
+    @staticmethod
+    def avaliar_melhores_modelos(jogos, rotulos, caminho_hiperparametros_txt, caminho_saida_resultados, modelo='MLP'):
+        import ast
+
+        with open(caminho_hiperparametros_txt, 'r') as f:
+            conteudo = f.read()
+
+        blocos = conteudo.strip().split('----------------------------------------\n')
+
+        with open(caminho_saida_resultados, 'w') as out:
+            for bloco in blocos:
+                if not bloco.strip():
+                    continue
+
+                linhas = bloco.strip().split('\n')
+                nome_modelo = linhas[0].split(': ')[1]
+                hiperparametros_str = linhas[2].split(': ', 1)[1]
+                hiperparametros = ast.literal_eval(hiperparametros_str)
+
+                if modelo == 'MLP':
+                    resultado = ClassificaEstados.treinar_e_avaliar_MLP(jogos, rotulos, hiperparametros)
+                else:
+                    resultado = ClassificaEstados.treinar_e_avaliar_GB(jogos, rotulos, hiperparametros)
+
+                out.write(f"Modelo: {nome_modelo}\n")
+                for metrica, valor in resultado.items():
+                    if metrica != 'confusion_matrix':
+                        out.write(f"{metrica}: {valor:.4f}\n")
+                    else:
+                        out.write("Matriz de Confusão:\n")
+                        out.write(str(valor) + "\n")
+                out.write("-" * 40 + "\n")
+
+    @staticmethod
+    def gerar_relatorio_melhores_models(diretorio_studies, caminho_saida_txt, modelo_desejado):
+        melhores_modelos = {
+            'Accuracy': {},
+            'Precision': {},
+            'F1': {}
+        }
+
+        for arquivo in os.listdir(diretorio_studies):
+            caminho_study = os.path.join(diretorio_studies, arquivo)
+            if os.path.isdir(caminho_study):
+                continue
+
+            # Filtra os arquivos do modelo correto
+            if modelo_desejado not in arquivo:
+                continue
+
+            try:
+                study = joblib.load(caminho_study)
+            except Exception as e:
+                print(f"Falha ao carregar {arquivo}: {e}")
+                continue
+
+            if 'F1' in arquivo:
+                metrica = 'F1'
+            elif 'Precision' in arquivo:
+                metrica = 'Precision'
+            elif 'Accuracy' in arquivo:
+                metrica = 'Accuracy'
+            else:
+                continue
+
+            for trial in study.trials:
+                score = trial.value
+                params = trial.params
+
+                if score not in melhores_modelos[metrica]:
+                    melhores_modelos[metrica][score] = []
+
+                melhores_modelos[metrica][score].append({
+                    'modelo': modelo_desejado,
+                    'params': params
+                })
+
+        with open(caminho_saida_txt, 'w') as f:
+            for metrica, modelos_dict in melhores_modelos.items():
+                if not modelos_dict:
+                    continue
+
+                melhor_score = max(modelos_dict.keys())
+                modelos = modelos_dict[melhor_score]
+
+                prefixo = {'Accuracy': 'A', 'Precision': 'P', 'F1': 'F'}[metrica]
+
+                for idx, modelo_dict in enumerate(modelos, start=1):
+                    nome_modelo = f"{modelo_dict['modelo']}-{prefixo}{idx}"
+                    f.write(f"Modelo: {nome_modelo}\n")
+                    f.write(f"Score {metrica}: {melhor_score:.4f}\n")
+                    f.write(f"Hiperparâmetros: {modelo_dict['params']}\n")
+                    f.write("-" * 40 + "\n")
