@@ -1052,9 +1052,9 @@ class ClassificaEstados:
             ])
 
             param_space = {
-                'max_depth': (15, 50),
-                'min_samples_leaf': (1, 501),
-                'min_samples_split': (2, 300),
+                'max_depth': (2, 50),
+                'min_samples_leaf': (2, 500),
+                'min_samples_split': (2, 500),
                 'class_weight': ['{0: 1, 1: 5}', '{0: 1, 1: 4}', '{0: 1, 1: 3}', '{0: 1, 1: 2}', '{0: 1, 1: 1}'],
                 'criterion': ['gini', 'entropy', 'log_loss']
             }
@@ -1121,6 +1121,9 @@ class ClassificaEstados:
             'Precision': make_scorer(precision_score),
             'F1 Score': make_scorer(f1_score)
         }
+        param_space = {
+            'class_weight': ['{0: 1, 1: 5}', '{0: 1, 1: 4}', '{0: 1, 1: 3}', '{0: 1, 1: 2}', '{0: 1, 1: 1}'],
+        }
 
         save_path = './classes/classification/models/RF'
         os.makedirs(save_path, exist_ok=True)
@@ -1135,12 +1138,12 @@ class ClassificaEstados:
                     else int(trial.suggest_float('max_depth', 15, 50))
 
                 params = {
-                    'n_estimators': int(trial.suggest_float('n_estimators', 50, 200)),
+                    'n_estimators': int(trial.suggest_float('n_estimators', 50, 1000)),
                     'criterion': trial.suggest_categorical('criterion', ['gini', 'entropy', 'log_loss']),
                     'max_depth': max_depth,
-                    'min_samples_leaf': int(trial.suggest_float('min_samples_leaf', 1, 501)),
-                    'min_samples_split': int(trial.suggest_float('min_samples_split', 2, 300)),
-                    'class_weight': trial.suggest_categorical('class_weight', [{0: 1, 1: w} for w in [5, 4, 3, 2, 1]])
+                    'min_samples_leaf': int(trial.suggest_float('min_samples_leaf', 2, 500)),
+                    'min_samples_split': int(trial.suggest_float('min_samples_split', 2, 500)),
+                    'class_weight': ast.literal_eval(trial.suggest_categorical('class_weight', param_space['class_weight']))
                 }
 
                 pipeline = clone(base_pipeline)
