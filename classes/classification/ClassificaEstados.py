@@ -1034,6 +1034,26 @@ class ClassificaEstados:
         return
     
     @staticmethod
+    def early_stopping_callback(patience):
+        best_score = -float("inf")
+        no_improve_count = 0
+
+        def callback(study, trial):
+            nonlocal best_score, no_improve_count
+
+            if trial.value is not None and trial.value > best_score:
+                best_score = trial.value
+                no_improve_count = 0
+            else:
+                no_improve_count += 1
+
+            if no_improve_count >= patience:
+                print(f"Early stopping triggered after {patience} trials without improvement.")
+                study.stop()
+
+        return callback
+
+    @staticmethod
     def optuna_CART(jogos, rotulos):
         resultados_optuna = {}
 
@@ -1081,7 +1101,7 @@ class ClassificaEstados:
                 return cross_val_score(pipeline, jogos, rotulos, cv=5, scoring=scorer, n_jobs=-1).mean()
 
             study = optuna.create_study(direction='maximize')
-            study.optimize(objective, n_trials=1000, n_jobs=1)
+            study.optimize(objective, n_trials=10000, n_jobs=1, callbacks=[ClassificaEstados.early_stopping_callback(patience=100)])
 
             best_score = study.best_value
             best_trials = [t for t in study.trials if t.value == best_score]
@@ -1122,7 +1142,12 @@ class ClassificaEstados:
             'F1 Score': make_scorer(f1_score)
         }
         param_space = {
-            'class_weight': ['{0: 1, 1: 5}', '{0: 1, 1: 4}', '{0: 1, 1: 3}', '{0: 1, 1: 2}', '{0: 1, 1: 1}'],
+            'n_estimators': (50, 1000),
+            'max_depth': (15, 50),
+            'min_samples_leaf': (2, 500),
+            'min_samples_split': (2, 500),
+            'criterion': ['gini', 'entropy', 'log_loss'],
+            'class_weight': ['{0: 1, 1: 5}', '{0: 1, 1: 4}', '{0: 1, 1: 3}', '{0: 1, 1: 2}', '{0: 1, 1: 1}']
         }
 
         save_path = './classes/classification/models/RF'
@@ -1135,14 +1160,14 @@ class ClassificaEstados:
 
             def objective(trial):
                 max_depth = None if trial.suggest_categorical("use_none_max_depth", [True, False]) \
-                    else int(trial.suggest_float('max_depth', 15, 50))
+                    else int(trial.suggest_float('max_depth', *param_space['max_depth']))
 
                 params = {
-                    'n_estimators': int(trial.suggest_float('n_estimators', 50, 1000)),
-                    'criterion': trial.suggest_categorical('criterion', ['gini', 'entropy', 'log_loss']),
+                    'n_estimators': int(trial.suggest_float('n_estimators', *param_space['n_estimators'])),
+                    'criterion': trial.suggest_categorical('criterion', param_space['criterion']),
                     'max_depth': max_depth,
-                    'min_samples_leaf': int(trial.suggest_float('min_samples_leaf', 2, 500)),
-                    'min_samples_split': int(trial.suggest_float('min_samples_split', 2, 500)),
+                    'min_samples_leaf': int(trial.suggest_float('min_samples_leaf', *param_space['min_samples_leaf'])),
+                    'min_samples_split': int(trial.suggest_float('min_samples_split', *param_space['min_samples_split'])),
                     'class_weight': ast.literal_eval(trial.suggest_categorical('class_weight', param_space['class_weight']))
                 }
 
@@ -1157,7 +1182,7 @@ class ClassificaEstados:
                 return cross_val_score(pipeline, jogos, rotulos, cv=5, scoring=scorer, n_jobs=-1).mean()
 
             study = optuna.create_study(direction='maximize')
-            study.optimize(objective, n_trials=1000, n_jobs=1)
+            study.optimize(objective, n_trials=10000, n_jobs=1, callbacks=[ClassificaEstados.early_stopping_callback(patience=100)])
 
             best_score = study.best_value
             best_trials = [t for t in study.trials if t.value == best_score]
@@ -1174,7 +1199,7 @@ class ClassificaEstados:
                                     rf__max_depth=max_depth,
                                     rf__min_samples_leaf=int(params['min_samples_leaf']),
                                     rf__min_samples_split=int(params['min_samples_split']),
-                                    rf__class_weight=params['class_weight'])
+                                    rf__class_weight=ast.literal_eval(params['class_weight']))
                 pipeline.fit(jogos, rotulos)
 
                 joblib.dump(pipeline, os.path.join(save_path, f'RF_{metric_name.replace(" ", "_")}_BestModel_{i}.joblib'))

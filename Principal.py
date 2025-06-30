@@ -58,7 +58,7 @@ diretorio_studies = './classes/classification/models/'
 # Caminho onde o relatório será salvo
 caminho_saida_txt = './classes/classification/results/resultados_melhores_MLP.txt'
 
-ClassificaEstados.optuna_CART(jogos, rotulos)
+#ClassificaEstados.optuna_CART(jogos, rotulos)
 ClassificaEstados.optuna_RF(jogos, rotulos)
 
 #ClassificaEstados.carregar_melhores_parametros('./classes/classification/models/MLP Best Precision')
