@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 import ast
 import os
+import pickle
 import traceback
 from more_itertools import sort_together
 import numpy as np
@@ -1128,8 +1129,7 @@ class ClassificaEstados:
                 "best_score": best_score,
                 "n_models_saved": len(best_trials)
             }
-
-        ClassificaEstados.salva_testes(resultados_optuna, './classes/classification/results/CART/cart')
+            
         return
     
     @staticmethod
@@ -1143,7 +1143,7 @@ class ClassificaEstados:
         }
         param_space = {
             'n_estimators': (50, 1000),
-            'max_depth': (15, 50),
+            'max_depth': (2, 50),
             'min_samples_leaf': (2, 500),
             'min_samples_split': (2, 500),
             'criterion': ['gini', 'entropy', 'log_loss'],
@@ -1211,7 +1211,6 @@ class ClassificaEstados:
                 "n_models_saved": len(best_trials)
             }
 
-        ClassificaEstados.salva_testes(resultados_optuna, './classes/classification/results/RF/rf')
         return
 
     @staticmethod
@@ -1262,6 +1261,25 @@ class ClassificaEstados:
             resultados[nome] = np.mean(scores)
 
         return resultados
+    
+    @staticmethod
+    def avaliar_modelo_carregado(caminho_modelo, X_teste, y_teste, nome_saida):
+        modelo = joblib.load(caminho_modelo)
+        y_pred = modelo.predict(X_teste)
+
+        resultados = {
+            'accuracy': accuracy_score(y_teste, y_pred),
+            'precision': precision_score(y_teste, y_pred, zero_division=0),
+            'recall': recall_score(y_teste, y_pred, zero_division=0),
+            'f1_score': f1_score(y_teste, y_pred, zero_division=0)
+        }
+
+        with open(f"./classes/classification/results/{nome_saida}", 'a') as f:
+            f.write(f"\nModelo: {caminho_modelo}\n")
+            for metrica, valor in resultados.items():
+                f.write(f"  {metrica}: {valor:.4f}\n")
+
+        return resultados
 
     @staticmethod
     def avaliar_melhores_modelos(jogos, rotulos, caminho_hiperparametros_txt, caminho_saida_resultados, modelo='MLP'):
@@ -1284,8 +1302,12 @@ class ClassificaEstados:
 
                 if modelo == 'MLP':
                     resultado = ClassificaEstados.treinar_e_avaliar_MLP(jogos, rotulos, hiperparametros)
-                else:
+                elif modelo == "GB":
                     resultado = ClassificaEstados.treinar_e_avaliar_GB(jogos, rotulos, hiperparametros)
+                elif modelo == "CART":
+                    resultado = ClassificaEstados.treinar_e_avaliar_CART(jogos, rotulos, hiperparametros)
+                elif modelo == "RF":
+                    resultado = ClassificaEstados.treinar_e_avaliar_RF(jogos, rotulos, hiperparametros)
 
                 out.write(f"Modelo: {nome_modelo}\n")
                 for metrica, valor in resultado.items():
@@ -1356,3 +1378,69 @@ class ClassificaEstados:
                     f.write(f"Score {metrica}: {melhor_score:.4f}\n")
                     f.write(f"Hiperparâmetros: {modelo_dict['params']}\n")
                     f.write("-" * 40 + "\n")
+
+    @staticmethod
+    def analise_study(study_path):
+
+        study = joblib.load(study_path)
+        # Print geral
+        print(f"\nStudy: {study.study_name}")
+        print(f"Directions: {study.directions}")
+        print(f"N trials: {len(study.trials)}")
+        print(f"Best value: {study.best_value}")
+        print(f"Best params: {study.best_params}\n")
+        
+        # Print de todos os trials
+        for trial in study.trials:
+            print(f"Trial #{trial.number}")
+            print(f"  State: {trial.state}")
+            print(f"  Value: {trial.value}")
+            print(f"  Params: {trial.params}")
+            print(f"  Duration: {trial.duration}")
+            print(f"  User attrs: {trial.user_attrs}")
+            print(f"  System attrs: {trial.system_attrs}")
+            print()
+
+            print("-" * 40)
+            
+        return
+    
+    @staticmethod
+    def study_best_trials(study_path):
+
+        study = joblib.load(study_path)
+        
+        # Pega o maior valor
+        best_value = study.best_value
+
+        # Filtra os trials com esse valor
+        melhores_trials = [t for t in study.trials if t.value == best_value]
+
+        # Printa todos
+        for trial in melhores_trials:
+            print("-" * 40)
+            print(f"Trial #{trial.number}")
+            print(f"Value: {trial.value}")
+            print("Params:")
+            for k, v in trial.params.items():
+                print(f"  {k}: {v}")
+            print(f"State: {trial.state}")
+
+    @staticmethod
+    def optuna_learning_curve(study_path, metric):
+        study = joblib.load(study_path)
+
+        # Extrai dados
+        x = [t.number for t in study.trials if t.value is not None]
+        y = [t.value for t in study.trials if t.value is not None]
+
+        # Plota
+        plt.figure(figsize=(10, 5))
+        plt.plot(x, y, marker='o', linestyle='-', color='blue', label='Score por trial')
+        plt.title("Evolução do Score por Trial")
+        plt.xlabel("Trial #")
+        plt.ylabel(f"{metric} Score")
+        plt.grid(True)
+        plt.legend()
+        plt.tight_layout()
+        plt.show()
