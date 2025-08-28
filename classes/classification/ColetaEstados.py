@@ -1,3 +1,6 @@
+import csv
+import os
+import sys
 from matplotlib import pyplot as plt
 import seaborn as sns
 from classes.classification.ClassificaEstados import ClassificaEstados
@@ -30,6 +33,12 @@ combinacoes = list(combinations_with_replacement(estrategias, 5))
 
 qtd_comb = len(combinacoes)
 
+pasta = r"C:\Users\djona\Programação\siradels\classes\classification\samples\sample_by_round"
+arquivos = [f"X_progress_20.csv", f"X_progress_40.csv", f"X_progress_60.csv", f"X_progress_80.csv", f"X_progress_100.csv",
+            f"Y_progress_20.csv", f"Y_progress_40.csv", f"Y_progress_60.csv", f"Y_progress_80.csv", f"Y_progress_100.csv"]
+
+os.makedirs(pasta, exist_ok=True)
+
 #print("Quantidade de Combinações:", qtd_comb)
 
 class ColetaEstados:
@@ -43,6 +52,10 @@ class ColetaEstados:
         # Inicializa dicionários de resultados
         resultados_total: dict[str, (int, int, int, int, int, int, int)] = dict()
         resultados: dict[str, (int, int, int, int, int, int)] = dict()
+        for arquivo in arquivos:
+            caminho = os.path.join(pasta, arquivo)
+            with open(caminho, 'w', newline='') as f:
+                pass  # só cria/trunca o arquivo, limpa o conteúdo
 
         # Inicializa resultados para cada estratégia
         for i, jogador in enumerate(estrategias):
@@ -53,7 +66,7 @@ class ColetaEstados:
         while num_simulacao < qtd_simulacao:
             print(f"Simulação {num_simulacao+1}/{qtd_simulacao}")
 
-            for i, p in enumerate(combinacoes):
+            """ for i, p in enumerate(combinacoes):
                 # Executa simulação com a combinação de estratégias
                 simulacao = SimulacaoColeta(list(p))
                 estado_final, X_coleta, Y_coleta, n_rodada = simulacao.rodar_simulacao(X_inicial, nome_modelo)
@@ -62,7 +75,43 @@ class ColetaEstados:
                 X = np.vstack((X, X_coleta))
 
                 # Armazena rótulos
+                Y.extend(Y_coleta for _ in range(n_rodada)) """
+                
+            for i, p in enumerate(combinacoes):
+                Y = []
+                simulacao = SimulacaoColeta(list(p))
+                estado_final, X_coleta, Y_coleta, n_rodada = simulacao.rodar_simulacao(X_inicial, nome_modelo)
+
+                X_coleta = np.delete(X_coleta, 0, axis=0)
                 Y.extend(Y_coleta for _ in range(n_rodada))
+
+                for r in range(n_rodada):
+
+                    divisao = (n_rodada+1) / 5
+                    if r < divisao:
+                        nome_arquivo = "progress_20.csv"
+                    elif r < 2 * divisao:
+                        nome_arquivo = "progress_40.csv"
+                    elif r < 3 * divisao:
+                        nome_arquivo = "progress_60.csv"
+                    elif r < 4 * divisao:
+                        nome_arquivo = "progress_80.csv"
+                    else:
+                        nome_arquivo = "progress_100.csv"
+
+                    arq_X = os.path.join(pasta, f"X_{nome_arquivo}")
+                    arq_Y = os.path.join(pasta, f"Y_{nome_arquivo}")
+
+                    #print(n_rodada, r, X_coleta[r], Y)
+
+                    with open(arq_X, 'a', newline='') as fx:
+                        csv.writer(fx).writerow(X_coleta[r])
+
+                    with open(arq_Y, 'a', newline='') as fy:
+                        csv.writer(fy).writerow([Y[r]]) 
+                    #print(f"Rodada {r+1} de {n_rodada} gravando em {nome_arquivo}")
+
+                    #assert len(X_coleta) == len(Y), f"Tamanhos diferentes: {len(X_coleta)} vs {len(Y)}"
 
                 # Atualiza os resultados da simulação
                 for jogador in estado_final.jogadores:
@@ -82,13 +131,13 @@ class ColetaEstados:
                     resultados[chave] = (int(jogador.vencedor) + vitoria, seg, ter, qua, qui, jogador.pontuacao_final + pontuacao)
             
             # Conta quantas vezes uma estratégia apareceu em uma lista para a combinação
-            count = 0
+            # Conta participações reais por jogador nas combinações
+            participacoes_simulacao = {estrategia.nome: 0 for estrategia in estrategias}
+            for combinacao in combinacoes:
+                for jogador in combinacao:
+                    participacoes_simulacao[jogador.nome] += 1
+
             num_simulacao += 1
-            for i in combinacoes:
-                for j in i:
-                    if j.nome == estrategias[0].nome:
-                        count += 1
-                        break
 
             # Acumula os resultados de todas as simulações
             for jogador, resultado in resultados.items():
@@ -99,7 +148,9 @@ class ColetaEstados:
                 qua += resultados_total[jogador][3]
                 qui += resultados_total[jogador][4]
                 pontuacao += resultados_total[jogador][5]
-                resultados_total[jogador] = (vitoria, seg, ter, qua, qui, pontuacao, resultados_total[jogador][6] + count)
+                participacoes = resultados_total[jogador][6] + participacoes_simulacao[jogador]
+
+                resultados_total[jogador] = (vitoria, seg, ter, qua, qui, pontuacao, participacoes)
 
         # Calcula estatísticas finais para cada jogador
         resultados_jogadores = {}
@@ -130,7 +181,7 @@ class ColetaEstados:
         # Remove primeira linha nula
         X = np.delete(X, 0, axis=0)
         ClassificaEstados.salva_testes(resultados_jogadores,"./classes/classification/results/Resultado da Coleta")
-        ClassificaEstados.salvar_amostras(X, Y, jogos, rotulos)
+        #ClassificaEstados.salvar_amostras(X, Y, jogos, rotulos)
         #ClassificaEstados.treinar_modelo(X, Y)
 
     @staticmethod
@@ -141,11 +192,10 @@ class ColetaEstados:
         dados['label'] = rotulos['label']
 
         correlacoes = dados.corr()['label'].drop('label')
-        '''
         matriz_corr = dados.corr()
 
         # Salvar correlacoes + linha em branco + matriz_corr
-        with open('./classes/classification/samples/correlação/correlação.csv', 'w') as f:
+        with open('./classes/classification/samples/correlation/correlação.csv', 'w') as f:
             correlacoes.to_csv(f)
             f.write('\n')  # linha em branco
             matriz_corr.to_csv(f)
@@ -153,16 +203,17 @@ class ColetaEstados:
         # Heatmap
         plt.figure(figsize=(12,10))
         sns.heatmap(matriz_corr, cmap='coolwarm', center=0, annot=False)
-        plt.title('Heatmap da Matriz de Correlação')
+        plt.title('Feature Correlation Heatmap')
         plt.tight_layout()
-        plt.savefig('./classes/classification/samples/correlação/heatmap_correlacao.png')
+        plt.savefig('./classes/classification/samples/correlation/heatmap_correlacao.png')
         plt.close()
-        '''
 
+        '''
         # Heatmap só das correlações com o label
         plt.figure(figsize=(3,12))
         sns.heatmap(pd.DataFrame(correlacoes), cmap='coolwarm', center=0, annot=True, cbar=True)
-        plt.title('Correlação de cada feature com o label')
+        plt.title('Feature-Label Correlation')
         plt.tight_layout()
-        plt.savefig('./classes/classification/samples/correlação/heatmap_correlacao_label.png')
+        plt.savefig('./classes/classification/samples/correlation/heatmap_correlacao_label.png')
         plt.close()
+        '''
