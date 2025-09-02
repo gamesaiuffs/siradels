@@ -486,22 +486,42 @@ class AnaliseResultados:
             model_final = modelo
             X_train_t = X_train
             X_test_t = X_test
+        expl = shap.TreeExplainer(model_final, X_train_t, feature_names=feature_names, model_output="probability")
 
-        expl = shap.Explainer(model_final, X_train_t, feature_names=feature_names, model_output="probability")
-        sv = expl(X_test_t[:1])  # primeira amostra
+        # Waterfall para primeira amostra
+        sv_first = expl(X_test_t[:1])
 
-        # gera gráficos para cada classe (funciona mesmo em versões antigas do shap)
-        for class_idx in range(sv.values.shape[-1]):
+        # Dependence plot para múltiplas amostras
+        subset = X_test_t[:1000]  # ou mais amostras
+        sv_subset = expl(subset)
+
+        X_array = subset.values if hasattr(subset, "values") else np.array(subset)
+
+        # Waterfall plot
+        for class_idx in range(sv_first.values.shape[-1]):
             sv_single = shap.Explanation(
-                values=sv.values[0, :, class_idx],
-                base_values=sv.base_values[0, class_idx],
-                data=sv.data[0],
-                feature_names=sv.feature_names
+                values=sv_first.values[0, :, class_idx],
+                base_values=sv_first.base_values[0, class_idx],
+                data=sv_first.data[0],
+                feature_names=sv_first.feature_names
             )
             shap.waterfall_plot(sv_single)
-            plt.savefig(f"./results/shap_{model_name}_class{class_idx}.png", dpi=300, bbox_inches='tight')
+            plt.savefig(f"./classes/classification/results/shap_{model_name}_class{class_idx}.png", dpi=300, bbox_inches='tight')
             plt.close()
 
+        # Dependence plot
+        for i, feat in enumerate(feature_names):
+            for class_idx in range(sv_subset.values.shape[-1]):
+                shap.dependence_plot(
+                    feat,
+                    sv_subset.values[:, :, class_idx],
+                    X_array,
+                    show=False,
+                    feature_names=feature_names
+                )
+                plt.savefig(f"./classes/classification/results/shap/shap_{model_name}_dependence_{feat}_class{class_idx}.png", dpi=300, bbox_inches='tight')
+                plt.close()
+                
     # Plota árvore
     @staticmethod
     def plot_tree(model_path: str, model_name, nomes_caracteristicas):

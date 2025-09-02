@@ -83,9 +83,9 @@ studies_names = [
     'RF_Best_Precision'
 ]
 
-print(X_test[0])
-print(y_test[0])
-#AnaliseResultados.shap_analysis(X_train, X_test, models[3], feature_names, model_names[3])
+#print(X_test[0])
+#print(y_test[0])
+AnaliseResultados.shap_analysis(X_train, X_test, models[3], feature_names, model_names[3])
 
 #AnaliseResultados.plot_tree(models[2], model_names[2], feature_names)
 
