@@ -1,6 +1,7 @@
-from classes.Experimento import Experimento
-from classes.classification.ColetaEstados import ColetaEstados
+#from classes.Experimento import Experimento
+#from classes.classification.ColetaEstados import ColetaEstados
 from classes.classification.ClassificaEstados import ClassificaEstados
+from classes.classification.AnaliseResultados import AnaliseResultados
 import sys
 caminho = './classes'
 n_features = 30
@@ -26,9 +27,9 @@ feature_names = [
 ]
 metrics = ["Accuracy", "F1_Score", "Precision"]
 
-'''
 #jogos, rotulos = ClassificaEstados.ler_amostras(x, y, False)
 X_train, X_test, y_train, y_test = ClassificaEstados.ler_amostras(x, y, True)
+'''
 
 ClassificaEstados.optuna_CART(X_train, y_train)
 ClassificaEstados.optuna_RF(X_train, y_train)
@@ -51,8 +52,6 @@ models = [
     f'{model_base_path}CART/CART_Accuracy_BestModel_0.joblib', 
     f'{model_base_path}CART/CART_F1_Score_BestModel_0.joblib',
     f'{model_base_path}CART/CART_Precision_BestModel_0.joblib',
-    f'{model_base_path}CART/CART_Precision_BestModel_1.joblib',
-    f'{model_base_path}CART/CART_Precision_BestModel_2.joblib',
     f'{model_base_path}RF/RF_Accuracy_BestModel_0.joblib',
     f'{model_base_path}RF/RF_F1_Score_BestModel_0.joblib',
     f'{model_base_path}RF/RF_Precision_BestModel_0.joblib']
@@ -61,8 +60,6 @@ model_names = [
     "CART_Accuracy",
     "CART_F1",
     "CART_Precision_0",
-    "CART_Precision_1",
-    "CART_Precision_2",
     "RF_Accuracy",
     "RF_F1",
     "RF_Precision"
@@ -86,21 +83,29 @@ studies_names = [
     'RF_Best_Precision'
 ]
 
-#for i in range(len(models)):
-#info_dict = ClassificaEstados.modelo_info(models[5], feature_names)
+print(X_test[0])
+print(y_test[0])
+#AnaliseResultados.shap_analysis(X_train, X_test, models[3], feature_names, model_names[3])
 
+#AnaliseResultados.plot_tree(models[2], model_names[2], feature_names)
+
+#AnaliseResultados.plot_performance()
+
+#for i in range(len(models)):
+#    info_dict = ClassificaEstados.modelo_info(models[i], feature_names)
+#    AnaliseResultados.plot_importances(info_dict["Feature Importances"], model_names[i])
 #ColetaEstados.correlacao()
 
-ColetaEstados.coleta_amostras(30, x, y, '', 1)
+#ColetaEstados.coleta_amostras(30, x, y, '', 1)
 
 #ClassificaEstados.testa_modelos(models, './classes/classification/samples/sample_by_round')
 
 #ClassificaEstados.plot_performance()
 
 #for study in studies:
-#    ClassificaEstados.study_best_trials(study)
+    #ClassificaEstados.study_best_trials(study)
 
-#    ClassificaEstados.plot_importances(info_dict["Feature Importances"], model_names[i])
+
 
 '''
 ClassificaEstados.model_comparation()
