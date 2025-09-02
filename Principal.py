@@ -10,18 +10,19 @@ y = f"Rótulos {n_features}f {data}"
 
 feature_names = [
     # Board features
-    "Round", "Max Districts Built", "Score P1", "Score P2", "Score P3", "Score P4", "Score P5",
+    "Round", "Max Districts Built", "Score P5", "Score P4", "Score P3", "Score P2", "Score P1",
 
     # AP features
-    "Gold (AP)", "Cards in Hand (AP)", "Built Districts (AP)", "Citadel Cost (AP)", "Hand Cost (AP)",
-    "Built District Types (AP)", "Hand District Types (AP)", "Low-Cost District in Hand (AP)",
-    "High-Cost District in Hand (AP)", "Special District in Hand (AP)", "Built Special District (AP)",
-    "Character Rank (AP)",
+    "Gold (AP)", "Cards in Hand (AP)", "Built Districts (AP)", "Built Districts Cost (AP)",
+    "Hand Districts Cost (AP)", "Built District Types (AP)", "Hand District Types (AP)",
+    "Low-Cost Built Districts (AP)", "High-Cost Built Districts (AP)",
+    "Low-Cost Districts in Hand (AP)", "High-Cost Districts in Hand (AP)",
+    "Special Districts in Hand (AP)", "Built Special Districts (AP)", "Character Rank (AP)",
 
     # MVP features
-    "Gold (MVP)", "Cards in Hand (MVP)", "Built Districts (MVP)", "Citadel Cost (MVP)",
-    "Built District Types (MVP)", "Low-Cost Built (MVP)", "High-Cost Built (MVP)", 
-    "Built Special District (MVP)", "Character Rank (MVP)",
+    "Gold (MVP)", "Cards in Hand (MVP)", "Built Districts (MVP)", "Built Districts Cost (MVP)",
+    "Built District Types (MVP)", "Low-Cost Built Districts (MVP)", "High-Cost Built Districts (MVP)",
+    "Built Special Districts (MVP)", "Character Rank (MVP)",
 ]
 metrics = ["Accuracy", "F1_Score", "Precision"]
 

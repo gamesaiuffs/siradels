@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 import ast
 import glob
+import shap
 import os
 import pickle
 import traceback
@@ -1454,8 +1455,8 @@ class ClassificaEstados:
     @staticmethod
     def plot_importances(importances: dict, model_name: str):
         
-        #filtered = {k: v for k, v in importances.items() if v > 0.01}
-        filtered = {k: v for k, v in importances.items()}
+        filtered = {k: v for k, v in importances.items() if v > 0.02}
+        #filtered = {k: v for k, v in importances.items()}
 
         # Ordena por importância decrescente
         sorted_importances = dict(sorted(filtered.items(), key=lambda x: x[1], reverse=True))
@@ -1464,8 +1465,11 @@ class ClassificaEstados:
         plt.figure(figsize=(10, 5))
         plt.barh(list(sorted_importances.keys()), list(sorted_importances.values()))
         plt.xlabel("Importance")
-        plt.title(f"{model_name} Feature importances > 0.01")
+        plt.title(f"{model_name} Feature importances > 0.02")
         plt.gca().invert_yaxis()
+
+        plt.xlim(0, 0.4) # Define o limite do eixo x de 0 a 0.4
+
         plt.tight_layout()
         #salva imagem no diretório de resultados
         plt.savefig(f"./classes/classification/results/feature_importances/all_features/{model_name}_importances.png")
@@ -1618,3 +1622,11 @@ class ClassificaEstados:
         plt.savefig("./classes/classification/results/performance_tests/recall_across_phases.png")
         plt.close()     
         return
+
+    @staticmethod
+    def shap_analysis(X, model_name, feature_names):
+        model = joblib.load(f'./classes/classification/models/{model_name}')
+
+        expl = shap.Explainer(model, X_train_t, feature_names=feature_names, model_output="probability")
+        sv = expl(X_test_t[:1])
+        shap.waterfall_plot(sv[0])
