@@ -183,7 +183,10 @@ class AnaliseResultados:
         
         # Pega o maior valor
         best_value = study.best_value
-
+        print(study_path, ":\n")
+        print(best_value)
+        print(len(study.trials), "trials")
+        '''
         # Filtra os trials com esse valor
         melhores_trials = [t for t in study.trials if t.value == best_value]
 
@@ -203,11 +206,11 @@ class AnaliseResultados:
                 print(f"  {k}: {v}")
             print()
             print("_" * 40)
-   
+        '''
         return
 
     @staticmethod
-    def plot_study_trials(study_path, metric):
+    def plot_study_trials(study_path, metric, model):
         study = joblib.load(study_path)
 
         # Extract data
@@ -217,88 +220,87 @@ class AnaliseResultados:
         # Plot
         plt.figure(figsize=(10, 5))
         plt.plot(x, y, marker='o', linestyle='-', color='blue', label='Score per trial')
-        plt.title("Score Evolution per Trial")
+        plt.title(f"{model} Score Evolution per Trial")
         plt.xlabel("Trial #")
         plt.ylabel(f"{metric} Score")
-        plt.yscale("log")          # Logarithmic scale
-        plt.ylim(1e-3, 0.8)       # Set Y range; avoid 0 for log scale
+        plt.ylim(0, 1)      
+        plt.xscale("log")          # escala logarítmica no eixo X
+        plt.xlim(1, 500) 
         plt.grid(True, which="both", linestyle="--", linewidth=0.5)
         plt.legend()
         plt.tight_layout()
-        plt.savefig(f"./classes/classification/results/study/trials/{metric}_trial.png")
+        plt.savefig(f"./classes/classification/results/study/trials/{model}_trial.png")
         # plt.show()
-    
-    def plot_trials_and_best_value(models_info, metric_name, filename):
-        """
-        Plots a horizontal bar chart comparing number of trials and best value for each model.
 
-        Exemple:
+    @staticmethod
+    def plot_best_values_all_models():
+
+        # Fixed results (trials, best_value)
         models_info = {
-            'CART': (50, 0.72),
-            'RF': (100, 0.78),
-            'XGB': (75, 0.81)
+            "CART-A": (223, 0.7648121643980227),
+            "CART-F1": (194, 0.7013390830685429),
+            "CART-P": (161, 0.7519929140832595),
+            "RF-A": (354, 0.7760183521625710),
+            "RF-F1": (266, 0.7160137294354362),
+            "RF-P": (174, 0.8383395207559905),
         }
-        plot_trials_and_best_value(models_info, metric_name="Accuracy", filename="./trials_best_value.png")
 
-        Args:
-            models_info (dict): Dictionary where keys are model abbreviations (str) and values are
-                                tuples (num_trials, best_value).
-                                Example: {'CART': (50, 0.72), 'RF': (100, 0.78)}
-            metric_name (str): Name of the metric (for labels/title)
-            filename (str): Path to save the figure
-        """
-        models = list(models_info.keys())
-        num_trials = [info[0] for info in models_info.values()]
-        best_values = [info[1] for info in models_info.values()]
-        
-        y_pos = range(len(models))
+        # Ordenar pela pontuação (maior primeiro)  
+        sorted_items = sorted(models_info.items(), key=lambda x: x[1][0], reverse=True)
+        # Para ordenar por trials trocar x[1][1] por x[1][0]
+
+        labels = [k for k, v in sorted_items]
+        trials = [v[0] for k, v in sorted_items]
+        values = [v[1] for k, v in sorted_items]
+        y = np.arange(len(labels))
 
         fig, ax1 = plt.subplots(figsize=(10, 6))
 
-        # First axis: number of trials
-        ax1.barh(y_pos, num_trials, color='skyblue', height=0.4, label='Number of Trials')
-        ax1.set_xlabel("Number of Trials")
-        ax1.set_yticks(y_pos)
-        ax1.set_yticklabels(models)
-        ax1.invert_yaxis()  # Highest on top
+        # Bar para trials (eixo inferior)
+        ax1.barh(y + 0.2, values, height=0.4, color="skyblue", label="Best Value")
+        ax1.set_xlim(0, 1)
+        ax1.set_xlabel("Best Metric Value", labelpad=10)
+        ax1.set_yticks(y)
+        ax1.set_yticklabels(labels)
+        ax1.invert_yaxis()
 
-        # Second axis: best value
-        ax2 = ax1.twiny()  # Share the same y-axis
-        ax2.barh([y + 0.4 for y in y_pos], best_values, color='salmon', height=0.4, label=f"Final {metric_name} Value")
-        ax2.set_xlabel(f"Final {metric_name} Value")
-        
+        # Bar para trials (eixo superior)
+        ax2 = ax1.twiny()
+        ax2.barh(y - 0.2, trials, height=0.4, color="salmon", label="Number of Trials")
+        ax2.set_xlabel("Number of Trials", labelpad=10)
+
         # Legends
-        ax1.legend(loc='lower right')
-        ax2.legend(loc='upper right')
+        ax1.legend(loc="lower right")
+        ax2.legend(loc="upper right")
 
-        plt.title(f"Number of Trials and Final {metric_name} Value per Model")
+        plt.title("Trials and Best Metric Values per Model")
         plt.tight_layout()
-        plt.savefig(filename)
-        # plt.show()
+        plt.savefig(f"./classes/classification/results/study/trials/overview.png")
+        plt.close()
 
     @staticmethod
     def plot_importances(importances: dict, model_name: str):
         
-        filtered = {k: v for k, v in importances.items() if v > 0.02}
-        #filtered = {k: v for k, v in importances.items()}
-
+        filtered = {k: v for k, v in importances.items() if v > 0.03}
         # Ordena por importância decrescente
         sorted_importances = dict(sorted(filtered.items(), key=lambda x: x[1], reverse=True))
         print(sorted_importances)
+
         # Plot
         plt.figure(figsize=(10, 5))
         plt.barh(list(sorted_importances.keys()), list(sorted_importances.values()))
-        plt.xlabel("Importance")
-        plt.title(f"{model_name} Feature importances > 0.02")
+        plt.xlabel("Importance", fontsize=14)
+        plt.ylabel("Features", fontsize=14)
+        plt.title(f"{model_name} Feature Importances > 0.03", fontsize=16)
         plt.gca().invert_yaxis()
-
-        plt.xlim(0, 0.4) # Define o limite do eixo x de 0 a 0.4
-
+        plt.xticks(fontsize=12)
+        plt.yticks(fontsize=12)
+        plt.xlim(0, 0.4)  # Define o limite do eixo x de 0 a 0.4
         plt.tight_layout()
-        #salva imagem no diretório de resultados
-        plt.savefig(f"./classes/classification/results/feature_importances/all_features/{model_name}_importances.png")
 
-        #plt.show()
+        # Salva imagem
+        plt.savefig(f"./classes/classification/results/feature_importances/{model_name}_importances.png")
+        # plt.show()
 
     # Compara os modelos CART e RF treinados
     @staticmethod
@@ -347,12 +349,12 @@ class AnaliseResultados:
         data = {
             "Phase": ["0%-20%", "20%-40%", "40%-60%", "60%-80%", "80%-100%"] * 6,
             "Model": (
-                ["CART_Best_Accuracy"] * 5 +
-                ["CART_Best_F1_score"] * 5 +
-                ["CART_Best_Precision"] * 5 +
-                ["RF_Best_Accuracy"] * 5 +
-                ["RF_Best_F1_score"] * 5 +
-                ["RF_Best_Precision"] * 5
+                ["CART_A"] * 5 +
+                ["CART_F1"] * 5 +
+                ["CART_P"] * 5 +
+                ["RF_A"] * 5 +
+                ["RF_F1"] * 5 +
+                ["RF_P"] * 5
             ),
             "Accuracy": [
                 0.6631, 0.7248, 0.7819, 0.8560, 0.9091,
@@ -397,7 +399,7 @@ class AnaliseResultados:
             plt.plot(subset['Phase'], subset['Accuracy'], marker='o', label=f"{model}")
             
         # Linha de referência para chance aleatória (1 em 5 jogadores)
-        plt.axhline(y=0.2, linestyle='--', color='red', label='Random baseline')
+        plt.axhline(y=0.2, linestyle='--', color='red', label='Baseline')
 
         plt.title("Accuracy of Models Across Game Progress Phases")
         plt.xlabel("Game Progress Phase")
@@ -416,7 +418,7 @@ class AnaliseResultados:
             plt.plot(subset['Phase'], subset['F1'], marker='o', label=f"{model}")
 
         # Linha de referência para chance aleatória (1 em 5 jogadores)
-        plt.axhline(y=0.2, linestyle='--', color='red', label='Random baseline')
+        plt.axhline(y=0.2, linestyle='--', color='red', label='Baseline')
 
         plt.title("F1 Score of Models Across Game Progress Phases")
         plt.xlabel("Game Progress Phase")
@@ -435,7 +437,7 @@ class AnaliseResultados:
             plt.plot(subset['Phase'], subset['Precision'], marker='o', label=f"{model}")
 
         # Linha de referência para chance aleatória (1 em 5 jogadores)
-        plt.axhline(y=0.2, linestyle='--', color='red', label='Random baseline')
+        plt.axhline(y=0.2, linestyle='--', color='red', label='Baseline')
 
         plt.title("Precision of Models Across Game Progress Phases")
         plt.xlabel("Game Progress Phase")
@@ -454,7 +456,7 @@ class AnaliseResultados:
             plt.plot(subset['Phase'], subset['Recall'], marker='o', label=f"{model}")
 
         # Linha de referência para chance aleatória (1 em 5 jogadores)
-        plt.axhline(y=0.2, linestyle='--', color='red', label='Random baseline')    
+        plt.axhline(y=0.2, linestyle='--', color='red', label='Baseline')    
 
         plt.title("Recall of Models Across Game Progress Phases")
         plt.xlabel("Game Progress Phase")

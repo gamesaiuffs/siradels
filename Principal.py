@@ -27,8 +27,6 @@ feature_names = [
 ]
 metrics = ["Accuracy", "F1_Score", "Precision"]
 
-#jogos, rotulos = ClassificaEstados.ler_amostras(x, y, False)
-X_train, X_test, y_train, y_test = ClassificaEstados.ler_amostras(x, y, True)
 '''
 
 ClassificaEstados.optuna_CART(X_train, y_train)
@@ -75,17 +73,29 @@ studies =[
 ]
 
 studies_names = [
-    'CART_Best_Accuracy',
-    'CART_Best_F1_Score',
-    'CART_Best_Precision',
-    'RF_Best_Accuracy',
-    'RF_Best_F1_Score',
-    'RF_Best_Precision'
+    'CART-A',
+    'CART-F1',
+    'CART-P',
+    'RF-A',
+    'RF-F1',
+    'RF-P'
 ]
+
+metrics = [
+    "Accuracy",
+    "F1",
+    "Precision",
+    "Accuracy",
+    "F1",
+    "Precision"
+]
+
+for i in range(len(studies)):
+    AnaliseResultados.plot_study_trials(studies[i], metrics[i], studies_names[i])
 
 #print(X_test[0])
 #print(y_test[0])
-AnaliseResultados.shap_analysis(X_train, X_test, models[3], feature_names, model_names[3])
+#AnaliseResultados.shap_analysis(X_train, X_test, models[3], feature_names, model_names[3])
 
 #AnaliseResultados.plot_tree(models[2], model_names[2], feature_names)
 
@@ -93,7 +103,8 @@ AnaliseResultados.shap_analysis(X_train, X_test, models[3], feature_names, model
 
 #for i in range(len(models)):
 #    info_dict = ClassificaEstados.modelo_info(models[i], feature_names)
-#    AnaliseResultados.plot_importances(info_dict["Feature Importances"], model_names[i])
+#    AnaliseResultados.plot_importances(info_dict["Feature Importances"], studies_names[i])
+
 #ColetaEstados.correlacao()
 
 #ColetaEstados.coleta_amostras(30, x, y, '', 1)
