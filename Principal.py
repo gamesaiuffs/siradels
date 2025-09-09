@@ -1,5 +1,5 @@
 #from classes.Experimento import Experimento
-#from classes.classification.ColetaEstados import ColetaEstados
+from classes.classification.ColetaEstados import ColetaEstados
 from classes.classification.ClassificaEstados import ClassificaEstados
 from classes.classification.AnaliseResultados import AnaliseResultados
 import sys
@@ -90,8 +90,10 @@ metrics = [
     "Precision"
 ]
 
-for i in range(len(studies)):
-    AnaliseResultados.plot_study_trials(studies[i], metrics[i], studies_names[i])
+ColetaEstados.correlacao()
+
+#for i in range(len(studies)):
+#    AnaliseResultados.plot_study_trials(studies[i], metrics[i], studies_names[i])
 
 #print(X_test[0])
 #print(y_test[0])

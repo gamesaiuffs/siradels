@@ -37,7 +37,7 @@ pasta = r"C:\Users\djona\Programação\siradels\classes\classification\samples\s
 arquivos = [f"X_progress_20.csv", f"X_progress_40.csv", f"X_progress_60.csv", f"X_progress_80.csv", f"X_progress_100.csv",
             f"Y_progress_20.csv", f"Y_progress_40.csv", f"Y_progress_60.csv", f"Y_progress_80.csv", f"Y_progress_100.csv"]
 
-os.makedirs(pasta, exist_ok=True)
+#os.makedirs(pasta, exist_ok=True)
 
 #print("Quantidade de Combinações:", qtd_comb)
 
@@ -186,34 +186,48 @@ class ColetaEstados:
 
     @staticmethod
     def correlacao():
+        import matplotlib.pyplot as plt
+        import seaborn as sns
+        import pandas as pd
+
+        # Ler dados
         dados = pd.read_csv('./classes/classification/samples/Jogos 30f 04-10-2024.csv', header=None)
         rotulos = pd.read_csv('./classes/classification/samples/Rótulos 30f 04-10-2024.csv', header=None, names=['label'])
 
         dados['label'] = rotulos['label']
 
-        correlacoes = dados.corr()['label'].drop('label')
-        matriz_corr = dados.corr()
+        # Selecionar apenas as features (colunas 0 a 29)
+        features = dados.iloc[:, 0:30]
+        features.columns = range(1, 31)  # renomear colunas 1-30
 
-        # Salvar correlacoes + linha em branco + matriz_corr
+        # Correlação das features com o label
+        correlacoes = dados.corr()['label'].drop('label')
+        correlacoes.index = range(1, 31)
+
+        # Matriz de correlação entre features
+        matriz_corr = features.corr()
+
+        # Salvar CSV
         with open('./classes/classification/samples/correlation/correlação.csv', 'w') as f:
             correlacoes.to_csv(f)
-            f.write('\n')  # linha em branco
+            f.write('\n')
             matriz_corr.to_csv(f)
-            
-        # Heatmap
-        plt.figure(figsize=(12,10))
-        sns.heatmap(matriz_corr, cmap='coolwarm', center=0, annot=False)
+
+        # Configuração da paleta Nature-friendly e dpi
+        sns.heatmap(matriz_corr, cmap='plasma_r', center=0, annot=True)
+
+        # Heatmap da matriz de correlação
+        plt.figure(figsize=(12,10), dpi=300)
+        sns.heatmap(matriz_corr, cmap='plasma_r', center=0, annot=False)
         plt.title('Feature Correlation Heatmap')
         plt.tight_layout()
-        plt.savefig('./classes/classification/samples/correlation/heatmap_correlacao.png')
+        plt.savefig('./classes/classification/samples/correlation/heatmap_correlacao.png', dpi=300)
         plt.close()
 
-        '''
-        # Heatmap só das correlações com o label
-        plt.figure(figsize=(3,12))
-        sns.heatmap(pd.DataFrame(correlacoes), cmap='coolwarm', center=0, annot=True, cbar=True)
+        # Heatmap da correlação com o label
+        plt.figure(figsize=(12,10), dpi=300)
+        sns.heatmap(pd.DataFrame(correlacoes), cmap='plasma_r', center=0, annot=True, cbar=True)
         plt.title('Feature-Label Correlation')
         plt.tight_layout()
-        plt.savefig('./classes/classification/samples/correlation/heatmap_correlacao_label.png')
+        plt.savefig('./classes/classification/samples/correlation/heatmap_correlacao_label.png', dpi=300)
         plt.close()
-        '''
