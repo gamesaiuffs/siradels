@@ -28,6 +28,7 @@ from sklearn.model_selection import learning_curve
 from sklearn.decomposition import PCA
 from sklearn.model_selection import StratifiedGroupKFold
 import matplotlib.pyplot as plt
+import matplotlib.cm as cm
 import joblib
 from classes.classification.ClassificaEstados import ClassificaEstados
 
@@ -280,22 +281,31 @@ class AnaliseResultados:
 
     @staticmethod
     def plot_importances(importances: dict, model_name: str):
-        
+        # Filtra apenas importâncias > 0.03
         filtered = {k: v for k, v in importances.items() if v > 0.03}
         # Ordena por importância decrescente
         sorted_importances = dict(sorted(filtered.items(), key=lambda x: x[1], reverse=True))
-        print(sorted_importances)
+        #print(sorted_importances)
+
+        values = np.array(list(sorted_importances.values()))
+        features = list(sorted_importances.keys())
+
+        #Gradiente vertical
+        values = np.array(list(sorted_importances.values()))
+        cmap = cm.viridis  # paleta Viridis
+        colors = cmap(values / values.max())  # normaliza para [0,1]
 
         # Plot
         plt.figure(figsize=(10, 5))
-        plt.barh(list(sorted_importances.keys()), list(sorted_importances.values()))
+        plt.barh(features, values, color=plt.cm.viridis(0.15))      # Usa azul do viridis
+        #plt.barh(list(sorted_importances.keys()), values, color=colors)  #Usa gradiente
         plt.xlabel("Importance", fontsize=14)
         plt.ylabel("Features", fontsize=14)
         plt.title(f"{model_name} Feature Importances > 0.03", fontsize=16)
         plt.gca().invert_yaxis()
         plt.xticks(fontsize=12)
         plt.yticks(fontsize=12)
-        plt.xlim(0, 0.4)  # Define o limite do eixo x de 0 a 0.4
+        plt.xlim(0, 0.4)  # define limite do eixo x
         plt.tight_layout()
 
         # Salva imagem
@@ -471,9 +481,14 @@ class AnaliseResultados:
 
     @staticmethod
     def shap_analysis(X_train, X_test, model_path, feature_names, model_name):
+        # Cria diretórios se não existirem
+        base_dir = f"./classes/classification/results/shap/{model_name}/"
+        os.makedirs(base_dir, exist_ok=True)
 
+        # Carrega o modelo
         modelo = joblib.load(model_path)
 
+        # Verifica se é pipeline
         if hasattr(modelo, "steps"):  
             if len(modelo.steps) > 1:
                 preprocessor = modelo[:-1]
@@ -488,42 +503,61 @@ class AnaliseResultados:
             model_final = modelo
             X_train_t = X_train
             X_test_t = X_test
+
+        # Cria TreeExplainer
         expl = shap.TreeExplainer(model_final, X_train_t, feature_names=feature_names, model_output="probability")
 
-        # Waterfall para primeira amostra
-        sv_first = expl(X_test_t[:1])
-
-        # Dependence plot para múltiplas amostras
-        subset = X_test_t[:1000]  # ou mais amostras
-        sv_subset = expl(subset)
-
-        X_array = subset.values if hasattr(subset, "values") else np.array(subset)
-
-        # Waterfall plot
+        # Waterfall plot para a primeira amostra real
+        sv_first = expl(X_test_t.iloc[[0]] if hasattr(X_test_t, "iloc") else X_test_t[:1])
         for class_idx in range(sv_first.values.shape[-1]):
             sv_single = shap.Explanation(
                 values=sv_first.values[0, :, class_idx],
                 base_values=sv_first.base_values[0, class_idx],
                 data=sv_first.data[0],
-                feature_names=sv_first.feature_names
+                feature_names
+                =sv_first.feature_names
             )
-            shap.waterfall_plot(sv_single)
-            plt.savefig(f"./classes/classification/results/shap_{model_name}_class{class_idx}.png", dpi=300, bbox_inches='tight')
-            plt.close()
+        fig = plt.figure(figsize=(12, 6))
+        shap.waterfall_plot(sv_single, max_display=30, show=False)
 
-        # Dependence plot
+        # Mostra na tela
+        plt.show()  
+
+        # Salva
+        plt.savefig(os.path.join(base_dir, f"waterfall_class{class_idx}.png"), dpi=300, bbox_inches='tight')
+        plt.close(fig)
+
+        # Subset para summary e dependence plots
+        subset = X_test_t.iloc[:1000] if hasattr(X_test_t, "iloc") else X_test_t[:1000]
+        sv_subset = expl(subset)
+        X_array = subset.values if hasattr(subset, "values") else np.array(subset)
+
+        # Summary plot
+        plt.figure(figsize=(12, 8))
+        shap.summary_plot(sv_subset, X_array, feature_names=feature_names, show=False)
+
+        # Mostra na tela
+        plt.show()
+
+        # Salva
+        plt.savefig(os.path.join(base_dir, "summary.png"), dpi=300, bbox_inches='tight')
+        plt.close()
+
+        # Dependence plots
         for i, feat in enumerate(feature_names):
             for class_idx in range(sv_subset.values.shape[-1]):
                 shap.dependence_plot(
                     feat,
                     sv_subset.values[:, :, class_idx],
                     X_array,
+                    interaction_index='auto',  # ou None se não quiser cor de interação
                     show=False,
                     feature_names=feature_names
                 )
-                plt.savefig(f"./classes/classification/results/shap/shap_{model_name}_dependence_{feat}_class{class_idx}.png", dpi=300, bbox_inches='tight')
+                plt.savefig(os.path.join(base_dir, f"dependence_{feat}_class{class_idx}.png"), dpi=300, bbox_inches='tight')
                 plt.close()
-                
+
+ 
     # Plota árvore
     @staticmethod
     def plot_tree(model_path: str, model_name, nomes_caracteristicas):
