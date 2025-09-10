@@ -213,12 +213,13 @@ class ColetaEstados:
             f.write('\n')
             matriz_corr.to_csv(f)
 
+        theme = "viridis"
         # Configuração da paleta Nature-friendly e dpi
-        sns.heatmap(matriz_corr, cmap='plasma_r', center=0, annot=True)
+        sns.heatmap(matriz_corr, cmap=theme, center=0, annot=True)
 
         # Heatmap da matriz de correlação
         plt.figure(figsize=(12,10), dpi=300)
-        sns.heatmap(matriz_corr, cmap='plasma_r', center=0, annot=False)
+        sns.heatmap(matriz_corr, cmap=theme, center=0, annot=False)
         plt.title('Feature Correlation Heatmap')
         plt.tight_layout()
         plt.savefig('./classes/classification/samples/correlation/heatmap_correlacao.png', dpi=300)
@@ -226,7 +227,7 @@ class ColetaEstados:
 
         # Heatmap da correlação com o label
         plt.figure(figsize=(12,10), dpi=300)
-        sns.heatmap(pd.DataFrame(correlacoes), cmap='plasma_r', center=0, annot=True, cbar=True)
+        sns.heatmap(pd.DataFrame(correlacoes), cmap=theme, center=0, annot=True, cbar=True)
         plt.title('Feature-Label Correlation')
         plt.tight_layout()
         plt.savefig('./classes/classification/samples/correlation/heatmap_correlacao_label.png', dpi=300)
