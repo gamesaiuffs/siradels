@@ -524,7 +524,7 @@ class AnaliseResultados:
         plt.show()  
 
         # Salva
-        plt.savefig(os.path.join(base_dir, f"waterfall_class{class_idx}.png"), dpi=300, bbox_inches='tight')
+        plt.savefig(os.path.join(base_dir, f"Waterfall/waterfall_class{class_idx}.png"), dpi=300, bbox_inches='tight')
         plt.close(fig)
 
         # Subset para summary e dependence plots
@@ -540,7 +540,7 @@ class AnaliseResultados:
         plt.show()
 
         # Salva
-        plt.savefig(os.path.join(base_dir, "summary.png"), dpi=300, bbox_inches='tight')
+        plt.savefig(os.path.join(base_dir, "Summary/summary.png"), dpi=300, bbox_inches='tight')
         plt.close()
 
         # Dependence plots
@@ -554,10 +554,59 @@ class AnaliseResultados:
                     show=False,
                     feature_names=feature_names
                 )
-                plt.savefig(os.path.join(base_dir, f"dependence_{feat}_class{class_idx}.png"), dpi=300, bbox_inches='tight')
+                plt.savefig(os.path.join(base_dir, f"Dependence/dependence_{feat}_class{class_idx}.png"), dpi=300, bbox_inches='tight')
                 plt.close()
 
- 
+    @staticmethod
+    def shap_beeswarm(X_train, X_test, model_path, feature_names, model_name):
+        # Diretório
+        base_dir = f"./classes/classification/results/shap/{model_name}/"
+        os.makedirs(base_dir, exist_ok=True)
+
+        # Carrega o modelo
+        modelo = joblib.load(model_path)
+
+        # Verifica se é pipeline
+        if hasattr(modelo, "steps"):  
+            if len(modelo.steps) > 1:
+                preprocessor = modelo[:-1]
+                model_final = modelo.steps[-1][1]
+                X_train_t = preprocessor.transform(X_train)
+                X_test_t = preprocessor.transform(X_test)
+            else:
+                model_final = modelo.steps[0][1]
+                X_train_t = X_train
+                X_test_t = X_test
+        else:
+            model_final = modelo
+            X_train_t = X_train
+            X_test_t = X_test
+
+        # Cria TreeExplainer
+        expl = shap.TreeExplainer(model_final, X_train_t, feature_names=feature_names, model_output="probability")
+
+        # Subset para não pesar demais
+        subset_len = 1000
+        subset = X_test_t.iloc[:subset_len] if hasattr(X_test_t, "iloc") else X_test_t[:subset_len]
+        sv_subset = expl(subset)
+        X_array = subset.values if hasattr(subset, "values") else np.array(subset)
+
+        # Beeswarm (um para cada classe)
+        for class_idx in range(sv_subset.values.shape[-1]):
+            plt.figure(figsize=(12, 8))
+            shap.summary_plot(
+                sv_subset.values[:, :, class_idx], 
+                X_array, 
+                feature_names=feature_names,
+                plot_type="dot",  # beeswarm
+                max_display=len(feature_names),  # mostra todas as features
+                show=False
+            )
+
+            plt.savefig(os.path.join(base_dir, f"Beeswarm/beeswarm_class{class_idx}.png"), dpi=300, bbox_inches='tight')
+            plt.show()
+            plt.close()
+    
     # Plota árvore
     @staticmethod
     def plot_tree(model_path: str, model_name, nomes_caracteristicas):
