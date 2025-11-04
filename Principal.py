@@ -95,11 +95,23 @@ metrics = [
 #for i in range(len(studies)):
 #    AnaliseResultados.plot_study_trials(studies[i], metrics[i], studies_names[i])
 
-X_train, X_test, y_train, y_test = ClassificaEstados.ler_amostras(x, y, True)
+""" X_train, X_test_1, y_train, y_test = ClassificaEstados.ler_amostras(x, y, True)
+
+progress = ["X_progress_20", "X_progress_40", "X_progress_60", "X_progress_80", "X_progress_100"]
+
+for i in progress:
+
+    x = f"sample_by_round/{i}"
+
+    X_train_1, X_test, y_train, y_test = ClassificaEstados.ler_amostras(x, x, True)
+
+    AnaliseResultados.shap_beeswarm(X_train, X_test, models[3], feature_names, model_names[3], i)
+ """
 #print(X_test[0])
 #print(y_test[0])
-#AnaliseResultados.shap_analysis(X_train, X_test, models[3], feature_names, model_names[3])
-AnaliseResultados.shap_beeswarm(X_train, X_test, models[3], feature_names, model_names[3])
+
+X_train, X_test, y_train, y_test = ClassificaEstados.ler_amostras(x, y, True)
+AnaliseResultados.shap_analysis(X_train, X_test, models[3], feature_names, model_names[3])
 
 #AnaliseResultados.plot_tree(models[2], model_names[2], feature_names)
 
@@ -111,25 +123,23 @@ AnaliseResultados.shap_beeswarm(X_train, X_test, models[3], feature_names, model
 
 #ColetaEstados.correlacao()
 
-#ColetaEstados.coleta_amostras(30, x, y, '', 1)
+#ColetaEstados.coleta_amostras(30, x, y, '', 10)
 
 #ClassificaEstados.testa_modelos(models, './classes/classification/samples/sample_by_round')
 
-#ClassificaEstados.plot_performance()
+#AnaliseResultados.plot_performance()
 
 #for study in studies:
     #ClassificaEstados.study_best_trials(study)
 
-
+#ClassificaEstados.model_comparation()
 
 '''
-ClassificaEstados.model_comparation()
-
 for i in range(len(studies)):
 
     #ClassificaEstados.study_best_trials(studies[i])
     try:
-        ClassificaEstados.plot_study_trials(studies[i], studies_names[i])
+        AnaliseResultados.plot_study_trials(studies[i], metrics[i], model_names[i])
     except:
         continue
 

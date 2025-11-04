@@ -34,6 +34,7 @@ combinacoes = list(combinations_with_replacement(estrategias, 5))
 qtd_comb = len(combinacoes)
 
 pasta = r"C:\Users\djona\Programação\siradels\classes\classification\samples\sample_by_round"
+pasta = r"C:\Users\djonatan.bonelli\Documents\GitHub\siradels\classes\classification\samples\sample_by_round"
 arquivos = [f"X_progress_20.csv", f"X_progress_40.csv", f"X_progress_60.csv", f"X_progress_80.csv", f"X_progress_100.csv",
             f"Y_progress_20.csv", f"Y_progress_40.csv", f"Y_progress_60.csv", f"Y_progress_80.csv", f"Y_progress_100.csv"]
 
@@ -76,7 +77,8 @@ class ColetaEstados:
 
                 # Armazena rótulos
                 Y.extend(Y_coleta for _ in range(n_rodada)) """
-                
+            total = 0
+            total20 = 0
             for i, p in enumerate(combinacoes):
                 Y = []
                 simulacao = SimulacaoColeta(list(p))
@@ -84,19 +86,26 @@ class ColetaEstados:
 
                 X_coleta = np.delete(X_coleta, 0, axis=0)
                 Y.extend(Y_coleta for _ in range(n_rodada))
-
+                print("rodadas: ", n_rodada)
+                total = n_rodada + total
                 for r in range(n_rodada):
 
                     divisao = (n_rodada+1) / 5
                     if r < divisao:
+                        #print(f"Rodada {r+1} de {n_rodada} gravando em progress_20.csv")
+                        total20 += 1
                         nome_arquivo = "progress_20.csv"
                     elif r < 2 * divisao:
+                        #print(f"Rodada {r+1} de {n_rodada} gravando em progress_40.csv")
                         nome_arquivo = "progress_40.csv"
                     elif r < 3 * divisao:
+                        #print(f"Rodada {r+1} de {n_rodada} gravando em progress_60.csv")
                         nome_arquivo = "progress_60.csv"
                     elif r < 4 * divisao:
+                        #print(f"Rodada {r+1} de {n_rodada} gravando em progress_80.csv")
                         nome_arquivo = "progress_80.csv"
                     else:
+                        #print(f"Rodada {r+1} de {n_rodada} gravando em progress_100.csv")
                         nome_arquivo = "progress_100.csv"
 
                     arq_X = os.path.join(pasta, f"X_{nome_arquivo}")
@@ -108,7 +117,7 @@ class ColetaEstados:
                         csv.writer(fx).writerow(X_coleta[r])
 
                     with open(arq_Y, 'a', newline='') as fy:
-                        csv.writer(fy).writerow([Y[r]]) 
+                        csv.writer(fy).writerow([Y[r]])
                     #print(f"Rodada {r+1} de {n_rodada} gravando em {nome_arquivo}")
 
                     #assert len(X_coleta) == len(Y), f"Tamanhos diferentes: {len(X_coleta)} vs {len(Y)}"
@@ -117,7 +126,7 @@ class ColetaEstados:
                 for jogador in estado_final.jogadores:
                     chave = f"{jogador.nome}"
                     (vitoria, seg, ter, qua, qui, pontuacao) = resultados[chave]
-                    
+                   
                     # Atualiza as posições e pontuações de acordo com o estado final da simulação
                     if jogador == estado_final.jogadores[1]:
                         seg += 1
@@ -129,7 +138,7 @@ class ColetaEstados:
                         qui += 1
 
                     resultados[chave] = (int(jogador.vencedor) + vitoria, seg, ter, qua, qui, jogador.pontuacao_final + pontuacao)
-            
+           
             # Conta quantas vezes uma estratégia apareceu em uma lista para a combinação
             # Conta participações reais por jogador nas combinações
             participacoes_simulacao = {estrategia.nome: 0 for estrategia in estrategias}
@@ -180,7 +189,9 @@ class ColetaEstados:
 
         # Remove primeira linha nula
         X = np.delete(X, 0, axis=0)
-        ClassificaEstados.salva_testes(resultados_jogadores,"./classes/classification/results/Resultado da Coleta")
+        print("total: ", total)
+        print(X)
+        #ClassificaEstados.salva_testes(resultados_jogadores,"./classes/classification/results/Resultado da Coleta")
         #ClassificaEstados.salvar_amostras(X, Y, jogos, rotulos)
         #ClassificaEstados.treinar_modelo(X, Y)
 
@@ -204,16 +215,47 @@ class ColetaEstados:
         correlacoes = dados.corr()['label'].drop('label')
         correlacoes.index = range(1, 31)
 
+        sns.set_theme(style="white", font_scale=3)
+        sns.set_context("paper", rc={"axes.titlesize": 12, "axes.labelsize": 10})
+
+        plt.figure(figsize=(5, 8), dpi=300)  # mais estreito e mais alto
+        ax = sns.heatmap(
+            pd.DataFrame(correlacoes),
+            cmap="coolwarm",
+            center=0,
+            annot=True,
+            cbar=True,
+            square=False,
+            linewidths=0.5,
+            linecolor="white",
+            annot_kws={"size": 10}
+        )
+
+        # eixos
+        ax.tick_params(axis="x", rotation=0, labelsize=10)
+        ax.tick_params(axis="y", rotation=0, labelsize=10)
+        ax.set_xlabel("Correlation with outcome (Pearson's r)", fontsize=12, labelpad=8, weight='bold')
+        ax.set_title("")  # garante sem título automático
+        ax.set_xticklabels([""])  # remove label duplicado se ainda aparecer
+        ax.set_ylabel("")  # sem label no eixo Y, fica mais limpo
+        sns.despine(left=True, bottom=True)
+
+        # colorbar
+        cbar = ax.collections[0].colorbar
+        cbar.ax.tick_params(labelsize=10)
+
+        plt.tight_layout()
+        plt.savefig('./classes/classification/samples/correlation/heatmap_correlacao_label(5,8).png', dpi=300, bbox_inches='tight')
+        plt.close()
+
+        '''
         # Matriz de correlação entre features
         matriz_corr = features.corr()
-
         # Salvar CSV
         with open('./classes/classification/samples/correlation/correlação.csv', 'w') as f:
             correlacoes.to_csv(f)
             f.write('\n')
             matriz_corr.to_csv(f)
-
-        theme = "viridis"
         # Configuração da paleta Nature-friendly e dpi
         sns.heatmap(matriz_corr, cmap=theme, center=0, annot=True)
 
@@ -224,11 +266,4 @@ class ColetaEstados:
         plt.tight_layout()
         plt.savefig('./classes/classification/samples/correlation/heatmap_correlacao.png', dpi=300)
         plt.close()
-
-        # Heatmap da correlação com o label
-        plt.figure(figsize=(12,10), dpi=300)
-        sns.heatmap(pd.DataFrame(correlacoes), cmap=theme, center=0, annot=True, cbar=True)
-        plt.title('Feature-Label Correlation')
-        plt.tight_layout()
-        plt.savefig('./classes/classification/samples/correlation/heatmap_correlacao_label.png', dpi=300)
-        plt.close()
+        '''

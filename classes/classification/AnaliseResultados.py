@@ -213,7 +213,7 @@ class AnaliseResultados:
     @staticmethod
     def plot_study_trials(study_path, metric, model):
         study = joblib.load(study_path)
-
+        
         # Extract data
         x = [t.number for t in study.trials if t.value is not None]
         y = [t.value for t in study.trials if t.value is not None]
@@ -221,17 +221,28 @@ class AnaliseResultados:
         # Plot
         plt.figure(figsize=(10, 5))
         plt.plot(x, y, marker='o', linestyle='-', color='blue', label='Score per trial')
-        plt.title(f"{model} Score Evolution per Trial")
-        plt.xlabel("Trial #")
-        plt.ylabel(f"{metric} Score")
-        plt.ylim(0, 1)      
-        plt.xscale("log")          # escala logarítmica no eixo X
-        plt.xlim(1, 500) 
-        plt.grid(True, which="both", linestyle="--", linewidth=0.5)
-        plt.legend()
+        
+        # Remove title, adjust axis limits
+        plt.xlabel("Trial #", fontsize=20)  # Increase font size for x-axis label
+        plt.ylabel(f"{metric} Score", fontsize=20)  # Increase font size for y-axis label
+        plt.ylim(0, 1)  # Y-axis from 0 to 100
+        plt.xlim(0, 360)  # X-axis from 0 to 360, without logarithmic scale
+        
+        # Additional plotting settings
+        plt.grid(True, which="both", linestyle="--", linewidth=0.8)
+        
+        # Increase font size for legend and grid lines
+        plt.legend(fontsize=18)
+        
+        # Adjust overall layout and font sizes for readability
+        plt.tick_params(axis='both', which='major', labelsize=18)  # Increase font size for tick labels
+        
         plt.tight_layout()
+
+        # Save the plot
         plt.savefig(f"./classes/classification/results/study/trials/{model}_trial.png")
-        # plt.show()
+        # plt.show()  # You can uncomment this if you want to display the plot interactively
+
 
     @staticmethod
     def plot_best_values_all_models():
@@ -299,12 +310,11 @@ class AnaliseResultados:
         plt.figure(figsize=(10, 5))
         plt.barh(features, values, color=plt.cm.viridis(0.15))      # Usa azul do viridis
         #plt.barh(list(sorted_importances.keys()), values, color=colors)  #Usa gradiente
-        plt.xlabel("Importance", fontsize=14)
-        plt.ylabel("Features", fontsize=14)
-        plt.title(f"{model_name} Feature Importances > 0.03", fontsize=16)
+        plt.xlabel("Importance", fontsize=16)
+        plt.ylabel("Features", fontsize=16)
         plt.gca().invert_yaxis()
-        plt.xticks(fontsize=12)
-        plt.yticks(fontsize=12)
+        plt.xticks(fontsize=16)
+        plt.yticks(fontsize=16)
         plt.xlim(0, 0.4)  # define limite do eixo x
         plt.tight_layout()
 
@@ -407,16 +417,13 @@ class AnaliseResultados:
         for model in df['Model'].unique():
             subset = df[df['Model'] == model]
             plt.plot(subset['Phase'], subset['Accuracy'], marker='o', label=f"{model}")
-            
-        # Linha de referência para chance aleatória (1 em 5 jogadores)
-        plt.axhline(y=0.2, linestyle='--', color='red', label='Baseline')
 
-        plt.title("Accuracy of Models Across Game Progress Phases")
-        plt.xlabel("Game Progress Phase")
-        plt.ylabel("Accuracy")
-        plt.ylim(0, 1)  # padroniza escala do eixo y
+        plt.xlabel("Game Progress", fontsize=20)  # Aumenta o tamanho da fonte
+        plt.ylabel("Accuracy", fontsize=20)  # Aumenta o tamanho da fonte
+        plt.ylim(0, 1)  # Padroniza escala do eixo y
         plt.grid(True, linestyle='--', alpha=0.5)
-        plt.legend()
+        plt.legend(fontsize=16)  # Aumenta o tamanho da fonte da legenda
+        plt.tick_params(axis='both', which='major', labelsize=18)  # Aumenta o tamanho das fontes dos ticks
         plt.tight_layout()
         plt.savefig("./classes/classification/results/performance_tests/accuracy_across_phases.png")
         plt.close()
@@ -427,15 +434,12 @@ class AnaliseResultados:
             subset = df[df['Model'] == model]
             plt.plot(subset['Phase'], subset['F1'], marker='o', label=f"{model}")
 
-        # Linha de referência para chance aleatória (1 em 5 jogadores)
-        plt.axhline(y=0.2, linestyle='--', color='red', label='Baseline')
-
-        plt.title("F1 Score of Models Across Game Progress Phases")
-        plt.xlabel("Game Progress Phase")
-        plt.ylabel("F1 Score")
-        plt.ylim(0, 1)  # padroniza escala do eixo y
+        plt.xlabel("Game Progress", fontsize=20)  # Aumenta o tamanho da fonte
+        plt.ylabel("F1 Score", fontsize=20)  # Aumenta o tamanho da fonte
+        plt.ylim(0, 1)  # Padroniza escala do eixo y
         plt.grid(True, linestyle='--', alpha=0.5)
-        plt.legend()
+        plt.legend(fontsize=16, loc='lower right')   # Aumenta o tamanho da fonte da legenda
+        plt.tick_params(axis='both', which='major', labelsize=18)  # Aumenta o tamanho das fontes dos ticks
         plt.tight_layout()
         plt.savefig("./classes/classification/results/performance_tests/f1_across_phases.png")
         plt.close()
@@ -446,15 +450,12 @@ class AnaliseResultados:
             subset = df[df['Model'] == model]
             plt.plot(subset['Phase'], subset['Precision'], marker='o', label=f"{model}")
 
-        # Linha de referência para chance aleatória (1 em 5 jogadores)
-        plt.axhline(y=0.2, linestyle='--', color='red', label='Baseline')
-
-        plt.title("Precision of Models Across Game Progress Phases")
-        plt.xlabel("Game Progress Phase")
-        plt.ylabel("Precision")
-        plt.ylim(0, 1)  # padroniza escala do eixo y
+        plt.xlabel("Game Progress", fontsize=20)  # Aumenta o tamanho da fonte
+        plt.ylabel("Precision", fontsize=20)  # Aumenta o tamanho da fonte
+        plt.ylim(0, 1)  # Padroniza escala do eixo y
         plt.grid(True, linestyle='--', alpha=0.5)
-        plt.legend()
+        plt.legend(fontsize=16)  # Aumenta o tamanho da fonte da legenda
+        plt.tick_params(axis='both', which='major', labelsize=18)  # Aumenta o tamanho das fontes dos ticks
         plt.tight_layout()
         plt.savefig("./classes/classification/results/performance_tests/precision_across_phases.png")
         plt.close()
@@ -465,19 +466,15 @@ class AnaliseResultados:
             subset = df[df['Model'] == model]
             plt.plot(subset['Phase'], subset['Recall'], marker='o', label=f"{model}")
 
-        # Linha de referência para chance aleatória (1 em 5 jogadores)
-        plt.axhline(y=0.2, linestyle='--', color='red', label='Baseline')    
-
-        plt.title("Recall of Models Across Game Progress Phases")
-        plt.xlabel("Game Progress Phase")
-        plt.ylabel("Recall")
-        plt.ylim(0, 1)  # padroniza escala do eixo y
+        plt.xlabel("Game Progress", fontsize=20)  # Aumenta o tamanho da fonte
+        plt.ylabel("Recall", fontsize=20)  # Aumenta o tamanho da fonte
+        plt.ylim(0, 1)  # Padroniza escala do eixo y
         plt.grid(True, linestyle='--', alpha=0.5)
-        plt.legend()
+        plt.legend(fontsize=16)  # Aumenta o tamanho da fonte da legenda
+        plt.tick_params(axis='both', which='major', labelsize=18)  # Aumenta o tamanho das fontes dos ticks
         plt.tight_layout()
         plt.savefig("./classes/classification/results/performance_tests/recall_across_phases.png")
-        plt.close()     
-        return
+        plt.close()
 
     @staticmethod
     def shap_analysis(X_train, X_test, model_path, feature_names, model_name):
@@ -507,61 +504,77 @@ class AnaliseResultados:
         # Cria TreeExplainer
         expl = shap.TreeExplainer(model_final, X_train_t, feature_names=feature_names, model_output="probability")
 
-        # Waterfall plot para a primeira amostra real
-        sv_first = expl(X_test_t.iloc[[0]] if hasattr(X_test_t, "iloc") else X_test_t[:1])
-        for class_idx in range(sv_first.values.shape[-1]):
-            sv_single = shap.Explanation(
-                values=sv_first.values[0, :, class_idx],
-                base_values=sv_first.base_values[0, class_idx],
-                data=sv_first.data[0],
-                feature_names
-                =sv_first.feature_names
-            )
-        fig = plt.figure(figsize=(12, 6))
-        shap.waterfall_plot(sv_single, max_display=30, show=False)
+        # Caminhos dos arquivos
+        array_path = os.path.join(base_dir, "X_array.npy")
+        sv_path = os.path.join(base_dir, "sv_subset.pkl")
 
-        # Mostra na tela
-        plt.show()  
+        # Carrega ou gera X_array e sv_subset
+        if os.path.exists(array_path) and os.path.exists(sv_path):
+            print("Carregando X_array e sv_subset salvos...")
+            X_array = np.load(array_path)
+            with open(sv_path, "rb") as f:
+                sv_subset = joblib.load(f)
+        else:
+            print("Gerando novo X_array e sv_subset...")
+            subset = X_test_t.iloc[:1000] if hasattr(X_test_t, "iloc") else X_test_t[:1000]
+            sv_subset = expl(subset)
+            X_array = subset.values if hasattr(subset, "values") else np.array(subset)
 
-        # Salva
-        plt.savefig(os.path.join(base_dir, f"Waterfall/waterfall_class{class_idx}.png"), dpi=300, bbox_inches='tight')
-        plt.close(fig)
+            # Salva os dados
+            np.save(array_path, X_array)
+            pd.DataFrame(X_array, columns=feature_names).to_csv(os.path.join(base_dir, "X_array.csv"), index=False)
+            with open(sv_path, "wb") as f:
+                joblib.dump(sv_subset, f)
 
-        # Subset para summary e dependence plots
-        subset = X_test_t.iloc[:1000] if hasattr(X_test_t, "iloc") else X_test_t[:1000]
-        sv_subset = expl(subset)
-        X_array = subset.values if hasattr(subset, "values") else np.array(subset)
-
-        # Summary plot
-        plt.figure(figsize=(12, 8))
-        shap.summary_plot(sv_subset, X_array, feature_names=feature_names, show=False)
-
-        # Mostra na tela
-        plt.show()
-
-        # Salva
-        plt.savefig(os.path.join(base_dir, "Summary/summary.png"), dpi=300, bbox_inches='tight')
-        plt.close()
-
-        # Dependence plots
+        # Dependence plots com legendas ajustadas
         for i, feat in enumerate(feature_names):
             for class_idx in range(sv_subset.values.shape[-1]):
                 shap.dependence_plot(
                     feat,
                     sv_subset.values[:, :, class_idx],
                     X_array,
-                    interaction_index='auto',  # ou None se não quiser cor de interação
+                    interaction_index='auto',
                     show=False,
                     feature_names=feature_names
                 )
-                plt.savefig(os.path.join(base_dir, f"Dependence/dependence_{feat}_class{class_idx}.png"), dpi=300, bbox_inches='tight')
+
+                ax = plt.gca()
+
+                # Eixo da esquerda: variável de interação
+                ax_left = ax.twinx()
+                ax_left.set_ylabel("Interaction feature (integers)")
+                try:
+                    ax_left.yaxis.set_major_locator(plt.MaxNLocator(integer=True))
+                except Exception:
+                    pass
+
+                # Eixo da direita: SHAP value
+                ax.set_ylabel("SHAP value")
+                ax.yaxis.set_label_position("right")
+                ax.yaxis.tick_right()
+
+                # Adiciona legenda de cor (colorbar)
+                sm = plt.cm.ScalarMappable(cmap=plt.cm.coolwarm)
+                sm.set_array(sv_subset.values[:, :, class_idx])
+                cbar = plt.colorbar(sm, ax=ax)
+                cbar.set_label("Shapley value")
+
+                plt.tight_layout()
+                plt.savefig(
+                    os.path.join(base_dir, f"Dependence/new/dependence_{feat}_class{class_idx}.png"),
+                    dpi=300,
+                    bbox_inches='tight'
+                )
                 plt.close()
 
+
     @staticmethod
-    def shap_beeswarm(X_train, X_test, model_path, feature_names, model_name):
-        # Diretório
+    def shap_beeswarm(X_train, X_test, model_path, feature_names, model_name, dataset_name, vitoria_class_idx=1):
+
+        # Diretório de saída
         base_dir = f"./classes/classification/results/shap/{model_name}/"
         os.makedirs(base_dir, exist_ok=True)
+        os.makedirs(os.path.join(base_dir, "Beeswarm"), exist_ok=True)
 
         # Carrega o modelo
         modelo = joblib.load(model_path)
@@ -585,28 +598,31 @@ class AnaliseResultados:
         # Cria TreeExplainer
         expl = shap.TreeExplainer(model_final, X_train_t, feature_names=feature_names, model_output="probability")
 
-        # Subset para não pesar demais
-        subset_len = 1000
+        # Subset para não pesar
+        subset_len = 500
         subset = X_test_t.iloc[:subset_len] if hasattr(X_test_t, "iloc") else X_test_t[:subset_len]
         sv_subset = expl(subset)
         X_array = subset.values if hasattr(subset, "values") else np.array(subset)
 
-        # Beeswarm (um para cada classe)
-        for class_idx in range(sv_subset.values.shape[-1]):
-            plt.figure(figsize=(12, 8))
-            shap.summary_plot(
-                sv_subset.values[:, :, class_idx], 
-                X_array, 
-                feature_names=feature_names,
-                plot_type="dot",  # beeswarm
-                max_display=len(feature_names),  # mostra todas as features
-                show=False
-            )
+        # Beeswarm apenas para a classe "vitória"
+        plt.figure(figsize=(12, 8))
+        shap.summary_plot(
+            sv_subset.values[:, :, vitoria_class_idx], 
+            X_array, 
+            feature_names=feature_names,
+            plot_type="dot",  
+            max_display=len(feature_names),
+            show=False
+        )
 
-            plt.savefig(os.path.join(base_dir, f"Beeswarm/beeswarm_class{class_idx}.png"), dpi=300, bbox_inches='tight')
-            plt.show()
-            plt.close()
-    
+        # Nome do arquivo com dataset
+        file_path = os.path.join(base_dir, f"Beeswarm/beeswarm_vitoria_{dataset_name}.png")
+        plt.savefig(file_path, dpi=300, bbox_inches='tight')
+        plt.show()
+        plt.close()
+
+        print(f"Beeswarm salvo em: {file_path}")
+        
     # Plota árvore
     @staticmethod
     def plot_tree(model_path: str, model_name, nomes_caracteristicas):
