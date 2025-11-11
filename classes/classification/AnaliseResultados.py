@@ -29,6 +29,7 @@ from sklearn.decomposition import PCA
 from sklearn.model_selection import StratifiedGroupKFold
 import matplotlib.pyplot as plt
 import matplotlib.cm as cm
+from matplotlib.ticker import ScalarFormatter, MaxNLocator
 import joblib
 from classes.classification.ClassificaEstados import ClassificaEstados
 
@@ -478,15 +479,20 @@ class AnaliseResultados:
 
     @staticmethod
     def shap_analysis(X_train, X_test, model_path, feature_names, model_name):
-        # Cria diretórios se não existirem
+        import os
+        import shap
+        import joblib
+        import numpy as np
+        import pandas as pd
+        import matplotlib.pyplot as plt
+        from matplotlib.ticker import ScalarFormatter
+
         base_dir = f"./classes/classification/results/shap/{model_name}/"
         os.makedirs(base_dir, exist_ok=True)
 
-        # Carrega o modelo
         modelo = joblib.load(model_path)
 
-        # Verifica se é pipeline
-        if hasattr(modelo, "steps"):  
+        if hasattr(modelo, "steps"):
             if len(modelo.steps) > 1:
                 preprocessor = modelo[:-1]
                 model_final = modelo.steps[-1][1]
@@ -501,14 +507,11 @@ class AnaliseResultados:
             X_train_t = X_train
             X_test_t = X_test
 
-        # Cria TreeExplainer
         expl = shap.TreeExplainer(model_final, X_train_t, feature_names=feature_names, model_output="probability")
 
-        # Caminhos dos arquivos
         array_path = os.path.join(base_dir, "X_array.npy")
         sv_path = os.path.join(base_dir, "sv_subset.pkl")
 
-        # Carrega ou gera X_array e sv_subset
         if os.path.exists(array_path) and os.path.exists(sv_path):
             print("Carregando X_array e sv_subset salvos...")
             X_array = np.load(array_path)
@@ -520,53 +523,41 @@ class AnaliseResultados:
             sv_subset = expl(subset)
             X_array = subset.values if hasattr(subset, "values") else np.array(subset)
 
-            # Salva os dados
             np.save(array_path, X_array)
             pd.DataFrame(X_array, columns=feature_names).to_csv(os.path.join(base_dir, "X_array.csv"), index=False)
             with open(sv_path, "wb") as f:
                 joblib.dump(sv_subset, f)
 
-        # Dependence plots com legendas ajustadas
+        output_dir = os.path.join(base_dir, "Dependence")
+        os.makedirs(output_dir, exist_ok=True)
+
         for i, feat in enumerate(feature_names):
             for class_idx in range(sv_subset.values.shape[-1]):
                 shap.dependence_plot(
                     feat,
                     sv_subset.values[:, :, class_idx],
                     X_array,
-                    interaction_index='auto',
-                    show=False,
-                    feature_names=feature_names
+                    feature_names=feature_names,
+                    show=False
                 )
 
-                ax = plt.gca()
+                plt.ylabel("SHAP value")
 
-                # Eixo da esquerda: variável de interação
-                ax_left = ax.twinx()
-                ax_left.set_ylabel("Interaction feature (integers)")
-                try:
-                    ax_left.yaxis.set_major_locator(plt.MaxNLocator(integer=True))
-                except Exception:
-                    pass
-
-                # Eixo da direita: SHAP value
-                ax.set_ylabel("SHAP value")
-                ax.yaxis.set_label_position("right")
-                ax.yaxis.tick_right()
-
-                # Adiciona legenda de cor (colorbar)
-                sm = plt.cm.ScalarMappable(cmap=plt.cm.coolwarm)
-                sm.set_array(sv_subset.values[:, :, class_idx])
-                cbar = plt.colorbar(sm, ax=ax)
-                cbar.set_label("Shapley value")
+                fig = plt.gcf()
+                for ax in fig.axes:
+                    for im in ax.get_images():
+                        if hasattr(im, "colorbar") and im.colorbar is not None:
+                            cbar = im.colorbar
+                            cbar.locator = MaxNLocator(integer=True)
+                            cbar.update_ticks()
 
                 plt.tight_layout()
                 plt.savefig(
-                    os.path.join(base_dir, f"Dependence/new/dependence_{feat}_class{class_idx}.png"),
+                    os.path.join(output_dir, f"dependence_{feat}_class{class_idx}.png"),
                     dpi=300,
-                    bbox_inches='tight'
+                    bbox_inches="tight"
                 )
                 plt.close()
-
 
     @staticmethod
     def shap_beeswarm(X_train, X_test, model_path, feature_names, model_name, dataset_name, vitoria_class_idx=1):

@@ -90,7 +90,7 @@ metrics = [
     "Precision"
 ]
 
-#ColetaEstados.correlacao()
+ColetaEstados.correlacao()
 
 #for i in range(len(studies)):
 #    AnaliseResultados.plot_study_trials(studies[i], metrics[i], studies_names[i])
@@ -110,8 +110,8 @@ for i in progress:
 #print(X_test[0])
 #print(y_test[0])
 
-X_train, X_test, y_train, y_test = ClassificaEstados.ler_amostras(x, y, True)
-AnaliseResultados.shap_analysis(X_train, X_test, models[3], feature_names, model_names[3])
+#X_train, X_test, y_train, y_test = ClassificaEstados.ler_amostras(x, y, True)
+#AnaliseResultados.shap_analysis(X_train, X_test, models[3], feature_names, model_names[3])
 
 #AnaliseResultados.plot_tree(models[2], model_names[2], feature_names)
 

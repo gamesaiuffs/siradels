@@ -218,7 +218,7 @@ class ColetaEstados:
         sns.set_theme(style="white", font_scale=3)
         sns.set_context("paper", rc={"axes.titlesize": 12, "axes.labelsize": 10})
 
-        plt.figure(figsize=(5, 8), dpi=300)  # mais estreito e mais alto
+        plt.figure(figsize=(3, 7), dpi=300)  # mais estreito e mais alto
         ax = sns.heatmap(
             pd.DataFrame(correlacoes),
             cmap="coolwarm",
@@ -234,7 +234,7 @@ class ColetaEstados:
         # eixos
         ax.tick_params(axis="x", rotation=0, labelsize=10)
         ax.tick_params(axis="y", rotation=0, labelsize=10)
-        ax.set_xlabel("Correlation with outcome (Pearson's r)", fontsize=12, labelpad=8, weight='bold')
+        ax.set_xlabel("Correlation with outcome", fontsize=12, labelpad=8, weight='bold')
         ax.set_title("")  # garante sem título automático
         ax.set_xticklabels([""])  # remove label duplicado se ainda aparecer
         ax.set_ylabel("")  # sem label no eixo Y, fica mais limpo
@@ -245,7 +245,7 @@ class ColetaEstados:
         cbar.ax.tick_params(labelsize=10)
 
         plt.tight_layout()
-        plt.savefig('./classes/classification/samples/correlation/heatmap_correlacao_label(5,8).png', dpi=300, bbox_inches='tight')
+        plt.savefig('./classes/classification/samples/correlation/heatmap_correlacao_label.png', dpi=300, bbox_inches='tight')
         plt.close()
 
         '''
