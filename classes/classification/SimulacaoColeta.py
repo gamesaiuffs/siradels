@@ -1,11 +1,11 @@
 from random import shuffle
-import random
 
 from classes.model.Acao import *
 from classes.model.Tabuleiro import Tabuleiro
 from classes.model.Jogador import Jogador
 from classes.strategies import Estrategia
 from classes.classification.ClassificaEstados import ClassificaEstados
+from classes.classification.dataset.ColetaFeatures import ColetaFeatures
 
 class SimulacaoColeta:
     # Construtor
@@ -18,6 +18,8 @@ class SimulacaoColeta:
         self.automatico: bool = automatico
         # Inicializa o jogo num estado inicial válido
         self.estado: Estado = self.criar_estado_inicial(num_personagens)
+        # Ordem inicial dos jogadores (aleatória, mas fixa para toda a partida)
+        self.ordem_inicial_jogadores = list(self.estado.jogadores)
         # Instância as ações do jogo
         self.acoes: list[Acao] = self.criar_acoes()
         # Primeiro jogador a finalizar cidade (construir 7 ou mais distritos)
@@ -94,25 +96,35 @@ class SimulacaoColeta:
 
     # Executa uma simulação do jogo e retorna estado final
     def rodar_simulacao(self, X, nome_modelo: str = '') -> Estado:
-        jogador_aleatorio_idx = random.randint(0, len(self.estado.jogadores)-1)
-        jogador_observado = self.estado.jogadores[jogador_aleatorio_idx].nome
+        # Inicializa controles de coleta para a partida atual
+        ColetaFeatures.iniciar_partida(self.ordem_inicial_jogadores)
+        qtd_amostras_coletadas = 0
+
         # Laço de rodadas do jogo
         while not self.final_jogo:
             self.iniciar_rodada()
+            # Atualiza a ordem de turno da rodada (ordem pelo coroado).
+            ColetaFeatures.atualizar_ordem_turno(self.estado.jogadores)
+            # Coleta somente a partir da segunda rodada, usando contadores da rodada anterior
+            if self.estado.rodada >= 2:
+                X = ColetaFeatures.coleta_features(self.ordem_inicial_jogadores, self.estado.rodada, X)
+                qtd_amostras_coletadas += 1
             self.executar_rodada(0, self.num_jogadores)
-            X = ClassificaEstados.coleta_features(self.estado.jogadores, self.estado.rodada, jogador_observado, 1, X, nome_modelo)
-        Y = ClassificaEstados.coleta_rotulos_treino(jogador_observado, self.jogador_finalizador.nome)
+            # Atualiza contagem de personagens para ser usada na próxima coleta
+            ColetaFeatures.atualizar_contagem_personagens(self.ordem_inicial_jogadores)
         # Rotina de final de jogo
         self.computar_pontuacao_final()
         self.estado.ordenar_jogadores_pontuacao()
         self.estado.jogadores[0].vencedor = True
+        jogador_vencedor = self.estado.jogadores[0]
+        Y = self.ordem_inicial_jogadores.index(jogador_vencedor)
         # Mostra estado final
         if not self.automatico:
             print('-----ESTADO FINAL-----')
             print(self.estado)
             for jogador in self.estado.jogadores:
                 print(f'{jogador.nome} - Pontuação final: {jogador.pontuacao_final}')
-        return self.estado, X, Y, self.estado.rodada
+        return self.estado, X, Y, qtd_amostras_coletadas
 
     def iniciar_rodada(self) -> None:
         # Preparação para nova rodada
@@ -156,11 +168,13 @@ class SimulacaoColeta:
                         jogador.rei = True
                     # Aplica habilidade da Assassina
                     if jogador.morto:
+                        ColetaFeatures.registrar_morto(jogador)
                         jogador.morto = False
                         self.estado.turno += 1
                         continue
                     # Aplica habilidade do Ladrão
                     if jogador.roubado:
+                        ColetaFeatures.registrar_roubado(jogador)
                         jogador.roubado = False
                         for ladrao in self.estado.jogadores:
                             if ladrao.personagem.nome == 'Ladrão':

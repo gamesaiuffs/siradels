@@ -53,11 +53,12 @@ class ColetaEstados:
         # Inicializa dicionários de resultados
         resultados_total: dict[str, (int, int, int, int, int, int, int)] = dict()
         resultados: dict[str, (int, int, int, int, int, int)] = dict()
+        '''
         for arquivo in arquivos:
             caminho = os.path.join(pasta, arquivo)
             with open(caminho, 'w', newline='') as f:
                 pass  # só cria/trunca o arquivo, limpa o conteúdo
-
+        '''
         # Inicializa resultados para cada estratégia
         for i, jogador in enumerate(estrategias):
             chave = f"{jogador.nome}"
@@ -67,7 +68,7 @@ class ColetaEstados:
         while num_simulacao < qtd_simulacao:
             print(f"Simulação {num_simulacao+1}/{qtd_simulacao}")
 
-            """ for i, p in enumerate(combinacoes):
+            for i, p in enumerate(combinacoes):
                 # Executa simulação com a combinação de estratégias
                 simulacao = SimulacaoColeta(list(p))
                 estado_final, X_coleta, Y_coleta, n_rodada = simulacao.rodar_simulacao(X_inicial, nome_modelo)
@@ -76,8 +77,9 @@ class ColetaEstados:
                 X = np.vstack((X, X_coleta))
 
                 # Armazena rótulos
-                Y.extend(Y_coleta for _ in range(n_rodada)) """
+                Y.extend(Y_coleta for _ in range(n_rodada))
             total = 0
+            '''   
             total20 = 0
             for i, p in enumerate(combinacoes):
                 Y = []
@@ -121,23 +123,24 @@ class ColetaEstados:
                     #print(f"Rodada {r+1} de {n_rodada} gravando em {nome_arquivo}")
 
                     #assert len(X_coleta) == len(Y), f"Tamanhos diferentes: {len(X_coleta)} vs {len(Y)}"
+                '''
 
-                # Atualiza os resultados da simulação
-                for jogador in estado_final.jogadores:
-                    chave = f"{jogador.nome}"
-                    (vitoria, seg, ter, qua, qui, pontuacao) = resultados[chave]
-                   
-                    # Atualiza as posições e pontuações de acordo com o estado final da simulação
-                    if jogador == estado_final.jogadores[1]:
-                        seg += 1
-                    elif jogador == estado_final.jogadores[2]:
-                        ter += 1
-                    elif jogador == estado_final.jogadores[3]:
-                        qua += 1
-                    elif jogador == estado_final.jogadores[4]:
-                        qui += 1
+            # Atualiza os resultados da simulação
+            for jogador in estado_final.jogadores:
+                chave = f"{jogador.nome}"
+                (vitoria, seg, ter, qua, qui, pontuacao) = resultados[chave]
+                
+                # Atualiza as posições e pontuações de acordo com o estado final da simulação
+                if jogador == estado_final.jogadores[1]:
+                    seg += 1
+                elif jogador == estado_final.jogadores[2]:
+                    ter += 1
+                elif jogador == estado_final.jogadores[3]:
+                    qua += 1
+                elif jogador == estado_final.jogadores[4]:
+                    qui += 1
 
-                    resultados[chave] = (int(jogador.vencedor) + vitoria, seg, ter, qua, qui, jogador.pontuacao_final + pontuacao)
+                resultados[chave] = (int(jogador.vencedor) + vitoria, seg, ter, qua, qui, jogador.pontuacao_final + pontuacao)
            
             # Conta quantas vezes uma estratégia apareceu em uma lista para a combinação
             # Conta participações reais por jogador nas combinações
@@ -192,18 +195,18 @@ class ColetaEstados:
         print("total: ", total)
         print(X)
         #ClassificaEstados.salva_testes(resultados_jogadores,"./classes/classification/results/Resultado da Coleta")
-        #ClassificaEstados.salvar_amostras(X, Y, jogos, rotulos)
+        ClassificaEstados.salvar_amostras(X, Y, jogos, rotulos)
         #ClassificaEstados.treinar_modelo(X, Y)
 
     @staticmethod
-    def correlacao():
+    def correlacao(jogos, rotulos):
         import matplotlib.pyplot as plt
         import seaborn as sns
         import pandas as pd
 
         # Ler dados
-        dados = pd.read_csv('./classes/classification/samples/Jogos 30f 04-10-2024.csv', header=None)
-        rotulos = pd.read_csv('./classes/classification/samples/Rótulos 30f 04-10-2024.csv', header=None, names=['label'])
+        dados = pd.read_csv(f'./classes/classification/dataset/amostras/{jogos}', header=None)
+        rotulos = pd.read_csv(f'./classes/classification/dataset/amostras/{rotulos}', header=None, names=['label'])
 
         dados['label'] = rotulos['label']
 
@@ -245,25 +248,5 @@ class ColetaEstados:
         cbar.ax.tick_params(labelsize=10)
 
         plt.tight_layout()
-        plt.savefig('./classes/classification/samples/correlation/heatmap_correlacao_label.png', dpi=300, bbox_inches='tight')
+        plt.savefig('./classes/classification/dataset/amostras/correlation/heatmap_correlacao_label.png', dpi=300, bbox_inches='tight')
         plt.close()
-
-        '''
-        # Matriz de correlação entre features
-        matriz_corr = features.corr()
-        # Salvar CSV
-        with open('./classes/classification/samples/correlation/correlação.csv', 'w') as f:
-            correlacoes.to_csv(f)
-            f.write('\n')
-            matriz_corr.to_csv(f)
-        # Configuração da paleta Nature-friendly e dpi
-        sns.heatmap(matriz_corr, cmap=theme, center=0, annot=True)
-
-        # Heatmap da matriz de correlação
-        plt.figure(figsize=(12,10), dpi=300)
-        sns.heatmap(matriz_corr, cmap=theme, center=0, annot=False)
-        plt.title('Feature Correlation Heatmap')
-        plt.tight_layout()
-        plt.savefig('./classes/classification/samples/correlation/heatmap_correlacao.png', dpi=300)
-        plt.close()
-        '''

@@ -1,13 +1,17 @@
 #from classes.Experimento import Experimento
-from classes.classification.ColetaEstados import ColetaEstados
+import datetime
+from classes.classification.dataset.ColetaEstados import ColetaEstados
 from classes.classification.ClassificaEstados import ClassificaEstados
 from classes.classification.AnaliseResultados import AnaliseResultados
 import sys
 caminho = './classes'
 n_features = 30
-data = '04-10-2024'
-x = f"Jogos {n_features}f {data}"
-y = f"Rótulos {n_features}f {data}" 
+data = datetime.date.today()
+
+jogos = f"Jogos {n_features}f {data}"
+rotulos = f"Rótulos {n_features}f {data}" 
+jogos_optuna = f"Jogos {n_features}f {data} optuna"
+rotulos_optuna = f"Rótulos {n_features}f {data} optuna" 
 
 feature_names = [
     # Board features
@@ -31,6 +35,8 @@ metrics = ["Accuracy", "F1_Score", "Precision"]
 
 ClassificaEstados.optuna_CART(X_train, y_train)
 ClassificaEstados.optuna_RF(X_train, y_train)
+ClassificaEstados.optuna_XGB(X_train, y_train)
+ClassificaEstados.optuna_MLP(X_train, y_train)
 
 #ClassificaEstados.analise_study(study_path)
 #diretorio_studies = './classes/classification/models/'
@@ -46,51 +52,7 @@ for i in range(len(metrics)):
 model_base_path = f'./classes/classification/models/'
 study_base_path = f'./classes/classification/results/study/'
 
-models = [
-    f'{model_base_path}CART/CART_Accuracy_BestModel_0.joblib', 
-    f'{model_base_path}CART/CART_F1_Score_BestModel_0.joblib',
-    f'{model_base_path}CART/CART_Precision_BestModel_0.joblib',
-    f'{model_base_path}RF/RF_Accuracy_BestModel_0.joblib',
-    f'{model_base_path}RF/RF_F1_Score_BestModel_0.joblib',
-    f'{model_base_path}RF/RF_Precision_BestModel_0.joblib']
-
-model_names = [
-    "CART_Accuracy",
-    "CART_F1",
-    "CART_Precision_0",
-    "RF_Accuracy",
-    "RF_F1",
-    "RF_Precision"
-]
-
-studies =[
-    f'{study_base_path}CART/CART_Best_Accuracy.pkl',
-    f'{study_base_path}CART/CART_Best_F1_Score.pkl',
-    f'{study_base_path}CART/CART_Best_Precision.pkl',
-    f'{study_base_path}RF/RF_Best_Accuracy.pkl',
-    f'{study_base_path}RF/RF_Best_F1_Score.pkl',
-    f'{study_base_path}RF/RF_Best_Precision.pkl'
-]
-
-studies_names = [
-    'CART-A',
-    'CART-F1',
-    'CART-P',
-    'RF-A',
-    'RF-F1',
-    'RF-P'
-]
-
-metrics = [
-    "Accuracy",
-    "F1",
-    "Precision",
-    "Accuracy",
-    "F1",
-    "Precision"
-]
-
-ColetaEstados.correlacao()
+#ColetaEstados.correlacao()
 
 #for i in range(len(studies)):
 #    AnaliseResultados.plot_study_trials(studies[i], metrics[i], studies_names[i])
@@ -123,9 +85,14 @@ for i in progress:
 
 #ColetaEstados.correlacao()
 
-#ColetaEstados.coleta_amostras(30, x, y, '', 10)
+#ColetaEstados.coleta_amostras(137, jogos, rotulos, '', 25)
 
-#ClassificaEstados.testa_modelos(models, './classes/classification/samples/sample_by_round')
+#Rode, por exemplo:
+res = ClassificaEstados.optuna_CART(jogos_optuna, rotulos_optuna)
+#Pegue:
+best_params = res["best_params"]
+#Avalie:
+ClassificaEstados.treinar_e_avaliar_CART(jogos, rotulos, best_params)
 
 #AnaliseResultados.plot_performance()
 
