@@ -22,7 +22,6 @@ from classes.strategies.EstrategiaMCTS import EstrategiaMCTS
 from classes.strategies.EstrategiaTotalmenteAleatoria import EstrategiaTotalmenteAleatoria
 from classes.enum.TipoDistrito import TipoDistrito
 from sklearn.tree import DecisionTreeClassifier, export_text, plot_tree
-from sklearn.ensemble import GradientBoostingClassifier
 from sklearn.ensemble import RandomForestClassifier
 from sklearn.model_selection import GroupKFold, train_test_split, cross_val_score, GridSearchCV
 from sklearn.metrics import f1_score, precision_score, recall_score, roc_auc_score, make_scorer, accuracy_score, confusion_matrix, log_loss, ConfusionMatrixDisplay
@@ -66,9 +65,9 @@ class ClassificaEstados:
     # Ler amostras salvas
     @staticmethod
     def ler_amostras(jogos: str, rotulos: str, div: bool = True):
-        X = np.genfromtxt('./classes/classification/dataset/amostras/' + jogos + '.csv', delimiter=',')
+        X = np.genfromtxt('./classes/classification/dataset/amostras/' + jogos + '.csv', delimiter=',', dtype=np.float32)
         #jogos = np.genfromtxt('./tabela_estado/' + i.name + '.csv', delimiter=',')
-        Y = np.genfromtxt('./classes/classification/dataset/amostras/' + rotulos + '.csv', delimiter=',') 
+        Y = np.genfromtxt('./classes/classification/dataset/amostras/' + rotulos + '.csv', delimiter=',', dtype=np.int8) 
         #rotulos = np.genfromtxt('./tabela_estado/' + 'Rotulos' + '.csv', delimiter=',') 
         #X = jogos
         #Y = rotulos
@@ -430,140 +429,17 @@ class ClassificaEstados:
     
     @staticmethod
     def optuna_MLP(jogos, rotulos):
-        # Otimiza SOMENTE acurácia e usando GroupKFold por id_partida (partidas completas no split)
-        X, y = ClassificaEstados.ler_amostras(jogos, rotulos, div=False)
-        X = np.asarray(X)
-        y = np.asarray(y).ravel()
-        if X.ndim == 1:
-            X = X.reshape(1, -1)
-
-        match_id_col = 1
-        if X.shape[1] <= match_id_col:
-            raise ValueError(f"X não possui coluna de id_partida na posição {match_id_col}. X.shape={X.shape}")
-
-        match_ids = X[:, match_id_col].astype(int)
-        X_feat = np.delete(X, match_id_col, axis=1)
-
-        pipeline = Pipeline([
-            ('scaler', StandardScaler()),
-            ('mlp', MLPClassifier(max_iter=500, random_state=42))
-        ])
-
-        param_space = {
-            'hidden_layer_sizes': [(50,), (100,), (50, 50)],
-            'activation': ['tanh', 'relu'],
-            'solver': ['adam', 'sgd'],
-            'alpha': [0.0001, 0.001],
-            'learning_rate': ['constant', 'adaptive']
-        }
-
-        cv = GroupKFold(n_splits=5)
-        scorer = make_scorer(accuracy_score)
-
-        def objective(trial):
-            params = {
-                'hidden_layer_sizes': trial.suggest_categorical('hidden_layer_sizes', param_space['hidden_layer_sizes']),
-                'activation': trial.suggest_categorical('activation', param_space['activation']),
-                'solver': trial.suggest_categorical('solver', param_space['solver']),
-                'alpha': trial.suggest_categorical('alpha', param_space['alpha']),
-                'learning_rate': trial.suggest_categorical('learning_rate', param_space['learning_rate'])
-            }
-
-            pipeline.set_params(mlp__hidden_layer_sizes=params['hidden_layer_sizes'],
-                                mlp__activation=params['activation'],
-                                mlp__solver=params['solver'],
-                                mlp__alpha=params['alpha'],
-                                mlp__learning_rate=params['learning_rate'])
-
-            scores = cross_val_score(
-                pipeline,
-                X_feat,
-                y,
-                cv=cv,
-                groups=match_ids,
-                scoring=scorer,
-                n_jobs=-1
-            )
-            return scores.mean()
-
-        study = optuna.create_study(direction='maximize')
-        study.optimize(objective, n_trials=200, n_jobs=1)
-
-        resultados_optuna = {
-            "best_params": study.best_params,
-            "best_score": study.best_value,
-            "history": [{"trial": t.number, "accuracy": float(t.value), "params": t.params} for t in study.trials]
-        }
-
-        save_dir = './classes/classification/results/optuna'
-        os.makedirs(save_dir, exist_ok=True)
-        save_path = os.path.join(save_dir, 'MLP_optuna.pkl')
-        with open(save_path, "wb") as f:
-            pickle.dump(resultados_optuna, f)
-
-        print(f"[optuna_MLP] best_accuracy={resultados_optuna['best_score']:.4f} save_path={save_path}")
-        return resultados_optuna
+        return ClassificaEstados._run_optuna_with_balanced_folds(
+            jogos=jogos,
+            rotulos=rotulos,
+            model_key="MLP",
+            n_trials=200
+        )
     
     @staticmethod
     def optuna_GB(jogos, rotulos):
-
-        resultados_optuna = {}
-
-        scorers = {
-            'F1': make_scorer(f1_score),
-            'Precision': make_scorer(precision_score),
-            'Accuracy': make_scorer(accuracy_score)
-        }
-
-        pipeline = Pipeline([
-            ('gb', GradientBoostingClassifier(random_state=42))
-        ])
-
-        param_space = {
-            'n_estimators': [50, 100, 150],
-            'learning_rate': [0.01, 0.1, 0.2],
-            'max_depth': [5, 10, 15],
-            'min_samples_split': [5, 20, 50],
-            'min_samples_leaf': [5, 20, 50],
-        }
-
-        for metric_name, scorer in scorers.items():
-            def objective(trial):
-                params = {
-                    'n_estimators': trial.suggest_categorical('n_estimators', param_space['n_estimators']),
-                    'learning_rate': trial.suggest_categorical('learning_rate', param_space['learning_rate']),
-                    'max_depth': trial.suggest_categorical('max_depth', param_space['max_depth']),
-                    'min_samples_split': trial.suggest_categorical('min_samples_split', param_space['min_samples_split']),
-                    'min_samples_leaf': trial.suggest_categorical('min_samples_leaf', param_space['min_samples_leaf'])
-                }
-
-                pipeline.set_params(gb__n_estimators=params['n_estimators'],
-                                    gb__learning_rate=params['learning_rate'],
-                                    gb__max_depth=params['max_depth'],
-                                    gb__min_samples_split=params['min_samples_split'],
-                                    gb__min_samples_leaf=params['min_samples_leaf'])
-
-                score = cross_val_score(pipeline, jogos, rotulos, cv=5, scoring=scorer, n_jobs=-1)
-                return score.mean()
-
-            study = optuna.create_study(direction='maximize')
-            study.optimize(objective, n_trials=50, n_jobs=-1)
-
-            best_score = study.best_value
-            best_params = study.best_params
-
-            print(f"Metric: {metric_name}, Score: {best_score:.4f}, Parameters: {best_params}")
-
-            resultados_optuna[metric_name] = {
-                "best_score": best_score,
-                "best_params": best_params
-            }
-
-            joblib.dump(study, f'./classes/classification/models/GB Best {metric_name}')
-
-        ClassificaEstados.salva_testes(resultados_optuna, './classes/classification/results/GB/gb')
-
-        return
+        # Mantida por compatibilidade: agora usa XGB.
+        return ClassificaEstados.optuna_XGB(jogos, rotulos)
     
     @staticmethod
     def early_stopping_callback(patience):
@@ -587,401 +463,61 @@ class ClassificaEstados:
 
     @staticmethod
     def optuna_CART(jogos, rotulos):
-        # Otimiza SOMENTE acurácia e usando GroupKFold por id_partida (partidas completas no split)
-        X, y = ClassificaEstados.ler_amostras(jogos, rotulos, div=False)
-        X = np.asarray(X)
-        y = np.asarray(y).ravel()
-        if X.ndim == 1:
-            X = X.reshape(1, -1)
-
-        match_id_col = 1
-        if X.shape[1] <= match_id_col:
-            raise ValueError(f"X não possui coluna de id_partida na posição {match_id_col}. X.shape={X.shape}")
-
-        match_ids = X[:, match_id_col].astype(int)
-        X_feat = np.delete(X, match_id_col, axis=1)
-
-        base_pipeline = Pipeline([
-            ('cart', DecisionTreeClassifier(random_state=42))
-        ])
-
-        # Para multiclasse, usar class_weight='balanced' (ou None) é seguro.
-        param_space = {
-            'max_depth': (2, 50),
-            'min_samples_leaf': (2, 200),
-            'min_samples_split': (2, 200),
-            'class_weight': [None, 'balanced'],
-            'criterion': ['gini', 'entropy', 'log_loss']
-        }
-
-        cv = GroupKFold(n_splits=5)
-        scorer = make_scorer(accuracy_score)
-
-        def objective(trial):
-            max_depth = None if trial.suggest_categorical("use_none_max_depth", [True, False]) \
-                else int(trial.suggest_float('max_depth', *param_space['max_depth']))
-
-            params = {
-                'max_depth': max_depth,
-                'criterion': trial.suggest_categorical('criterion', param_space['criterion']),
-                'min_samples_leaf': int(trial.suggest_float('min_samples_leaf', *param_space['min_samples_leaf'])),
-                'min_samples_split': int(trial.suggest_float('min_samples_split', *param_space['min_samples_split'])),
-                'class_weight': trial.suggest_categorical('class_weight', param_space['class_weight']),
-            }
-
-            pipeline = clone(base_pipeline)
-            pipeline.set_params(cart__max_depth=params['max_depth'],
-                                cart__criterion=params['criterion'],
-                                cart__min_samples_leaf=params['min_samples_leaf'],
-                                cart__min_samples_split=params['min_samples_split'],
-                                cart__class_weight=params['class_weight'])
-
-            scores = cross_val_score(
-                pipeline,
-                X_feat,
-                y,
-                cv=cv,
-                groups=match_ids,
-                scoring=scorer,
-                n_jobs=-1
-            )
-            return scores.mean()
-
-        study = optuna.create_study(direction='maximize')
-        study.optimize(objective, n_trials=200, n_jobs=1)
-
-        resultados_optuna = {
-            "best_params": study.best_params,
-            "best_score": study.best_value,
-            "history": [{"trial": t.number, "accuracy": float(t.value), "params": t.params} for t in study.trials]
-        }
-
-        save_dir = './classes/classification/results/optuna'
-        os.makedirs(save_dir, exist_ok=True)
-        save_path = os.path.join(save_dir, 'CART_optuna.pkl')
-        with open(save_path, "wb") as f:
-            pickle.dump(resultados_optuna, f)
-
-        print(f"[optuna_CART] best_accuracy={resultados_optuna['best_score']:.4f} save_path={save_path}")
-        return resultados_optuna
-
-    @staticmethod    
-    def optuna_RF(X, y, match_ids, n_trials=1000, save_path="rf_optuna.pkl"):
-
-        base_pipeline = Pipeline([
-            ("rf", RandomForestClassifier(random_state=42))
-        ])
-
-        cv = GroupKFold(n_splits=5)
-        scorer = make_scorer(accuracy_score)
-
-        def objective(trial):
-
-            max_depth = None if trial.suggest_categorical(
-                "use_none_max_depth", [True, False]
-            ) else trial.suggest_int("max_depth", 2, 50)
-
-            params = {
-                "n_estimators": trial.suggest_int("n_estimators", 50, 1000),
-                "criterion": trial.suggest_categorical(
-                    "criterion", ["gini", "entropy", "log_loss"]
-                ),
-                "max_depth": max_depth,
-                "min_samples_leaf": trial.suggest_int("min_samples_leaf", 2, 500),
-                "min_samples_split": trial.suggest_int("min_samples_split", 2, 500)
-            }
-
-            pipeline = clone(base_pipeline)
-            pipeline.set_params(**{f"rf__{k}": v for k, v in params.items()})
-
-            scores = cross_val_score(
-                pipeline,
-                X,
-                y,
-                cv=cv,
-                groups=match_ids,
-                scoring=scorer,
-                n_jobs=-1
-            )
-
-            return scores.mean()
-
-        study = optuna.create_study(direction="maximize")
-        study.optimize(objective, n_trials=n_trials)
-
-        results = {
-            "best_params": study.best_params,
-            "best_score": study.best_value,
-            "history": [(t.number, t.value) for t in study.trials]
-        }
-
-        with open(save_path, "wb") as f:
-            pickle.dump(results, f)
-
-        return results
-    
-    @staticmethod
-    def evaluate_rf(X, y, match_ids, best_params):
-        model = RandomForestClassifier(
-            random_state=42,
-            **{k: v for k, v in best_params.items() if k != "use_none_max_depth"}
+        return ClassificaEstados._run_optuna_with_balanced_folds(
+            jogos=jogos,
+            rotulos=rotulos,
+            model_key="CART",
+            n_trials=200
         )
 
-        if best_params.get("use_none_max_depth"):
-            model.set_params(max_depth=None)
-
-        cv = GroupKFold(n_splits=5)
-
-        acc, prec, rec, f1 = [], [], [], []
-
-        for train_idx, test_idx in cv.split(X, y, groups=match_ids):
-            X_train, X_test = X[train_idx], X[test_idx]
-            y_train, y_test = y[train_idx], y[test_idx]
-
-            model.fit(X_train, y_train)
-            preds = model.predict(X_test)
-
-            acc.append(accuracy_score(y_test, preds))
-            prec.append(precision_score(y_test, preds, average="macro", zero_division=0))
-            rec.append(recall_score(y_test, preds, average="macro", zero_division=0))
-            f1.append(f1_score(y_test, preds, average="macro", zero_division=0))
-
-        def summarize(vals):
-            vals = np.asarray(vals, dtype=float)
-            mean = float(np.mean(vals))
-            std = float(np.std(vals, ddof=1)) if len(vals) > 1 else 0.0
-            sem = std / np.sqrt(len(vals)) if len(vals) > 0 else 0.0
-            ci95 = (mean - 1.96 * sem, mean + 1.96 * sem) if len(vals) > 1 else (mean, mean)
-            return {"mean": mean, "std": std, "sem": float(sem), "ci95": ci95, "n_folds": len(vals)}
-
-        results = {
-            "accuracy": summarize(acc),
-            "precision_macro": summarize(prec),
-            "recall_macro": summarize(rec),
-            "f1_macro": summarize(f1),
-            "raw": {"accuracy": acc, "precision_macro": prec, "recall_macro": rec, "f1_macro": f1}
-        }
-
-        with open("rf_evaluation.pkl", "wb") as f:
-            pickle.dump(results, f)
-
-        return results
+    @staticmethod    
+    def optuna_RF(jogos, rotulos, n_trials=200, total_partidas=None):
+        return ClassificaEstados._run_optuna_with_balanced_folds(
+            jogos=jogos,
+            rotulos=rotulos,
+            model_key="RF",
+            n_trials=n_trials,
+            total_partidas=total_partidas
+        )
+    
+    @staticmethod
+    def evaluate_rf(jogos, rotulos, best_params, total_partidas=None):
+        return ClassificaEstados.treinar_e_avaliar_RF(
+            jogos=jogos,
+            rotulos=rotulos,
+            best_params=best_params,
+            total_partidas=total_partidas
+        )
 
     @staticmethod
-    def optuna_XGB(jogos, rotulos):
-        # Otimiza SOMENTE acurácia e usando GroupKFold por id_partida (partidas completas no split)
-        X, y = ClassificaEstados.ler_amostras(jogos, rotulos, div=False)
-        X = np.asarray(X)
-        y = np.asarray(y).ravel()
-        if X.ndim == 1:
-            X = X.reshape(1, -1)
-
-        match_id_col = 1
-        if X.shape[1] <= match_id_col:
-            raise ValueError(f"X não possui coluna de id_partida na posição {match_id_col}. X.shape={X.shape}")
-
-        match_ids = X[:, match_id_col].astype(int)
-        X_feat = np.delete(X, match_id_col, axis=1)
-
-        n_classes = int(len(np.unique(y)))
-
-        # Para multiclasse, usar multi:softprob
-        base_pipeline = Pipeline([
-            ('xgb', XGBClassifier(
-                objective='multi:softprob',
-                num_class=n_classes,
-                eval_metric='mlogloss',
-                tree_method='hist',
-                random_state=42
-            ))
-        ])
-
-        param_space = {
-            'n_estimators': (50, 1000),
-            'max_depth': (2, 20),
-            'learning_rate': (0.01, 0.5),
-            'subsample': (0.5, 1.0),
-            'colsample_bytree': (0.5, 1.0),
-            'reg_lambda': (0.0, 10.0),
-            'reg_alpha': (0.0, 10.0),
-        }
-
-        cv = GroupKFold(n_splits=5)
-        scorer = make_scorer(accuracy_score)
-
-        def objective(trial):
-            params = {
-                'n_estimators': int(trial.suggest_float('n_estimators', *param_space['n_estimators'])),
-                'max_depth': int(trial.suggest_float('max_depth', *param_space['max_depth'])),
-                'learning_rate': trial.suggest_float('learning_rate', *param_space['learning_rate']),
-                'subsample': trial.suggest_float('subsample', *param_space['subsample']),
-                'colsample_bytree': trial.suggest_float('colsample_bytree', *param_space['colsample_bytree']),
-                'reg_lambda': trial.suggest_float('reg_lambda', *param_space['reg_lambda']),
-                'reg_alpha': trial.suggest_float('reg_alpha', *param_space['reg_alpha']),
-            }
-
-            pipeline = clone(base_pipeline)
-            pipeline.set_params(
-                xgb__n_estimators=params['n_estimators'],
-                xgb__max_depth=params['max_depth'],
-                xgb__learning_rate=params['learning_rate'],
-                xgb__subsample=params['subsample'],
-                xgb__colsample_bytree=params['colsample_bytree'],
-                xgb__reg_lambda=params['reg_lambda'],
-                xgb__reg_alpha=params['reg_alpha'],
-            )
-
-            scores = cross_val_score(
-                pipeline,
-                X_feat,
-                y,
-                cv=cv,
-                groups=match_ids,
-                scoring=scorer,
-                n_jobs=-1
-            )
-            return scores.mean()
-
-        study = optuna.create_study(direction='maximize')
-        study.optimize(objective, n_trials=300, n_jobs=1)
-
-        resultados_optuna = {
-            "best_params": study.best_params,
-            "best_score": study.best_value,
-            "history": [{"trial": t.number, "accuracy": float(t.value), "params": t.params} for t in study.trials]
-        }
-
-        save_dir = './classes/classification/results/optuna'
-        os.makedirs(save_dir, exist_ok=True)
-        save_path = os.path.join(save_dir, 'XGB_optuna.pkl')
-        with open(save_path, "wb") as f:
-            pickle.dump(resultados_optuna, f)
-
-        print(f"[optuna_XGB] best_accuracy={resultados_optuna['best_score']:.4f} save_path={save_path}")
-        return resultados_optuna
+    def optuna_XGB(jogos, rotulos, n_trials=300, total_partidas=None):
+        return ClassificaEstados._run_optuna_with_balanced_folds(
+            jogos=jogos,
+            rotulos=rotulos,
+            model_key="XGB",
+            n_trials=n_trials,
+            total_partidas=total_partidas
+        )
 
     @staticmethod
-    def treinar_e_avaliar_CART(jogos, rotulos, best_params):
-        # Avalia via GroupKFold garantindo partidas completas no split
-        X, y = ClassificaEstados.ler_amostras(jogos, rotulos, div=False)
-        X = np.asarray(X)
-        y = np.asarray(y).ravel()
-        if X.ndim == 1:
-            X = X.reshape(1, -1)
-
-        match_id_col = 1
-        match_ids = X[:, match_id_col].astype(int)
-        X_feat = np.delete(X, match_id_col, axis=1)
-
-        pipeline = Pipeline([
-            ('cart', DecisionTreeClassifier(random_state=42, **best_params))
-        ])
-
-        cv = GroupKFold(n_splits=5)
-        acc, prec, rec, f1 = [], [], [], []
-
-        for train_idx, test_idx in cv.split(X_feat, y, groups=match_ids):
-            X_train, X_test = X_feat[train_idx], X_feat[test_idx]
-            y_train, y_test = y[train_idx], y[test_idx]
-
-            pipeline.fit(X_train, y_train)
-            preds = pipeline.predict(X_test)
-
-            acc.append(accuracy_score(y_test, preds))
-            prec.append(precision_score(y_test, preds, average="macro", zero_division=0))
-            rec.append(recall_score(y_test, preds, average="macro", zero_division=0))
-            f1.append(f1_score(y_test, preds, average="macro", zero_division=0))
-
-        def summarize(vals):
-            vals = np.asarray(vals, dtype=float)
-            mean = float(np.mean(vals))
-            std = float(np.std(vals, ddof=1)) if len(vals) > 1 else 0.0
-            sem = std / np.sqrt(len(vals)) if len(vals) > 0 else 0.0
-            ci95 = (mean - 1.96 * sem, mean + 1.96 * sem) if len(vals) > 1 else (mean, mean)
-            return {"mean": mean, "std": std, "sem": float(sem), "ci95": ci95, "n_folds": len(vals)}
-
-        results = {
-            "accuracy": summarize(acc),
-            "precision_macro": summarize(prec),
-            "recall_macro": summarize(rec),
-            "f1_macro": summarize(f1),
-            "raw": {"accuracy": acc, "precision_macro": prec, "recall_macro": rec, "f1_macro": f1}
-        }
-
-        save_dir = './classes/classification/results/optuna'
-        os.makedirs(save_dir, exist_ok=True)
-        save_path = os.path.join(save_dir, 'CART_evaluation.pkl')
-        with open(save_path, "wb") as f:
-            pickle.dump(results, f)
-
-        print(f"[treinar_e_avaliar_CART] saved evaluation to {save_path}")
-        return results
+    def treinar_e_avaliar_CART(jogos, rotulos, best_params, total_partidas=None):
+        return ClassificaEstados._run_evaluation_with_balanced_folds(
+            jogos=jogos,
+            rotulos=rotulos,
+            best_params=best_params,
+            model_key="CART",
+            total_partidas=total_partidas
+        )
 
     @staticmethod
-    def treinar_e_avaliar_XGB(jogos, rotulos, best_params):
-        # Avalia via GroupKFold garantindo partidas completas no split
-        X, y = ClassificaEstados.ler_amostras(jogos, rotulos, div=False)
-        X = np.asarray(X)
-        y = np.asarray(y).ravel()
-        if X.ndim == 1:
-            X = X.reshape(1, -1)
-
-        match_id_col = 1
-        match_ids = X[:, match_id_col].astype(int)
-        X_feat = np.delete(X, match_id_col, axis=1)
-
-        n_classes = int(len(np.unique(y)))
-
-        pipeline = Pipeline([
-            ('xgb', XGBClassifier(
-                objective='multi:softprob',
-                num_class=n_classes,
-                eval_metric='mlogloss',
-                tree_method='hist',
-                random_state=42,
-                **best_params
-            ))
-        ])
-
-        cv = GroupKFold(n_splits=5)
-        acc, prec, rec, f1 = [], [], [], []
-
-        for train_idx, test_idx in cv.split(X_feat, y, groups=match_ids):
-            X_train, X_test = X_feat[train_idx], X_feat[test_idx]
-            y_train, y_test = y[train_idx], y[test_idx]
-
-            pipeline.fit(X_train, y_train)
-            preds = pipeline.predict(X_test)
-
-            acc.append(accuracy_score(y_test, preds))
-            prec.append(precision_score(y_test, preds, average="macro", zero_division=0))
-            rec.append(recall_score(y_test, preds, average="macro", zero_division=0))
-            f1.append(f1_score(y_test, preds, average="macro", zero_division=0))
-
-        def summarize(vals):
-            vals = np.asarray(vals, dtype=float)
-            mean = float(np.mean(vals))
-            std = float(np.std(vals, ddof=1)) if len(vals) > 1 else 0.0
-            sem = std / np.sqrt(len(vals)) if len(vals) > 0 else 0.0
-            ci95 = (mean - 1.96 * sem, mean + 1.96 * sem) if len(vals) > 1 else (mean, mean)
-            return {"mean": mean, "std": std, "sem": float(sem), "ci95": ci95, "n_folds": len(vals)}
-
-        results = {
-            "accuracy": summarize(acc),
-            "precision_macro": summarize(prec),
-            "recall_macro": summarize(rec),
-            "f1_macro": summarize(f1),
-            "raw": {"accuracy": acc, "precision_macro": prec, "recall_macro": rec, "f1_macro": f1}
-        }
-
-        save_dir = './classes/classification/results/optuna'
-        os.makedirs(save_dir, exist_ok=True)
-        save_path = os.path.join(save_dir, 'XGB_evaluation.pkl')
-        with open(save_path, "wb") as f:
-            pickle.dump(results, f)
-
-        print(f"[treinar_e_avaliar_XGB] saved evaluation to {save_path}")
-        return results
+    def treinar_e_avaliar_XGB(jogos, rotulos, best_params, total_partidas=None):
+        return ClassificaEstados._run_evaluation_with_balanced_folds(
+            jogos=jogos,
+            rotulos=rotulos,
+            best_params=best_params,
+            model_key="XGB",
+            total_partidas=total_partidas
+        )
 
     @staticmethod
     def carregar_melhores_parametros(caminho_study):
@@ -990,150 +526,291 @@ class ClassificaEstados:
         return best_params
 
     @staticmethod
-    def treinar_e_avaliar_MLP(jogos, rotulos, best_params):
-        # Avalia via GroupKFold garantindo partidas completas no split
-        X, y = ClassificaEstados.ler_amostras(jogos, rotulos, div=False)
-        X = np.asarray(X)
-        y = np.asarray(y).ravel()
-        if X.ndim == 1:
-            X = X.reshape(1, -1)
-
-        match_id_col = 1
-        match_ids = X[:, match_id_col].astype(int)
-        X_feat = np.delete(X, match_id_col, axis=1)
-
-        pipeline = Pipeline([
-            ('scaler', StandardScaler()),
-            ('mlp', MLPClassifier(max_iter=500, random_state=42, **best_params))
-        ])
-
-        cv = GroupKFold(n_splits=5)
-
-        acc, prec, rec, f1 = [], [], [], []
-        for train_idx, test_idx in cv.split(X_feat, y, groups=match_ids):
-            X_train, X_test = X_feat[train_idx], X_feat[test_idx]
-            y_train, y_test = y[train_idx], y[test_idx]
-
-            pipeline.fit(X_train, y_train)
-            preds = pipeline.predict(X_test)
-
-            acc.append(accuracy_score(y_test, preds))
-            prec.append(precision_score(y_test, preds, average="macro", zero_division=0))
-            rec.append(recall_score(y_test, preds, average="macro", zero_division=0))
-            f1.append(f1_score(y_test, preds, average="macro", zero_division=0))
-
-        def summarize(vals):
-            vals = np.asarray(vals, dtype=float)
-            mean = float(np.mean(vals))
-            std = float(np.std(vals, ddof=1)) if len(vals) > 1 else 0.0
-            sem = std / np.sqrt(len(vals)) if len(vals) > 0 else 0.0
-            ci95 = (mean - 1.96 * sem, mean + 1.96 * sem) if len(vals) > 1 else (mean, mean)
-            return {"mean": mean, "std": std, "sem": float(sem), "ci95": ci95, "n_folds": len(vals)}
-
-        results = {
-            "accuracy": summarize(acc),
-            "precision_macro": summarize(prec),
-            "recall_macro": summarize(rec),
-            "f1_macro": summarize(f1),
-            "raw": {"accuracy": acc, "precision_macro": prec, "recall_macro": rec, "f1_macro": f1}
-        }
-
-        save_dir = './classes/classification/results/optuna'
-        os.makedirs(save_dir, exist_ok=True)
-        save_path = os.path.join(save_dir, 'MLP_evaluation.pkl')
-        with open(save_path, "wb") as f:
-            pickle.dump(results, f)
-
-        print(f"[treinar_e_avaliar_MLP] saved evaluation to {save_path}")
-        return results
+    def treinar_e_avaliar_MLP(jogos, rotulos, best_params, total_partidas=None):
+        return ClassificaEstados._run_evaluation_with_balanced_folds(
+            jogos=jogos,
+            rotulos=rotulos,
+            best_params=best_params,
+            model_key="MLP",
+            total_partidas=total_partidas
+        )
         
     @staticmethod
-    def treinar_e_avaliar_GB(jogos, rotulos, best_params):
-        # Avalia via GroupKFold garantindo partidas completas no split
-        X, y = ClassificaEstados.ler_amostras(jogos, rotulos, div=False)
-        X = np.asarray(X)
-        y = np.asarray(y).ravel()
-        if X.ndim == 1:
-            X = X.reshape(1, -1)
-
-        match_id_col = 1
-        match_ids = X[:, match_id_col].astype(int)
-        X_feat = np.delete(X, match_id_col, axis=1)
-
-        pipeline = Pipeline([
-            ('gb', GradientBoostingClassifier(random_state=42, **best_params))
-        ])
-
-        cv = GroupKFold(n_splits=5)
-
-        acc, prec, rec, f1 = [], [], [], []
-        for train_idx, test_idx in cv.split(X_feat, y, groups=match_ids):
-            X_train, X_test = X_feat[train_idx], X_feat[test_idx]
-            y_train, y_test = y[train_idx], y[test_idx]
-
-            pipeline.fit(X_train, y_train)
-            preds = pipeline.predict(X_test)
-
-            acc.append(accuracy_score(y_test, preds))
-            prec.append(precision_score(y_test, preds, average="macro", zero_division=0))
-            rec.append(recall_score(y_test, preds, average="macro", zero_division=0))
-            f1.append(f1_score(y_test, preds, average="macro", zero_division=0))
-
-        def summarize(vals):
-            vals = np.asarray(vals, dtype=float)
-            mean = float(np.mean(vals))
-            std = float(np.std(vals, ddof=1)) if len(vals) > 1 else 0.0
-            sem = std / np.sqrt(len(vals)) if len(vals) > 0 else 0.0
-            ci95 = (mean - 1.96 * sem, mean + 1.96 * sem) if len(vals) > 1 else (mean, mean)
-            return {"mean": mean, "std": std, "sem": float(sem), "ci95": ci95, "n_folds": len(vals)}
-
-        results = {
-            "accuracy": summarize(acc),
-            "precision_macro": summarize(prec),
-            "recall_macro": summarize(rec),
-            "f1_macro": summarize(f1),
-            "raw": {"accuracy": acc, "precision_macro": prec, "recall_macro": rec, "f1_macro": f1}
-        }
-
-        save_dir = './classes/classification/results/optuna'
-        os.makedirs(save_dir, exist_ok=True)
-        save_path = os.path.join(save_dir, 'GB_evaluation.pkl')
-        with open(save_path, "wb") as f:
-            pickle.dump(results, f)
-
-        print(f"[treinar_e_avaliar_GB] saved evaluation to {save_path}")
-        return results
+    def treinar_e_avaliar_GB(jogos, rotulos, best_params, total_partidas=None):
+        # Mantida por compatibilidade: agora usa XGB.
+        return ClassificaEstados.treinar_e_avaliar_XGB(
+            jogos=jogos,
+            rotulos=rotulos,
+            best_params=best_params,
+            total_partidas=total_partidas
+        )
 
     @staticmethod
-    def treinar_regressao_logistica(jogos, rotulos, nome_modelo, class_weight=None):
-        # Avalia via GroupKFold garantindo partidas completas no split
-        X, y = ClassificaEstados.ler_amostras(jogos, rotulos, div=False)
-        X = np.asarray(X)
-        y = np.asarray(y).ravel()
-        if X.ndim == 1:
-            X = X.reshape(1, -1)
+    def treinar_e_avaliar_RF(jogos, rotulos, best_params, total_partidas=None):
+        return ClassificaEstados._run_evaluation_with_balanced_folds(
+            jogos=jogos,
+            rotulos=rotulos,
+            best_params=best_params,
+            model_key="RF",
+            total_partidas=total_partidas
+        )
 
-        match_id_col = 1
-        match_ids = X[:, match_id_col].astype(int)
-        X_feat = np.delete(X, match_id_col, axis=1)
+    @staticmethod
+    def treinar_regressao_logistica(jogos, rotulos, nome_modelo, class_weight=None, total_partidas=None):
+        return ClassificaEstados._run_evaluation_with_balanced_folds(
+            jogos=jogos,
+            rotulos=rotulos,
+            best_params={"class_weight": class_weight},
+            model_key="LOGREG",
+            total_partidas=total_partidas,
+            nome_modelo=nome_modelo
+        )
 
-        pipeline = Pipeline([
-            ('scaler', StandardScaler()),
-            ('logreg', LogisticRegression(
-                max_iter=2000,
-                class_weight=class_weight,
-                solver='lbfgs',
-                multi_class='auto'
-            ))
-        ])
+    @staticmethod
+    def _summarize(vals):
+        vals = np.asarray(vals, dtype=float)
+        mean = float(np.mean(vals))
+        std = float(np.std(vals, ddof=1)) if len(vals) > 1 else 0.0
+        sem = std / np.sqrt(len(vals)) if len(vals) > 0 else 0.0
+        ci95 = (mean - 1.96 * sem, mean + 1.96 * sem) if len(vals) > 1 else (mean, mean)
+        return {"mean": mean, "std": std, "sem": float(sem), "ci95": ci95, "n_folds": len(vals)}
 
-        cv = GroupKFold(n_splits=5)
+    @staticmethod
+    def _swap_players_in_row(row, from_pos, to_pos):
+        row = row.copy()
+        # Aqui a feature de id_partida já foi removida.
+        turn_start = 1
+        players_start = 6
+        n_players = 5
+        player_block = (len(row) - players_start) // n_players
 
+        i = int(from_pos) - 1
+        j = int(to_pos) - 1
+        if i == j:
+            return row
+
+        idx_turn_i = turn_start + i
+        idx_turn_j = turn_start + j
+        row[idx_turn_i], row[idx_turn_j] = row[idx_turn_j], row[idx_turn_i]
+
+        bi_start = players_start + (i * player_block)
+        bj_start = players_start + (j * player_block)
+        bi_end = bi_start + player_block
+        bj_end = bj_start + player_block
+
+        bloco_i = row[bi_start:bi_end].copy()
+        bloco_j = row[bj_start:bj_end].copy()
+        row[bi_start:bi_end] = bloco_j
+        row[bj_start:bj_end] = bloco_i
+        return row
+
+    @staticmethod
+    def _balance_fold_classes_by_swapping(X_fold, y_fold, rng):
+        X_bal = np.asarray(X_fold).copy()
+        y_bal = np.asarray(y_fold).astype(int).copy()
+        labels = np.array([1, 2, 3, 4, 5], dtype=int)
+
+        n = len(y_bal)
+        base = n // len(labels)
+        remainder = n % len(labels)
+        target = {int(lbl): base for lbl in labels}
+        for lbl in labels[:remainder]:
+            target[int(lbl)] += 1
+
+        while True:
+            counts = {int(lbl): int(np.sum(y_bal == lbl)) for lbl in labels}
+            surplus = [lbl for lbl in labels if counts[int(lbl)] > target[int(lbl)]]
+            deficit = [lbl for lbl in labels if counts[int(lbl)] < target[int(lbl)]]
+            if not surplus or not deficit:
+                break
+
+            src = int(max(surplus, key=lambda c: counts[int(c)] - target[int(c)]))
+            dst = int(max(deficit, key=lambda c: target[int(c)] - counts[int(c)]))
+            src_idx = np.where(y_bal == src)[0]
+            if len(src_idx) == 0:
+                break
+
+            chosen = int(rng.choice(src_idx))
+            X_bal[chosen] = ClassificaEstados._swap_players_in_row(X_bal[chosen], src, dst)
+            y_bal[chosen] = dst
+
+        return X_bal, y_bal
+
+    @staticmethod
+    def _prepare_balanced_folds(jogos, rotulos, total_partidas=None, seed=42):
+        X_raw, y_raw = ClassificaEstados.ler_amostras(jogos, rotulos, div=False)
+        X_raw = np.asarray(X_raw, dtype=np.float32)
+        y_raw = np.asarray(y_raw).astype(int).ravel()
+        if X_raw.ndim == 1:
+            X_raw = X_raw.reshape(1, -1)
+
+        # Coluna 0 = id_partida e coluna 1 = rodada.
+        round_mask = X_raw[:, 1] >= 2
+        X_raw = X_raw[round_mask]
+        y_raw = y_raw[round_mask]
+        match_ids = X_raw[:, 0].astype(int)
+        features = np.delete(X_raw, 0, axis=1).astype(np.float32)
+
+        unique_matches = np.unique(match_ids)
+        available = len(unique_matches)
+        if available < 100:
+            raise ValueError(f"Número de partidas insuficiente após filtro de rodada>=2: {available}.")
+
+        max_divisible = (available // 100) * 100
+        if total_partidas is None:
+            total_partidas = max_divisible
+        if total_partidas % 100 != 0:
+            raise ValueError(f"total_partidas deve ser divisível por 100. Recebido: {total_partidas}.")
+        if total_partidas > available:
+            raise ValueError(f"total_partidas ({total_partidas}) > partidas disponíveis ({available}).")
+
+        rng = np.random.default_rng(seed)
+        selected_matches = rng.choice(unique_matches, size=total_partidas, replace=False)
+        selected_set = set(int(m) for m in selected_matches.tolist())
+        selected_mask = np.array([int(m) in selected_set for m in match_ids], dtype=bool)
+
+        X_sel = features[selected_mask]
+        y_sel = y_raw[selected_mask]
+        m_sel = match_ids[selected_mask]
+
+        shuffled_matches = np.array(sorted(list(selected_set)))
+        rng.shuffle(shuffled_matches)
+
+        half = total_partidas // 2
+        matches_A = shuffled_matches[:half]
+        matches_B = shuffled_matches[half:]
+
+        def build_folds(matches_subset, n_folds):
+            split_matches = np.array_split(matches_subset, n_folds)
+            folds = []
+            for fm in split_matches:
+                fm_set = set(int(m) for m in fm.tolist())
+                mask = np.array([int(m) in fm_set for m in m_sel], dtype=bool)
+                X_fold = X_sel[mask]
+                y_fold = y_sel[mask]
+                m_fold = m_sel[mask]
+                X_fold, y_fold = ClassificaEstados._balance_fold_classes_by_swapping(X_fold, y_fold, rng)
+                folds.append((X_fold, y_fold, m_fold))
+            return folds
+
+        folds_A = build_folds(matches_A, n_folds=5)
+        folds_B = build_folds(matches_B, n_folds=10)
+        return folds_A, folds_B
+
+    @staticmethod
+    def _make_pipeline(model_key, params, y_train):
+        params = dict(params or {})
+
+        if model_key == "CART":
+            params = {k: v for k, v in params.items() if k != "use_none_max_depth"}
+            if params.get("max_depth", "KEEP") == "KEEP":
+                params.pop("max_depth", None)
+            return Pipeline([("cart", DecisionTreeClassifier(random_state=42, **params))])
+
+        if model_key == "RF":
+            use_none = bool(params.pop("use_none_max_depth", False))
+            if use_none:
+                params["max_depth"] = None
+            return Pipeline([("rf", RandomForestClassifier(random_state=42, **params))])
+
+        if model_key == "XGB":
+            n_classes = int(len(np.unique(y_train)))
+            return Pipeline([("xgb", XGBClassifier(
+                objective="multi:softprob",
+                num_class=n_classes,
+                eval_metric="mlogloss",
+                tree_method="hist",
+                random_state=42,
+                **params
+            ))])
+
+        if model_key == "MLP":
+            return Pipeline([
+                ("scaler", StandardScaler()),
+                ("mlp", MLPClassifier(max_iter=500, random_state=42, **params))
+            ])
+
+        if model_key == "LOGREG":
+            class_weight = params.get("class_weight", None)
+            return Pipeline([
+                ("scaler", StandardScaler()),
+                ("logreg", LogisticRegression(
+                    max_iter=2000,
+                    class_weight=class_weight,
+                    solver="lbfgs",
+                    multi_class="auto"
+                ))
+            ])
+
+        raise ValueError(f"model_key inválido: {model_key}")
+
+    @staticmethod
+    def _optuna_params(model_key, trial):
+        if model_key == "CART":
+            use_none = trial.suggest_categorical("use_none_max_depth", [True, False])
+            return {
+                "max_depth": None if use_none else trial.suggest_int("max_depth", 2, 50),
+                "criterion": trial.suggest_categorical("criterion", ["gini", "entropy", "log_loss"]),
+                "min_samples_leaf": trial.suggest_int("min_samples_leaf", 2, 200),
+                "min_samples_split": trial.suggest_int("min_samples_split", 2, 200),
+                "class_weight": trial.suggest_categorical("class_weight", [None, "balanced"]),
+                "use_none_max_depth": use_none
+            }
+        if model_key == "RF":
+            use_none = trial.suggest_categorical("use_none_max_depth", [True, False])
+            return {
+                "n_estimators": trial.suggest_int("n_estimators", 50, 1000),
+                "criterion": trial.suggest_categorical("criterion", ["gini", "entropy", "log_loss"]),
+                "max_depth": None if use_none else trial.suggest_int("max_depth", 2, 50),
+                "min_samples_leaf": trial.suggest_int("min_samples_leaf", 2, 500),
+                "min_samples_split": trial.suggest_int("min_samples_split", 2, 500),
+                "use_none_max_depth": use_none
+            }
+        if model_key == "XGB":
+            return {
+                "n_estimators": trial.suggest_int("n_estimators", 50, 1000),
+                "max_depth": trial.suggest_int("max_depth", 2, 20),
+                "learning_rate": trial.suggest_float("learning_rate", 0.01, 0.5),
+                "subsample": trial.suggest_float("subsample", 0.5, 1.0),
+                "colsample_bytree": trial.suggest_float("colsample_bytree", 0.5, 1.0),
+                "reg_lambda": trial.suggest_float("reg_lambda", 0.0, 10.0),
+                "reg_alpha": trial.suggest_float("reg_alpha", 0.0, 10.0),
+            }
+        if model_key == "MLP":
+            return {
+                "hidden_layer_sizes": trial.suggest_categorical("hidden_layer_sizes", [(50,), (100,), (50, 50)]),
+                "activation": trial.suggest_categorical("activation", ["tanh", "relu"]),
+                "solver": trial.suggest_categorical("solver", ["adam", "sgd"]),
+                "alpha": trial.suggest_categorical("alpha", [0.0001, 0.001]),
+                "learning_rate": trial.suggest_categorical("learning_rate", ["constant", "adaptive"])
+            }
+        raise ValueError(f"Sem espaço de busca Optuna para model_key={model_key}")
+
+    @staticmethod
+    def _cross_val_accuracy_from_folds(folds, model_key, params):
+        scores = []
+        for i in range(len(folds)):
+            X_val, y_val, _ = folds[i]
+            train_parts = [folds[j] for j in range(len(folds)) if j != i]
+            X_train = np.vstack([p[0] for p in train_parts])
+            y_train = np.concatenate([p[1] for p in train_parts])
+
+            pipeline = ClassificaEstados._make_pipeline(model_key, params, y_train)
+            pipeline.fit(X_train, y_train)
+            preds = pipeline.predict(X_val)
+            scores.append(accuracy_score(y_val, preds))
+        return float(np.mean(scores))
+
+    @staticmethod
+    def _evaluate_from_folds(folds, model_key, params):
         acc, prec, rec, f1 = [], [], [], []
-        for train_idx, test_idx in cv.split(X_feat, y, groups=match_ids):
-            X_train, X_test = X_feat[train_idx], X_feat[test_idx]
-            y_train, y_test = y[train_idx], y[test_idx]
+        for i in range(len(folds)):
+            X_test, y_test, _ = folds[i]
+            train_parts = [folds[j] for j in range(len(folds)) if j != i]
+            X_train = np.vstack([p[0] for p in train_parts])
+            y_train = np.concatenate([p[1] for p in train_parts])
 
+            pipeline = ClassificaEstados._make_pipeline(model_key, params, y_train)
             pipeline.fit(X_train, y_train)
             preds = pipeline.predict(X_test)
 
@@ -1142,29 +819,66 @@ class ClassificaEstados:
             rec.append(recall_score(y_test, preds, average="macro", zero_division=0))
             f1.append(f1_score(y_test, preds, average="macro", zero_division=0))
 
-        def summarize(vals):
-            vals = np.asarray(vals, dtype=float)
-            mean = float(np.mean(vals))
-            std = float(np.std(vals, ddof=1)) if len(vals) > 1 else 0.0
-            sem = std / np.sqrt(len(vals)) if len(vals) > 0 else 0.0
-            ci95 = (mean - 1.96 * sem, mean + 1.96 * sem) if len(vals) > 1 else (mean, mean)
-            return {"mean": mean, "std": std, "sem": float(sem), "ci95": ci95, "n_folds": len(vals)}
-
-        results = {
-            "accuracy": summarize(acc),
-            "precision_macro": summarize(prec),
-            "recall_macro": summarize(rec),
-            "f1_macro": summarize(f1),
+        return {
+            "accuracy": ClassificaEstados._summarize(acc),
+            "precision_macro": ClassificaEstados._summarize(prec),
+            "recall_macro": ClassificaEstados._summarize(rec),
+            "f1_macro": ClassificaEstados._summarize(f1),
             "raw": {"accuracy": acc, "precision_macro": prec, "recall_macro": rec, "f1_macro": f1}
         }
 
-        save_dir = './classes/classification/results/optuna'
+    @staticmethod
+    def _run_optuna_with_balanced_folds(jogos, rotulos, model_key, n_trials=200, total_partidas=None):
+        folds_A, _ = ClassificaEstados._prepare_balanced_folds(
+            jogos=jogos,
+            rotulos=rotulos,
+            total_partidas=total_partidas
+        )
+
+        def objective(trial):
+            params = ClassificaEstados._optuna_params(model_key, trial)
+            return ClassificaEstados._cross_val_accuracy_from_folds(folds_A, model_key, params)
+
+        callback = ClassificaEstados.early_stopping_callback(patience=100)
+        study = optuna.create_study(direction="maximize")
+        study.optimize(objective, n_trials=n_trials, n_jobs=1, callbacks=[callback])
+
+        resultados_optuna = {
+            "best_params": study.best_params,
+            "best_score": study.best_value,
+            "history": [{"trial": t.number, "accuracy": float(t.value), "params": t.params} for t in study.trials]
+        }
+
+        save_dir = "./classes/classification/results/optuna"
         os.makedirs(save_dir, exist_ok=True)
-        safe_name = str(nome_modelo).replace("/", "_").replace("\\", "_")
-        save_path = os.path.join(save_dir, f'LogReg_evaluation_{safe_name}.pkl')
+        save_path = os.path.join(save_dir, f"{model_key}_optuna.pkl")
+        with open(save_path, "wb") as f:
+            pickle.dump(resultados_optuna, f)
+
+        print(f"[optuna_{model_key}] best_accuracy={resultados_optuna['best_score']:.4f} save_path={save_path}")
+        return resultados_optuna
+
+    @staticmethod
+    def _run_evaluation_with_balanced_folds(jogos, rotulos, best_params, model_key, total_partidas=None, nome_modelo=None):
+        _, folds_B = ClassificaEstados._prepare_balanced_folds(
+            jogos=jogos,
+            rotulos=rotulos,
+            total_partidas=total_partidas
+        )
+        results = ClassificaEstados._evaluate_from_folds(folds_B, model_key, best_params)
+
+        save_dir = "./classes/classification/results/optuna"
+        os.makedirs(save_dir, exist_ok=True)
+
+        if model_key == "LOGREG":
+            safe_name = str(nome_modelo).replace("/", "_").replace("\\", "_")
+            save_name = f"LogReg_evaluation_{safe_name}.pkl"
+        else:
+            save_name = f"{model_key}_evaluation.pkl"
+        save_path = os.path.join(save_dir, save_name)
         with open(save_path, "wb") as f:
             pickle.dump(results, f)
 
-        print(f"[treinar_regressao_logistica] saved evaluation to {save_path}")
+        print(f"[treinar_e_avaliar_{model_key}] saved evaluation to {save_path}")
         return results
     
