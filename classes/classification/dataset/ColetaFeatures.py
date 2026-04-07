@@ -232,11 +232,11 @@ class ColetaFeatures:
 
             features_jogador = [
                 jogador.ouro,                                                           # qtd ouro
-                1 if jogador.ouro == max([player.ouro for player in jogadores]) else 0, # flag maior ouro
+                max([player.ouro for player in jogadores]) - jogador.ouro, # dif maior ouro
                 len(jogador.cartas_distrito_mao),                                       # numero de cartas na mao
-                1 if len(jogador.cartas_distrito_mao) == max([len(player.cartas_distrito_mao) for player in jogadores], default=0) else 0, # flag mais cartas
+                max([len(player.cartas_distrito_mao) for player in jogadores], default=0) - len(jogador.cartas_distrito_mao) , # dif mais cartas
                 len(jogador.distritos_construidos),                             # numero de distritos construidos
-                1 if len(jogador.distritos_construidos) == max([len(player.distritos_construidos) for player in jogadores], default=0) else 0, # flag mais distritos construidos
+                max([len(player.distritos_construidos) for player in jogadores], default=0) - len(jogador.distritos_construidos), # dif mais distritos construidos
                 jogador.distritos_construidos.count(TipoDistrito.Militar),      # numero de distritos militar construidos
                 jogador.distritos_construidos.count(TipoDistrito.Religioso),    # numero de distritos religioso construidos
                 jogador.distritos_construidos.count(TipoDistrito.Comercial),    # numero de distritos comercial construidos
@@ -246,7 +246,7 @@ class ColetaFeatures:
                 min([distrito.valor_do_distrito for distrito in jogador.distritos_construidos], default=0),  # custo distrito mais barato
                 custo_cidade / len(jogador.distritos_construidos) if len(jogador.distritos_construidos) != 0 else 1, # custo medio distritos construidos
                 custo_cidade, # custo total da cidade
-                1 if custo_cidade == max(sum(d.valor_do_distrito for d in player.distritos_construidos) for player in jogadores) else 0,  # flag maior valor de cidade
+                max(sum(d.valor_do_distrito for d in player.distritos_construidos) for player in jogadores) - custo_cidade ,  # dif maior valor de cidade
                 ColetaFeatures._contagem_morto_por_jogador.get(id(jogador), 0), # vezes morto
                 ColetaFeatures._contagem_roubado_por_jogador.get(id(jogador), 0), # vezes roubado
                 ColetaFeatures._contagem_personagens_por_jogador.get(id(jogador), {}).get(1, 0), # personagem rank 1

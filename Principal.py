@@ -1,40 +1,53 @@
 #from classes.Experimento import Experimento
-import datetime
 from classes.classification.dataset.ColetaEstados import ColetaEstados
-from classes.classification.ClassificaEstados import ClassificaEstados
+from classes.classification.ClassificaEstados import ClassificaEstados, carregar_resultados_optuna, carregar_resultados_avaliacao, carregar_best_params, carregar_resultados_progress
 from classes.classification.AnaliseResultados import AnaliseResultados
 import sys
+import numpy as np 
 
 caminho = './classes'
 n_features = 30
 
-data = datetime.date.today()
-data = "2026-03-20"
+data = "2026-03-26"
 
-jogos = f"Jogos {n_features}f {data}"
-rotulos = f"Rótulos {n_features}f {data}"
+jogos_base = f"Jogos {n_features}f {data}"
+rotulos_base = f"Rótulos {n_features}f {data}"
 
-jogos_optuna = f"Jogos {n_features}f {data} optuna"
-rotulos_optuna = f"Rótulos {n_features}f {data} optuna"
-
+datasets = [" otimização", " testes", " por_round"]
 metrics = ["Accuracy", "F1_Score", "Precision", "Recall"]
+
+jogos = jogos_base + "por_round"
+rotulos = rotulos_base + "por_round"
 
 # -------------------------------------------------------
 # BUSCA DE HIPERPARÂMETROS (OPTUNA)
 # -------------------------------------------------------
 
+""" 
+for i in datasets:
+
+    jogos = jogos_base + i
+    rotulos = rotulos_base + i  
+
+    ColetaEstados.coleta_amostras(137, jogos, rotulos, '', 25) """
+
+
+'''
 print("\n===== OPTUNA SEARCH =====\n")
 
-res_cart = ClassificaEstados.optuna_CART(jogos_optuna, rotulos_optuna)
-res_rf   = ClassificaEstados.optuna_RF(jogos_optuna, rotulos_optuna)
-res_xgb  = ClassificaEstados.optuna_XGB(jogos_optuna, rotulos_optuna)
-res_mlp  = ClassificaEstados.optuna_MLP(jogos_optuna, rotulos_optuna)
+res_cart = ClassificaEstados.optuna_CART(jogos, rotulos)
+res_rf   = ClassificaEstados.optuna_RF(jogos, rotulos)
+res_xgb  = ClassificaEstados.optuna_XGB(jogos, rotulos)
+res_mlp  = ClassificaEstados.optuna_MLP(jogos, rotulos)
 
-best_cart = res_cart["best_params"]
-best_rf   = res_rf["best_params"]
-best_xgb  = res_xgb["best_params"]
-best_mlp  = res_mlp["best_params"]
+print("\n===== LOADING BEST PARAMS =====\n")
+'''
 
+'''
+best_cart = carregar_best_params("CART")
+best_rf   = carregar_best_params("RF")
+best_xgb  = carregar_best_params("XGB")
+best_mlp  = carregar_best_params("MLP")
 
 # -------------------------------------------------------
 # TREINAR + TESTAR MODELOS COM OS MELHORES PARÂMETROS
@@ -58,11 +71,6 @@ mlp_results = ClassificaEstados.treinar_e_avaliar_MLP(
     jogos, rotulos, best_mlp
 )
 
-print("\nResultados CART:", cart_results)
-print("\nResultados RF:", rf_results)
-print("\nResultados XGB:", xgb_results)
-print("\nResultados MLP:", mlp_results)
-
 logreg_results = ClassificaEstados.treinar_regressao_logistica(
     jogos,
     rotulos,
@@ -70,24 +78,41 @@ logreg_results = ClassificaEstados.treinar_regressao_logistica(
     class_weight="balanced"
 )
 
-print("\nResultados LogReg:", logreg_results)
+print("\n===== PROGRESS EVALUATION =====\n")
 
+cart_progress = ClassificaEstados.treinar_e_avaliar_progress_CART(
+    jogos, rotulos
+)
 
+rf_progress = ClassificaEstados.treinar_e_avaliar_progress_RF(
+    jogos, rotulos
+)
+
+xgb_progress = ClassificaEstados.treinar_e_avaliar_progress_XGB(
+    jogos, rotulos
+)
+
+mlp_progress = ClassificaEstados.treinar_e_avaliar_progress_MLP(
+    jogos, rotulos
+)
+'''
 # -------------------------------------------------------
 # CÓDIGOS DE ANÁLISE / GRÁFICOS (MANTIDOS COMENTADOS)
 # -------------------------------------------------------
 
-#ColetaEstados.correlacao()
-
-#AnaliseResultados.plot_performance()
-
-#AnaliseResultados.plot_tree(models[2], model_names[2], feature_names)
+'''
+AnaliseResultados.plot_performance_from_pkls([
+    "CART",
+    "RF",
+    "XGB",
+    "MLP"
+])
 
 #AnaliseResultados.shap_analysis(X_train, X_test, models[3], feature_names, model_names[3])
 
-#AnaliseResultados.plot_importances(info_dict["Feature Importances"], studies_names[i])
+'''
 
-#for study in studies:
-#    ClassificaEstados.study_best_trials(study)
-
-#ClassificaEstados.model_comparation()
+#AnaliseResultados.plot_optuna_trials()
+#AnaliseResultados.plot_evaluation_comparison()
+#AnaliseResultados.print_evaluation_table()
+#AnaliseResultados.plot_progress_by_type()

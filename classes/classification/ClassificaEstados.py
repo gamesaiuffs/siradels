@@ -22,7 +22,7 @@ from classes.strategies.EstrategiaMCTS import EstrategiaMCTS
 from classes.strategies.EstrategiaTotalmenteAleatoria import EstrategiaTotalmenteAleatoria
 from classes.enum.TipoDistrito import TipoDistrito
 from sklearn.tree import DecisionTreeClassifier, export_text, plot_tree
-from sklearn.ensemble import RandomForestClassifier
+from sklearn.ensemble import GradientBoostingClassifier, RandomForestClassifier
 from sklearn.model_selection import GroupKFold, train_test_split, cross_val_score, GridSearchCV
 from sklearn.metrics import f1_score, precision_score, recall_score, roc_auc_score, make_scorer, accuracy_score, confusion_matrix, log_loss, ConfusionMatrixDisplay
 from sklearn.model_selection import learning_curve
@@ -30,15 +30,8 @@ from sklearn.decomposition import PCA
 from sklearn.model_selection import StratifiedGroupKFold
 import matplotlib.pyplot as plt
 import joblib
-from scipy import stats
 
 class ClassificaEstados:   
-
-    @staticmethod
-    def coleta_rotulos_treino(nome_observado, nome_vencedor):
-        if nome_vencedor != "":              
-            Y = 1 if nome_observado == nome_vencedor else 0
-            return Y
     
     # Salva resultados das amostras
     @staticmethod
@@ -76,26 +69,11 @@ class ClassificaEstados:
             return X_train, X_test, y_train, y_test
         else:
             return X, Y
-       
-    @staticmethod
-    def cross_validation(X, y, group):
-        sgkf = StratifiedGroupKFold(n_splits=3)
-
-        # Faça a divisão dos dados
-        for train_index, test_index in sgkf.split(X, y, group):
-            X_train, X_test = X[train_index], X[test_index]
-            y_train, y_test = y[train_index], y[test_index]
-            groups_train, groups_test = group[train_index], group[test_index]
-   
-        f1_macro_scorer = make_scorer(f1_score, average='macro')
-        scores = cross_val_score(estimator=f1_macro_scorer)
-
-        return groups_train, groups_test 
     
     #------------------------------------------------- FIM MANIPULAÇÃO DE AMOSTRAS ------------------------------------------------------------#
     
     @staticmethod
-    def pca(X: str):
+    def pca(X: str, n_features: int = 137):
 
         pca = PCA(n_features)
         pca.fit(X)
@@ -112,69 +90,8 @@ class ClassificaEstados:
         print("Soma: ", sum(pca.explained_variance_ratio_))
         X = pca.transform(X)
 
-        #output = pca.set_output()  #Estimator  
-        #print("Parâmetros: \n", pca.get_params(True))
-        #print("Precisão: \n", pca.get_precision())
         return X
 
-    @staticmethod
-    def grid_gb(jogos, rotulos):
-
-        resultados_grid = {}
-
-        f1_macro_scorer = make_scorer(f1_score, average='macro')
-        precision_scorer = make_scorer(precision_score)
-        recall_scorer = make_scorer(recall_score)
-        accuracy_scorer = make_scorer(accuracy_score)
-
-        metrics = (f1_macro_scorer, precision_scorer, recall_scorer, accuracy_scorer)
-        metrics_names = ('Macro F1', 'Precision', 'Recall', 'Accuracy')
-
-        # Definir a grade de hiperparâmetros
-        grid = {
-            'max_depth': [3, 5, 7, 10, 20, None],
-            'loss': ['log_loss', 'exponential'],
-            'n_estimators': [50, 100, 200],
-            'criterion': ['friedman_mse', 'squared_error'],
-            'min_samples_leaf': [1, 101, 301, 501],
-            'min_samples_split': [2, 20, 100, 300],
-            'learnin_rate': [0.01, 0.1, 0.3, 0.5, 1],
-        }
-
-        for i, metric in enumerate(metrics):
-            # Configurar o GridSearchCV
-            grid_search = GridSearchCV(
-                estimator=GradientBoostingClassifier(random_state=42),
-                param_grid=grid,
-                cv=10,  # 10-fold cross-validation
-                n_jobs=-1,  # Use todos os núcleos disponíveis
-                scoring= metric  # Métrica de avaliação
-            )
-
-            # Treinar o modelo
-            grid_search.fit(jogos, rotulos)
-
-            best_score = grid_search.best_score_
-            cv_results = grid_search.cv_results_
-
-            matching_models = [
-                (score, params) for score, params in zip(cv_results['mean_test_score'], cv_results['params']) if score == best_score
-            ]
-
-            # Exibir os modelos com a mesma pontuação do melhor estimador
-            for score, params in matching_models:
-                print(f" Metric: {metric}, Score: {score}, Parameters: {params}")
-
-            resultados_grid[metrics_names] = {
-                "best_score": best_score,
-                "matching_models": matching_models
-            }
-
-            joblib.dump(grid_search, f'./classes/classification/models/GB Best {metrics_names[i]}')
-
-        ClassificaEstados.salva_testes(resultados_grid, './classes/classification/results/Gradient Boosting/gradient')
-
-        return
 
     @staticmethod
     def grid_rf(jogos, rotulos):
@@ -428,12 +345,12 @@ class ClassificaEstados:
         return
     
     @staticmethod
-    def optuna_MLP(jogos, rotulos):
+    def optuna_MLP(jogos, rotulos, n_trials=1000):
         return ClassificaEstados._run_optuna_with_balanced_folds(
             jogos=jogos,
             rotulos=rotulos,
             model_key="MLP",
-            n_trials=200
+            n_trials=n_trials
         )
     
     @staticmethod
@@ -462,16 +379,16 @@ class ClassificaEstados:
         return callback
 
     @staticmethod
-    def optuna_CART(jogos, rotulos):
+    def optuna_CART(jogos, rotulos, n_trials=1000):
         return ClassificaEstados._run_optuna_with_balanced_folds(
             jogos=jogos,
             rotulos=rotulos,
             model_key="CART",
-            n_trials=200
+            n_trials=n_trials
         )
 
     @staticmethod    
-    def optuna_RF(jogos, rotulos, n_trials=200, total_partidas=None):
+    def optuna_RF(jogos, rotulos, n_trials=1000, total_partidas=None):
         return ClassificaEstados._run_optuna_with_balanced_folds(
             jogos=jogos,
             rotulos=rotulos,
@@ -490,7 +407,7 @@ class ClassificaEstados:
         )
 
     @staticmethod
-    def optuna_XGB(jogos, rotulos, n_trials=300, total_partidas=None):
+    def optuna_XGB(jogos, rotulos, n_trials=1000, total_partidas=None):
         return ClassificaEstados._run_optuna_with_balanced_folds(
             jogos=jogos,
             rotulos=rotulos,
@@ -567,6 +484,30 @@ class ClassificaEstados:
         )
 
     @staticmethod
+    def treinar_e_avaliar_progress_CART(jogos, rotulos):
+        return ClassificaEstados._run_evaluation_with_progress_folds(
+            jogos, rotulos, "CART"
+        )
+
+    @staticmethod
+    def treinar_e_avaliar_progress_RF(jogos, rotulos):
+        return ClassificaEstados._run_evaluation_with_progress_folds(
+            jogos, rotulos, "RF"
+        )
+
+    @staticmethod
+    def treinar_e_avaliar_progress_XGB(jogos, rotulos):
+        return ClassificaEstados._run_evaluation_with_progress_folds(
+            jogos, rotulos, "XGB"
+        )
+
+    @staticmethod
+    def treinar_e_avaliar_progress_MLP(jogos, rotulos):
+        return ClassificaEstados._run_evaluation_with_progress_folds(
+            jogos, rotulos, "MLP"
+        )
+
+    @staticmethod
     def _summarize(vals):
         vals = np.asarray(vals, dtype=float)
         mean = float(np.mean(vals))
@@ -584,8 +525,8 @@ class ClassificaEstados:
         n_players = 5
         player_block = (len(row) - players_start) // n_players
 
-        i = int(from_pos) - 1
-        j = int(to_pos) - 1
+        i = int(from_pos) 
+        j = int(to_pos)
         if i == j:
             return row
 
@@ -608,7 +549,7 @@ class ClassificaEstados:
     def _balance_fold_classes_by_swapping(X_fold, y_fold, rng):
         X_bal = np.asarray(X_fold).copy()
         y_bal = np.asarray(y_fold).astype(int).copy()
-        labels = np.array([1, 2, 3, 4, 5], dtype=int)
+        labels = np.array([0, 1, 2, 3, 4], dtype=int)
 
         n = len(y_bal)
         base = n // len(labels)
@@ -635,6 +576,63 @@ class ClassificaEstados:
             y_bal[chosen] = dst
 
         return X_bal, y_bal
+
+    @staticmethod
+    def _prepare_progress_folds(jogos, rotulos, seed=42):
+        X_raw, y_raw = ClassificaEstados.ler_amostras(jogos, rotulos, div=False)
+
+        X_raw = np.asarray(X_raw, dtype=np.float32)
+        y_raw = np.asarray(y_raw).astype(int).ravel()
+
+        match_ids = X_raw[:, 0].astype(int)
+        rounds = X_raw[:, 1].astype(int)
+
+        features = np.delete(X_raw, 0, axis=1).astype(np.float32)
+
+        # agrupar por partida
+        matches = {}
+        for i, m in enumerate(match_ids):
+            matches.setdefault(m, []).append(i)
+
+        # bins de progresso
+        bins = {
+            0: [],  # 0-20
+            1: [],  # 20-40
+            2: [],  # 40-60
+            3: [],  # 60-80
+            4: []   # 80-100
+        }
+
+        for m, idxs in matches.items():
+            idxs = sorted(idxs, key=lambda i: rounds[i])
+            total = len(idxs)
+
+            for pos, i in enumerate(idxs):
+                progress = pos / total
+                bin_id = min(int(progress * 5), 4)
+
+                bins[bin_id].append(i)
+
+        rng = np.random.default_rng(seed)
+        folds_by_bin = {}
+
+        for bin_id, indices in bins.items():
+            indices = np.array(indices)
+            rng.shuffle(indices)
+
+            split = np.array_split(indices, 10)
+            folds = []
+
+            for part in split:
+                X_fold = features[part]
+                y_fold = y_raw[part]
+                m_fold = match_ids[part]
+
+                folds.append((X_fold, y_fold, m_fold))
+
+            folds_by_bin[bin_id] = folds
+
+        return folds_by_bin
 
     @staticmethod
     def _prepare_balanced_folds(jogos, rotulos, total_partidas=None, seed=42):
@@ -747,42 +745,50 @@ class ClassificaEstados:
     @staticmethod
     def _optuna_params(model_key, trial):
         if model_key == "CART":
-            use_none = trial.suggest_categorical("use_none_max_depth", [True, False])
             return {
-                "max_depth": None if use_none else trial.suggest_int("max_depth", 2, 50),
                 "criterion": trial.suggest_categorical("criterion", ["gini", "entropy", "log_loss"]),
-                "min_samples_leaf": trial.suggest_int("min_samples_leaf", 2, 200),
-                "min_samples_split": trial.suggest_int("min_samples_split", 2, 200),
+                "max_depth": trial.suggest_int("max_depth", 3, 40),
+                "min_samples_split": trial.suggest_int("min_samples_split", 2, 100),
+                "min_samples_leaf": trial.suggest_int("min_samples_leaf", 1, 50),
+                "max_features": trial.suggest_categorical("max_features", [None, "sqrt", "log2"]),
                 "class_weight": trial.suggest_categorical("class_weight", [None, "balanced"]),
-                "use_none_max_depth": use_none
+                "ccp_alpha": trial.suggest_float("ccp_alpha", 0.0, 0.01)
             }
         if model_key == "RF":
-            use_none = trial.suggest_categorical("use_none_max_depth", [True, False])
             return {
-                "n_estimators": trial.suggest_int("n_estimators", 50, 1000),
+                "n_estimators": trial.suggest_int("n_estimators", 200, 1200),
                 "criterion": trial.suggest_categorical("criterion", ["gini", "entropy", "log_loss"]),
-                "max_depth": None if use_none else trial.suggest_int("max_depth", 2, 50),
-                "min_samples_leaf": trial.suggest_int("min_samples_leaf", 2, 500),
-                "min_samples_split": trial.suggest_int("min_samples_split", 2, 500),
-                "use_none_max_depth": use_none
+                "max_depth": trial.suggest_int("max_depth", 5, 40),
+                "min_samples_split": trial.suggest_int("min_samples_split", 2, 100),
+                "min_samples_leaf": trial.suggest_int("min_samples_leaf", 1, 50),
+                "max_features": trial.suggest_categorical("max_features", ["sqrt", "log2", 0.3, 0.5, 0.7]),
+                "bootstrap": trial.suggest_categorical("bootstrap", [True, False]),
+                "class_weight": trial.suggest_categorical("class_weight", [None, "balanced", "balanced_subsample"])
             }
         if model_key == "XGB":
             return {
-                "n_estimators": trial.suggest_int("n_estimators", 50, 1000),
-                "max_depth": trial.suggest_int("max_depth", 2, 20),
-                "learning_rate": trial.suggest_float("learning_rate", 0.01, 0.5),
-                "subsample": trial.suggest_float("subsample", 0.5, 1.0),
-                "colsample_bytree": trial.suggest_float("colsample_bytree", 0.5, 1.0),
-                "reg_lambda": trial.suggest_float("reg_lambda", 0.0, 10.0),
-                "reg_alpha": trial.suggest_float("reg_alpha", 0.0, 10.0),
+                "n_estimators": trial.suggest_int("n_estimators", 300, 1500),
+                "max_depth": trial.suggest_int("max_depth", 3, 10),
+                "learning_rate": trial.suggest_float("learning_rate", 0.01, 0.2, log=True),
+                "subsample": trial.suggest_float("subsample", 0.6, 1.0),
+                "colsample_bytree": trial.suggest_float("colsample_bytree", 0.6, 1.0),
+                "min_child_weight": trial.suggest_int("min_child_weight", 1, 10),
+                "gamma": trial.suggest_float("gamma", 0, 5),
+                "reg_lambda": trial.suggest_float("reg_lambda", 1e-2, 10.0, log=True),
+                "reg_alpha": trial.suggest_float("reg_alpha", 1e-3, 10.0, log=True),
             }
         if model_key == "MLP":
             return {
-                "hidden_layer_sizes": trial.suggest_categorical("hidden_layer_sizes", [(50,), (100,), (50, 50)]),
-                "activation": trial.suggest_categorical("activation", ["tanh", "relu"]),
-                "solver": trial.suggest_categorical("solver", ["adam", "sgd"]),
-                "alpha": trial.suggest_categorical("alpha", [0.0001, 0.001]),
-                "learning_rate": trial.suggest_categorical("learning_rate", ["constant", "adaptive"])
+                "hidden_layer_sizes": trial.suggest_categorical(
+                    "hidden_layer_sizes",
+                    [(64,), (128,), (256,), (64, 64), (128, 64), (128, 128)]
+                ),
+                "activation": trial.suggest_categorical("activation", ["relu", "tanh"]),
+                "solver": "adam",
+                "alpha": trial.suggest_float("alpha", 1e-5, 1e-2, log=True),
+                "learning_rate_init": trial.suggest_float("learning_rate_init", 1e-4, 1e-2, log=True),
+                "batch_size": trial.suggest_categorical("batch_size", [64, 128, 256]),
+                "early_stopping": True
             }
         raise ValueError(f"Sem espaço de busca Optuna para model_key={model_key}")
 
@@ -804,6 +810,7 @@ class ClassificaEstados:
     @staticmethod
     def _evaluate_from_folds(folds, model_key, params):
         acc, prec, rec, f1 = [], [], [], []
+        models = []
         for i in range(len(folds)):
             X_test, y_test, _ = folds[i]
             train_parts = [folds[j] for j in range(len(folds)) if j != i]
@@ -812,6 +819,9 @@ class ClassificaEstados:
 
             pipeline = ClassificaEstados._make_pipeline(model_key, params, y_train)
             pipeline.fit(X_train, y_train)
+
+            models.append(pipeline)
+
             preds = pipeline.predict(X_test)
 
             acc.append(accuracy_score(y_test, preds))
@@ -824,7 +834,33 @@ class ClassificaEstados:
             "precision_macro": ClassificaEstados._summarize(prec),
             "recall_macro": ClassificaEstados._summarize(rec),
             "f1_macro": ClassificaEstados._summarize(f1),
-            "raw": {"accuracy": acc, "precision_macro": prec, "recall_macro": rec, "f1_macro": f1}
+            "raw": {"accuracy": acc, "precision_macro": prec, "recall_macro": rec, "f1_macro": f1},
+            "models": models
+        }
+
+    @staticmethod
+    def _evaluate_models_on_bins(models, X, y):
+        acc, prec, rec, f1 = [], [], [], []
+
+        for model in models:
+            preds = model.predict(X)
+
+            acc.append(accuracy_score(y, preds))
+            prec.append(precision_score(y, preds, average="macro", zero_division=0))
+            rec.append(recall_score(y, preds, average="macro", zero_division=0))
+            f1.append(f1_score(y, preds, average="macro", zero_division=0))
+
+        return {
+            "accuracy": ClassificaEstados._summarize(acc),
+            "precision_macro": ClassificaEstados._summarize(prec),
+            "recall_macro": ClassificaEstados._summarize(rec),
+            "f1_macro": ClassificaEstados._summarize(f1),
+            "raw": {
+                "accuracy": acc,
+                "precision_macro": prec,
+                "recall_macro": rec,
+                "f1_macro": f1
+            }
         }
 
     @staticmethod
@@ -840,7 +876,7 @@ class ClassificaEstados:
             return ClassificaEstados._cross_val_accuracy_from_folds(folds_A, model_key, params)
 
         callback = ClassificaEstados.early_stopping_callback(patience=100)
-        study = optuna.create_study(direction="maximize")
+        study = optuna.create_study(direction="maximize", storage="sqlite:///C:/Users/djona/Programação/siradels/siradels/classes/classification/results/optuna/optuna.db")
         study.optimize(objective, n_trials=n_trials, n_jobs=1, callbacks=[callback])
 
         resultados_optuna = {
@@ -865,20 +901,105 @@ class ClassificaEstados:
             rotulos=rotulos,
             total_partidas=total_partidas
         )
+        
+        save_dir = "./classes/classification/results/modelos"
+        os.makedirs(save_dir, exist_ok=True)
+
         results = ClassificaEstados._evaluate_from_folds(folds_B, model_key, best_params)
 
-        save_dir = "./classes/classification/results/optuna"
-        os.makedirs(save_dir, exist_ok=True)
+        models = results["models"]
+
+        with open(os.path.join(save_dir, f"{model_key}_models.pkl"), "wb") as f:
+            pickle.dump(models, f)
+
+        results_to_save = dict(results)
+        results_to_save.pop("models", None)
 
         if model_key == "LOGREG":
             safe_name = str(nome_modelo).replace("/", "_").replace("\\", "_")
             save_name = f"LogReg_evaluation_{safe_name}.pkl"
         else:
             save_name = f"{model_key}_evaluation.pkl"
-        save_path = os.path.join(save_dir, save_name)
+
+        with open(os.path.join(save_dir, save_name), "wb") as f:
+            pickle.dump(results_to_save, f)
+
+        print(f"[treinar_e_avaliar_{model_key}] saved evaluation to {save_dir}")
+        return results
+
+    @staticmethod
+    def _run_evaluation_with_progress_folds(jogos, rotulos, model_key):
+        folds_by_bin = ClassificaEstados._prepare_progress_folds(jogos, rotulos)
+
+        model_path = f"./classes/classification/results/modelos/{model_key}_models.pkl"
+
+        with open(model_path, "rb") as f:
+            models = pickle.load(f)
+
+        results = {}
+
+        labels = [
+            "0-20%",
+            "20-40%",
+            "40-60%",
+            "60-80%",
+            "80-100%"
+        ]
+
+        for bin_id, folds in folds_by_bin.items():
+
+            # junta todos os folds do bin
+            X_bin = np.vstack([f[0] for f in folds])
+            y_bin = np.concatenate([f[1] for f in folds])
+
+            res = ClassificaEstados._evaluate_models_on_bins(models, X_bin, y_bin)
+
+            results[labels[bin_id]] = res
+
+        # salvar
+        save_dir = "./classes/classification/results/progress"
+        os.makedirs(save_dir, exist_ok=True)
+
+        save_path = os.path.join(save_dir, f"{model_key}_progress_evaluation.pkl")
+
         with open(save_path, "wb") as f:
             pickle.dump(results, f)
 
-        print(f"[treinar_e_avaliar_{model_key}] saved evaluation to {save_path}")
+        print(f"[progress_eval_{model_key}] saved to {save_path}")
+
         return results
     
+    
+def carregar_best_params(model_key):
+
+    caminho = f"./classes/classification/results/optuna/{model_key}_optuna.pkl"
+
+    with open(caminho, "rb") as f:
+        resultados = pickle.load(f)
+
+    return resultados["best_params"]
+
+def carregar_resultados_optuna(model_key):
+
+    caminho = f"./classes/classification/results/optuna/{model_key}_optuna.pkl"
+
+    with open(caminho, "rb") as f:
+        resultados = pickle.load(f)
+
+    return resultados
+
+def carregar_resultados_avaliacao(model_key):
+    caminho = f"./classes/classification/results/evaluation/{model_key}_evaluation.pkl"
+
+    with open(caminho, "rb") as f:
+        resultados = pickle.load(f)
+
+    return resultados
+
+def carregar_resultados_progress(model_key):
+    caminho = f"./classes/classification/results/progress/{model_key}_progress_evaluation.pkl"
+
+    with open(caminho, "rb") as f:
+        resultados = pickle.load(f)
+
+    return resultados
