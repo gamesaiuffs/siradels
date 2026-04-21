@@ -49,6 +49,11 @@ best_rf   = carregar_best_params("RF")
 best_xgb  = carregar_best_params("XGB")
 best_mlp  = carregar_best_params("MLP")
 
+print(f"{best_cart}\n")
+print(f"{best_rf}\n")
+print(f"{best_xgb}\n")
+print(f"{best_mlp}\n")
+
 # -------------------------------------------------------
 # TREINAR + TESTAR MODELOS COM OS MELHORES PARÂMETROS
 # -------------------------------------------------------
@@ -95,24 +100,129 @@ xgb_progress = ClassificaEstados.treinar_e_avaliar_progress_XGB(
 mlp_progress = ClassificaEstados.treinar_e_avaliar_progress_MLP(
     jogos, rotulos
 )
+
+logreg_progress = ClassificaEstados.treinar_e_avaliar_progress_LogReg(
+    jogos, rotulos
+)
 '''
+
 # -------------------------------------------------------
-# CÓDIGOS DE ANÁLISE / GRÁFICOS (MANTIDOS COMENTADOS)
+# CÓDIGOS DE ANÁLISE / GRÁFICOS
+# -------------------------------------------------------
+
+MODEL_KEY = "XGB"
+MODEL_NAME = "XGB_final"
+MODEL_PATH = "./classes/classification/results/modelos/XGB_final.pkl"
+
+TOTAL_PARTIDAS = 1000
+
+FEATURE_NAMES = (
+    # ===== global =====
+    ["round"] +
+    [f"turn_order_p{i}" for i in range(1, 6)] +
+
+    # ===== players =====
+    [
+        f"{feat}_p{i}"
+        for i in range(1, 6)
+        for feat in [
+            "gold",
+            "gold_diff_max",
+            "hand_size",
+            "hand_diff_max",
+            "built_districts",
+            "built_diff_max",
+            "military_districts",
+            "religious_districts",
+            "commercial_districts",
+            "noble_districts",
+            "special_districts",
+            "district_cost_max",
+            "district_cost_min",
+            "district_cost_avg",
+            "city_cost_total",
+            "city_cost_diff_max",
+            "times_killed",
+            "times_robbed",
+            "role_rank_1",
+            "role_rank_2",
+            "role_rank_3",
+            "role_rank_4",
+            "role_rank_5",
+            "role_rank_6",
+            "role_rank_7",
+            "role_rank_8",
+        ]
+    ]
+)
+
+#print(len(FEATURE_NAMES))
+
+# -------------------------------------------------------
+# TREINO FINAL (XGB GRANDE)
 # -------------------------------------------------------
 
 '''
-AnaliseResultados.plot_performance_from_pkls([
-    "CART",
-    "RF",
-    "XGB",
-    "MLP"
-])
+print("\n===== TREINO FINAL XGB =====\n")
+best_xgb = carregar_best_params("XGB")
 
-#AnaliseResultados.shap_analysis(X_train, X_test, models[3], feature_names, model_names[3])
+model = ClassificaEstados.treinar_modelo_final_XGB_grande(
+    jogos=jogos,
+    rotulos=rotulos,
+    best_params=best_xgb,
+    total_partidas=TOTAL_PARTIDAS,
+    save_name=f"{MODEL_NAME}.pkl"
+)
+# -------------------------------------------------------
+# DATA PARA SHAP (simples)
+# -------------------------------------------------------
 
 '''
+X_train, X_test, y_train, y_test = ClassificaEstados.ler_amostras(
+    jogos,
+    rotulos,
+    div=True
+)
+
+AnaliseResultados.shap_full_analysis(
+    X_train=X_train,
+    X_test=X_test,
+    model_path=MODEL_PATH,
+    feature_names=FEATURE_NAMES,
+    model_name=MODEL_NAME,
+    dataset_name=jogos
+)
+
+
+# -------------------------------------------------------
+# (mantido) ANÁLISES OPCIONAIS
+# -------------------------------------------------------
 
 #AnaliseResultados.plot_optuna_trials()
 #AnaliseResultados.plot_evaluation_comparison()
 #AnaliseResultados.print_evaluation_table()
 #AnaliseResultados.plot_progress_by_type()
+
+#model_keys = ["CART", "MLP", "RF", "XGB", "LOGREG"]
+
+#for i in model_keys:
+    #try:
+        #print(f"Modelo {i}")
+        #print("Optuna")
+        #print(carregar_best_params(i))
+        #results = carregar_resultados_optuna(i)
+        #for t in results['history']:
+        #    print(f"trial={t['trial']} | acc={t['accuracy']:.4f}")
+        #print("Avaliação")
+        #print(carregar_resultados_avaliacao(i))    
+        #print("Progress")
+        #progress = carregar_resultados_progress(i)
+        #for fase, metrics in progress.items():
+        #    means = {
+        #        m: v["mean"]
+        #        for m, v in metrics.items()
+        #        if m != "raw"
+        #    }
+        #    print(f"{fase} -> {means}")
+    #except:
+    #    continue

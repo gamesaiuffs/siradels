@@ -287,21 +287,44 @@ class AnaliseResultados:
             plt.tight_layout()
             plt.savefig(f"./classes/classification/estatisticas_resultados/progress_performance/{metric}_progress.png")
             plt.close()
-
+    
     @staticmethod
-    def shap_analysis(X_train, X_test, model_path, feature_names, model_name):
+    def shap_full_analysis(X_train, X_test, model_path, feature_names, model_name, dataset_name):
         import os
         import shap
         import joblib
         import numpy as np
         import pandas as pd
         import matplotlib.pyplot as plt
-        from matplotlib.ticker import ScalarFormatter
+        import pickle
 
-        base_dir = f"./classes/classification/results/shap/{model_name}/"
-        os.makedirs(base_dir, exist_ok=True)
+        # =========================
+        # DIRS
+        # =========================
+        base_raw = f"./classes/classification/results/shap/{model_name}/"
+        base_plot = f"./classes/classification/estatisticas_resultados/shap/{model_name}/"
 
-        modelo = joblib.load(model_path)
+        os.makedirs(base_raw, exist_ok=True)
+        os.makedirs(base_plot, exist_ok=True)
+        os.makedirs(os.path.join(base_plot, "Beeswarm"), exist_ok=True)
+
+        # =========================
+        # REMOVE ID
+        # =========================
+        if hasattr(X_train, "iloc"):
+            X_train = X_train.iloc[:, 1:]
+            X_test = X_test.iloc[:, 1:]
+        else:
+            X_train = X_train[:, 1:]
+            X_test = X_test[:, 1:]
+
+        assert X_train.shape[1] == len(feature_names)
+
+        # =========================
+        # LOAD MODEL
+        # =========================
+        with open(model_path, "rb") as f:
+            modelo = pickle.load(f)
 
         if hasattr(modelo, "steps"):
             if len(modelo.steps) > 1:
@@ -318,110 +341,138 @@ class AnaliseResultados:
             X_train_t = X_train
             X_test_t = X_test
 
-        expl = shap.TreeExplainer(model_final, X_train_t, feature_names=feature_names, model_output="probability")
+        # =========================
+        # CACHE SHAP
+        # =========================
+        sv_path = os.path.join(base_raw, "sv.pkl")
+        X_path = os.path.join(base_raw, "X.npy")
 
-        array_path = os.path.join(base_dir, "X_array.npy")
-        sv_path = os.path.join(base_dir, "sv_subset.pkl")
-
-        if os.path.exists(array_path) and os.path.exists(sv_path):
-            print("Carregando X_array e sv_subset salvos...")
-            X_array = np.load(array_path)
-            with open(sv_path, "rb") as f:
-                sv_subset = joblib.load(f)
+        if os.path.exists(sv_path) and os.path.exists(X_path):
+            print("Carregando SHAP cache...")
+            sv = joblib.load(sv_path)
+            X_array = np.load(X_path)
         else:
-            print("Gerando novo X_array e sv_subset...")
-            subset = X_test_t.iloc[:1000] if hasattr(X_test_t, "iloc") else X_test_t[:1000]
-            sv_subset = expl(subset)
+            print("Gerando SHAP...")
+
+            expl = shap.Explainer(model_final.predict_proba, X_train_t[:1000])
+
+            subset = X_test_t[:1000]
             X_array = subset.values if hasattr(subset, "values") else np.array(subset)
 
-            np.save(array_path, X_array)
-            pd.DataFrame(X_array, columns=feature_names).to_csv(os.path.join(base_dir, "X_array.csv"), index=False)
-            with open(sv_path, "wb") as f:
-                joblib.dump(sv_subset, f)
+            sv = expl(subset)
 
-        output_dir = os.path.join(base_dir, "Dependence")
-        os.makedirs(output_dir, exist_ok=True)
+            joblib.dump(sv, sv_path)
+            np.save(X_path, X_array)
 
-        for i, feat in enumerate(feature_names):
-            for class_idx in range(sv_subset.values.shape[-1]):
-                shap.dependence_plot(
-                    feat,
-                    sv_subset.values[:, :, class_idx],
-                    X_array,
-                    feature_names=feature_names,
-                    show=False
-                )
+        shap_vals = sv.values  # (samples, features, classes)
+        n_classes = shap_vals.shape[2]
 
-                plt.ylabel("SHAP value")
+        # =====================================================
+        # GLOBAL IMPORTANCE
+        # =====================================================
+        global_importance = np.mean(np.abs(shap_vals), axis=(0, 2))
 
-                fig = plt.gcf()
-                for ax in fig.axes:
-                    for im in ax.get_images():
-                        if hasattr(im, "colorbar") and im.colorbar is not None:
-                            cbar = im.colorbar
-                            cbar.locator = MaxNLocator(integer=True)
-                            cbar.update_ticks()
+        df_global = pd.DataFrame({
+            "feature": feature_names,
+            "importance": global_importance
+        }).sort_values("importance", ascending=False)
 
-                plt.tight_layout()
-                plt.savefig(
-                    os.path.join(output_dir, f"dependence_{feat}_class{class_idx}.png"),
-                    dpi=300,
-                    bbox_inches="tight"
-                )
-                plt.close()
+        df_global.to_csv(os.path.join(base_raw, "global_importance.csv"), index=False)
 
-    @staticmethod
-    def shap_beeswarm(X_train, X_test, model_path, feature_names, model_name, dataset_name, vitoria_class_idx=1):
+        # ---- top 20
+        top20 = df_global.head(20)
 
-        # Diretório de saída
-        base_dir = f"./classes/classification/results/shap/{model_name}/"
-        os.makedirs(base_dir, exist_ok=True)
-        os.makedirs(os.path.join(base_dir, "Beeswarm"), exist_ok=True)
+        plt.figure(figsize=(10, 6))
+        plt.barh(top20["feature"][::-1], top20["importance"][::-1])
+        plt.title("Top 20 Global Features")
+        plt.tight_layout()
+        plt.savefig(os.path.join(base_plot, "top20_global.png"), dpi=300)
+        plt.close()
 
-        # Carrega o modelo
-        modelo = joblib.load(model_path)
+        # =====================================================
+        # IMPORTANCE POR CLASSE
+        # =====================================================
+        class_importance = np.mean(np.abs(shap_vals), axis=0)
 
-        # Verifica se é pipeline
-        if hasattr(modelo, "steps"):  
-            if len(modelo.steps) > 1:
-                preprocessor = modelo[:-1]
-                model_final = modelo.steps[-1][1]
-                X_train_t = preprocessor.transform(X_train)
-                X_test_t = preprocessor.transform(X_test)
-            else:
-                model_final = modelo.steps[0][1]
-                X_train_t = X_train
-                X_test_t = X_test
-        else:
-            model_final = modelo
-            X_train_t = X_train
-            X_test_t = X_test
+        df_class = pd.DataFrame(
+            class_importance,
+            index=feature_names,
+            columns=[f"class_{i}" for i in range(n_classes)]
+        )
 
-        # Cria TreeExplainer
-        expl = shap.TreeExplainer(model_final, X_train_t, feature_names=feature_names, model_output="probability")
+        df_class.to_csv(os.path.join(base_raw, "importance_per_class.csv"))
 
-        # Subset para não pesar
-        subset_len = 500
-        subset = X_test_t.iloc[:subset_len] if hasattr(X_test_t, "iloc") else X_test_t[:subset_len]
-        sv_subset = expl(subset)
-        X_array = subset.values if hasattr(subset, "values") else np.array(subset)
+        # ---- soma por classe
+        class_sum = df_class.sum(axis=0)
 
-        # Beeswarm apenas para a classe "vitória"
+        class_sum.plot(kind="bar", figsize=(8, 5))
+        plt.title("Importância total por classe")
+        plt.tight_layout()
+        plt.savefig(os.path.join(base_plot, "importance_per_class.png"), dpi=300)
+        plt.close()
+
+        # ---- top15 por classe
+        for c in range(n_classes):
+            top15 = df_class.iloc[:, c].sort_values(ascending=False).head(15)
+
+            plt.figure(figsize=(10, 6))
+            plt.barh(top15.index[::-1], top15.values[::-1])
+            plt.title(f"Top 15 - Classe {c}")
+            plt.tight_layout()
+            plt.savefig(os.path.join(base_plot, f"top15_class_{c}.png"), dpi=300)
+            plt.close()
+
+        # =====================================================
+        # LOW IMPORTANCE
+        # =====================================================
+        thresholds = [0.05, 0.01, 0.005]
+
+        with open(os.path.join(base_raw, "low_importance.txt"), "w") as f:
+            for t in thresholds:
+                count = np.sum(global_importance < t)
+                f.write(f"< {t}: {count}\n")
+                print(f"Features < {t}: {count}")
+
+        # =====================================================
+        # BEESWARM
+        # =====================================================
+
+        subset = X_array[:500]
+
+        # por classe
+        for c in range(n_classes):
+            plt.figure(figsize=(12, 8))
+
+            shap.summary_plot(
+                shap_vals[:500, :, c],
+                subset,
+                feature_names=feature_names,
+                show=False
+            )
+
+            plt.savefig(
+                os.path.join(base_plot, f"Beeswarm/beeswarm_class_{c}_{dataset_name}.png"),
+                dpi=300,
+                bbox_inches="tight"
+            )
+            plt.close()
+
+        # global
+        shap_abs_mean = np.mean(np.abs(shap_vals), axis=2)
+
         plt.figure(figsize=(12, 8))
         shap.summary_plot(
-            sv_subset.values[:, :, vitoria_class_idx], 
-            X_array, 
+            shap_abs_mean[:500],
+            subset,
             feature_names=feature_names,
-            plot_type="dot",  
-            max_display=len(feature_names),
             show=False
         )
 
-        # Nome do arquivo com dataset
-        file_path = os.path.join(base_dir, f"Beeswarm/beeswarm_vitoria_{dataset_name}.png")
-        plt.savefig(file_path, dpi=300, bbox_inches='tight')
-        plt.show()
+        plt.savefig(
+            os.path.join(base_plot, f"Beeswarm/beeswarm_global_{dataset_name}.png"),
+            dpi=300,
+            bbox_inches="tight"
+        )
         plt.close()
 
-        print(f"Beeswarm salvo em: {file_path}")
-        
+        print("SHAP completo finalizado.")

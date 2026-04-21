@@ -437,6 +437,66 @@ class ClassificaEstados:
         )
 
     @staticmethod
+    def preparar_dataset_combinado_otimizacao_teste(jogos, rotulos, total_partidas=None, seed=42):
+        X_raw, y_raw = ClassificaEstados.ler_amostras(jogos, rotulos, div=False)
+        X_raw = np.asarray(X_raw, dtype=np.float32)
+        y_raw = np.asarray(y_raw).astype(int).ravel()
+        if X_raw.ndim == 1:
+            X_raw = X_raw.reshape(1, -1)
+
+        round_mask = X_raw[:, 1] >= 2
+        X_raw = X_raw[round_mask]
+        y_raw = y_raw[round_mask]
+
+        match_ids = X_raw[:, 0].astype(int)
+        features = np.delete(X_raw, 0, axis=1).astype(np.float32)
+
+        unique_matches = np.unique(match_ids)
+        available = len(unique_matches)
+        if available < 100:
+            raise ValueError(f"Número de partidas insuficiente após filtro de rodada>=2: {available}.")
+
+        max_divisible = (available // 100) * 100
+        if total_partidas is None:
+            total_partidas = max_divisible
+        if total_partidas % 100 != 0:
+            raise ValueError(f"total_partidas deve ser divisível por 100. Recebido: {total_partidas}.")
+        if total_partidas > available:
+            raise ValueError(f"total_partidas ({total_partidas}) > partidas disponíveis ({available}).")
+
+        rng = np.random.default_rng(seed)
+        selected_matches = rng.choice(unique_matches, size=total_partidas, replace=False)
+        selected_set = set(int(m) for m in selected_matches.tolist())
+        selected_mask = np.array([int(m) in selected_set for m in match_ids], dtype=bool)
+
+        X_sel = features[selected_mask]
+        y_sel = y_raw[selected_mask]
+        return X_sel, y_sel
+
+
+    @staticmethod
+    def treinar_modelo_final_XGB_grande(jogos, rotulos, best_params, total_partidas=None, seed=42, save_name="XGB_final.pkl"):
+        X, y = ClassificaEstados.preparar_dataset_combinado_otimizacao_teste(
+            jogos=jogos,
+            rotulos=rotulos,
+            total_partidas=total_partidas,
+            seed=seed
+        )
+
+        pipeline = ClassificaEstados._make_pipeline("XGB", best_params, y)
+        pipeline.fit(X, y)
+
+        save_dir = "./classes/classification/results/modelos"
+        os.makedirs(save_dir, exist_ok=True)
+        save_path = os.path.join(save_dir, save_name)
+
+        with open(save_path, "wb") as f:
+            pickle.dump(pipeline, f)
+
+        print(f"[XGB_final] saved model to {save_path}")
+        return pipeline
+    
+    @staticmethod
     def carregar_melhores_parametros(caminho_study):
         study = joblib.load(caminho_study)
         best_params = study.best_params
@@ -449,16 +509,6 @@ class ClassificaEstados:
             rotulos=rotulos,
             best_params=best_params,
             model_key="MLP",
-            total_partidas=total_partidas
-        )
-        
-    @staticmethod
-    def treinar_e_avaliar_GB(jogos, rotulos, best_params, total_partidas=None):
-        # Mantida por compatibilidade: agora usa XGB.
-        return ClassificaEstados.treinar_e_avaliar_XGB(
-            jogos=jogos,
-            rotulos=rotulos,
-            best_params=best_params,
             total_partidas=total_partidas
         )
 
@@ -505,6 +555,12 @@ class ClassificaEstados:
     def treinar_e_avaliar_progress_MLP(jogos, rotulos):
         return ClassificaEstados._run_evaluation_with_progress_folds(
             jogos, rotulos, "MLP"
+        )
+
+    @staticmethod
+    def treinar_e_avaliar_progress_LogReg(jogos, rotulos):
+        return ClassificaEstados._run_evaluation_with_progress_folds(
+            jogos, rotulos, "LOGREG"
         )
 
     @staticmethod
