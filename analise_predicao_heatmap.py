@@ -4,15 +4,25 @@ import gymnasium as gym
 import seaborn as sns
 import matplotlib.pyplot as plt
 from stable_baselines3 import DQN
+import os
 
 if __name__ == "__main__":
+    
+    
     ENV_ID = "Citadels"
     ENV_ENTRY_POINT = 'classes.openaigym_env.Citadels_mb:Citadels'
-    NUM_EPISODES = 100000
+    NUM_EPISODES = 1000
     gym.register(id=ENV_ID, entry_point=ENV_ENTRY_POINT)
     
     VARIABLE_NAME = "e_character_gold"  
     VARIABLE_RANGE = range(0, 3)  # Range de valores para a variável escolhida
+    
+    PATH = f"graficos_artigos/teste/{VARIABLE_NAME}"
+    
+    if not os.path.isdir(PATH): 
+        raise Exception(f"Diretorio {PATH} não existe")
+    else:
+        print("Diretorio encontrado!")
     
     EXP_NUM = 4
     MODEL = 30
@@ -114,5 +124,5 @@ if __name__ == "__main__":
         plt.xlabel("Actions")
         plt.ylabel(f"Values of {VARIABLE_NAME}")
         plt.title(EXP_NAME)
-        plt.savefig(f"graficos_atualizado/predicao/{VARIABLE_NAME}/{VARIABLE_NAME}_heatmap_exp={EXP_NUM}_init={INIT_NUM}_model={MODEL}.png")
+        plt.savefig(f"{PATH}/{VARIABLE_NAME}_heatmap_exp={EXP_NUM}_init={INIT_NUM}_model={MODEL}.png")
     # plt.show()
