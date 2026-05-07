@@ -1,2 +1,5 @@
 Fazer backup 
 pg_dump -U postgres ia > nome_arquivo_backup
+
+Aplicar backup 
+psql -U postgres -d ia -f /backup/backup_ia_5
