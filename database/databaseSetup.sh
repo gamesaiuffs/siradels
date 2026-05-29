@@ -1,5 +1,5 @@
 #!/bin/bash
-#!/bin/bash
+
 docker run --name postgres-pesquisa-ia \
   -e POSTGRES_PASSWORD=postgres \
   -e POSTGRES_USER=postgres \

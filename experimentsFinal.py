@@ -1,4 +1,4 @@
-from stable_baselines3 import DQN
+from stable_baselines3 import DQN, PPO
 import gymnasium as gym
 import os
 import shutil
@@ -15,18 +15,8 @@ import time
 
 from database.Postgres import Conexao
 
-ENV_ID = "Citadels"
+from scripts.experimentsConfig import *
 
-# Mudar
-ENV_ENTRY_POINT = 'classes.openaigym_env.Citadels_box:Citadels'
-EXP_ATUAL = 21
-EXP_TITLE='menos:menos_18_17_13_14_12'
-
-
-gym.register(
-    id=ENV_ID,
-    entry_point=ENV_ENTRY_POINT
-)
 
 # Experimento 1 - salvos nas pastas de 1 a 6 
 # Experimento 2 - variável mais importante - pastas de 10 a 19
@@ -35,20 +25,11 @@ gym.register(
 
 
 
-
-
 # Configurações gerais 
 
-NUM_INITS = 10
-TRAIN_STEPS = 300000
-MODEL_SAVE_FREQ = 10000
-NUM_EVAL_EPISODES = 100
 
-DIR_NAME = f"aaa_experimentos_final/{EXP_ATUAL}"
-NOT_ALLOW_REUSE_DIRS = True
-EVAL_LOG_FILE = os.path.join(DIR_NAME, "evaluations.txt")
 
-LEARN_ENV = gym.make(ENV_ID)
+# LEARN_ENV = gym.make(ENV_ID)
 TEST_ENV = gym.make(ENV_ID)
 
 
@@ -97,7 +78,7 @@ class SaveOnTrainStepsNumCallback(BaseCallback):
             self.model.save(self.log_dir + "/"+str(self.num_saves))
             
             # Teste do modelo atual
-            local_model = DQN.load(self.log_dir + "/"+str(self.num_saves))
+            local_model = LOCAL_MODEL.load(self.log_dir + "/"+str(self.num_saves))
             
             self.evaluate_model_policy(local_model)
             
@@ -140,7 +121,7 @@ if __name__ == "__main__":
         if NOT_ALLOW_REUSE_DIRS: exit(0)
         
     database = Conexao()
-    env = gym.make(ENV_ID)
+    
     
     experimento = True
     novo_exp = True
@@ -151,7 +132,6 @@ if __name__ == "__main__":
         database.executar(f"insert into experiment(idexp, title, numpt, status) values ({EXP_ATUAL}, '{EXP_TITLE}', {TRAIN_STEPS}, 'pendente');")
 
     
-            
     start_time = time.time()
     while num_init <= NUM_INITS: 
         print(f"Nova inicialização: {num_init}\n\n")
@@ -159,37 +139,9 @@ if __name__ == "__main__":
         # cria a inicialização no banco 
         database.executar(f"insert into initialize (idexp, idin, status) values ({EXP_ATUAL}, {num_init}, 'pendente');")
         
-        model = DQN(
-            "MlpPolicy",                     
-            env=env,                         
-            verbose=0,                       
-
-            # Parâmetros de exploração
-            exploration_initial_eps=1.0,    
-            exploration_final_eps=0.05,      
-            exploration_fraction=0.5,       
-
-            # Parâmetros de treinamento e otimização
-            learning_rate=1e-5,             
-            learning_starts=2000,           
-            gradient_steps=-1,            
-            # policy_kwargs=dict(net_arch=[256, 128, 64, 32]),  
-            policy_kwargs=dict(net_arch=[256, 256]),  
-
-            # Parâmetros de desconto e frequência de treinamento
-            gamma=0.9,                     
-            train_freq=10,                   
-
-            # Parâmetros do replay buffer
-            buffer_size=100000,             
-            batch_size=256,                 
-            target_update_interval=300,         
-        )
-
-
         callback = SaveOnTrainStepsNumCallback(verbose=0, database=database, idexp=EXP_ATUAL, num_init=num_init)  
 
-        model.learn(total_timesteps=TRAIN_STEPS, callback=callback)
+        getModel().learn(total_timesteps=TRAIN_STEPS, callback=callback)
         
         # atualiza status da inicialização - completo
         database.executar(f"UPDATE initialize SET status='concluido' WHERE idin='{num_init}' AND idexp='{EXP_ATUAL}';")

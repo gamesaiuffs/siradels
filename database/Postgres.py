@@ -3,7 +3,7 @@ import psycopg2
 class Conexao(object):
     _db=None
     def __init__(self):
-        self._db = psycopg2.connect(host='localhost', database='ia', user='postgres', password='admin')
+        self._db = psycopg2.connect(host='localhost', database='ia', user='postgres', password='postgres')
     
     def executar(self, sql):
         cur=self._db.cursor()

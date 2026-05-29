@@ -17,7 +17,7 @@ if __name__ == "__main__":
     VARIABLE_NAME = "e_character_gold"  
     VARIABLE_RANGE = range(0, 3)  # Range de valores para a variável escolhida
     
-    PATH = f"graficos_artigos/teste/{VARIABLE_NAME}"
+    PATH = f"graficos_artigo/teste/{VARIABLE_NAME}"
     
     if not os.path.isdir(PATH): 
         raise Exception(f"Diretorio {PATH} não existe")
