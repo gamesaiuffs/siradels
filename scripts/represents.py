@@ -100,4 +100,4 @@ menos_18_17_13_14_12 = ["ouro_personagem_original", "cartas_dist_mao_original", 
 
 
 
-REPRESENT = variaveis_original
+REPRESENT = variaveis_padrao

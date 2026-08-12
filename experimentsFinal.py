@@ -34,7 +34,7 @@ TEST_ENV = gym.make(ENV_ID)
 
 
 class SaveOnTrainStepsNumCallback(BaseCallback):
-    def __init__(self, verbose: int, num_init: int, database: Conexao, idexp: int):
+    def __init__(self, verbose: int, num_init: int, database: Conexao|None, idexp: int):
         super().__init__(verbose)  # 0 -> verbose
         self.log_dir = DIR_NAME + "/in_" + str(num_init)
         self.num_saves = 1
@@ -59,7 +59,8 @@ class SaveOnTrainStepsNumCallback(BaseCallback):
         if (num_init == 0): print()
 
     def cria_inicializacao(self): 
-        self.db = Conexao()
+        # self.db = Conexao()
+        pass
 
     def evaluate_model_policy(self, model): 
         local_env = TEST_ENV
@@ -103,7 +104,7 @@ class SaveOnTrainStepsNumCallback(BaseCallback):
             file.close()
             
             # cria registro no banco - 
-            self.db.executar(f"INSERT INTO sample (id_sample, idin, idexp, avscore, avrew, tsteps, nwins) values ({self.num_saves}, {self.num_init}, {self.idexp}, {pontuacao_media}, {mean_reward}, {self.num_timesteps}, {vitoria})")
+            # self.db.executar(f"INSERT INTO sample (id_sample, idin, idexp, avscore, avrew, tsteps, nwins) values ({self.num_saves}, {self.num_init}, {self.idexp}, {pontuacao_media}, {mean_reward}, {self.num_timesteps}, {vitoria})")
             
             # atualiza o valor para o proximo salvamento 
             self.num_saves += 1
@@ -120,7 +121,7 @@ if __name__ == "__main__":
         print(f"Diretório '{DIR_NAME}' já existe. Usá-lo pode afetar o conteúdo pré-existente.")
         if NOT_ALLOW_REUSE_DIRS: exit(0)
         
-    database = Conexao()
+    # database = Conexao()
     
     
     experimento = True
@@ -128,8 +129,8 @@ if __name__ == "__main__":
     num_init = 1
     
     
-    if novo_exp:
-        database.executar(f"insert into experiment(idexp, title, numpt, status) values ({EXP_ATUAL}, '{EXP_TITLE}', {TRAIN_STEPS}, 'pendente');")
+    # if novo_exp:
+    #     database.executar(f"insert into experiment(idexp, title, numpt, status) values ({EXP_ATUAL}, '{EXP_TITLE}', {TRAIN_STEPS}, 'pendente');")
 
     
     start_time = time.time()
@@ -137,14 +138,15 @@ if __name__ == "__main__":
         print(f"Nova inicialização: {num_init}\n\n")
         
         # cria a inicialização no banco 
-        database.executar(f"insert into initialize (idexp, idin, status) values ({EXP_ATUAL}, {num_init}, 'pendente');")
+        # database.executar(f"insert into initialize (idexp, idin, status) values ({EXP_ATUAL}, {num_init}, 'pendente');")
         
-        callback = SaveOnTrainStepsNumCallback(verbose=0, database=database, idexp=EXP_ATUAL, num_init=num_init)  
+        # callback = SaveOnTrainStepsNumCallback(verbose=0, database=database, idexp=EXP_ATUAL, num_init=num_init)  
+        callback = SaveOnTrainStepsNumCallback(verbose=0, database=None, idexp=EXP_ATUAL, num_init=num_init)  
 
         getModel().learn(total_timesteps=TRAIN_STEPS, callback=callback)
         
         # atualiza status da inicialização - completo
-        database.executar(f"UPDATE initialize SET status='concluido' WHERE idin='{num_init}' AND idexp='{EXP_ATUAL}';")
+        # database.executar(f"UPDATE initialize SET status='concluido' WHERE idin='{num_init}' AND idexp='{EXP_ATUAL}';")
         
         num_init += 1
 
