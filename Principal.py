@@ -177,7 +177,6 @@ model = ClassificaEstados.treinar_modelo_final_XGB_grande(
 # DATA PARA SHAP (simples)
 # -------------------------------------------------------
 
-'''
 X_train, X_test, y_train, y_test = ClassificaEstados.ler_amostras(
     jogos,
     rotulos,
@@ -192,6 +191,7 @@ AnaliseResultados.shap_full_analysis(
     model_name=MODEL_NAME,
     dataset_name=jogos
 )
+'''
 
 
 # -------------------------------------------------------
@@ -226,3 +226,11 @@ AnaliseResultados.shap_full_analysis(
         #    print(f"{fase} -> {means}")
     #except:
     #    continue
+
+import pandas as pd
+
+df = pd.read_csv("./classes/classification/results/shap/XGB_final/importance_per_class.csv")
+
+col_sum = df.sum()
+
+print(col_sum)

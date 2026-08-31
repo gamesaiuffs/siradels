@@ -254,7 +254,7 @@ class AnaliseResultados:
             if not file.endswith(".pkl"):
                 continue
 
-            model_type = file.split("_")[0]  
+            model_type = file.replace("_progress_evaluation.pkl", "")
             path = os.path.join(base_dir, file)
 
             with open(path, "rb") as f:
@@ -288,6 +288,74 @@ class AnaliseResultados:
             plt.savefig(f"./classes/classification/estatisticas_resultados/progress_performance/{metric}_progress.png")
             plt.close()
     
+    # Compara pares de modelos/baselines usando os mesmos 10 folds (seed=42 fixa em
+    # _prepare_balanced_folds, então o fold i é composto pelas mesmas partidas em todas as
+    # avaliações rodadas com o mesmo total_partidas). Isso permite teste pareado real em vez de
+    # comparar apenas médias e ICs que se sobrepõem (Comentário 5 / Reviewer 2).
+    # model_keys: nomes de arquivo sem o sufixo "_evaluation.pkl", ex: "XGB", "LOGREG", "RANDOM".
+    @staticmethod
+    def testes_pareados(model_keys, base_dir="./classes/classification/results/modelos",
+                         baseline_dir="./classes/classification/results/evaluation",
+                         metric="accuracy", alpha=0.05, filenames=None):
+        from scipy import stats
+
+        filenames = filenames or {}
+
+        def load_raw(key):
+            fname = filenames.get(key, f"{key}_evaluation.pkl")
+            for d in (base_dir, baseline_dir):
+                path = os.path.join(d, fname)
+                if os.path.exists(path):
+                    with open(path, "rb") as f:
+                        data = pickle.load(f)
+                    return np.asarray(data["raw"][metric], dtype=float)
+            raise FileNotFoundError(f"Evaluation não encontrada para {key} ({fname}) em {base_dir} nem {baseline_dir}")
+
+        raws = {k: load_raw(k) for k in model_keys}
+
+        n_folds_set = {len(v) for v in raws.values()}
+        if len(n_folds_set) > 1:
+            raise ValueError(f"Modelos com número de folds diferente, comparação pareada inválida: {n_folds_set}")
+
+        rows = []
+        for i in range(len(model_keys)):
+            for j in range(i + 1, len(model_keys)):
+                a, b = model_keys[i], model_keys[j]
+                va, vb = raws[a], raws[b]
+
+                t_stat, t_p = stats.ttest_rel(va, vb)
+                try:
+                    w_stat, w_p = stats.wilcoxon(va, vb)
+                except ValueError:
+                    w_stat, w_p = np.nan, np.nan
+
+                rows.append({
+                    "Model A": a,
+                    "Model B": b,
+                    "Mean A": va.mean(),
+                    "Mean B": vb.mean(),
+                    "Mean diff (A-B)": (va - vb).mean(),
+                    "t_stat": t_stat,
+                    "t_pvalue": t_p,
+                    "wilcoxon_stat": w_stat,
+                    "wilcoxon_pvalue": w_p,
+                    "significant_ttest": bool(t_p < alpha),
+                    "significant_wilcoxon": bool(w_p < alpha) if not np.isnan(w_p) else None,
+                })
+
+        df = pd.DataFrame(rows)
+
+        save_dir = "./classes/classification/results/statistical_tests"
+        os.makedirs(save_dir, exist_ok=True)
+        save_path = os.path.join(save_dir, f"paired_tests_{metric}.csv")
+        df.to_csv(save_path, index=False)
+
+        print(f"\n=== TESTES PAREADOS ({metric}, alpha={alpha}) ===\n")
+        print(df.to_string(index=False, float_format="%.4f"))
+        print(f"\nSalvo em {save_path}")
+
+        return df
+
     @staticmethod
     def shap_full_analysis(X_train, X_test, model_path, feature_names, model_name, dataset_name):
         import os

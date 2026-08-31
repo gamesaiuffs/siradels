@@ -751,6 +751,135 @@ class ClassificaEstados:
         folds_B = build_folds(matches_B, n_folds=10)
         return folds_A, folds_B
 
+    #------------------------------------------------- ABLAÇÕES DE FEATURES ------------------------------------------------------------#
+
+    # Offsets dentro do bloco de 26 features de cada jogador (ver FEATURE_NAMES em Principal.py).
+    # 16 -> times_killed, 17 -> times_robbed, 18..25 -> role_rank_1..8. Essas colunas acumulam
+    # quantas vezes o jogador foi alvo de cada papel/ação ao longo da partida e podem funcionar
+    # como uma "impressão digital" da política do agente (Comentário 3 / Reviewer 2).
+    ABLATION_NO_HISTORY_OFFSETS = list(range(16, 26))
+
+    # Features de gap relativo entre o jogador e o líder: gold_diff_max(1), hand_diff_max(3),
+    # built_diff_max(5), city_cost_diff_max(15). O Reviewer 5 argumenta que elas podem entregar
+    # a resposta pronta ao modelo em vez de deixá-lo aprender a relação a partir dos valores brutos.
+    ABLATION_NO_GAP_OFFSETS = [1, 3, 5, 15]
+
+    @staticmethod
+    def _drop_player_offsets(X, offsets, players_start=6, n_players=5):
+        X = np.asarray(X)
+        old_block = (X.shape[1] - players_start) // n_players
+        keep_local = [i for i in range(old_block) if i not in offsets]
+
+        cols_to_keep = list(range(players_start))
+        for p in range(n_players):
+            base = players_start + p * old_block
+            cols_to_keep += [base + i for i in keep_local]
+
+        return X[:, cols_to_keep]
+
+    @staticmethod
+    def _prepare_balanced_folds_reduced(jogos, rotulos, drop_offsets, total_partidas=None, seed=42):
+        folds_A, folds_B = ClassificaEstados._prepare_balanced_folds(
+            jogos=jogos, rotulos=rotulos, total_partidas=total_partidas, seed=seed
+        )
+
+        def reduce(folds):
+            return [
+                (ClassificaEstados._drop_player_offsets(X, drop_offsets), y, m)
+                for X, y, m in folds
+            ]
+
+        return reduce(folds_A), reduce(folds_B)
+
+    @staticmethod
+    def _prepare_progress_folds_reduced(jogos, rotulos, drop_offsets, seed=42):
+        folds_by_bin = ClassificaEstados._prepare_progress_folds(jogos, rotulos, seed=seed)
+        return {
+            bin_id: [
+                (ClassificaEstados._drop_player_offsets(X, drop_offsets), y, m)
+                for X, y, m in folds
+            ]
+            for bin_id, folds in folds_by_bin.items()
+        }
+
+    @staticmethod
+    def _run_evaluation_with_balanced_folds_reduced(jogos, rotulos, best_params, model_key, drop_offsets, ablation_name, total_partidas=None):
+        _, folds_B = ClassificaEstados._prepare_balanced_folds_reduced(
+            jogos=jogos, rotulos=rotulos, drop_offsets=drop_offsets, total_partidas=total_partidas
+        )
+
+        save_dir = "./classes/classification/results/modelos"
+        os.makedirs(save_dir, exist_ok=True)
+
+        results = ClassificaEstados._evaluate_from_folds(folds_B, model_key, best_params)
+
+        models = results["models"]
+        with open(os.path.join(save_dir, f"{model_key}_{ablation_name}_models.pkl"), "wb") as f:
+            pickle.dump(models, f)
+
+        results_to_save = dict(results)
+        results_to_save.pop("models", None)
+
+        with open(os.path.join(save_dir, f"{model_key}_{ablation_name}_evaluation.pkl"), "wb") as f:
+            pickle.dump(results_to_save, f)
+
+        print(f"[ablation_{ablation_name}_{model_key}] saved evaluation to {save_dir}")
+        return results
+
+    @staticmethod
+    def _run_evaluation_with_progress_folds_reduced(jogos, rotulos, model_key, drop_offsets, ablation_name, total_partidas=None, seed=42):
+        held_out_matches = ClassificaEstados._held_out_match_sets(jogos, rotulos, total_partidas=total_partidas, seed=seed)
+        folds_by_bin = ClassificaEstados._prepare_progress_folds_reduced(jogos, rotulos, drop_offsets=drop_offsets, seed=seed)
+
+        model_path = f"./classes/classification/results/modelos/{model_key}_{ablation_name}_models.pkl"
+        with open(model_path, "rb") as f:
+            models = pickle.load(f)
+
+        labels = ["0-20%", "20-40%", "40-60%", "60-80%", "80-100%"]
+        results = {}
+
+        for bin_id, folds in folds_by_bin.items():
+            X_bin = np.vstack([f[0] for f in folds])
+            y_bin = np.concatenate([f[1] for f in folds])
+            m_bin = np.concatenate([f[2] for f in folds])
+            results[labels[bin_id]] = ClassificaEstados._evaluate_models_on_bins(models, X_bin, y_bin, m_bin, held_out_matches)
+
+        save_dir = "./classes/classification/results/progress"
+        os.makedirs(save_dir, exist_ok=True)
+        save_path = os.path.join(save_dir, f"{model_key}_{ablation_name}_progress_evaluation.pkl")
+
+        with open(save_path, "wb") as f:
+            pickle.dump(results, f)
+
+        print(f"[ablation_progress_{ablation_name}_{model_key}] saved to {save_path}")
+        return results
+
+    @staticmethod
+    def treinar_e_avaliar_ablation(jogos, rotulos, best_params, model_key, ablation_name, total_partidas=None):
+        offsets = {
+            "NO_HISTORY": ClassificaEstados.ABLATION_NO_HISTORY_OFFSETS,
+            "NO_GAP": ClassificaEstados.ABLATION_NO_GAP_OFFSETS,
+        }[ablation_name]
+
+        return ClassificaEstados._run_evaluation_with_balanced_folds_reduced(
+            jogos=jogos, rotulos=rotulos, best_params=best_params, model_key=model_key,
+            drop_offsets=offsets, ablation_name=ablation_name, total_partidas=total_partidas
+        )
+
+    @staticmethod
+    def treinar_e_avaliar_progress_ablation(jogos, rotulos, model_key, ablation_name):
+        offsets = {
+            "NO_HISTORY": ClassificaEstados.ABLATION_NO_HISTORY_OFFSETS,
+            "NO_GAP": ClassificaEstados.ABLATION_NO_GAP_OFFSETS,
+        }[ablation_name]
+
+        return ClassificaEstados._run_evaluation_with_progress_folds_reduced(
+            jogos=jogos, rotulos=rotulos, model_key=model_key,
+            drop_offsets=offsets, ablation_name=ablation_name
+        )
+
+    #------------------------------------------------- FIM ABLAÇÕES DE FEATURES ------------------------------------------------------------#
+
     @staticmethod
     def _make_pipeline(model_key, params, y_train):
         params = dict(params or {})
@@ -894,17 +1023,47 @@ class ClassificaEstados:
             "models": models
         }
 
+    # Retorna, para cada um dos 10 modelos finais salvos em {model_key}_models.pkl (um por fold de
+    # _prepare_balanced_folds), o conjunto de id_partida que esse modelo NUNCA viu no treino: o
+    # proprio fold held-out dele em matches_B, mais TODO o matches_A (usado so pelo Optuna para
+    # busca de hiperparametros, nunca para treinar os modelos finais via _evaluate_from_folds).
     @staticmethod
-    def _evaluate_models_on_bins(models, X, y):
+    def _held_out_match_sets(jogos, rotulos, total_partidas=None, seed=42):
+        folds_A, folds_B = ClassificaEstados._prepare_balanced_folds(
+            jogos=jogos, rotulos=rotulos, total_partidas=total_partidas, seed=seed
+        )
+
+        matches_A_all = set()
+        for (_, _, m) in folds_A:
+            matches_A_all.update(int(mm) for mm in m.tolist())
+
+        held_out = []
+        for (_, _, m) in folds_B:
+            fold_matches = set(int(mm) for mm in m.tolist())
+            held_out.append(fold_matches | matches_A_all)
+        return held_out
+
+    # Avalia cada um dos 10 modelos (um por fold de treino) SOMENTE nas linhas cujo id_partida
+    # pertence ao fold held-out daquele modelo especifico. _prepare_progress_folds constroi os
+    # bins de progresso a partir de todas as partidas, sem excluir as que ja foram usadas no
+    # treino, entao avaliar um modelo no bin inteiro (sem esse filtro) mistura desempenho real
+    # com desempenho sobre dados que o proprio modelo ja viu no treino.
+    @staticmethod
+    def _evaluate_models_on_bins(models, X, y, m, held_out_matches):
         acc, prec, rec, f1 = [], [], [], []
 
-        for model in models:
-            preds = model.predict(X)
+        for i, model in enumerate(models):
+            mask = np.isin(m, list(held_out_matches[i]))
+            if not np.any(mask):
+                continue
 
-            acc.append(accuracy_score(y, preds))
-            prec.append(precision_score(y, preds, average="macro", zero_division=0))
-            rec.append(recall_score(y, preds, average="macro", zero_division=0))
-            f1.append(f1_score(y, preds, average="macro", zero_division=0))
+            preds = model.predict(X[mask])
+            y_true = y[mask]
+
+            acc.append(accuracy_score(y_true, preds))
+            prec.append(precision_score(y_true, preds, average="macro", zero_division=0))
+            rec.append(recall_score(y_true, preds, average="macro", zero_division=0))
+            f1.append(f1_score(y_true, preds, average="macro", zero_division=0))
 
         return {
             "accuracy": ClassificaEstados._summarize(acc),
@@ -984,8 +1143,9 @@ class ClassificaEstados:
         return results
 
     @staticmethod
-    def _run_evaluation_with_progress_folds(jogos, rotulos, model_key):
-        folds_by_bin = ClassificaEstados._prepare_progress_folds(jogos, rotulos)
+    def _run_evaluation_with_progress_folds(jogos, rotulos, model_key, total_partidas=None, seed=42):
+        held_out_matches = ClassificaEstados._held_out_match_sets(jogos, rotulos, total_partidas=total_partidas, seed=seed)
+        folds_by_bin = ClassificaEstados._prepare_progress_folds(jogos, rotulos, seed=seed)
 
         model_path = f"./classes/classification/results/modelos/{model_key}_models.pkl"
 
@@ -1007,8 +1167,9 @@ class ClassificaEstados:
             # junta todos os folds do bin
             X_bin = np.vstack([f[0] for f in folds])
             y_bin = np.concatenate([f[1] for f in folds])
+            m_bin = np.concatenate([f[2] for f in folds])
 
-            res = ClassificaEstados._evaluate_models_on_bins(models, X_bin, y_bin)
+            res = ClassificaEstados._evaluate_models_on_bins(models, X_bin, y_bin, m_bin, held_out_matches)
 
             results[labels[bin_id]] = res
 
@@ -1024,8 +1185,137 @@ class ClassificaEstados:
         print(f"[progress_eval_{model_key}] saved to {save_path}")
 
         return results
-    
-    
+
+    #------------------------------------------------- BASELINES DE PREDIÇÃO (HEURÍSTICA / ALEATÓRIO) ------------------------------------------------------------#
+
+    # HIGHEST_SCORE: vence quem tem maior pontuação parcial no momento (também é uma heurística).
+    # MOST_DISTRICTS: vence quem tem mais distritos construídos no momento.
+    # RANDOM: nenhuma informação é usada, os 5 jogadores estão sempre "empatados".
+    # Layout da linha (id_partida já removido): [rodada, 5x ordem_turno, 5x bloco_jogador]
+    # Offsets dentro do bloco de cada jogador (ver ColetaFeatures.coleta_features):
+    #   4  -> número de distritos construídos
+    #   14 -> custo total da cidade, que equivale exatamente à pontuação parcial do jogador
+    #         (ver Jogador.construir/destruir)
+    _BASELINE_FEATURE_OFFSET = {
+        "HIGHEST_SCORE": 14,
+        "MOST_DISTRICTS": 4,
+    }
+
+    # Em vez de sortear 1 vencedor entre os empatados (o que dependeria de uma seed de rng
+    # e poderia enviesar o resultado), cada linha empatada é expandida em N sub-amostras,
+    # uma prevendo cada jogador empatado, todas com o mesmo rótulo verdadeiro. As métricas
+    # (accuracy/precision/recall/F1) são então calculadas normalmente sobre o conjunto expandido.
+    # Isso corresponde exatamente ao valor esperado de um desempate aleatório uniforme, mas
+    # de forma determinística (sem RNG e sem variância entre execuções).
+    @staticmethod
+    def _expandir_predicoes_baseline(baseline_key, X, y, n_players=5):
+        y = np.asarray(y).astype(int)
+
+        if baseline_key == "RANDOM":
+            tied_mask = np.ones((X.shape[0], n_players), dtype=bool)
+        elif baseline_key in ClassificaEstados._BASELINE_FEATURE_OFFSET:
+            players_start = 6
+            offset = ClassificaEstados._BASELINE_FEATURE_OFFSET[baseline_key]
+            player_block = (X.shape[1] - players_start) // n_players
+
+            values = np.stack([
+                X[:, players_start + i * player_block + offset]
+                for i in range(n_players)
+            ], axis=1)
+
+            max_values = values.max(axis=1, keepdims=True)
+            tied_mask = values == max_values
+        else:
+            raise ValueError(f"baseline_key inválido: {baseline_key}")
+
+        linhas_idx, classes_preditas = np.nonzero(tied_mask)
+        y_expandido = y[linhas_idx]
+        return y_expandido, classes_preditas
+
+    @staticmethod
+    def _evaluate_baseline_from_folds(folds, baseline_key):
+        acc, prec, rec, f1 = [], [], [], []
+
+        for i in range(len(folds)):
+            X_test, y_test, _ = folds[i]
+            y_exp, preds_exp = ClassificaEstados._expandir_predicoes_baseline(baseline_key, X_test, y_test)
+
+            acc.append(accuracy_score(y_exp, preds_exp))
+            prec.append(precision_score(y_exp, preds_exp, average="macro", zero_division=0))
+            rec.append(recall_score(y_exp, preds_exp, average="macro", zero_division=0))
+            f1.append(f1_score(y_exp, preds_exp, average="macro", zero_division=0))
+
+        return {
+            "accuracy": ClassificaEstados._summarize(acc),
+            "precision_macro": ClassificaEstados._summarize(prec),
+            "recall_macro": ClassificaEstados._summarize(rec),
+            "f1_macro": ClassificaEstados._summarize(f1),
+            "raw": {"accuracy": acc, "precision_macro": prec, "recall_macro": rec, "f1_macro": f1},
+        }
+
+    # Avalia um baseline (HIGHEST_SCORE, MOST_DISTRICTS ou RANDOM) nos mesmos 10 folds balanceados usados para os modelos supervisionados.
+    @staticmethod
+    def avaliar_baseline(jogos, rotulos, baseline_key, total_partidas=None, seed=42):
+        _, folds_B = ClassificaEstados._prepare_balanced_folds(
+            jogos=jogos,
+            rotulos=rotulos,
+            total_partidas=total_partidas,
+            seed=seed
+        )
+
+        results = ClassificaEstados._evaluate_baseline_from_folds(folds_B, baseline_key)
+
+        save_dir = "./classes/classification/results/evaluation"
+        os.makedirs(save_dir, exist_ok=True)
+        save_path = os.path.join(save_dir, f"{baseline_key}_evaluation.pkl")
+
+        with open(save_path, "wb") as f:
+            pickle.dump(results, f)
+
+        print(f"[avaliar_baseline_{baseline_key}] saved evaluation to {save_path}")
+        return results
+
+    # Avalia um baseline por fase de progresso da partida (0-20%, ..., 80-100%), usando os
+    # mesmos 10 sub-folds por fase que _prepare_progress_folds já constrói (mantém o mesmo
+    # formato n_folds=10 dos *_progress_evaluation.pkl dos modelos, mas aqui a variância
+    # reflete apenas a divisão em folds, já que o cálculo em si é determinístico).
+    @staticmethod
+    def avaliar_baseline_progress(jogos, rotulos, baseline_key, seed=42):
+        folds_by_bin = ClassificaEstados._prepare_progress_folds(jogos, rotulos, seed=seed)
+
+        labels = ["0-20%", "20-40%", "40-60%", "60-80%", "80-100%"]
+        results = {}
+
+        for bin_id, folds in folds_by_bin.items():
+            acc, prec, rec, f1 = [], [], [], []
+
+            for X_fold, y_fold, _ in folds:
+                y_exp, preds_exp = ClassificaEstados._expandir_predicoes_baseline(baseline_key, X_fold, y_fold)
+
+                acc.append(accuracy_score(y_exp, preds_exp))
+                prec.append(precision_score(y_exp, preds_exp, average="macro", zero_division=0))
+                rec.append(recall_score(y_exp, preds_exp, average="macro", zero_division=0))
+                f1.append(f1_score(y_exp, preds_exp, average="macro", zero_division=0))
+
+            results[labels[bin_id]] = {
+                "accuracy": ClassificaEstados._summarize(acc),
+                "precision_macro": ClassificaEstados._summarize(prec),
+                "recall_macro": ClassificaEstados._summarize(rec),
+                "f1_macro": ClassificaEstados._summarize(f1),
+                "raw": {"accuracy": acc, "precision_macro": prec, "recall_macro": rec, "f1_macro": f1}
+            }
+
+        save_dir = "./classes/classification/results/progress"
+        os.makedirs(save_dir, exist_ok=True)
+        save_path = os.path.join(save_dir, f"{baseline_key}_progress_evaluation.pkl")
+
+        with open(save_path, "wb") as f:
+            pickle.dump(results, f)
+
+        print(f"[avaliar_baseline_progress_{baseline_key}] saved to {save_path}")
+        return results
+
+
 def carregar_best_params(model_key):
 
     caminho = f"./classes/classification/results/optuna/{model_key}_optuna.pkl"
